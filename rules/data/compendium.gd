@@ -1,6 +1,6 @@
 class_name Compendium
 extends RefCounted
-## Every rules data file (data/<folder>/*.json), loaded once and looked up by id (ADR 0005). The engine
+## Every rules data file (data/<folder>/*.json of the core and of the game), loaded once and looked up by id (ADR 0005). The engine
 ## reads content only through here, so a new subclass, feat or spell is a data file, never new code.
 
 const FOLDERS: Array[String] = ["classes", "subclasses", "species", "backgrounds", "feats", "spells", "items",
@@ -9,18 +9,19 @@ const FOLDERS: Array[String] = ["classes", "subclasses", "species", "backgrounds
 
 static var _shared: Compendium = null
 
-var root: String = ""
+## The data roots this compendium reads, in order; an entry of a later root replaces an earlier one with the same id.
+var roots: Array[String] = []
 ## folder -> {id: Dictionary}
 var tables: Dictionary = {}
 ## Magic items built on a base weapon or armor, by id (filled on first use).
 var _variants: Dictionary = {}
 
 
-## The game's compendium, loaded from res://data on first use.
+## The game's compendium, loaded from the core's data and the game's own on first use.
 static func shared() -> Compendium:
 	if _shared == null:
 		_shared = Compendium.new()
-		_shared.load_all("res://data")
+		_shared.load_all(data_roots())
 	return _shared
 
 
@@ -29,18 +30,54 @@ static func release() -> void:
 	_shared = null
 
 
-func load_all(root_path: String) -> void:
-	root = root_path
+## The folder the core lives in (this script is rules/data/compendium.gd inside it): res:// when the core is the project
+## itself, res://addons/dnd_core when a game uses it as a submodule.
+static func core_root() -> String:
+	var here: GDScript = Compendium
+	return here.resource_path.get_base_dir().get_base_dir().get_base_dir()
+
+
+## Where data/<folder>/*.json is read from: the core's rules data, then the game's own (its monsters, items and the rest of
+## its content, and everything in a folder the core has none of).
+static func data_roots() -> Array[String]:
+	var out: Array[String] = [core_root().path_join("data")]
+	if out[0] != "res://data":
+		out.append("res://data")
+	return out
+
+
+## The paths of one data folder's .json files across the roots, by file name; a game file replaces the core's of its name.
+static func data_files(folder: String) -> Array[String]:
+	var by_name := {}
+	for r in data_roots():
+		var dir := DirAccess.open(r.path_join(folder))
+		if dir == null:
+			continue
+		for f in dir.get_files():
+			if f.ends_with(".json"):
+				by_name[f] = r.path_join(folder).path_join(f)
+	var names := by_name.keys()
+	names.sort()
+	var out: Array[String] = []
+	for n: String in names:
+		out.append(by_name[n] as String)
+	return out
+
+
+func load_all(data_dirs: Array[String]) -> void:
+	roots = data_dirs
 	for folder in FOLDERS:
 		var table := {}
-		var dir := DirAccess.open(root_path.path_join(folder))
-		if dir != null:
+		for r in data_dirs:
+			var dir := DirAccess.open(r.path_join(folder))
+			if dir == null:
+				continue
 			var files := dir.get_files()
 			files.sort()
 			for f in files:
 				if not f.ends_with(".json"):
 					continue
-				var text := FileAccess.get_file_as_string(root_path.path_join(folder).path_join(f))
+				var text := FileAccess.get_file_as_string(r.path_join(folder).path_join(f))
 				var parsed: Variant = JSON.parse_string(text)
 				if parsed is Dictionary:
 					var entry := parsed as Dictionary

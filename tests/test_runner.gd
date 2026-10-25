@@ -1,12 +1,13 @@
 extends Node
-## Runs every tests/unit/test_*.gd and tests/integration/test_*.gd headless. Exits non-zero on any
-## failure or if no tests ran. Use: make test   (optionally -- --only=<substring> --files=test_a.gd,test_b.gd)
+## Runs every tests/unit/test_*.gd and tests/integration/test_*.gd headless (the game's, and the core's own unit tests
+## when the core is a submodule: addons/dnd_core/tests/unit). Exits non-zero on any failure or if no tests ran.
+## The host game provides the autoloads this runner uses: Dice, GameSettings, GameState, ModeController and SaveSystem. Use: make test   (optionally -- --only=<substring> --files=test_a.gd,test_b.gd)
 ## make test starts several of these at once (tools/run_tests.py) with --claim=<folder>: each takes the files in
 ## --files order, skips any another runner has claimed (a folder per file there, made atomically), and marks where
 ## each file starts and ends ("@@ start <file>", "@@ done <file> <ms>") so the driver can keep a file's lines together.
 ## The files in --split are claimed a test at a time instead (<file>@<test>), so a long file's tests run side by side.
 
-const DIRS := ["res://tests/unit/", "res://tests/integration/"]
+const DIRS := ["tests/unit/", "tests/integration/"]
 
 
 func _ready() -> void:
@@ -111,10 +112,23 @@ func _run_file(script: GDScript, f: String, methods: Array[String], claim_dir: S
 	return {"total": methods.size(), "failed": failed}
 
 
+## The folders the test files are in: DIRS under the game (res://) and under the core, where that is another folder.
+func _test_roots() -> Array[String]:
+	var out: Array[String] = ["res://"]
+	var core := Compendium.core_root()
+	if core != "res://":
+		out.append(core + "/")
+	return out
+
+
 ## The test files to run: every test_*.gd under DIRS, or those named in `files_only`, in the order given there.
 func _test_files(files_only: PackedStringArray) -> Array[String]:
 	var found := {}
-	for dir_path: String in DIRS:
+	var dirs: Array[String] = []
+	for root: String in _test_roots():
+		for d: String in DIRS:
+			dirs.append(root + d)
+	for dir_path: String in dirs:
 		var dir := DirAccess.open(dir_path)
 		if dir == null:
 			continue
