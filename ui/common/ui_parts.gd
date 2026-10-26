@@ -16,8 +16,8 @@ static var _caps_font: Font
 
 ## The faces shipped with the game (OFL, art/sourced/google_fonts), the same on every platform (owner, 2026-10-08):
 ## EB Garamond for the numbers and Cinzel for the captions, in place of macOS's Hoefler Text and Copperplate.
-const FIGURE_FACE := "res://art/sourced/google_fonts/ebgaramond/EBGaramond[wght].ttf"
-const CAPS_FACE := "res://art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
+const FIGURE_FACE := "res://addons/dnd_core/art/sourced/google_fonts/ebgaramond/EBGaramond[wght].ttf"
+const CAPS_FACE := "res://addons/dnd_core/art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
 
 
 ## A book serif for the big numbers (EB Garamond at its boldest, near Hoefler Text Black; its file imports with light

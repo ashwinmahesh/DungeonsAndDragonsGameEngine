@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://xnrnbpj8xeh"
+path="res://.godot/imported/Deep Break 1.wav-153121e9738c1b912b00b31f1dbbf12d.sample"
+
+[deps]
+
+source_file="res://art/sourced/oga_deep_bone_breaks/Deep Break 1.wav"
+dest_files=["res://.godot/imported/Deep Break 1.wav-153121e9738c1b912b00b31f1dbbf12d.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

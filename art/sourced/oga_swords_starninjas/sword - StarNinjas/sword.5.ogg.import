@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://7rmkex4g7psu"
+path="res://.godot/imported/sword.5.ogg-d6782b1fb82295da60ad7ad7c36ce79e.oggvorbisstr"
+
+[deps]
+
+source_file="res://art/sourced/oga_swords_starninjas/sword - StarNinjas/sword.5.ogg"
+dest_files=["res://.godot/imported/sword.5.ogg-d6782b1fb82295da60ad7ad7c36ce79e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

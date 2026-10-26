@@ -6,7 +6,7 @@ extends RefCounted
 ## else its base item's.
 ## The tiles carry their own colours, so they're drawn untinted (the theme tints plain button icons gilt).
 
-const DIR := "res://art/icons/"
+const DIR := "res://addons/dnd_core/art/icons/"
 
 static var _cache: Dictionary = {}
 

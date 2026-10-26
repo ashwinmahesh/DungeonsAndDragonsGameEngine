@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b14jctvm1t2mf"
+path="res://.godot/imported/Chest Creak.wav-36b780896982148b92229ce4c906d2fb.sample"
+
+[deps]
+
+source_file="res://art/sourced/oga_chest_creak_spookymodem/Chest Creak.wav"
+dest_files=["res://.godot/imported/Chest Creak.wav-36b780896982148b92229ce4c906d2fb.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

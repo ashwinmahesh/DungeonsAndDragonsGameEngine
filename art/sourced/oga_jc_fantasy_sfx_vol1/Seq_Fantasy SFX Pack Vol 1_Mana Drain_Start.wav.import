@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://d05s0wavnb4u3"
+path="res://.godot/imported/Seq_Fantasy SFX Pack Vol 1_Mana Drain_Start.wav-55a48e43e3b51b5fb589ed68871c8cc2.sample"
+
+[deps]
+
+source_file="res://art/sourced/oga_jc_fantasy_sfx_vol1/Seq_Fantasy SFX Pack Vol 1_Mana Drain_Start.wav"
+dest_files=["res://.godot/imported/Seq_Fantasy SFX Pack Vol 1_Mana Drain_Start.wav-55a48e43e3b51b5fb589ed68871c8cc2.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

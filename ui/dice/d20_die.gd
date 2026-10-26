@@ -15,7 +15,7 @@ signal landed
 
 const SHADER := preload("res://addons/dnd_core/shaders/ui/emerald_die.gdshader")
 const FEATHER := preload("res://addons/dnd_core/shaders/ui/die_feather.gdshader")
-const CAPS_FACE := "res://art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
+const CAPS_FACE := "res://addons/dnd_core/art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
 
 ## Seconds from the throw to resting, at pace 1 (fast combat halves it).
 const ROLL_SECONDS := 1.45

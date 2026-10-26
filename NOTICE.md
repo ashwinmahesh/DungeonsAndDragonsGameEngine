@@ -25,3 +25,10 @@ publish.
 ## Code
 
 The source code and tooling are under the MIT license (LICENSE), copyright (c) 2026 Ashwin Mahesh.
+
+## Bundled third-party assets
+
+`art/sourced/` holds fonts, controller prompts, game-icons.net silhouettes and sound-effect packs by other authors, each with its
+own license (CC0, CC BY 3.0/4.0, OGA-BY 3.0, SIL OFL 1.1) and a license file in its folder. The credit lines are in
+`docs/assets/THIRD_PARTY.md` and must be kept with them. The tiles in `art/icons/` are framed from the game-icons.net silhouettes
+(credit "Icons made by {author}"). The MIT license above does not relicense any of it.

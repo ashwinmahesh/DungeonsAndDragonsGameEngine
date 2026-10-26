@@ -6,7 +6,7 @@ extends RefCounted
 ## B on a Nintendo one. Settings' "Button icons" can fix the family; otherwise it follows the pad in use
 ## (PadNav.family).
 
-const DIR := "res://art/sourced/kenney_input_prompts/"
+const DIR := "res://addons/dnd_core/art/sourced/kenney_input_prompts/"
 const FAMILIES: Array[String] = ["xbox", "playstation", "nintendo"]
 
 ## Each family's picture per button place (paths under DIR).

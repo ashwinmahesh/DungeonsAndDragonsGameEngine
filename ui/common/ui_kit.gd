@@ -17,7 +17,7 @@ static var _themed := false
 
 ## The display face for titles, headers and buttons: a medieval book hand shipped with the game, MedievalSharp (OFL,
 ## art/sourced/google_fonts), the same on every platform (owner, 2026-10-08: macOS's Luminari, which Windows lacks).
-const DISPLAY_FACE := "res://art/sourced/google_fonts/medievalsharp/MedievalSharp.ttf"
+const DISPLAY_FACE := "res://addons/dnd_core/art/sourced/google_fonts/medievalsharp/MedievalSharp.ttf"
 
 
 static func display_font() -> Font:

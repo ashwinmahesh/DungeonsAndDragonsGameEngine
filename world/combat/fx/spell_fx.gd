@@ -206,7 +206,7 @@ static func derive_family(s: Dictionary) -> String:
 static func flavour_for_spell(spell_id: String, s: Dictionary) -> String:
 	var flavours := data()["flavours"] as Dictionary
 	if _icon_picks.is_empty():
-		var cat := JSON.parse_string(FileAccess.get_file_as_string("res://art/icons.json")) as Dictionary
+		var cat := JSON.parse_string(FileAccess.get_file_as_string("res://addons/dnd_core/art/icons.json")) as Dictionary
 		_icon_picks = cat.get("spells", {}) as Dictionary
 	var icon := str(_icon_picks.get(Icons.spell_key(spell_id), ""))
 	if icon.contains("@") and flavours.has(icon.get_slice("@", 1)):

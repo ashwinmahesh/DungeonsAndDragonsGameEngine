@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://vqhy08bih0xq"
+path="res://.godot/imported/Single_Fantasy SFX Pack Vol 1_Ice Shard  Projectile_Impact_02.wav-144190c2fe4604a990a6319ecddaf6fb.sample"
+
+[deps]
+
+source_file="res://art/sourced/oga_jc_fantasy_sfx_vol1/Single_Fantasy SFX Pack Vol 1_Ice Shard  Projectile_Impact_02.wav"
+dest_files=["res://.godot/imported/Single_Fantasy SFX Pack Vol 1_Ice Shard  Projectile_Impact_02.wav-144190c2fe4604a990a6319ecddaf6fb.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

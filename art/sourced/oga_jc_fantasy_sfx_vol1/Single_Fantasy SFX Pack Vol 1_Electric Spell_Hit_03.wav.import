@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://c811rsa66jcq1"
+path="res://.godot/imported/Single_Fantasy SFX Pack Vol 1_Electric Spell_Hit_03.wav-66238e22991e36bf88eeb3cc646a3c10.sample"
+
+[deps]
+
+source_file="res://art/sourced/oga_jc_fantasy_sfx_vol1/Single_Fantasy SFX Pack Vol 1_Electric Spell_Hit_03.wav"
+dest_files=["res://.godot/imported/Single_Fantasy SFX Pack Vol 1_Electric Spell_Hit_03.wav-66238e22991e36bf88eeb3cc646a3c10.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
