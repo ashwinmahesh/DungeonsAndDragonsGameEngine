@@ -106,9 +106,11 @@ func after_damage(target: Combatant, parts: Array, dr: DamageResult, was_up: boo
 
 
 ## Legendary Resistance (after a D20 Test of `c`, D20Responses): a failed saving throw succeeds instead while uses are
-## left. The AI decides for its creatures, as it does their Reactions.
-func d20_offers(c: Combatant, t: D20Test, out: Array) -> void:
+## left, and only on a save worth one (worth_resisting). The AI decides for its creatures, as it does their Reactions.
+func d20_offers(c: Combatant, t: D20Test, keys: Array[String], out: Array) -> void:
 	if t.kind != D20Test.Kind.SAVING_THROW or t.target <= 0 or not c.creature is Monster or c.is_player_controlled():
+		return
+	if not worth_resisting(keys):
 		return
 	var n := resistances(c)
 	if n <= 0:
@@ -122,6 +124,26 @@ func d20_offers(c: Combatant, t: D20Test, out: Array) -> void:
 			t.success = true
 			t.reroll_note = ("%s; " % t.reroll_note if t.reroll_note != "" else "") + "Legendary Resistance: succeeds instead (%d left)" % (n - used - 1)
 			_log("info", "%s shrugs it off: Legendary Resistance (%d left)" % [c.name(), n - used - 1], c)})
+
+
+## Whether a failed save is worth a Legendary Resistance, from the save's keys (house rule, owner 2026-10-21;
+## docs/rules/deviations.md): one that would put a condition on it (`save_vs:<condition>`), or a spell of 5th level or
+## higher, as cast, that does no damage on a success (`save_vs:spell_level:<n>` without `save_vs:damage_on_success`,
+## SpellSaves). A Fireball or a Cone of Cold is taken on the chin.
+static func worth_resisting(keys: Array[String]) -> bool:
+	var level := -1
+	var hurts_anyway := false
+	for k in keys:
+		if not k.begins_with("save_vs:"):
+			continue
+		var what := k.substr(8)
+		if what.begins_with("spell_level:"):
+			level = int(what.substr(12))
+		elif what == "damage_on_success":
+			hurts_anyway = true
+		elif Compendium.shared().has("conditions", what):
+			return true
+	return level >= 5 and not hurts_anyway
 
 
 ## Legendary Resistance uses a day: `legendary_resistance`, or `legendary_resistance_in_lair` in a lair fight (2025

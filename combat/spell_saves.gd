@@ -90,6 +90,11 @@ func _save_victim(ctx: Dictionary, t: Combatant, victims: Array[Combatant], st: 
 	for cond in _conditions_in(s.get("effects", []) as Array, str(ctx.get("choice", ""))):
 		keys.append("save_vs:%s" % cond)
 	keys.append_array(spell_save_keys(c.id))
+	# What the save is against, for Legendary Resistance (Legendary.worth_resisting): the spell's level as cast, and
+	# whether a success still takes damage.
+	keys.append("save_vs:spell_level:%d" % maxi(int(s.get("level", 0)), int(ctx.get("slot", 0))))
+	if bool(st["has_damage"]) and bool(st["half"]):
+		keys.append("save_vs:damage_on_success")
 	var dis: Array[String] = []
 	dis.assign(ctx.get("save_disadvantage", []))
 	var adv: Array[String] = []
