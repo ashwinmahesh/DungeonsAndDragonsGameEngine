@@ -93,6 +93,7 @@ func _resist_then(ctx: Dictionary, t: Combatant, ab: StringName, after: Callable
 	var dc := (ctx["nums"]["dc"] as Breakdown).total()
 	var keys := t.creature.save_keys(ab)
 	keys.append_array(SpellCaster.spell_save_keys(c.id))
+	keys.append_array(SpellSaves.level_keys(s, int(ctx.get("slot", 0)), str(s.get("save_success", "none")) == "half" and s.has("damage")))
 	if str(s["id"]) in ["polymorph", "true_polymorph"]:
 		keys.append("save_vs:shapechange")
 	keys.append_array(extra_keys)

@@ -90,11 +90,7 @@ func _save_victim(ctx: Dictionary, t: Combatant, victims: Array[Combatant], st: 
 	for cond in _conditions_in(s.get("effects", []) as Array, str(ctx.get("choice", ""))):
 		keys.append("save_vs:%s" % cond)
 	keys.append_array(spell_save_keys(c.id))
-	# What the save is against, for Legendary Resistance (Legendary.worth_resisting): the spell's level as cast, and
-	# whether a success still takes damage.
-	keys.append("save_vs:spell_level:%d" % maxi(int(s.get("level", 0)), int(ctx.get("slot", 0))))
-	if bool(st["has_damage"]) and bool(st["half"]):
-		keys.append("save_vs:damage_on_success")
+	keys.append_array(level_keys(s, int(ctx.get("slot", 0)), bool(st["has_damage"]) and bool(st["half"])))
 	var dis: Array[String] = []
 	dis.assign(ctx.get("save_disadvantage", []))
 	var adv: Array[String] = []
@@ -428,6 +424,15 @@ func _repeat_settled(c: Combatant, fx: Effect, test: D20Test) -> CombatResult:
 			var rolled := e._roll_damage_dice(str(fd["dice"]), false, 0, fx.name)
 			e.deal_damage(e.get_c(fx.caster_id), c, [{"amount": int(rolled["total"]), "type": str(fd["type"]), "spell": true}], false, fx.name, [str(rolled["text"])])
 	return r
+
+
+## What a save against spell `s` cast with `slot` is against, for Legendary Resistance (Legendary.worth_resisting):
+## the level it's cast at, and whether a success still takes damage (`hurts_on_success`, the spell's half on a save).
+static func level_keys(s: Dictionary, slot: int, hurts_on_success: bool = false) -> Array[String]:
+	var keys: Array[String] = ["save_vs:spell_level:%d" % maxi(int(s.get("level", 0)), slot)]
+	if hurts_on_success:
+		keys.append("save_vs:damage_on_success")
+	return keys
 
 
 static func spell_save_keys(caster_id: String) -> Array[String]:

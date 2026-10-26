@@ -72,7 +72,9 @@ func _sleep(ctx: Dictionary, cells: Array[Vector2i], r: CombatResult, pausable: 
 			r.lines.append(e.log.add("info", "%s doesn't sleep: unaffected" % t.name(), t.id))
 			return r
 		var roll := func() -> D20Test:
-			return t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs Sleep (%s)" % t.name(), SpellCaster.spell_save_keys(c.id))
+			var keys := SpellCaster.spell_save_keys(c.id)
+			keys.append_array(["save_vs:incapacitated", "save_vs:unconscious"])
+			return t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs Sleep (%s)" % t.name(), keys)
 		var after := func(test: D20Test) -> CombatResult:
 			if test.success:
 				r.lines.append(e.log.add("info", "%s shrugs off Sleep" % t.name(), t.id, [test.describe()]))
@@ -155,7 +157,10 @@ func _suggestion(ctx: Dictionary, t: Combatant, kind: String, r: CombatResult, p
 		return r
 	var dc := (ctx["nums"]["dc"] as Breakdown).total()
 	var roll := func() -> D20Test:
-		return t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs %s (%s)" % [s["name"], t.name()], SpellCaster.spell_save_keys(c.id))
+		var keys := SpellCaster.spell_save_keys(c.id)
+		keys.append("save_vs:charmed")
+		keys.append_array(SpellSaves.level_keys(s, int(ctx.get("slot", 0))))
+		return t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs %s (%s)" % [s["name"], t.name()], keys)
 	var after := func(test: D20Test) -> CombatResult:
 		if test.success:
 			r.lines.append(e.log.add("info", "%s ignores the suggestion" % t.name(), t.id, [test.describe()]))

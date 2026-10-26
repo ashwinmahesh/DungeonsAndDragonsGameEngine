@@ -89,6 +89,7 @@ func _save(ctx: Dictionary, t: Combatant, ab: StringName, cond: String = "") -> 
 	var s := ctx["s"] as Dictionary
 	var keys := t.creature.save_keys(ab)
 	keys.append_array(SpellCaster.spell_save_keys((ctx["c"] as Combatant).id))
+	keys.append_array(SpellSaves.level_keys(s, int(ctx.get("slot", 0)), str(s.get("save_success", "none")) == "half" and s.has("damage")))
 	if str(s["id"]) in ["polymorph", "true_polymorph"]:
 		keys.append("save_vs:shapechange")
 	if cond != "":

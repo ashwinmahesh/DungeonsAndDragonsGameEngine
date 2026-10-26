@@ -37,7 +37,12 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 		return CombatResult.fail("No attacks left this turn")
 	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
 	var ab := &"str" if target.creature.save_bonus(&"str").total() >= target.creature.save_bonus(&"dex").total() else &"dex"
-	var s := target.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], mode.capitalize(), target.name()])
+	var against: Array[String] = []
+	if mode == "grapple":
+		against.append("save_vs:grappled")
+	elif mode == "shove_prone":
+		against.append("save_vs:prone")
+	var s := target.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], mode.capitalize(), target.name()], against)
 	var r := CombatResult.new()
 	if s.success:
 		e.log.add("info", "%s resists %s's %s" % [target.name(), c.name(), mode], c.id, [s.describe()])

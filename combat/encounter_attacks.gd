@@ -866,7 +866,7 @@ func _mastery_on_hit(c: Combatant, target: Combatant, p: WeaponProfile, dr: Dama
 			# Hold back Topple or Push (hotbar riders): the mastery is skipped this turn.
 			if not "skip:topple" in c.armed:
 				var dc := 8 + c.creature.ability_mod(p.ability) + c.creature.proficiency_bonus()
-				return e.d20.then_after(target, func() -> D20Test: return target.creature.roll_save(e.dice, &"con", dc, [], [], "Topple (%s)" % target.name()),
+				return e.d20.then_after(target, func() -> D20Test: return target.creature.roll_save(e.dice, &"con", dc, [], [], "Topple (%s)" % target.name(), ["save_vs:prone"]),
 					func(sv: D20Test) -> CombatResult:
 						if not sv.success:
 							target.creature.add_condition(&"prone", "Topple")
@@ -903,7 +903,8 @@ func _stat_block_on_hit(c: Combatant, target: Combatant, option: Dictionary, dr:
 			return r
 		var sv := act["save"] as Dictionary
 		return e.d20.then_after(target, func() -> D20Test:
-			return target.creature.roll_save(e.dice, StringName(str(sv["ability"])), int(sv["dc"]), [], [], "%s (%s)" % [act.get("name", ""), target.name()]),
+			return target.creature.roll_save(e.dice, StringName(str(sv["ability"])), int(sv["dc"]), [], [], "%s (%s)" % [act.get("name", ""), target.name()],
+				["save_vs:%s" % cond]),
 			func(s2: D20Test) -> CombatResult:
 				if not s2.success:
 					land.call(cond)

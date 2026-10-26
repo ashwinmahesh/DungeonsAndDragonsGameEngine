@@ -315,7 +315,8 @@ func turn_undead(c: Combatant) -> CombatResult:
 		sear_total = int(rolled["total"])
 		sear_text = "Sear Undead %dd8: %s" % [n, rolled["text"]]
 	for t in targets:
-		var s := t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs Turn Undead (%s)" % t.name())
+		var s := t.creature.roll_save(e.dice, &"wis", dc, [], [], "Wisdom save vs Turn Undead (%s)" % t.name(),
+			["save_vs:turn_undead", "save_vs:frightened", "save_vs:incapacitated"])
 		if s.success:
 			r.lines.append(e.log.add("info", "%s resists the turning" % t.name(), t.id, [s.describe()]))
 			continue
