@@ -33,7 +33,7 @@ func _init(encounter: Encounter) -> void:
 func tabs_for(c: Combatant) -> Array[String]:
 	var out: Array[String] = [COMMON, class_tab(c)]
 	# A hero who casts none of their own still has the Spells tab while an item they work gives them a spell.
-	if c.creature is Character and (not (c.creature as Character).spellcasting.is_empty() or e.items.has_item_spells(c)):
+	if (c.creature is Character and (not (c.creature as Character).spellcasting.is_empty() or e.items.has_item_spells(c))) or has_block_spells(c):
 		out.append(SPELLS)
 	out.append(ITEMS)
 	if c.creature is Character:
@@ -653,7 +653,79 @@ func _sustained(c: Combatant, out: Array[Dictionary]) -> void:
 		out.append(entry)
 
 
+## Whether `c` is a stat-block caster someone runs (a story ally such as Ezmerelda): a monster whose Spellcasting block lists spells and
+## who is not a hero's shape that keeps its own (those cast from the hero's sheet).
+func has_block_spells(c: Combatant) -> bool:
+	return c.creature is Monster and e.spells.caster_char(c) == null and not e.monster_actions.block_spells(c).is_empty()
+
+
+## The Spells tab of a stat-block caster the player runs: the spells its Spellcasting block lists, at will or so many a day, each cast
+## with the block's save DC and attack bonus and no slot (MonsterActions.cast). One with no uses left today shows greyed with why, and
+## a Reaction spell says it is cast when its trigger comes. The AI casts the same block (AiSpells); this is the player's way to it.
+func _stat_block_spells(c: Combatant, out: Array[Dictionary]) -> void:
+	var ma := e.monster_actions
+	for sp in ma.block_spells(c):
+		var id := str(sp["id"])
+		var data := Compendium.shared().spell_data(id)
+		if data.is_empty():
+			continue
+		var level := ma.block_level(c, id)
+		var unit := str((data.get("casting_time", {}) as Dictionary).get("unit", "action"))
+		var cost := "bonus" if unit == "bonus_action" else ("reaction" if unit == "reaction" else "action")
+		var at_will := int(sp["per_day"]) == 0
+		var why := ""
+		if str(data.get("automation", "")) == "reference":
+			why = "Not automated yet"
+		elif not e.spells.has_combat_rules(data):
+			why = "No effect in a fight (%s)" % SpellOptions._out_of_combat_word(data)
+		elif unit == "reaction":
+			why = "Cast as a Reaction when it triggers"
+		elif unit in ["minute", "hour"] and not e.peaceful:
+			why = "Takes too long to cast in combat"
+		elif not at_will and int(sp["left"]) <= 0:
+			why = "None left today"
+		else:
+			why = e._turn_check(c)
+			if why == "" and not c.can_act():
+				why = "Can't act"
+			if why == "":
+				why = e.spells.economy_block(c, unit)
+			if why == "" and (c.creature.has_flag("cant_cast") or e.spells.specials.high.in_antimagic(c)):
+				why = "Can't cast spells here"
+		var sub := ("Cantrip" if level == 0 else "Level %d" % level) + (" · at will" if at_will else " · %d left today" % int(sp["left"]))
+		var preview := cast_preview(c, {"spell_id": id}, level)
+		if preview.has("damage_dice"):
+			sub += " · %s" % preview["damage_dice"]
+		elif preview.has("heal_dice"):
+			sub += " · heal %s" % preview["heal_dice"]
+		var a := _entry("spell:" + id, SPELLS, str(data["name"]), sub, cost, why, spell_targeting(data), str(data.get("summary", "")))
+		a["spell_id"] = id
+		a["slot"] = level
+		a["at_will"] = at_will
+		a["free"] = true
+		a["stat_block"] = true
+		a["range"] = e.spells.range_ft(data, c)
+		var t := data.get("targets", {}) as Dictionary
+		a["count"] = int(t.get("count", 1))
+		a["repeat"] = id in ["magic_missile", "scorching_ray"] or bool(data.get("repeat_targets", false))
+		a["concentration"] = bool((data.get("duration", {}) as Dictionary).get("concentration", false))
+		var choice := data.get("choice", {}) as Dictionary
+		if not choice.is_empty():
+			var opts_list: Array = []
+			var words := choice.get("labels", {}) as Dictionary
+			for v: Variant in choice.get("from", []):
+				opts_list.append({"value": str(v), "label": str(words.get(str(v), str(v).replace("_", " ").capitalize()))})
+			a["choices"] = opts_list
+			a["choice_label"] = str(choice.get("label", "Choose"))
+			a["opts"] = {"choice": str((opts_list[0] as Dictionary)["value"])}
+			a["sub"] = str(a["sub"]) + " · " + str((opts_list[0] as Dictionary)["label"])
+		out.append(a)
+
+
 func _spells(c: Combatant, out: Array[Dictionary]) -> void:
+	if has_block_spells(c):
+		_stat_block_spells(c, out)
+		return
 	for s in e.spells.castable(c):
 		var data := Compendium.shared().spell_data(str(s["id"]))
 		var level := int(s["level"])
@@ -1141,7 +1213,7 @@ func _spell_details(c: Combatant, action: Dictionary) -> Dictionary:
 	lines.append("Duration: %s" % Effect.duration_text(data.get("duration", {}) as Dictionary))
 	var ch := c.creature as Character
 	var slot := int(action.get("slot", level))
-	var prev := ch.spell_preview(sid, slot)
+	var prev := ch.spell_preview(sid, slot) if ch != null else _block_preview(c, sid, slot)
 	if prev.has("save_dc"):
 		lines.append("%s saving throw, DC %s" % [Creature.ABILITY_NAMES.get(StringName(str(prev.get("save", ""))), ""), (prev["save_dc"] as Breakdown).describe()])
 	if prev.has("attack"):
@@ -1165,14 +1237,19 @@ func _spell_details(c: Combatant, action: Dictionary) -> Dictionary:
 		if up.has("text"):
 			bits.append(str(up["text"]))
 		lines.append("At higher levels, per slot level above %d: %s" % [level, "; ".join(bits)])
-	for k in ch.known_spells():
+	if ch == null:
+		# A stat block's spell: how often it can be cast, and what is left of it today.
+		for sp in e.monster_actions.block_spells(c):
+			if str(sp["id"]) == sid:
+				lines.append("Known from: its stat block (%s)" % ("at will" if int(sp["per_day"]) == 0 else "%d a day, %d left today" % [int(sp["per_day"]), int(sp["left"])]))
+	for k in (ch.known_spells() if ch != null else []):
 		if str(k["id"]) == sid:
 			var how := str(k["kind"]).capitalize()
 			if str(k["kind"]) == "granted" and ch.resource_left("spell:" + sid) > 0:
 				how = "Free casting (%d left, then with a slot)" % ch.resource_left("spell:" + sid)
 			lines.append("Known from: %s (%s)" % [k.get("source", ""), how])
 			break
-	if level > 0:
+	if level > 0 and ch != null:
 		lines.append("Your slots: %s" % slots_text(c))
 	lines.append(str(data.get("text", data.get("summary", ""))))
 	if not bool(action["legal"]):
@@ -1283,6 +1360,11 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 				return e.features.toggle_rider(c, "smite:" + str(action["spell_id"]))
 			var all_opts := (action.get("opts", {}) as Dictionary).duplicate()
 			all_opts.merge(opts, true)
+			# A stat-block caster casts from its block (a use of an N-a-day spell, the block's DC), with no slot.
+			if bool(action.get("stat_block", false)) and c.creature is Monster:
+				if dir != Vector2.ZERO:
+					all_opts["direction"] = dir
+				return e.monster_actions.cast(c, str(action["spell_id"]), targets, point, 0, all_opts)
 			return e.spells.cast(c, str(action["spell_id"]), slot, targets, point, dir, all_opts)
 		"ready_spell":
 			return e.ready_spell(c, str(action["spell_id"]), slot, str((action.get("opts", {}) as Dictionary).get("trigger", "approach")))
@@ -1854,6 +1936,8 @@ static func _avg(expr: String) -> float:
 
 ## Levels a hotbar spell entry can be cast at: spell slots, or an item's charge levels (a Wand of Fireballs).
 func level_choices(c: Combatant, action: Dictionary) -> Array[int]:
+	if bool(action.get("stat_block", false)):
+		return []   # a stat block's spell has the one level it is written at
 	if str((action.get("opts", {}) as Dictionary).get("resource_cast", "")) != "":
 		return [int(action["slot"])]
 	if str(action.get("kind", "")) == "item_spell":
@@ -1882,8 +1966,42 @@ func level_choices(c: Combatant, action: Dictionary) -> Array[int]:
 	return levels
 
 
+## What a stat-block spell shows on the hotbar and the target hover: the block's save DC and attack bonus (with the bonuses to a
+## monster's own, Tactician's +2) and the damage or healing dice at the level the block casts it; no per-hero extras.
+func _block_preview(c: Combatant, spell_id: String, slot: int) -> Dictionary:
+	var s := Compendium.shared().spell_data(spell_id)
+	if s.is_empty():
+		return {}
+	var level := int(s.get("level", 0))
+	var use_slot := 0 if level == 0 else maxi(level, slot)
+	var sc := (c.creature as Monster).data.get("spellcasting", {}) as Dictionary
+	var ab := StringName(str(sc.get("ability", "int")))
+	var out := {"name": str(s["name"]), "level": level, "slot": use_slot, "ability": str(ab), "class_id": ""}
+	if s.has("save"):
+		out["save"] = str(s["save"])
+		out["save_dc"] = Breakdown.new("Spell save DC").add("Stat block", e.monster_actions.spell_dc(c))
+	if s.has("attack"):
+		var atk := Breakdown.new("Spell attack").add("Stat block", int(sc.get("attack", c.creature.ability_mod(ab) + c.creature.proficiency_bonus())))
+		var ctx := c.creature.formula_context()
+		for m in c.creature.modifiers_for(&"spell_attack"):
+			atk.add_nonzero(m.source_name, c.creature.mod_value(m, ctx))
+		out["attack"] = atk
+	var damage := s.get("damage", []) as Array
+	if not damage.is_empty():
+		out["damage_dice"] = Spellcasting.damage_dice(s, maxi(1, c.creature.character_level()), use_slot)
+		out["damage_type"] = str((damage[0] as Dictionary).get("type", ""))
+		out["damage_bonus"] = Breakdown.new("%s damage bonus" % s["name"])
+	var heal := s.get("heal", {}) as Dictionary
+	if heal.has("dice"):
+		out["heal_dice"] = Spellcasting.heal_dice(s, use_slot)
+		out["heal_bonus"] = Breakdown.new("%s healing bonus" % s["name"])
+	return out
+
+
 ## Character.spell_preview for a hotbar entry, with an item's own DC and attack bonus in place of the caster's.
 func cast_preview(c: Combatant, action: Dictionary, slot: int) -> Dictionary:
+	if e.spells.caster_char(c) == null and c.creature is Monster:
+		return _block_preview(c, str(action["spell_id"]), slot)
 	var prev := e.spells.caster_char(c).spell_preview(str(action["spell_id"]), slot)
 	if action.has("dc"):
 		var data := Compendium.shared().spell_data(str(action["spell_id"]))

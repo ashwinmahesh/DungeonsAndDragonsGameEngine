@@ -613,6 +613,27 @@ func spells_now(c: Combatant) -> Array[Dictionary]:
 	return out
 
 
+## Every spell in the monster's `spellcasting` block, used up or not, in the block's order: [{id, per_day (0 = at will), left}].
+## What a player who runs a stat-block caster (a story ally such as Ezmerelda) sees on the Spells tab; spells_now is the ones it
+## could cast this moment.
+func block_spells(c: Combatant) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var sc := data_of(c).get("spellcasting", {}) as Dictionary
+	for sid: Variant in sc.get("at_will", []):
+		out.append({"id": str(sid), "per_day": 0, "left": 99})
+	var per_day := sc.get("per_day", {}) as Dictionary
+	for n: String in per_day:
+		for sid2: Variant in per_day[n]:
+			out.append({"id": str(sid2), "per_day": int(n), "left": maxi(0, int(n) - int(c.get_meta("cast_%s" % sid2, 0)))})
+	return out
+
+
+## The level the block casts `spell_id` at: its `levels` entry (Magic Missile at level 4 for the Night Hag), else the spell's own.
+func block_level(c: Combatant, spell_id: String) -> int:
+	var sc := data_of(c).get("spellcasting", {}) as Dictionary
+	return int((sc.get("levels", {}) as Dictionary).get(spell_id, int(Compendium.shared().spell_data(spell_id).get("level", 0))))
+
+
 ## Casts a stat-block spell with the monster's DC and attack bonus, at the level the block gives (Magic Missile
 ## at level 4 for the Night Hag) or the spell's own level.
 func cast(c: Combatant, spell_id: String, targets: Array, point: Vector2 = Vector2.INF, slot: int = 0, opts: Dictionary = {}) -> CombatResult:
