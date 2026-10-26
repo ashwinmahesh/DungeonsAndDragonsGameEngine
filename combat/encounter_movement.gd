@@ -743,6 +743,8 @@ func _readied_triggers(mover: Combatant, from: Vector2i, to: Vector2i) -> Array[
 func _provokers(mover: Combatant, from: Vector2i, to: Vector2i) -> Array[Combatant]:
 	var e := enc()
 	var out: Array[Combatant] = []
+	if mover.has_meta(Legendary.NO_OA_MOVE):
+		return out   # a legendary move provokes none, a Sentinel's included
 	for p in e.hostiles_of(mover):
 		if not e.spells.can_react(p) or not e.can_see(p, mover) or p.creature.has_flag("no_opportunity_attacks"):
 			continue

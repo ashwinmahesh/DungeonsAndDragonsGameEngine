@@ -9,6 +9,8 @@ extends RefCounted
 ## Stat-block trait ids these rules stand behind (tools/data/check_implemented.py looks for the literals).
 const TRAITS := ["legendary_resistance", "regeneration", "shapechanger", "misty_escape", "children_of_the_night",
 	"charm", "legendary_actions", "lair_actions"]
+## On a creature while it makes a legendary move: no Opportunity Attack of any kind (EncounterMovement._provokers).
+const NO_OA_MOVE := "legendary_move"
 ## Lair actions happen on this initiative count, losing ties.
 const LAIR_COUNT := 20
 ## Where Regeneration, a change of shape or Misty Escape can be blocked.
@@ -750,7 +752,11 @@ func _move(c: Combatant, cell: Vector2i, budget: int = -1) -> CombatResult:
 	var keep_moved := c.moved
 	c.movement_left = ft
 	c.disengaged = true
+	# "Without provoking Opportunity Attacks": none at all, a Sentinel's included (owner, 2026-10-23: the dragon's
+	# Pounce bypasses Sentinel), not a Disengage that a Sentinel ignores.
+	c.set_meta(NO_OA_MOVE, true)
 	var r := e._walk(c, path, 1, CombatResult.new(), {"willing": true})
+	c.remove_meta(NO_OA_MOVE)
 	c.movement_left = keep_move
 	c.disengaged = keep_dis
 	c.moved = keep_moved
