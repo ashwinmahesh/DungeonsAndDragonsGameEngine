@@ -38,25 +38,29 @@ static var _bosses: Dictionary = {}
 ##   full_bosses:   a fight's lighter version of a boss (for a lower-level party) is put back to its stat block.
 ##   boss_damage:   what a boss's damage to the other side is multiplied by (owner, 2026-10-19: bosses hit about 25%
 ##                  harder; Story, the mode for the tale, keeps the book's numbers). Who counts is boss_entry.
+##   boss_bonus:    added to a boss's attack rolls and DCs on top of enemy_bonus, by the party's level: [from level,
+##                  bonus] steps, the last one holding above its range (owner, 2026-10-25: "+1 to bosses before level 5,
+##                  +2 from 5-8, and +3 for 9-11"; 12 and up keep +3). The level is the lowest hero's at the fight, as
+##                  the fights' `level` versions read it. Tactician and Honour give every foe +2 instead.
 ##   spared:        a party member who would die is left Unconscious and Stable instead.
 ##   safe_rests:    Long Rests in risky places are never interrupted.
 ##   one_save:      the playthrough keeps a single save (built by the saves lane).
 ##   switchable:    can be picked in Settings mid-game (Honour only at a new game).
 const MODES := {
 	"story": {"name": "Story", "hp": 0.75, "party_bonus": 2, "enemy_bonus": 0, "tactics": "kind", "spells": false, "kit": false, "morale": false, "full_bosses": false,
-		"boss_damage": 1.0, "spared": true, "safe_rests": true, "one_save": false, "switchable": true,
+		"boss_damage": 1.0, "boss_bonus": [], "spared": true, "safe_rests": true, "one_save": false, "switchable": true,
 		"tagline": "For the tale",
 		"summary": "Foes are frailer and spread their blows around, your party gets +2 to attacks and saves, and nobody dies for good."},
 	"balanced": {"name": "Balanced", "hp": 1.0, "party_bonus": 0, "enemy_bonus": 0, "tactics": "standard", "spells": true, "kit": false, "morale": false,
-		"full_bosses": false, "boss_damage": 1.25, "spared": false, "safe_rests": false, "one_save": false, "switchable": true,
-		"tagline": "The book as written",
+		"full_bosses": false, "boss_damage": 1.25, "boss_bonus": [[1, 1], [5, 2], [9, 3]], "spared": false, "safe_rests": false, "one_save": false,
+		"switchable": true, "tagline": "The book as written",
 		"summary": "Foes at their stat block, fighting the way the book has them."},
 	"tactician": {"name": "Tactician", "hp": 1.2, "party_bonus": 0, "enemy_bonus": 2, "tactics": "sharp", "spells": true, "kit": true, "morale": true,
-		"full_bosses": false, "boss_damage": 1.25, "spared": false, "safe_rests": false, "one_save": false, "switchable": true,
-		"tagline": "For a hard fight",
+		"full_bosses": false, "boss_damage": 1.25, "boss_bonus": [], "spared": false, "safe_rests": false, "one_save": false,
+		"switchable": true, "tagline": "For a hard fight",
 		"summary": "Tougher, sharper foes (+2 to hit and to their DCs) who gang up on the hurt, go for your healers, drink their potions and run when beaten."},
 	"honour": {"name": "Honour", "hp": 1.2, "party_bonus": 0, "enemy_bonus": 2, "tactics": "ruthless", "spells": true, "kit": true, "morale": true, "full_bosses": true,
-		"boss_damage": 1.25, "spared": false, "safe_rests": false, "one_save": true, "switchable": false,
+		"boss_damage": 1.25, "boss_bonus": [], "spared": false, "safe_rests": false, "one_save": true, "switchable": false,
 		"tagline": "One life, one save",
 		"summary": "Tactician with no mercy: bosses at full strength, cruel foes finish the fallen, and one save."},
 }
@@ -74,6 +78,9 @@ var kit: bool = false
 var morale: bool = false
 var full_bosses: bool = false
 var boss_damage: float = 1.0
+var boss_bonus: Array = []
+## The party's level for boss_bonus, read when a fight is set up (prepare, arm): its lowest hero's.
+var party_level: int = 1
 var spared: bool = false
 var safe_rests: bool = false
 var one_save: bool = false
@@ -98,6 +105,7 @@ static func named(mode_id: String) -> Difficulty:
 	d.morale = bool(m["morale"])
 	d.full_bosses = bool(m["full_bosses"])
 	d.boss_damage = float(m["boss_damage"])
+	d.boss_bonus = (m["boss_bonus"] as Array).duplicate(true)
 	d.spared = bool(m["spared"])
 	d.safe_rests = bool(m["safe_rests"])
 	d.one_save = bool(m["one_save"])
@@ -154,6 +162,15 @@ func describe() -> Array[String]:
 		out.append("Bosses always come at full strength.")
 	if not is_equal_approx(boss_damage, 1.0):
 		out.append("Bosses hit %d%% harder." % roundi((boss_damage - 1.0) * 100.0))
+	if not boss_bonus.is_empty():
+		var steps: Array[String] = []
+		for i in boss_bonus.size():
+			var step := boss_bonus[i] as Array
+			var upto := int((boss_bonus[i + 1] as Array)[0]) - 1 if i + 1 < boss_bonus.size() else 0
+			var span := "from level %d" % int(step[0]) if upto == 0 else (
+				"to level %d" % upto if i == 0 else "at levels %d-%d" % [int(step[0]), upto])
+			steps.append("+%d %s" % [int(step[1]), span])
+		out.append("Bosses' attack rolls and the DCs of their spells and abilities: %s." % ", ".join(steps))
 	if spared:
 		out.append("Nobody in your party dies for good: a hero who would die is left Unconscious and Stable.")
 	if safe_rests:
@@ -204,6 +221,25 @@ func damage_factor(source: Combatant, target: Combatant) -> float:
 	return boss_damage if not boss_entry(source).is_empty() else 1.0
 
 
+## What boss_bonus adds for a party of `level`: the step it falls in (0 when the mode has none).
+func boss_bonus_at(level: int) -> int:
+	var out := 0
+	for step: Variant in boss_bonus:
+		if level >= int((step as Array)[0]):
+			out = int((step as Array)[1])
+	return out
+
+
+## The lowest level among the heroes in `e` (1 with none), as a fight version's `level` condition reads it.
+static func level_of(e: Encounter) -> int:
+	var lowest := 0
+	for c in e.combatants:
+		if c.side == &"party" and c.creature is Character:
+			var lv := (c.creature as Character).character_level()
+			lowest = lv if lowest == 0 else mini(lowest, lv)
+	return maxi(1, lowest)
+
+
 ## The lowest and highest Hit Points `m`'s Hit Dice could roll (x and y); its average twice when it has no dice.
 static func hit_dice_range(m: Monster) -> Vector2i:
 	var hp := m.data.get("hp", {}) as Dictionary
@@ -235,6 +271,7 @@ func monster_hp(m: Monster, base: int) -> int:
 
 ## Sets up a fight before it starts: each enemy's Hit Points, what armed foes carry, and the party's rules (arm()).
 func prepare(e: Encounter) -> void:
+	party_level = level_of(e)
 	for c in e.combatants:
 		if c.side == &"enemy" and c.creature is Monster:
 			toughen(c)
@@ -247,6 +284,7 @@ func prepare(e: Encounter) -> void:
 ## bonus for this mode.
 func arm(e: Encounter) -> void:
 	e.difficulty = self
+	party_level = level_of(e)
 	for c in e.combatants:
 		if c.side in [&"party", &"guest"]:
 			c.creature.spared_from_death = spared
@@ -270,7 +308,7 @@ func fit_party(cr: Creature) -> void:
 
 
 ## This mode's numbers for an enemy, as one effect under the mode's name: its Hit Points, and Tactician's +2 to its
-## attack rolls and DCs. They show in its Breakdowns ("Stat block (17d8+68) 144, Tactician +29"). Before a fight it
+## attack rolls and DCs (a boss's boss_bonus on top: Balanced's +1 to +3 by the party's level). They show in its Breakdowns ("Stat block (17d8+68) 144, Tactician +29"). Before a fight it
 ## starts unhurt; one joining mid-fight keeps what it came with, moved by the same number (a werewolf risen from a
 ## cursed hero has 10).
 func toughen(c: Combatant, fresh: bool = true) -> void:
@@ -287,9 +325,10 @@ func toughen(c: Combatant, fresh: bool = true) -> void:
 	var fx := Effect.new(name, &"feature", "difficulty")
 	if want != base:
 		fx = fx.with_modifier("hp_max", {"value": want - base})
-	if enemy_bonus != 0:
+	var bonus := enemy_bonus + (boss_bonus_at(party_level) if not boss_entry(c).is_empty() else 0)
+	if bonus != 0:
 		for stat: String in ["attack", "spell_attack", "spell_dc"]:
-			fx = fx.with_modifier(stat, {"value": enemy_bonus})
+			fx = fx.with_modifier(stat, {"value": bonus})
 	if not fx.modifiers.is_empty():
 		fx.ends = Effect.Ends.NEVER
 		m.add_effect(fx)
