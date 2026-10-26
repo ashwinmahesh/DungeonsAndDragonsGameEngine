@@ -214,9 +214,18 @@ func leave_sun(c: Combatant) -> Variant:
 	var to := _vantage_cell(c, _best_target(c), true)
 	if to == c.cell:
 		return null
+	_let_go(c)
 	e.ai.last_plan = {"kind": "leave_sun", "why": "out of the sunlight"}
 	var hz := e.ai.hazards.read(c)
 	return e.move(c, to, {} if hz == null else hz.avoid)
+
+
+## Lets go of whoever it holds before it steps out of the light: a held creature is dragged along, and the one it holds
+## may be the one carrying the light (the bearer it struck and seized).
+func _let_go(c: Combatant) -> void:
+	var e := enc()
+	for t in e.grappling.held_by(c):
+		e.grappling.release(c, t)
 
 
 ## Whether `c` stands in sunlight that will burn it as its next turn starts (Sunlight Hypersensitivity).
@@ -283,6 +292,7 @@ func legendary_plan(c: Combatant) -> Dictionary:
 	if sun and _turns_before_own(c) == 0:
 		var out := _vantage_cell(c, _best_target(c), false, budget)
 		if out != c.cell:
+			_let_go(c)
 			return {"option": str(move_opt["id"]), "cell": out}
 	var best := {}
 	var best_v := 0.0
