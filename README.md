@@ -1,6 +1,6 @@
 # DndCoreEngine
 
-Private core for D&D 5e (2024) games made in Godot 4.7: the rules engine, grid combat and AI, the story engine core
+Core for D&D 5e (2024) games made in Godot 4.7: the rules engine, grid combat and AI, the story engine core
 (state, dialogue, quests, rests, travel), the data schemas, the Compendium data (classes, subclasses, species,
 backgrounds, feats, spells, items, magic items, monsters, conditions) and the test framework.
 
@@ -16,5 +16,6 @@ keep their folders (`rules/`, `combat/`, `story/`, `data/`, `tests/`), so inside
 - The story engine names no campaign: a game supplies a `CampaignModule` (story/campaign_module.gd) named in
   `data/campaign.json`.
 - Data holds rules content of the books only; a game keeps its own entries (its monsters, items) in its own `data/`.
-- Private: it holds content beyond the SRD, used under the owner's personal-use decision. Never make it public.
+- Licence: the code is MIT (LICENSE). The data also holds mechanics from Wizards of the Coast books beyond the SRD, which
+  the MIT license does not cover; see NOTICE.md for the SRD 5.2.1 attribution (CC BY 4.0) and the fan-project notice.
 - The design principles (`docs/design/game_design_principles.md`) are the reference for games built on the engine.
