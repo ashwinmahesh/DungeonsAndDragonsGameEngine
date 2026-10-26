@@ -17,3 +17,4 @@ keep their folders (`rules/`, `combat/`, `story/`, `data/`, `tests/`), so inside
   `data/campaign.json`.
 - Data holds rules content of the books only; a game keeps its own entries (its monsters, items) in its own `data/`.
 - Private: it holds content beyond the SRD, used under the owner's personal-use decision. Never make it public.
+- The design principles (`docs/design/game_design_principles.md`) are the reference for games built on the engine.
