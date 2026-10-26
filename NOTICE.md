@@ -2,7 +2,7 @@
 
 ## Unofficial fan project
 
-DndCoreEngine is a free, non-commercial fan project made by one fan. It is not made, approved, endorsed or sponsored by
+DungeonsAndDragonsGameEngine is a free, non-commercial fan project made by one fan. It is not made, approved, endorsed or sponsored by
 Wizards of the Coast LLC or Hasbro, Inc., and it is not affiliated with them in any way. *Dungeons & Dragons*, *D&D*,
 *Curse of Strahd* and *Ravenloft* are trademarks of Wizards of the Coast LLC, named here only to say what the project is
 based on, with no claim of ownership. Rights holders with a concern can open an issue on this repository.

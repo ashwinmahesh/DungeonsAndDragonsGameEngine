@@ -1,4 +1,4 @@
-# DndCoreEngine
+# DungeonsAndDragonsGameEngine
 
 Core for D&D 5e (2024) games made in Godot 4.7: the rules engine, grid combat and AI, the story engine core
 (state, dialogue, quests, rests, travel), the data schemas, the Compendium data (classes, subclasses, species,
