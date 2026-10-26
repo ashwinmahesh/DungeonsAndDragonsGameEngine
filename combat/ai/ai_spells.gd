@@ -35,12 +35,16 @@ static func scroll_pick(m: Monster) -> String:
 	var sc := m.data.get("spellcasting", {}) as Dictionary
 	var best := ""
 	var best_level := -1
+	var daily: Array = []
 	for n: String in (sc.get("per_day", {}) as Dictionary):
-		for sid: Variant in (sc["per_day"] as Dictionary)[n]:
-			var s := Compendium.shared().spell_data(str(sid))
-			if not s.is_empty() and _offensive(s) and int(s.get("level", 0)) > best_level:
-				best_level = int(s.get("level", 0))
-				best = str(sid)
+		daily.append_array((sc["per_day"] as Dictionary)[n] as Array)
+	for lv: String in (sc.get("prepared", {}) as Dictionary):
+		daily.append_array((sc["prepared"] as Dictionary)[lv] as Array)
+	for sid: Variant in daily:
+		var s := Compendium.shared().spell_data(str(sid))
+		if not s.is_empty() and _offensive(s) and int(s.get("level", 0)) > best_level:
+			best_level = int(s.get("level", 0))
+			best = str(sid)
 	return best
 
 

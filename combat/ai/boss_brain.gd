@@ -271,7 +271,9 @@ func legendary_plan(c: Combatant) -> Dictionary:
 			move_opt = od
 	var budget := L.move_ft(c, move_opt)
 	var threatened := _threatened(c)
-	if hurt and threatened and not move_opt.is_empty():
+	# Hurt and in a foe's reach, it gets clear; a teleport that leaves a burst behind (Deathly Teleport) is taken as soon
+	# as a foe closes in, hurt or not.
+	if threatened and not move_opt.is_empty() and (hurt or bool(move_opt.get("teleport", false))):
 		var away := _safe_cell(c, budget)
 		if away != c.cell:
 			return {"option": str(move_opt["id"]), "cell": away}

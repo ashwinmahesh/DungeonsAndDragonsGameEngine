@@ -1097,6 +1097,36 @@
               "once": {
                 "type": "boolean",
                 "description": "It can't take this option again until the start of its next turn (2025 Monster Manual)."
+              },
+              "teleport": {
+                "type": "boolean",
+                "description": "With `move`: it teleports to a square up to `ft` feet away instead of walking (Deathly Teleport)."
+              },
+              "ft": {
+                "type": "integer",
+                "minimum": 5,
+                "description": "How far a moving option goes, instead of the creature's Speed (a teleport's range)."
+              },
+              "burst": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Damage each other creature within `radius` feet of the space a teleport left takes, rolled once, no save.",
+                "properties": {
+                  "dice": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "radius": {
+                    "type": "integer",
+                    "minimum": 5
+                  }
+                },
+                "required": [
+                  "dice",
+                  "type"
+                ]
               }
             }
           }
@@ -1145,6 +1175,24 @@
           "description": "spell id -> the level it is cast at (Wall of Fire at 7th for the efreeti).",
           "additionalProperties": {
             "type": "integer"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "description": "Spell slots by level (an older stat block's \"4th level (3 slots)\"): \"4\" -> how many; the `prepared` spells of that level share them.",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "prepared": {
+          "type": "object",
+          "description": "Slot level -> the spell ids prepared at that level, cast with `slots`.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
@@ -1348,6 +1396,13 @@
       "type": "string",
       "pattern": "^[a-z0-9_]+$",
       "description": "The figure a lycanthrope drawn as its hybrid (`art`) wears in its human form: it walks in as a person and changes into its `art` when it shifts (CombatToken.human_figure; MonsterActions._hybrid_art). A named one the story shows (Zuleika) wears that NPC's figure instead."
+    },
+    "legendary_strikes": {
+      "type": "array",
+      "description": "Actions only a legendary option uses (never taken on the creature's own turn), found by id like its actions.",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
     }
   }
 }

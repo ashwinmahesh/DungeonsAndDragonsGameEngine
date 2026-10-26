@@ -595,7 +595,9 @@ static func taken_by_type(t: Combatant, parts: Array) -> Dictionary:
 
 # --- Spellcasting -------------------------------------------------------------------------------
 
-## Spells the monster can cast now: [{id, level, per_day_left}] from its `spellcasting` block (at will, N/day).
+## Spells the monster can cast now: [{id, level, per_day_left}] from its `spellcasting` block (at will, N/day, and
+## spell slots: `slots` {level: count} that the `prepared` spells of that level share, as an older stat block lists
+## them).
 func spells_now(c: Combatant) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	# No spellcasting inside an Antimagic Field (or with Befuddlement, Feeblemind...).
@@ -610,7 +612,37 @@ func spells_now(c: Combatant) -> Array[Dictionary]:
 			var used := int(c.get_meta("cast_%s" % sid2, 0))
 			if used < int(n):
 				out.append({"id": str(sid2), "left": int(n) - used})
+	var slots := sc.get("slots", {}) as Dictionary
+	var prepared := sc.get("prepared", {}) as Dictionary
+	for lv: String in slots:
+		var free := int(slots[lv]) - int(c.get_meta("slots_used_%s" % lv, 0))
+		if free <= 0:
+			continue
+		for sid3: Variant in prepared.get(lv, []):
+			out.append({"id": str(sid3), "left": free})
 	return out
+
+
+## The slot level `spell_id` is prepared at in `sc` (its `prepared` lists), "" when it isn't a slot spell.
+static func slot_level_of(sc: Dictionary, spell_id: String) -> String:
+	var prepared := sc.get("prepared", {}) as Dictionary
+	for lv: String in prepared:
+		if spell_id in (prepared[lv] as Array):
+			return lv
+	return ""
+
+
+## Spends what casting `spell_id` uses from `sc`: one of its per-day castings, else a slot of its level. At-will
+## spells use nothing.
+func _spend_casting(c: Combatant, sc: Dictionary, spell_id: String) -> void:
+	var per_day := sc.get("per_day", {}) as Dictionary
+	for n: String in per_day:
+		if spell_id in (per_day[n] as Array):
+			c.set_meta("cast_%s" % spell_id, int(c.get_meta("cast_%s" % spell_id, 0)) + 1)
+			return
+	var lv := slot_level_of(sc, spell_id)
+	if lv != "":
+		c.set_meta("slots_used_%s" % lv, int(c.get_meta("slots_used_%s" % lv, 0)) + 1)
 
 
 ## Every spell in the monster's `spellcasting` block, used up or not, in the block's order: [{id, per_day (0 = at will), left}].
@@ -643,7 +675,8 @@ func cast(c: Combatant, spell_id: String, targets: Array, point: Vector2 = Vecto
 	if s.is_empty():
 		return CombatResult.fail("Unknown spell")
 	var levels := sc.get("levels", {}) as Dictionary
-	var level := int(levels.get(spell_id, maxi(slot, int(s.get("level", 0)))))
+	var slot_lv := slot_level_of(sc, spell_id)
+	var level := int(levels.get(spell_id, maxi(maxi(slot, int(s.get("level", 0))), int(slot_lv) if slot_lv != "" else 0)))
 	var ab := StringName(str(sc.get("ability", "int")))
 	var dc := Breakdown.new("Spell save DC").add("Stat block", int(sc.get("dc", 8 + c.creature.ability_mod(ab) + c.creature.proficiency_bonus())))
 	var atk := Breakdown.new("Spell attack").add("Stat block", int(sc.get("attack", c.creature.ability_mod(ab) + c.creature.proficiency_bonus())))
@@ -654,12 +687,10 @@ func cast(c: Combatant, spell_id: String, targets: Array, point: Vector2 = Vecto
 	for m2 in c.creature.modifiers_for(&"spell_attack"):
 		atk.add_nonzero(m2.source_name, c.creature.mod_value(m2, ctx))
 	var r := e.spells.cast_with_numbers(c, spell_id, level, targets, point, {"dc": dc, "attack": atk, "mod": c.creature.ability_mod(ab), "ability": ab}, opts)
-	# A per-day spell is used up once it's cast, not when the cast was refused (no target in range, no action left).
+	# A per-day spell or a slot is used up once it's cast, not when the cast was refused (no target in range, no action
+	# left).
 	if r.ok:
-		var per_day := sc.get("per_day", {}) as Dictionary
-		for n: String in per_day:
-			if spell_id in (per_day[n] as Array):
-				c.set_meta("cast_%s" % spell_id, int(c.get_meta("cast_%s" % spell_id, 0)) + 1)
+		_spend_casting(c, sc, spell_id)
 	return r
 
 
@@ -707,11 +738,7 @@ func spend_reaction_spell(c: Combatant, spell_id: String) -> int:
 		return 0
 	var sc := data_of(c).get("spellcasting", {}) as Dictionary
 	if src == "spellcasting":
-		var per_day := sc.get("per_day", {}) as Dictionary
-		for n: String in per_day:
-			if spell_id in (per_day[n] as Array):
-				c.set_meta("cast_%s" % spell_id, int(c.get_meta("cast_%s" % spell_id, 0)) + 1)
-				break
+		_spend_casting(c, sc, spell_id)
 	else:
 		c.set_meta("react_%s" % src, int(c.get_meta("react_%s" % src, 0)) + 1)
 	return int((sc.get("levels", {}) as Dictionary).get(spell_id, maxi(1, int(Compendium.shared().spell_data(spell_id).get("level", 1)))))

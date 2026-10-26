@@ -569,6 +569,8 @@ func pips(c: Combatant) -> String:
 func move_ft(c: Combatant, opt: Dictionary) -> int:
 	if not bool(opt.get("move", false)):
 		return 0
+	if opt.has("ft"):
+		return int(opt["ft"])   # a teleport's range (Deathly Teleport: 60 ft), not its Speed
 	return c.speed() / 2 if bool(opt.get("half", false)) else c.speed()
 
 
@@ -600,6 +602,14 @@ func use_why(c: Combatant, opt: Dictionary, target: Combatant, cell: Vector2i) -
 				return ""
 		return "Can't cast %s now" % opt["spell"]
 	var moves := bool(opt.get("move", false))
+	if bool(opt.get("teleport", false)):
+		if cell == Vector2i(-1, -1) or cell == c.cell:
+			return "Choose a square"
+		if not e.feature_actions.room_at(c, cell):
+			return "Choose an unoccupied square"
+		if e.grid.distance_ft(c.cell, c.size_cells, cell, c.size_cells) > move_ft(c, opt):
+			return "At most %d ft" % move_ft(c, opt)
+		return ""
 	if moves and (cell != Vector2i(-1, -1) or not opt.has("action")):
 		if c.speed() <= 0:
 			return "Speed 0"
@@ -639,12 +649,38 @@ func use(c: Combatant, opt_id: String, target: Combatant = null, cell: Vector2i 
 	_log("info", "%s uses a legendary action: %s%s (%d left)" % [c.name(), opt.get("name", opt_id),
 		(" on %s" % target.name()) if target != null else "", left(c)], c)
 	e.events.append({"type": "legendary", "id": c.id, "option": opt_id, "name": str(opt.get("name", opt_id)), "left": left(c)})
+	if bool(opt.get("teleport", false)):
+		return _teleport_away(c, cell, opt)
 	if bool(opt.get("move", false)) and cell != Vector2i(-1, -1):
 		var r := _move(c, cell, move_ft(c, opt))
 		if not opt.has("action") or target == null:
 			return r
 		return e.then(r, func() -> CombatResult: return _strike(c, opt, target))
 	return _strike(c, opt, target)
+
+
+## A teleporting option (Deathly Teleport): `c` teleports to `cell`, and each other creature within `burst.radius` feet
+## (5 when unset) of the space it left takes the burst's damage, rolled once, no save.
+func _teleport_away(c: Combatant, cell: Vector2i, opt: Dictionary) -> CombatResult:
+	var e := enc()
+	var from := c.cell
+	var r := CombatResult.new()
+	e.spells._teleport(c, cell, r)
+	var burst := opt.get("burst", {}) as Dictionary
+	if burst.is_empty():
+		return r
+	var radius := int(burst.get("radius", 5))
+	var caught: Array[Combatant] = []
+	for o in e.combatants:
+		if o != c and o.is_alive() and e.grid.distance_ft(from, c.size_cells, o.cell, o.size_cells) <= radius:
+			caught.append(o)
+	if caught.is_empty():
+		return r
+	var rolled := e._roll_damage_dice(str(burst.get("dice", "2d10")), false, 0, str(opt.get("name", "")))
+	for o in caught:
+		e.deal_damage(c, o, [{"amount": int(rolled["total"]), "type": str(burst.get("type", "necrotic"))}], false, str(opt.get("name", "")),
+			[str(rolled["text"])])
+	return e.run_reaction_queue(r)
 
 
 ## A legendary option's strike on `target` from where `c` stands now; nothing when it can't land it any more (it fell,

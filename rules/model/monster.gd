@@ -92,8 +92,10 @@ func xp() -> int:
 	return int(data.get("xp", 0))
 
 
+## A stat-block action by id: its actions, bonus actions and reactions, and `legendary_strikes`, the ones only a legendary
+## option uses (a lich's Disrupt Life: never taken on its own turn).
 func action(action_id: String) -> Dictionary:
-	for list_name: String in ["actions", "bonus_actions", "reactions"]:
+	for list_name: String in ["actions", "bonus_actions", "reactions", "legendary_strikes"]:
 		for a: Variant in data.get(list_name, []):
 			if str((a as Dictionary).get("id", "")) == action_id:
 				return a as Dictionary
