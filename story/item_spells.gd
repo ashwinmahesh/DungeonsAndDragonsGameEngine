@@ -44,17 +44,6 @@ static func find(list: Array[Dictionary], item_id: String, power_id: String) -> 
 	return {}
 
 
-## Whether the item behind power `p` is working for `ch`: worn, held or equipped where it must be and attuned where it asks
-## (Character.item_active). A weapon in the second weapon set counts too: the game takes it in hand to use its power
-## (CombatItems.power_why).
-static func working(ch: Character, p: Dictionary) -> bool:
-	if ch.item_active(p["entry"] as Dictionary):
-		return true
-	var iid := str(p["item_id"])
-	var data := p["data"] as Dictionary
-	return Gear.is_weapon(data) and ch.weapon_set_of(iid) == 2 and (not MagicItems.needs_attunement(data) or iid in ch.attuned)
-
-
 static func _entry(st: StoryState, ch: Character, e: Encounter, c: Combatant, p: Dictionary) -> Dictionary:
 	var power := p["power"] as Dictionary
 	var data := p["data"] as Dictionary
@@ -62,11 +51,10 @@ static func _entry(st: StoryState, ch: Character, e: Encounter, c: Combatant, p:
 	# Real spells of an item that stays with its bearer: not what a scroll or potion casts once and is gone, not an effect
 	# an item names for itself (a recipe), not a power the game uses on its own (hidden), not one a potion left behind.
 	var spell_id := str(power.get("spell", ""))
-	if p.has("effect") or spell_id == "" or bool(power.get("hidden", false)) or bool(power.get("scroll", false)) \
-			or bool(power.get("consume", false)) or MagicItems.is_consumable(data):
+	if not CombatItems.gives_spell(p):
 		return {}
 	var spell := Compendium.shared().spell_data(spell_id)
-	if spell.is_empty() or not working(ch, p):
+	if spell.is_empty() or not CombatItems.working(ch, p):
 		return {}
 	# A Necklace of Prayer Beads casts what its beads hold: none of that kind, no spell.
 	if power.has("bead") and CombatItems.use_count(p) <= 0:

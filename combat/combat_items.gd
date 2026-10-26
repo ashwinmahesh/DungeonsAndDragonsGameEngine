@@ -109,6 +109,49 @@ func find_power(c: Combatant, item_id: String, power_id: String) -> Dictionary:
 	return {}
 
 
+## Whether power `p` is a spell its item keeps giving its bearer (a staff's Fireball, a ring's Invisibility): not what a
+## scroll or potion casts once and is gone, not an effect an item names for itself (a recipe), not a power the game uses
+## on its own, not one a potion left behind. These are the spells the character sheet lists (ItemSpells) and the combat
+## hotbar's Spells tab, whatever the item's charges.
+static func gives_spell(p: Dictionary) -> bool:
+	var power := p["power"] as Dictionary
+	return not p.has("effect") and str(power.get("spell", "")) != "" and not bool(power.get("hidden", false)) \
+		and not bool(power.get("scroll", false)) and not bool(power.get("consume", false)) \
+		and not MagicItems.is_consumable(p["data"] as Dictionary)
+
+
+## Whether the item behind power `p` is working for `ch`: worn, held or equipped where it must be and attuned where it
+## asks (Character.item_active). A weapon in the second weapon set counts too: the game takes it in hand to use its power
+## (power_why).
+static func working(ch: Character, p: Dictionary) -> bool:
+	if ch.item_active(p["entry"] as Dictionary):
+		return true
+	var iid := str(p["item_id"])
+	var data := p["data"] as Dictionary
+	return Gear.is_weapon(data) and ch.weapon_set_of(iid) == 2 and (not MagicItems.needs_attunement(data) or iid in ch.attuned)
+
+
+## Whether power `p` is one of `c`'s own spells from an item: the Spells tab lists it (list) instead of the Items tab.
+func on_spells_tab(c: Combatant, p: Dictionary) -> bool:
+	var ch := ch_of(c)
+	if ch == null or not gives_spell(p) or not working(ch, p):
+		return false
+	var power := p["power"] as Dictionary
+	if not bool(power.get("combat", true)) or bool(power.get("hidden", false)) or (power.has("bead") and use_count(p) <= 0):
+		return false
+	# A spell with nothing to do in a fight (Detect Magic, Scrying) stays on the Items tab, out of the way of the ones that do.
+	var spell := comp().spell_data(str(power["spell"]))
+	return not spell.is_empty() and (enc().spells.has_combat_rules(spell) or power.has("custom"))
+
+
+## Whether any item of `c` gives it a spell on the Spells tab: a hero who casts none of their own still has the tab then.
+func has_item_spells(c: Combatant) -> bool:
+	for p in powers(c):
+		if on_spells_tab(c, p):
+			return true
+	return false
+
+
 ## The spell a power casts (a spell id, or the item's own recipe "<item>__<recipe>"), "" for none.
 static func power_spell(item_id: String, power: Dictionary) -> String:
 	if power.has("spell"):
@@ -379,6 +422,13 @@ func list(c: Combatant) -> Array[Dictionary]:
 				a["choices"] = opts_list
 				a["choice_label"] = str(choice.get("label", "Choose"))
 				a["opts"] = {"choice": str((opts_list[0] as Dictionary)["value"])}
+		if on_spells_tab(c, p):
+			# On the Spells tab beside the hero's own (Ashwin, 2026-10-24), by the spell's name: the item it comes from and what
+			# it has left are the slot's second line, and the tooltip says what a casting costs.
+			a["tab"] = ActionCatalog.SPELLS
+			a["label"] = str(spell.get("name", spell_id))
+			a["sub"] = _source_sub(p)
+			a["help"] = "%s%s" % [_source_note(p, spell), "\n" + str(a["help"]) if str(a["help"]) != "" else ""]
 		var pchoice := power.get("choice", {}) as Dictionary
 		if not pchoice.is_empty():
 			var po: Array = []
@@ -389,6 +439,37 @@ func list(c: Combatant) -> Array[Dictionary]:
 			a["opts"] = {"choice": str((po[0] as Dictionary)["value"])}
 		out.append(a)
 	return out
+
+
+## The second line of an item's spell on the Spells tab: what it has left, then the item it comes from ("7/10 · Staff of Fire",
+## "at will · Ring of Spell Storing", "1/1 · Cape of the Mountebank" for a daily use). The slot is narrow and trims the end, so
+## what is left comes first.
+func _source_sub(p: Dictionary) -> String:
+	var data := p["data"] as Dictionary
+	var power := p["power"] as Dictionary
+	var left := "at will"
+	if power.has("bead") or not (power.get("uses", {}) as Dictionary).is_empty():
+		left = "%d/%d" % [maxi(0, use_count(p) - uses_spent(p)), use_count(p)]
+	elif MagicItems.has_charges(data) and int(power.get("charges", 0)) > 0:
+		left = "%d/%d" % [charges_of(p), MagicItems.max_charges(data, p["entry"] as Dictionary)]
+	return "%s · %s" % [left, MagicItems.display_name(data, p["entry"] as Dictionary)]
+
+
+## What the tooltip says of an item's spell on the Spells tab, before the power's own text: where it comes from and what a
+## casting costs.
+func _source_note(p: Dictionary, spell: Dictionary) -> String:
+	var data := p["data"] as Dictionary
+	var power := p["power"] as Dictionary
+	var name := MagicItems.display_name(data, p["entry"] as Dictionary)
+	var cost := "at will"
+	if power.has("bead") or not (power.get("uses", {}) as Dictionary).is_empty():
+		var total := use_count(p)
+		cost = "%d of %d use%s left, %s" % [maxi(0, total - uses_spent(p)), total, "" if total == 1 else "s",
+			_per_text(str((power.get("uses", {}) as Dictionary).get("per", "dawn")))]
+	elif MagicItems.has_charges(data) and int(power.get("charges", 0)) > 0:
+		var n := charge_cost(power, spell, int(power.get("level", spell.get("level", 0))))
+		cost = "%d charge%s a casting, %d of %d left" % [n, "" if n == 1 else "s", charges_of(p), MagicItems.max_charges(data, p["entry"] as Dictionary)]
+	return "From your %s: %s." % [name, cost]
 
 
 func _power_sub(c: Combatant, p: Dictionary, spell: Dictionary) -> String:

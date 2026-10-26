@@ -32,7 +32,8 @@ func _init(encounter: Encounter) -> void:
 
 func tabs_for(c: Combatant) -> Array[String]:
 	var out: Array[String] = [COMMON, class_tab(c)]
-	if c.creature is Character and not (c.creature as Character).spellcasting.is_empty():
+	# A hero who casts none of their own still has the Spells tab while an item they work gives them a spell.
+	if c.creature is Character and (not (c.creature as Character).spellcasting.is_empty() or e.items.has_item_spells(c)):
 		out.append(SPELLS)
 	out.append(ITEMS)
 	if c.creature is Character:
