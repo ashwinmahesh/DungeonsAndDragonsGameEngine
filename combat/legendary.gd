@@ -1,7 +1,7 @@
 class_name Legendary
 extends RefCounted
-## Bosses in a fight (ADR 0014, docs/contracts/combat.md "Bosses"): legendary actions at the end of other creatures'
-## turns, lair actions on initiative count 20, Legendary Resistance, Regeneration, Shapechanger forms, Misty Escape to
+## Bosses in a fight (ADR 0014, docs/contracts/combat.md "Bosses"): legendary actions at the end of a hero's turn
+## (opens_window), lair actions on initiative count 20, Legendary Resistance, Regeneration, Shapechanger forms, Misty Escape to
 ## the resting place, Children of the Night, and foes that withdraw from a fight. Any monster can use these through
 ## its stat block; the encounter calls the hooks below and BossBrain (combat/ai/boss_brain.gd) makes the choices.
 ## Pure logic: what the story must learn (flags, quest stages) waits in `story_flags` and `story_quests`.
@@ -721,10 +721,19 @@ func _move(c: Combatant, cell: Vector2i, budget: int = -1) -> CombatResult:
 	return r
 
 
-## The end of `ended`'s turn: each legendary creature (not `ended`) may use one option, as the AI chooses. May pause
-## for a reaction; the rest follow once it's answered.
+## Whether the end of `c`'s turn lets legendary creatures act: only a hero's, a player character on the party's side
+## (house rule, owner 2026-10-24: "Legendary actions are only allowed after a player characters turn (shouldnt trigger
+## after an NPC)"; docs/rules/deviations.md). A guest, a summon, a steed or a foe's turn opens none.
+static func opens_window(c: Combatant) -> bool:
+	return c != null and c.side == &"party" and c.creature is Character
+
+
+## The end of `ended`'s turn: each legendary creature (not `ended`) may use one option, as the AI chooses, when the turn
+## was a hero's (opens_window). May pause for a reaction; the rest follow once it's answered.
 func after_turn(ended: Combatant) -> CombatResult:
 	var queue: Array[Combatant] = []
+	if not opens_window(ended):
+		return CombatResult.new()
 	for c in enc().combatants:
 		if c != ended and per_round(c) > 0 and c.is_alive() and not c.is_player_controlled():
 			queue.append(c)

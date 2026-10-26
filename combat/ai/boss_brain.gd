@@ -417,9 +417,9 @@ func _cheapest_strike(c: Combatant) -> int:
 	return least
 
 
-## How many other creatures' turns still end before `c`'s own next turn: 0 at the end of the last of them, its last
-## chance to spend legendary uses before they come back. Counts the order from the current turn round to `c`, and the
-## heroes of a shared party turn who haven't ended theirs.
+## How many more turns that open a legendary window (heroes', Legendary.opens_window) still end before `c`'s own next
+## turn: 0 at the end of the last of them, its last chance to spend legendary uses before they come back. Counts the
+## order from the current turn round to `c`, and the heroes of a shared party turn who haven't ended theirs.
 func _turns_before_own(c: Combatant) -> int:
 	var e := enc()
 	var at := e.order.find(c)
@@ -431,11 +431,11 @@ func _turns_before_own(c: Combatant) -> int:
 	var i := (e.turn_index + 1) % n
 	while i != at and i != e.turn_index:
 		var o := e.order[i]
-		if o.is_alive() and not o.has_meta("left_fight"):
+		if o.is_alive() and not o.has_meta("left_fight") and Legendary.opens_window(o):
 			seen[o.id] = true
 		i = (i + 1) % n
 	for id: String in e.shared:
-		if not id in e.shared_ended and (cur == null or id != cur.id):
+		if not id in e.shared_ended and (cur == null or id != cur.id) and Legendary.opens_window(e.get_c(id)):
 			seen[id] = true
 	return seen.size()
 
