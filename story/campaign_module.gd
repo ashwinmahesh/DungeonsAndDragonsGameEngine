@@ -97,3 +97,83 @@ func cast_spell(_st: StoryState, _caster: Character, _spell_id: String, _choice:
 ## Records the ending that holds now (a dialogue's `end_game`).
 func request_ending(_st: StoryState) -> void:
 	pass
+
+
+# --- Fights and places --------------------------------------------------------------------------------------------
+
+## A talk the campaign plays before its final battle, as "<dialogue key>:<node>" (or "" for none), and who speaks it.
+func parley_ref() -> String:
+	return ""
+
+
+func parley_speaker() -> String:
+	return ""
+
+
+## The party's answer to that parley ("" while unanswered).
+func parley_answer(_st: StoryState) -> String:
+	return ""
+
+
+## Whether the final battle goes ahead after the parley (an answer that ends the game instead says no).
+func parley_allows_fight(_st: StoryState) -> bool:
+	return true
+
+
+## The places in a location (ids) that the campaign's reading hid treasure in.
+func treasure_spots(_loc: Dictionary) -> Array[String]:
+	return []
+
+
+## Takes the treasure hidden in `kind` ("container" or "encounter") `id` of a location, returning its item ids.
+func take_treasure(_loc: Dictionary, _kind: String, _id: String, _st: StoryState) -> Array[String]:
+	return []
+
+
+## A final battle begins here: the campaign's quests may move on.
+func final_battle_begun(_st: StoryState) -> void:
+	pass
+
+
+## Narrator keys (narrative/narrator) the campaign says when a fight starts or is won, besides the usual ones.
+func fight_start_keys() -> Array[String]:
+	return []
+
+
+func fight_victory_keys() -> Array[String]:
+	return []
+
+
+## The stat block of the town watch when a crime brings them (data/npcs `monster` wins).
+func guard_monster() -> String:
+	return "guard"
+
+
+## What the scouting spells find: the nearest trap within 30 ft (sprung harmlessly) and the nearest locked or secret way.
+func spring_trap(_st: StoryState, _location_id: String, _cell: Vector2i, _ft: int = 30) -> Dictionary:
+	return {}
+
+
+func open_way(_st: StoryState, _location_id: String, _cell: Vector2i, _ft: int = 30) -> Dictionary:
+	return {}
+
+
+# --- Endings and achievements -------------------------------------------------------------------------------------
+
+## The campaign's endings (each {id, title, summary, ...}); each earns the achievement "ending_<id>".
+func endings() -> Array[Dictionary]:
+	return []
+
+
+func ending(_id: String) -> Dictionary:
+	return {}
+
+
+## Achievements of the campaign's own beyond the engine's list: id -> [name, text].
+func extra_achievements() -> Dictionary:
+	return {}
+
+
+## What a Skirmish with these foes (monster ids) earns beyond the engine's own.
+func skirmish_achievements(_foe_monsters: Array[String]) -> Array[String]:
+	return []

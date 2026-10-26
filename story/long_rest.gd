@@ -38,7 +38,7 @@ const RESTLESS := "restless"
 ## Takes the rest in a place whose rule is `rule` ("safe" or "risky": the place's, after the difficulty's safe rests).
 ## Returns {how, interrupted: how isn't SLEPT, minutes: how long since it began, text: how the night went, lines: what
 ## the inn and the spells cast as it ends add}. DARK: the caller brings what came (the camp's visitors) or, with
-## nothing to fight, ends the night (restless). STRAHD: the caller lets his visit play (game root `strahd_after_rest`).
+## nothing to fight, ends the night (restless). STRAHD: the caller lets his visit play (game root `visit_after_rest`).
 static func take(st: StoryState, rule: String, dice: DiceRoller) -> Dictionary:
 	var start := st.total_minutes()
 	var interrupted := false
