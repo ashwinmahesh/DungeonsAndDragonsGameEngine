@@ -152,8 +152,10 @@ static func hours(legs: Array[Dictionary]) -> float:
 ## Rolls a road's random encounter table for one leg (at the time the leg ends). Returns {} for a quiet road, or
 ## {table, entry} for a fight or an event. Uses the dice (d100 for the chance, then the weights). `journey_to` is the
 ## place the journey is bound for and `leg_to` the place this leg ends at: a road the party has walked, or a place it
-## has been, is familiar ground (RoadFamiliarity).
-static func roll(road: Dictionary, st: StoryState, dice: DiceRoller, journey_to: String = "", leg_to: String = "") -> Dictionary:
+## has been, is familiar ground (RoadFamiliarity). `fights` false (the player turned random fights off in Settings,
+## Ashwin 2026-10-26): a roll that would pick a fight leaves the road quiet; the meetings are rolled as before.
+static func roll(road: Dictionary, st: StoryState, dice: DiceRoller, journey_to: String = "", leg_to: String = "",
+		fights: bool = true) -> Dictionary:
 	var tid := str(road.get("table", ""))
 	if tid == "":
 		return {}
@@ -189,6 +191,8 @@ static func roll(road: Dictionary, st: StoryState, dice: DiceRoller, journey_to:
 	for entry in pool:
 		pick -= int(entry["weight"])
 		if pick <= 0:
+			if entry.has("monsters") and not fights:
+				return {}   # a fight the player keeps off the roads: nothing is marked seen, so a meeting's `once` is untouched
 			if bool(entry.get("once", false)):
 				seen["%s:%s" % [tid, entry.get("id", "")]] = true
 				st.flags["_random_seen"] = seen
