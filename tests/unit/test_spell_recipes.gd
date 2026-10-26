@@ -476,7 +476,7 @@ func test_a_readied_spell_goes_off_when_an_enemy_comes_in_range() -> void:
 	TestCombat.start_with(e, s)
 	var r := e.ready_spell(s, "fire_bolt", 0)
 	assert_true(r.ok, r.reason)
-	assert_true(s.creature.concentration != null, "held with Concentration")
+	assert_true(s.creature.concentration == null, "held without Concentration (house rule)")
 	e.end_turn()
 	w.movement_left = 60
 	e.move(w, Vector2i(20, 3))
@@ -509,6 +509,71 @@ func test_a_spell_readied_for_an_attack_waits_for_one() -> void:
 	assert_false(s.reaction_available, "released at the wolf once its bite was done")
 	assert_true(s.creature.concentration == null)
 	assert_true(e.log.texts().any(func(t: String) -> bool: return t.contains("releases the readied Fire Bolt at Wolf")))
+
+
+## House rule (owner, 2026-10-24): readying a spell doesn't end the Concentration the caster keeps, takes none of its own,
+## and releasing a spell that needs none leaves the first one going.
+func test_readying_a_spell_keeps_the_concentration_going() -> void:
+	var rows: Array[String] = []
+	for z in 6:
+		rows.append(".".repeat(32))
+	var e := TestCombat.encounter(rows, 3)
+	var s := TestCombat.hero(e, "silvain_aster", Vector2i(1, 3))
+	s.reaction_rules["readied_attack"] = "auto"
+	var w := TestCombat.foe(e, "wolf", Vector2i(28, 3))
+	w.creature.hp = 100
+	TestCombat.start_with(e, s)
+	var kept := s.creature.begin_concentration("bless", "Bless")
+	var r := e.ready_spell(s, "fire_bolt", 0)
+	assert_true(r.ok, r.reason)
+	assert_true(s.creature.concentration == kept and not kept.ended, "Bless is still being kept")
+	assert_false(s.readied.has("conc"), "and the held spell takes none of its own")
+	e.end_turn()
+	w.movement_left = 60
+	e.move(w, Vector2i(20, 3))
+	assert_false(s.reaction_available, "released with the Reaction")
+	assert_true(s.creature.concentration == kept and not kept.ended, "Bless is still being kept after the release too")
+
+
+## A readied spell that is let go at the start of its caster's next turn, as the book has it, ends nothing else either.
+func test_a_readied_spell_lapses_at_the_next_turn_without_touching_concentration() -> void:
+	var e := TestCombat.open_field(3)
+	var s := TestCombat.hero(e, "silvain_aster", Vector2i(1, 3))
+	var w := TestCombat.foe(e, "wolf", Vector2i(20, 3))
+	w.creature.hp = 100
+	TestCombat.start_with(e, s)
+	var kept := s.creature.begin_concentration("bless", "Bless")
+	assert_true(e.ready_spell(s, "fire_bolt", 0).ok)
+	var guard := 0
+	while not (e.current() == s and e.round_no >= 2) and guard < 20:
+		e.end_turn()
+		guard += 1
+	assert_true(s.readied.is_empty(), "lost at the start of the next turn")
+	assert_true(s.creature.concentration == kept and not kept.ended)
+
+
+func test_unready_lets_a_readied_attack_or_spell_go_and_keeps_the_reaction() -> void:
+	var e := TestCombat.open_field(3)
+	var s := TestCombat.hero(e, "silvain_aster", Vector2i(1, 3))
+	var w := TestCombat.foe(e, "wolf", Vector2i(20, 3))
+	w.creature.hp = 100
+	TestCombat.start_with(e, s)
+	var cat := ActionCatalog.new(e)
+	assert_true(cat.find(s, "unready").is_empty(), "nothing readied: nothing to unready")
+	assert_false(e.unready(s).ok)
+	assert_true(e.ready_spell(s, "fire_bolt", 0).ok)
+	assert_false(cat.find(s, "unready").is_empty(), "a readied spell can be let go from the hotbar")
+	var slots := (s.creature as Character).slots_left(1)
+	var r := e.unready(s)
+	assert_true(r.ok, r.reason)
+	assert_true(s.readied.is_empty())
+	assert_true(s.reaction_available, "the Reaction stays")
+	assert_eq((s.creature as Character).slots_left(1), slots, "nothing is given back or spent now")
+	assert_true(cat.find(s, "unready").is_empty())
+	e.end_turn()
+	w.movement_left = 90
+	e.move(w, Vector2i(10, 3))
+	assert_true(s.reaction_available and e.pending == null, "an enemy coming in range sets nothing off")
 
 
 ## Ilse with an attack readied for a spell (her rule for it: `rule`) beside an enemy mage whose turn it is.
@@ -625,3 +690,47 @@ func test_a_readied_spell_is_aimed_as_it_goes_off() -> void:
 		e.answer_reaction(false)
 	assert_true(e.log.texts().any(func(t: String) -> bool: return t.contains("releases the readied Shocking Grasp at") and t.ends_with(other.name())),
 		"\n".join(e.log.texts().slice(-4)))
+
+
+## An Invisible foe's attack or spell gives it away (owner, 2026-10-24): a readied attack goes off at it right after, in
+## range, though it is as unseen as before by then.
+func test_a_readied_attack_goes_off_at_an_invisible_foe_right_after_its_attack() -> void:
+	var e := TestCombat.open_field(3)
+	var ilse := TestCombat.hero(e, "ilse_varga", Vector2i(2, 3))
+	ilse.reaction_rules["readied_attack"] = "auto"
+	var hedda := TestCombat.hero(e, "hedda_ironvow", Vector2i(4, 3))
+	hedda.reaction_rules["readied_attack"] = "never"
+	var w := TestCombat.foe(e, "wolf", Vector2i(3, 3))
+	w.creature.hp = 300
+	TestCombat.start_with(e, ilse)
+	assert_true(e.ready_attack(ilse, str(e.best_melee_option(ilse, null)["id"]), "attack").ok)
+	w.creature.add_effect(Effect.new("Invisible", &"spell", "greater_invisibility").with_condition(&"invisible"))
+	assert_true(e.sight.unseen_foe(ilse, w), "unseen to begin with")
+	while e.current() != w:
+		e.end_turn()
+	e.monster_attack(w, hedda, "bite")
+	while e.pending != null:
+		e.answer_reaction(false)
+	assert_false(ilse.reaction_available, "the readied attack went off right after the bite")
+	assert_true(e.log.texts().any(func(t: String) -> bool: return t.contains("readied attack goes off against " + w.name())))
+	assert_true(e.sight.unseen_foe(ilse, w), "and it is as unseen as before: nothing stays revealed")
+
+
+func test_a_readied_spell_goes_off_at_an_invisible_foe_right_after_its_attack() -> void:
+	var e := TestCombat.open_field(3)
+	var s := TestCombat.hero(e, "silvain_aster", Vector2i(1, 3))
+	s.reaction_rules["readied_attack"] = "auto"
+	var ilse := TestCombat.hero(e, "ilse_varga", Vector2i(12, 3))
+	(ilse.creature as Character).heroic_inspiration = false
+	var w := TestCombat.foe(e, "wolf", Vector2i(13, 3))
+	w.creature.hp = 300
+	TestCombat.start_with(e, s)
+	assert_true(e.ready_spell(s, "fire_bolt", 0, "attack").ok)
+	w.creature.add_effect(Effect.new("Invisible", &"spell", "greater_invisibility").with_condition(&"invisible"))
+	while e.current() != w:
+		e.end_turn()
+	e.monster_attack(w, ilse, "bite")
+	while e.pending != null:
+		e.answer_reaction(false)
+	assert_false(s.reaction_available, "released at the wolf once its bite was done")
+	assert_true(e.log.texts().any(func(t: String) -> bool: return t.contains("releases the readied Fire Bolt at " + w.name())))

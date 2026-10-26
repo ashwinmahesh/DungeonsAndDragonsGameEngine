@@ -336,16 +336,9 @@ func cast_reactive_spell(c: Combatant, spell_id: String, target: Combatant) -> C
 func release_readied(c: Combatant, held: Dictionary, target: Combatant) -> CombatResult:
 	var spells := sp()
 	var e := enc()
-	var conc := held.get("conc") as Concentration
-	if conc != null and conc.ended:
-		return CombatResult.new()
 	var spell_id := str(held["spell"])
 	var s := _comp().spell_data(spell_id)
 	c.reaction_available = false
-	if conc != null:
-		conc.ended = true
-		if c.creature.concentration == conc:
-			c.creature.concentration = null
 	var new_conc: Concentration = null
 	if bool((s.get("duration", {}) as Dictionary).get("concentration", false)):
 		new_conc = c.creature.begin_concentration(spell_id, str(s["name"]))

@@ -129,11 +129,8 @@ func _begin_turn() -> CombatResult:
 		o.creature.on_turn_start(c.id)
 	e._expire_marks(c.id, "start")
 	e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
-	if c.readied.has("conc"):
-		var held := c.readied["conc"] as Concentration
-		if held != null and not held.ended:
-			held.end("the readied spell wasn't released")
-			e.log.add("info", "%s lets the readied spell go" % c.name(), c.id)
+	if c.readied.has("spell"):
+		e.log.add("info", "%s lets the readied spell go" % c.name(), c.id)
 	c.reset_turn()
 	if c.creature.has_flag("hasted"):
 		c.haste_action = true

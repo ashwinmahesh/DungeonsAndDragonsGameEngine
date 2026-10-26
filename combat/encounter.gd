@@ -813,6 +813,10 @@ func drop_concentration(c: Combatant) -> CombatResult:
 	return actions.drop_concentration(c)
 
 
+func unready(c: Combatant) -> CombatResult:
+	return actions.unready(c)
+
+
 func dash(c: Combatant, use_bonus: bool = false) -> CombatResult:
 	return actions.dash(c, use_bonus)
 

@@ -53,11 +53,19 @@ func _readied_attack(p: Combatant, target: Combatant) -> CombatResult:
 		return e.spells.release_readied(p, held, target)
 	var option := e.option_by_id(p, str(p.readied.get("option", "")))
 	p.readied = {}
-	if option.is_empty() or e.attack_legal(p, target, option) != "":
-		return CombatResult.new()
-	p.reaction_available = false
-	e.log.add("reaction", "%s's readied attack goes off against %s" % [p.name(), target.name()], p.id)
-	return _resolve_attack(p, target, option, {"reaction": true})
+	# The attack or spell that set it off gave its maker away, Invisible or not (owner, 2026-10-24): it can be struck
+	# right after it, whether or not it is unseen again by now.
+	var exposed := e.sight.unseen_foe(p, target)
+	if exposed:
+		target.set_meta("gave_itself_away", true)
+	var r := CombatResult.new()
+	if not option.is_empty() and e.attack_legal(p, target, option) == "":
+		p.reaction_available = false
+		e.log.add("reaction", "%s's readied attack goes off against %s" % [p.name(), target.name()], p.id)
+		r = _resolve_attack(p, target, option, {"reaction": true})
+	if exposed:
+		target.remove_meta("gave_itself_away")
+	return r
 
 
 ## War Caster's Reactive Spell (2024): the spells `p` could cast at `target` instead of an Opportunity Attack: a casting

@@ -233,10 +233,11 @@ func _queued_ok(q: Dictionary, reactor: Combatant) -> bool:
 			return e.spells.can_react(reactor) and reactor.creature.hp > 0 and e.get_c(str(q["trigger"])) != null and e.distance(reactor, e.get_c(str(q["trigger"]))) <= 5
 		"readied_attack":
 			var foe := e.get_c(str(q["trigger"]))
-			var held := reactor.readied.get("conc") as Concentration
+			# An attack or spell gives its maker away (owner, 2026-10-24): a readied one goes off right after it, in range,
+			# even at an Invisible foe that turned unseen again by the time the Reaction comes.
 			return not reactor.readied.is_empty() and str(reactor.readied.get("trigger", "approach")) == str(q.get("on", "")) \
-				and (held == null or not held.ended) and e.spells.can_react(reactor) and foe != null and not foe.is_down() \
-				and e.can_see(reactor, foe) and e.distance(reactor, foe) <= readied_reach(reactor)
+				and e.spells.can_react(reactor) and foe != null and not foe.is_down() \
+				and e.distance(reactor, foe) <= readied_reach(reactor)
 	return false
 
 

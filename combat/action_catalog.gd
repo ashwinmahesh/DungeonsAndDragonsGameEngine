@@ -262,6 +262,7 @@ func actions_for(c: Combatant) -> Array[Dictionary]:
 	_spells(c, out)
 	_sustained(c, out)
 	_concentration(c, out)
+	_readied(c, out)
 	_items(c, out)
 	_quick(c, out)
 	_passives(c, out)
@@ -601,6 +602,17 @@ func _concentration(c: Combatant, out: Array[Dictionary]) -> void:
 	var why := e._turn_check(c)
 	out.append(_entry("drop_concentration", COMMON, "Drop Concentration", conc.name, "free", why, "none",
 		"End your Concentration on %s now. It costs nothing, and the spell ends with everything it was keeping going." % conc.name))
+
+
+## Letting a readied attack or spell go (owner, 2026-10-24): a free slot on the Common tab for as long as one is held.
+func _readied(c: Combatant, out: Array[Dictionary]) -> void:
+	if c.readied.is_empty():
+		return
+	var what := "attack"
+	if c.readied.has("spell"):
+		what = str(Compendium.shared().spell_data(str(c.readied["spell"])).get("name", "spell"))
+	out.append(_entry("unready", COMMON, "Unready", what, "free", e._turn_check(c), "none",
+		"Let your readied %s go. Nothing is given back (a readied spell's slot is spent), and your Reaction stays free for anything else." % what))
 
 
 ## Actions a spell keeps granting while it lasts (Spiritual Weapon's strike, Witch Bolt's arc, Flaming Sphere's
@@ -955,7 +967,7 @@ const ACTION_TEXT := {
 	"hide": "A DC 15 Dexterity (Stealth) check while out of every enemy's sight (Three-Quarters or Total Cover). On a success you're Invisible until you attack, cast a spell aloud, or an enemy finds you.",
 	"search": "A Wisdom (Perception) check to find hidden creatures; it beats their Stealth total to find them.",
 	"study": "An Intelligence check (Arcana, History, Nature or Religion by the creature's type) to recall what a creature is: its defenses and traits.",
-	"ready": "Hold an attack: when an enemy you can see comes within reach (or, picked with a right-click, when one within reach attacks or casts a spell), you make it with your Reaction. Lasts until the start of your next turn. To ready a spell, right-click it on the Spells tab: it's cast now (spending the slot) and held with Concentration until it's released.",
+	"ready": "Hold an attack: when an enemy you can see comes within reach (or, picked with a right-click, when one within reach attacks or casts a spell), you make it with your Reaction. Lasts until the start of your next turn. To ready a spell, right-click it on the Spells tab: it's cast now (spending the slot) and held until it's released, without Concentration (the Concentration you keep goes on). Unready lets a readied attack or spell go.",
 	"stabilize": "Help a dying creature within 5 ft: a DC 10 Wisdom (Medicine) check makes it Stable. The same first aid brings round a creature that was knocked out.",
 	"healers_kit": "Spend one use of the kit to make a dying creature within 5 ft Stable, no check needed.",
 	"grapple": "One of your attacks: the target (no more than one size larger) makes a Strength or Dexterity save against 8 + Str + Proficiency or is Grappled (Speed 0).",
@@ -1311,6 +1323,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 	match id:
 		"drop_concentration":
 			return e.drop_concentration(c)
+		"unready":
+			return e.unready(c)
 		"grapple":
 			return e.unarmed_special(c, t, "grapple")
 		"shove_prone":

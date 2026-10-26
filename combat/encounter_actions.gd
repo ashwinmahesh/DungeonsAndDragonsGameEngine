@@ -40,9 +40,11 @@ func ready_attack(c: Combatant, option_id: String, trigger: String = "approach")
 	return CombatResult.new()
 
 
-## Ready (2024) with a spell: cast it now (the slot is spent), hold its energy with Concentration, and release it
-## with your Reaction when an enemy within the spell's range sets off `trigger` (READY_TRIGGERS) before the start of
-## your next turn. If Concentration breaks first, the spell is lost.
+## Ready (2024) with a spell: cast it now (the slot is spent), hold its energy, and release it with your Reaction when
+## an enemy within the spell's range sets off `trigger` (READY_TRIGGERS) before the start of your next turn, else it is
+## lost (or `unready` lets it go). House rule (owner, 2026-10-24): the held spell takes no Concentration, so readying one
+## doesn't end the Concentration you keep and damage doesn't lose it (docs/rules/deviations.md); a Concentration spell
+## begins its own when it is released.
 func ready_spell(c: Combatant, spell_id: String, slot: int, trigger: String = "approach") -> CombatResult:
 	var e := enc()
 	var why := e._action_check(c)
@@ -77,11 +79,28 @@ func ready_spell(c: Combatant, spell_id: String, slot: int, trigger: String = "a
 	var used := ch.use_component(s)   # a costly component the spell uses up goes as it's cast, held or not
 	if used != "":
 		e.log.add("info", "%s uses up %s (%s)" % [c.name(), used, s["name"]], c.id)
-	var conc := c.creature.begin_concentration("readied:" + spell_id, "a readied %s" % s["name"])
 	if not READY_TRIGGERS.has(trigger):
 		trigger = "approach"
-	c.readied = {"spell": spell_id, "slot": slot, "conc": conc, "trigger": trigger}
+	c.readied = {"spell": spell_id, "slot": slot, "trigger": trigger}
 	e.log.add("spell", "%s readies %s for the first enemy that %s" % [c.name(), s["name"], str(READY_TRIGGERS[trigger]) % ("%d ft" % e.spells.range_ft(s, c))], c.id)
+	return CombatResult.new()
+
+
+## Lets a readied attack or spell go (owner, 2026-10-24): nothing is spent or given back (a readied spell's slot is gone),
+## and the Reaction stays for anything else.
+func unready(c: Combatant) -> CombatResult:
+	var e := enc()
+	if e.state != Encounter.State.ACTIVE:
+		return CombatResult.fail("Combat is over")
+	if e.pending != null:
+		return CombatResult.fail("Answer the reaction prompt first")
+	if c.readied.is_empty():
+		return CombatResult.fail("%s has nothing readied" % c.name())
+	var what := "attack"
+	if c.readied.has("spell"):
+		what = str(Compendium.shared().spell_data(str(c.readied["spell"])).get("name", "spell"))
+	c.readied = {}
+	e.log.add("info", "%s lets the readied %s go" % [c.name(), what], c.id)
 	return CombatResult.new()
 
 

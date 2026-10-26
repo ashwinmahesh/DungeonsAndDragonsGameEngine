@@ -124,7 +124,7 @@ func sees_invisible(a: Combatant, b: Combatant) -> bool:
 ## "They shouldn't be targetable outside of AoE spells"). Attacks and spells on one creature, opportunity attacks and
 ## every hotbar action refuse it; an area still catches it. Its own side is never unseen (a hero can help an Invisible ally).
 func unseen_foe(a: Combatant, b: Combatant) -> bool:
-	return a != b and a.hostile_to(b) and truly_invisible(b) and not sees_invisible(a, b)
+	return a != b and a.hostile_to(b) and truly_invisible(b) and not sees_invisible(a, b) and not b.has_meta("gave_itself_away")
 
 
 ## Whether the player can't see `b` on the map (owner, 2026-10-13: "Creatures that go invisible should disappear from the
