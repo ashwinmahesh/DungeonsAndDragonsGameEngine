@@ -119,6 +119,24 @@ func test_the_preview_and_the_map_leave_it_out_until_one_of_the_party_sees_it() 
 	assert_false(e.sight.hidden_from_party(foe))
 
 
+func test_walking_into_its_square_names_no_one() -> void:
+	var sc := _scene()
+	var e := sc["e"] as Encounter
+	var fighter := sc["fighter"] as Combatant
+	var foe := sc["foe"] as Combatant
+	TestCombat.start_with(e, fighter)
+	assert_true(e.movement.occupied_why(fighter, foe.cell).contains("in that square"), "a foe in plain view is named: " + e.movement.occupied_why(fighter, foe.cell))
+	_invisible(foe)
+	var why := e.movement.occupied_why(fighter, foe.cell)
+	assert_false(why.contains(foe.name()) or why.contains("square") or why.contains("enemy"), "an Invisible one is not: " + why)
+	assert_eq(why, "You can't go there")
+	var r := e.move(fighter, foe.cell)
+	assert_false(r.ok)
+	assert_false(r.reason.contains(foe.name()) or r.reason.contains("square") or r.reason.contains("enemy"), "the move's refusal: " + r.reason)
+	_sees_invisible(fighter)
+	assert_true(e.movement.occupied_why(fighter, foe.cell).contains("in that square"), "one who sees it is told as before")
+
+
 func test_a_foe_cannot_swing_at_an_invisible_hero_and_gets_no_opportunity_attack() -> void:
 	var e := TestCombat.open_field(5)
 	var hero := TestCombat.hero(e, "ilse_varga", Vector2i(3, 3))

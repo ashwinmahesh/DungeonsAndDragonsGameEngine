@@ -251,6 +251,15 @@ func occupied_why(c: Combatant, cell: Vector2i) -> String:
 			here.append(o)
 	if here.is_empty():
 		return ""
+	# Whoever `c` can't see isn't named, and nothing says anyone is there (owner, 2026-10-24): an Invisible foe's square
+	# is just one the move can't end on.
+	var seen_here: Array[Combatant] = []
+	for o in here:
+		if not e.sight.unseen_foe(c, o):
+			seen_here.append(o)
+	if seen_here.is_empty():
+		return "You can't go there"
+	here = seen_here
 	var names: Array[String] = []
 	for o in here:
 		names.append(o.name())
