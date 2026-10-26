@@ -274,6 +274,25 @@ func test_spiritual_weapon_attacks_again_as_a_bonus_action() -> void:
 	assert_false(h.bonus_available)
 
 
+func test_spiritual_weapon_is_not_a_concentration_spell() -> void:
+	var e := TestCombat.open_field(13)
+	var h := TestCombat.hero(e, "hedda_ironvow", Vector2i(1, 3))
+	var w := TestCombat.foe(e, "dire_wolf", Vector2i(6, 3))
+	w.creature.hp = 100
+	TestCombat.start_with(e, h)
+	assert_true(e.spells.cast(h, "bless", 1, [h]).ok)
+	assert_true(h.creature.concentration != null, "Bless is being kept")
+	e.end_turn()
+	e.end_turn()
+	assert_eq(e.current().id, h.id)
+	var r := e.spells.cast(h, "spiritual_weapon", 2, [w])
+	assert_true(r.ok, r.reason)
+	assert_true(h.creature.concentration != null and not h.creature.concentration.ended, "casting it leaves Bless alone")
+	assert_true(e.spells.has_spiritual_weapon(h))
+	e.drop_concentration(h)
+	assert_true(e.spells.has_spiritual_weapon(h), "and dropping Concentration leaves the weapon")
+
+
 func test_shield_spell_is_a_reaction_only() -> void:
 	var e := _wizard_vs(["wolf"])
 	var s := e.combatants[0]

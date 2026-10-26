@@ -63,9 +63,10 @@ func test_spiritual_weapon_is_an_object_on_the_field_with_its_own_bonus_action()
 	assert_true(r2.ok, r2.reason)
 	assert_false(h.bonus_available)
 	assert_true(e.grid.distance_ft(e.spells.weapon_of(h).cell, 1, w.cell, 1) <= 5, "the weapon flew to the target")
-	h.creature.concentration.end("test")
+	assert_true(h.creature.concentration == null, "kept with no Concentration (2024 book)")
 	e.spells.zones.prune()
-	assert_true(e.spells.weapon_of(h) == null, "gone when Concentration ends")
+	assert_true(e.spells.weapon_of(h) != null, "so nothing ends it but its minute")
+	assert_true(e.spells.weapon_of(h).rounds_left in range(8, 11), "it lasts its minute: %d rounds left" % e.spells.weapon_of(h).rounds_left)
 
 
 func test_spiritual_weapon_can_be_placed_on_an_empty_square() -> void:
