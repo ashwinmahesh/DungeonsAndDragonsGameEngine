@@ -123,12 +123,15 @@ func option_by_id(c: Combatant, option_id: String) -> Dictionary:
 	return {}
 
 
-## The melee attack a creature would use for an Opportunity Attack (best average damage).
+## The melee attack a creature would use for an Opportunity Attack (best average damage), from what it holds: a weapon
+## of the second set is not one a reaction, a foe's move or the AI takes up, because taking it in hand swaps the whole
+## sets (take_in_hand), and the player's Set 1 and Set 2 would swap on their own (Ashwin, 2026-10-26: "my set 1 and set 2
+## weapons keep switching randomly"). Only the player's own attack with it, or Swap weapons, does that.
 func best_melee_option(c: Combatant, _target: Combatant) -> Dictionary:
 	var best := {}
 	var best_avg := -1.0
 	for o in attack_options(c):
-		if not bool(o["melee"]) or _weapon_gone(c, o) != "":
+		if not bool(o["melee"]) or _weapon_gone(c, o) != "" or int(o.get("set", 1)) == 2:
 			continue
 		var avg := (o["profile"] as WeaponProfile).average_damage()
 		if avg > best_avg:

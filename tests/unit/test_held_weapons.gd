@@ -85,6 +85,45 @@ func test_swap_weapons_is_free_and_goes_both_ways() -> void:
 	assert_true(cat.find(ilse, "swap_weapons").is_empty())
 
 
+## Ashwin, 2026-10-26: "my set 1 and set 2 weapons keep switching randomly". An Opportunity Attack on a foe's turn took the
+## best melee weapon of either set, and taking a second-set weapon in hand swaps the sets. A reaction now uses what is in
+## hand; only the player's own attack with a set II weapon, or Swap weapons, swaps.
+func test_an_opportunity_attack_never_swaps_the_sets() -> void:
+	var e := TestCombat.open_field()
+	var ilse := TestCombat.hero(e, "ilse_varga", Vector2i(3, 2), 5)
+	var z := TestCombat.foe(e, "zombie", Vector2i(4, 2))
+	z.creature.hp = 100
+	TestCombat.start_with(e, ilse)
+	var ch := ilse.creature as Character
+	ch.swap_weapon_sets()   # the shortbow in hand, the greatsword in set II
+	assert_eq(ch.held_id("main_hand"), "shortbow")
+	var best := e.best_melee_option(ilse, z)
+	assert_true(best.is_empty() or int(best.get("set", 1)) != 2, "the greatsword in set II is not what a reaction takes up")
+	var r := e._opportunity_attack(ilse, z)
+	assert_true(r != null)
+	assert_eq(ch.held_id("main_hand"), "shortbow", "the bow is still in hand after the reaction")
+	assert_eq(str(ch.weapon_set_2.get("main_hand", "")), "greatsword", "and the greatsword still in set II")
+	assert_false(_attacks_made(e, ilse).has("weapon:greatsword"), "the reaction did not swing it: %s" % [_attacks_made(e, ilse)])
+	# Her own attack with it, on her turn, still takes it up.
+	assert_true(e.attack(ilse, z, "weapon:greatsword").ok)
+	assert_eq(ch.held_id("main_hand"), "greatsword", "the player's own attack swaps, as it always did")
+
+
+func test_an_opportunity_attack_uses_the_weapon_in_hand() -> void:
+	var e := TestCombat.open_field()
+	var ilse := TestCombat.hero(e, "ilse_varga", Vector2i(3, 2), 5)
+	var z := TestCombat.foe(e, "zombie", Vector2i(4, 2))
+	z.creature.hp = 100
+	TestCombat.start_with(e, ilse)
+	var ch := ilse.creature as Character
+	assert_eq(ch.held_id("main_hand"), "greatsword")
+	assert_eq(str(e.best_melee_option(ilse, z)["id"]), "weapon:greatsword", "the greatsword in hand is the one it picks")
+	e._opportunity_attack(ilse, z)
+	assert_eq(ch.held_id("main_hand"), "greatsword", "and the sets stay as they were")
+	assert_eq(str(ch.weapon_set_2.get("main_hand", "")), "shortbow")
+	assert_true(_attacks_made(e, ilse).has("weapon:greatsword"), "it swung the greatsword: %s" % [_attacks_made(e, ilse)])
+
+
 func test_the_second_sets_grip_counts() -> void:
 	# A spear in the second set, alone, is held in two hands (Versatile 1d8), though a Shield is in hand now.
 	var e := TestCombat.open_field()
