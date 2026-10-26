@@ -36,6 +36,12 @@ var auto_failed: bool = false
 var auto_fail_reason: String = ""
 ## Text for a d20 that was rolled again (Halfling Luck): "Luck: 1 → 14".
 var reroll_note: String = ""
+## Every d20 rolled again or put in place of the roll, in order: {source, before (the dice as they lay), before_kept,
+## after, after_kept}. The big d20 throws the first roll, then each of these in turn (ui/dice/dice_roll.gd).
+var rerolls: Array[Dictionary] = []
+## Everything added after the roll (Dark One's Own Luck, Bardic Inspiration, Tactical Mind, Cutting Words ...), in order:
+## {source, amount, total (the roll's total once it was added), success (whether it then met the target)}.
+var added: Array[Dictionary] = []
 ## The choices that follow this roll wait for the player's answer (a Concentration save asked once the attack or
 ## spell that caused it is done): whoever rolled it doesn't act on the result yet.
 var awaiting: bool = false
@@ -95,6 +101,8 @@ static func automatic_failure(kind_: Kind, target_: int, label_: String, reason:
 
 ## Halfling Luck (2024): a d20 that shows 1 is rolled again and the new roll must be used.
 func reroll_ones(dice: DiceRoller, source: String) -> void:
+	var before_rolls := rolls.duplicate()
+	var before_kept := kept
 	var notes: Array[String] = []
 	for i in rolls.size():
 		if rolls[i] == 1:
@@ -108,22 +116,27 @@ func reroll_ones(dice: DiceRoller, source: String) -> void:
 	else:
 		kept = rolls[0]
 	_resolve()
+	_log_reroll(source, before_rolls, before_kept)
 
 
 ## Adds a bonus after the roll (Precision Attack's die, Guided Strike's +10, Boon of Fate) and re-resolves.
 func add_bonus(amount: int, source: String) -> void:
 	extra += amount
-	extra_label = ("%s %s %s %d" % [extra_label, "+" if amount >= 0 else "-", source, absi(amount)]).strip_edges() if extra_label != "" \
-		else "%s %d" % [source, amount]
+	# Each part leads with its sign, so the big d20 can name them one by one (extra_bits).
+	extra_label = ("%s %s %s %d" % [extra_label, "+" if amount >= 0 else "-", source, absi(amount)]).strip_edges()
 	_resolve()
+	added.append({"source": source, "amount": amount, "total": total, "success": success})
 
 
 ## The kept d20 becomes `natural` (Portent replaces the roll; Stroke of Luck turns a failure into a 20).
 func set_natural(natural: int, source: String) -> void:
+	var before_rolls := rolls.duplicate()
+	var before_kept := kept
 	reroll_note = ("%s; " % reroll_note if reroll_note != "" else "") + "%s: %d → %d" % [source, kept, natural]
 	kept = natural
 	auto_failed = false
 	_resolve()
+	_log_reroll(source, before_rolls, before_kept)
 
 
 ## A d20 below `floor` counts as `floor` (Reliable Talent: 9 or lower counts as 10).
@@ -136,6 +149,7 @@ func floor_natural(floor: int, source: String) -> void:
 ## rolling again is the lower one, so with Advantage the better of the two still counts and with Disadvantage the worse.
 func reroll_one(natural: int, source: String) -> void:
 	var before := kept
+	var before_rolls := rolls.duplicate()
 	if rolls.size() == 2 and (advantage or disadvantage):
 		var low := 0 if rolls[0] <= rolls[1] else 1
 		rolls[low] = natural
@@ -144,6 +158,7 @@ func reroll_one(natural: int, source: String) -> void:
 		rolls = [natural]
 		kept = natural
 	_note_reroll(source, "%d → %d" % [before, kept])
+	_log_reroll(source, before_rolls, before)
 
 
 ## The whole roll made again (Indomitable, Countercharm, a Luck Blade): its Advantage and Disadvantage as before, plus
@@ -151,6 +166,7 @@ func reroll_one(natural: int, source: String) -> void:
 ## stay. `luck`: Halfling Luck rerolls a 1 again.
 func reroll(dice: DiceRoller, source: String, add_advantage: bool = false, luck: bool = false) -> void:
 	var before := kept
+	var before_rolls := rolls.duplicate()
 	var has_adv := advantage or not advantage_sources.is_empty() or add_advantage
 	var has_dis := disadvantage or not disadvantage_sources.is_empty()
 	advantage = has_adv and not has_dis
@@ -164,10 +180,20 @@ func reroll(dice: DiceRoller, source: String, add_advantage: bool = false, luck:
 		rolls = dice.roll(20, 1, source)
 		kept = rolls[0]
 	_note_reroll(source, "%d → %s" % [before, str(kept) if rolls.size() == 1 else "%d (%d, %d)" % [kept, rolls[0], rolls[1]]])
+	_log_reroll(source, before_rolls, before)
 	if luck and 1 in rolls:
 		var note := reroll_note
 		reroll_ones(dice, "Luck")
 		reroll_note = "%s; %s" % [note, reroll_note]
+
+
+## Records a reroll for the big d20: the dice as they lay before, and as they lie now.
+func _log_reroll(source: String, before_rolls: Array, before_kept: int) -> void:
+	var before: Array[int] = []
+	before.assign(before_rolls)
+	var after: Array[int] = []
+	after.assign(rolls)
+	rerolls.append({"source": source, "before": before, "before_kept": before_kept, "after": after, "after_kept": kept})
 
 
 func _note_reroll(source: String, what: String) -> void:

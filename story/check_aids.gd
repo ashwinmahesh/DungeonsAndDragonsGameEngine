@@ -52,11 +52,11 @@ static func apply(id: String, ch: Character, test: D20Test, dice: DiceRoller) ->
 			if ch.heroic_inspiration:
 				ch.heroic_inspiration = false
 				var n := dice.d20("Heroic Inspiration reroll (%s)" % ch.name)
-				test.set_natural(n, "Heroic Inspiration")
+				test.reroll_one(n, "Heroic Inspiration")   # one die rolled again (2024): under Advantage the lower one
 		"lucky_foot":
 			if test.kept == 1:
 				ch.remove_one("lucky_foot")
-				test.set_natural(dice.d20("Lucky Foot (%s)" % ch.name), "Lucky Foot")
+				test.reroll_one(dice.d20("Lucky Foot (%s)" % ch.name), "Lucky Foot")
 		OWN_LUCK:
 			if own_luck_ready(ch, test):
 				ch.spend_resource(OWN_LUCK)

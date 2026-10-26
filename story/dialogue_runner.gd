@@ -868,7 +868,9 @@ func _check_beat() -> Dictionary:
 		# The dice themselves, for the big d20 (G11): both dice under Advantage or Disadvantage, the one kept, the bonuses.
 		"rolls": test.rolls.duplicate(), "kept": test.kept, "modifier": test.modifier, "parts": parts, "extra": test.extra,
 		"extra_label": test.extra_label, "advantage": test.advantage, "disadvantage": test.disadvantage,
-		"auto_failed": test.auto_failed}
+		"auto_failed": test.auto_failed,
+		# What was rolled again and what was added after the first throw, for the big d20 to show in turn (D20Test).
+		"rerolls": test.rerolls.duplicate(true), "added": test.added.duplicate(true)}
 
 
 ## XP levelling (story/xp.gd): a check passed is worth a little, once for each line that asks it (`key`: file:node:line).
