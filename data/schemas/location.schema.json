@@ -814,6 +814,10 @@
                   "type": "string",
                   "description": "The sprite this foe wears instead of its stat block's: a person fighting on a borrowed block (Vasilka on a flesh golem's)."
                 },
+                "boss": {
+                  "type": "boolean",
+                  "description": "false: this foe isn't one of the game's bosses whatever its stat block (Difficulty.boss_entry): no boss bar, no boss damage or to-hit step (a lieutenant on a boss's block)."
+                },
                 "steps_down": {
                   "type": "object",
                   "required": ["npc"],
