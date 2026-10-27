@@ -1,0 +1,5 @@
+# Godot-generated import state; script UIDs remain versioned.
+.godot/
+*.import
+.DS_Store
+__pycache__/

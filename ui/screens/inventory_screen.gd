@@ -83,6 +83,84 @@ var _viewed := {}
 ## PrepareScreen.snapshot() as an item's Long Rest ended (Daern's Instant Fortress, Rod of Security): while this screen
 ## stays open it offers the chance to change prepared spells the rest screen gives, counted from that list.
 var _prepared_before: Dictionary = {}
+var mobile: MobileInventory
+
+
+## Mobile composition contract. The adapter owns layout; this screen keeps row/card references,
+## item identity and mutations private so desktop inventory changes cannot silently detach mobile UI.
+func reset_mobile_surface() -> void:
+	MobileUi.clear(_frame)
+	_tiles.clear()
+	_grid = null
+	_list_foot = null
+	_card = null
+
+
+func mobile_body() -> VBoxContainer:
+	return _frame
+
+
+func mobile_character() -> Character:
+	return _ch()
+
+
+func mark_mobile_member_viewed() -> void:
+	_viewed[_ch().id] = true
+
+
+func select_mobile_member(member_index: int) -> void:
+	index = member_index
+	selected = ""
+	_picked = {}
+
+
+func mobile_feedback() -> Dictionary:
+	return {"text": _note, "colour": _note_colour}
+
+
+func mount_mobile_bag(grid: Container, footer: Control) -> void:
+	_grid = grid
+	_list_foot = footer
+
+
+func mobile_bag_footer() -> Control:
+	return _list_foot
+
+
+func refresh_mobile_bag() -> void:
+	_fill_list()
+
+
+func mount_mobile_card(card: VBoxContainer) -> void:
+	_card = card
+
+
+func mobile_card() -> VBoxContainer:
+	return _card
+
+
+func refresh_mobile_card() -> void:
+	_draw_card()
+
+
+func mobile_equipment() -> Control:
+	return _doll(_ch())
+
+
+func select_mobile_entry(entry: Dictionary) -> void:
+	_pick(entry)
+
+
+func mobile_stash_available() -> bool:
+	return _stash_open()
+
+
+func take_mobile_stash(entry: Dictionary) -> bool:
+	return _take_from_stash(entry, _ch())
+
+
+static func display_number(value: float) -> String:
+	return _num(value)
 
 
 func _init() -> void:
@@ -94,7 +172,14 @@ func open(root_: Node, state: StoryState, index_: int) -> void:
 	root = root_
 	st = state
 	index = clampi(index_, 0, st.party.size() - 1)
-	_frame = UiKit.screen_frame(self, "Inventory", Vector2(1500, 850))
+	if MobileDevice.enabled():
+		mobile = MobileInventory.new(self)
+		UiScale.full_screen(self)
+		_frame = MobilePage.build(self, "Inventory", mobile.back, true)
+		mobile.page = _frame.get_parent().get_parent().get_parent() as MobilePage
+		get_viewport().size_changed.connect(mobile.resized)
+	else:
+		_frame = UiKit.screen_frame(self, "Inventory", Vector2(1500, 850))
 	_draw()
 
 
@@ -109,6 +194,9 @@ func _ch() -> Character:
 
 
 func _draw() -> void:
+	if mobile != null:
+		mobile.draw()
+		return
 	while _frame.get_child_count() > 0:
 		var c := _frame.get_child(0)
 		_frame.remove_child(c)
@@ -449,6 +537,8 @@ func _fill_tile(t: ItemTile, ch: Character, e: Dictionary, from: Dictionary) -> 
 ## right-click menu and double-click, as on a tile.
 func _row(ch: Character, e: Dictionary, from: Dictionary, content: Control) -> ItemTile.Row:
 	var r := ItemTile.Row.new()
+	if mobile != null:
+		r.custom_minimum_size.y = 64
 	var data := Compendium.shared().item_data(str(e["id"]))
 	var shown := MagicItems.shown_data(data, e)
 	r.icon = UiParts.icon_texture("item", str(shown.get("id", e["id"])))
@@ -470,6 +560,8 @@ func _row(ch: Character, e: Dictionary, from: Dictionary, content: Control) -> I
 ## A pack row's content: icon (in a box of its rarity's colour, for a magic item), name and count, its marks (new, junk,
 ## equipped, quest, attuned, rarity, charges) and weight.
 func _pack_line(ch: Character, e: Dictionary, data: Dictionary) -> Control:
+	if mobile != null:
+		return mobile.item_line(ch, e, data)
 	var id := str(e["id"])
 	var junk := InventoryScreen.is_junk(e)
 	var shown := MagicItems.shown_data(data, e)
@@ -876,6 +968,9 @@ func _pick(e: Dictionary) -> void:
 	_amount = 1
 	_note = ""
 	_scroll_confirm = ""
+	if mobile != null:
+		mobile.pick()
+		return
 	for t in _tiles:
 		if is_instance_valid(t):
 			t.set("lit", is_same((t.get("payload") as Dictionary).get("entry"), e))
@@ -1260,9 +1355,16 @@ func _fill_list() -> void:
 		elif not rarities.is_empty():
 			why = "No %s items here in %s's pack." % [" or ".join(rarities.map(func(r: String) -> String: return InventoryScreen.rarity_name(r).to_lower())),
 				ch.name.get_slice(" ", 0)]
-		_list_foot.add_child(UiKit.label(why, 15, "bone", 540))
-	for r in rows:
+		if mobile != null and marks == "junk" and search.strip_edges() == "":
+			why = "Nothing marked as junk. Open an item and choose Mark as junk."
+		_list_foot.add_child(MobileUi.text(why, "bone") if mobile != null else UiKit.label(why, 15, "bone", 540))
+		if mobile != null and (search != "" or filter != "All" or marks != "" or not rarities.is_empty()):
+			_list_foot.add_child(MobileUi.button("Show all items", mobile.reset_filters))
+	var shown := mobile.visible_rows(rows) if mobile != null else rows
+	for r in shown:
 		_grid.add_child(_row(ch, r["e"] as Dictionary, {"from": "pack"}, _pack_line(ch, r["e"] as Dictionary, r["d"] as Dictionary)))
+	if mobile != null:
+		mobile.paging(rows.size())
 	if marks == "junk" and not rows.is_empty():
 		var weight := 0.0
 		var value := 0.0
@@ -1270,8 +1372,8 @@ func _fill_list() -> void:
 			var q := int((r["e"] as Dictionary)["qty"])
 			weight += float((r["d"] as Dictionary).get("weight_lb", 0)) * q
 			value += float((r["d"] as Dictionary).get("cost_gp", 0)) * q
-		_list_foot.add_child(UiKit.label("%d junk, %s lb, worth %s gp new. A merchant's Sell all junk sells it for less." % [rows.size(),
-			_num(weight), _num(value)], 13, "parchment", 540))
+		var total := "%d junk, %s lb, worth %s gp new. A merchant's Sell all junk sells it for less." % [rows.size(), _num(weight), _num(value)]
+		_list_foot.add_child(MobileUi.text(total, "parchment") if mobile != null else UiKit.label(total, 13, "parchment", 540))
 
 
 ## What the pack shows now, as item ids in order (for tests and captures).
@@ -1300,12 +1402,17 @@ func _exit_tree() -> void:
 
 
 func _draw_card() -> void:
+	if mobile != null:
+		mobile.fit_details.call_deferred()
 	for c in _card.get_children():
 		c.queue_free()
 	if _note != "":
 		_card.add_child(UiParts.row(UiKit.label(_note, 14, _note_colour, 400)))
 	if selected == "" or _entry(selected).is_empty():
-		_card.add_child(UiKit.label("Pick an item to see what it does for %s. Drag it onto a slot to wear it, onto a chip to give it, or into the stash; right-click for more." % _ch().name.get_slice(" ", 0), 15, "bone", 420))
+		var hint := "Pick an item to see what it does for %s. Drag it onto a slot to wear it, onto a chip to give it, or into the stash; right-click for more." % _ch().name.get_slice(" ", 0)
+		if mobile != null:
+			hint = "Choose an item to inspect, compare, equip, use, or give it to a party member."
+		_card.add_child(UiKit.label(hint, 15, "bone", 420))
 		return
 	var ch := _ch()
 	var data := Compendium.shared().item_data(selected)
@@ -1320,7 +1427,7 @@ func _draw_card() -> void:
 	t.custom_minimum_size = Vector2(360, 0)
 	head.add_child(t)
 	_card.add_child(head)
-	var facts := HBoxContainer.new()
+	var facts := _detail_row()
 	facts.add_theme_constant_override("separation", 6)
 	for f: Array in [["Kind", str(shown.get("category", "")).capitalize()], ["Weight", "%s lb" % str(shown.get("weight_lb", 0))],
 			["Value", "%s gp" % str(shown.get("cost_gp", 0))]]:
@@ -1503,7 +1610,7 @@ func _draw_card() -> void:
 	var n := int(entry.get("qty", 1))
 	if n > 1:
 		_amount = clampi(_amount, 1, n)
-		var step := HBoxContainer.new()
+		var step := _detail_row()
 		step.add_theme_constant_override("separation", 6)
 		step.add_child(UiParts.caption("How many", 11))
 		var less := UiParts.small_button("◀", func() -> void:
@@ -1532,7 +1639,7 @@ func _draw_card() -> void:
 		cut.tooltip_text = "A stack of its own in the pack, to drag somewhere by itself"
 		step.add_child(cut)
 		_card.add_child(step)
-	var give := HBoxContainer.new()
+	var give := _detail_row()
 	give.add_theme_constant_override("separation", 6)
 	give.add_child(UiParts.caption("Give to", 11))
 	for i in st.party.size():
@@ -1560,7 +1667,7 @@ func _draw_card() -> void:
 		drop.tooltip_text = "Can't drop: needed for a quest"
 	elif stuck != "":
 		drop.tooltip_text = stuck
-	var bottom := HBoxContainer.new()
+	var bottom := _detail_row()
 	bottom.add_theme_constant_override("separation", 6)
 	bottom.add_child(drop)
 	# Into the party stash from anywhere (owner, 2026-10-07); it comes out again at a safe place.
@@ -1580,6 +1687,15 @@ func _draw_card() -> void:
 		else "A merchant's Sell all junk sells it with the rest")
 	bottom.add_child(jb)
 	_card.add_child(bottom)
+
+
+func _detail_row() -> Container:
+	if mobile == null:
+		return HBoxContainer.new()
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 8)
+	return flow
 
 
 ## A found spellbook (item `spells`): the list for anyone to read, and a Copy button for each Wizard in the party

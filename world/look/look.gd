@@ -68,7 +68,7 @@ static func palette_size() -> int:
 ## own roughness and metal (COLOUR_MATERIALS).
 static func cel(albedo_name: String) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
-	m.shader = LIT_SHADER if modern() else CEL_SHADER
+	m.shader = LIT_SHADER if modern() and not Graphics.software_simulator() else CEL_SHADER
 	m.set_shader_parameter("albedo", color(albedo_name))
 	if modern():
 		var spec := COLOUR_MATERIALS.get(albedo_name, {}) as Dictionary
@@ -175,7 +175,7 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 	if modern() and info.has("hd_file") and ResourceLoader.exists("res://" + str(info["hd_file"])):
 		path = "res://" + str(info["hd_file"])
 	var m := ShaderMaterial.new()
-	m.shader = LIT_WORLD_SHADER if modern() else CEL_WORLD_SHADER
+	m.shader = LIT_WORLD_SHADER if modern() and not Graphics.software_simulator() else CEL_WORLD_SHADER
 	m.set_shader_parameter("albedo_tex", load(path) as Texture2D)
 	m.set_shader_parameter("tile_units", float(info.get("tile_world_units", 2.0)))
 	m.set_shader_parameter("wall_band", str(info.get("wrap", "xy")) == "x")
@@ -185,7 +185,7 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 	m.set_meta("surface", surface)   # what the ground is, for footprints (Atmosphere)
 	if _surface_tints.has(surface):
 		m.set_shader_parameter("tint", surface_tint(surface))
-	if modern():
+	if modern() and not Graphics.software_simulator():
 		var spec := material_for(surface)
 		var relief := MODERN_RELIEF * float(spec.get("relief", 1.0))
 		var nm: Texture2D = null
@@ -292,11 +292,24 @@ static var _blend_layers: Dictionary = {}
 static var _blends: Array[ShaderMaterial] = []
 static var _flat_normal: Texture2DArray = null
 static var _white_array: Texture2DArray = null
+static var _simulator_blend_shader: Shader = null
+
+
+## Only Apple's software GLES simulator uses the reduced sampler interface. Desktop and device Metal
+## retain the original shader resource, its ORM detail and all existing lighting.
+static func blend_shader(software_simulator: bool) -> Shader:
+	if not software_simulator:
+		return LIT_BLEND_SHADER
+	if _simulator_blend_shader == null:
+		_simulator_blend_shader = Shader.new()
+		_simulator_blend_shader.code = "#define DND_SOFTWARE_SIMULATOR\n" + LIT_BLEND_SHADER.code
+	return _simulator_blend_shader
 
 
 static func blend_ground(slots: Array[ShaderMaterial], control: Texture2D, size: Vector2, difficult: Vector4 = Vector4.ZERO) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
-	m.shader = LIT_BLEND_SHADER
+	var software := Graphics.software_simulator()
+	m.shader = blend_shader(software)
 	m.set_shader_parameter("control", control)
 	m.set_shader_parameter("grid_size", size)
 	m.set_shader_parameter("difficult", difficult)
@@ -309,7 +322,8 @@ static func blend_ground(slots: Array[ShaderMaterial], control: Texture2D, size:
 		var layers := _blend_layers_of(src, surface)
 		m.set_shader_parameter("albedo_" + k, layers["albedo"])
 		m.set_shader_parameter("normal_" + k, layers["normal"])
-		m.set_shader_parameter("orm_" + k, layers["orm"])
+		if not software:
+			m.set_shader_parameter("orm_" + k, layers["orm"])
 		m.set_shader_parameter("layers_" + k, int(layers["layers"]))
 		m.set_shader_parameter("use_orm_" + k, bool(layers["use_orm"]))
 		m.set_shader_parameter("tile_" + k, _param(src, "tile_units", 2.0))
@@ -573,6 +587,7 @@ static func make_post_process() -> MeshInstance3D:
 	quad.material = mat
 	var mi := MeshInstance3D.new()
 	mi.name = "PostProcess"
+	mi.visible = not Graphics.software_simulator()
 	mi.mesh = quad
 	mi.extra_cull_margin = 16384.0
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

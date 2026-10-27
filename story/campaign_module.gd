@@ -158,6 +158,11 @@ func open_way(_st: StoryState, _location_id: String, _cell: Vector2i, _ft: int =
 	return {}
 
 
+## What the campaign says when the party falls; shared by desktop and mobile.
+func defeat_text() -> String:
+	return "The adventure is not over. Load a save to try again."
+
+
 # --- Endings and achievements -------------------------------------------------------------------------------------
 
 ## The campaign's endings (each {id, title, summary, ...}); each earns the achievement "ending_<id>".

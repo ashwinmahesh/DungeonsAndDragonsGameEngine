@@ -22,6 +22,8 @@ static func scripts(dir: String = "res://") -> Array[String]:
 func test_every_script_compiles() -> void:
 	var broken: Array[String] = []
 	var all := scripts()
+	all.append_array(scripts("res://addons/dnd_core"))
+	assert_true(all.has("res://addons/dnd_core/core/game_state.gd"), "the engine is included in the compile check")
 	for path in all:
 		var s := load(path) as GDScript
 		if s == null or not s.can_instantiate():

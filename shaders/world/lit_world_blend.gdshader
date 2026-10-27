@@ -12,6 +12,8 @@ shader_type spatial;
 #include "res://addons/dnd_core/shaders/world/lit_light.gdshaderinc"
 #include "res://addons/dnd_core/shaders/world/weather_surface.gdshaderinc"
 
+// The iOS software simulator has 16 fragment texture units including engine bindings. Its variant
+// keeps all four painted surfaces and normals, using per-surface light values in place of ORM maps.
 uniform sampler2D control : filter_linear, repeat_disable, hint_default_black;
 // The map's squares across and down: the control map covers them, a square's middle on its texel's.
 uniform vec2 grid_size = vec2(32.0, 20.0);
@@ -34,7 +36,9 @@ uniform float macro_units = 9.0;
 // squares, its tint, how deep its relief reads, and how it takes light.
 uniform sampler2DArray albedo_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_a : filter_linear_mipmap_anisotropic, repeat_enable;
+#ifndef DND_SOFTWARE_SIMULATOR
 uniform sampler2DArray orm_a : filter_linear_mipmap_anisotropic, repeat_enable;
+#endif
 uniform int layers_a = 1;
 uniform float tile_a = 2.0;
 uniform vec3 tint_a : source_color = vec3(1.0);
@@ -45,7 +49,9 @@ uniform float macro_a = 0.0;
 
 uniform sampler2DArray albedo_b : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_b : filter_linear_mipmap_anisotropic, repeat_enable;
+#ifndef DND_SOFTWARE_SIMULATOR
 uniform sampler2DArray orm_b : filter_linear_mipmap_anisotropic, repeat_enable;
+#endif
 uniform int layers_b = 1;
 uniform float tile_b = 2.0;
 uniform vec3 tint_b : source_color = vec3(1.0);
@@ -56,7 +62,9 @@ uniform float macro_b = 0.0;
 
 uniform sampler2DArray albedo_c : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_c : filter_linear_mipmap_anisotropic, repeat_enable;
+#ifndef DND_SOFTWARE_SIMULATOR
 uniform sampler2DArray orm_c : filter_linear_mipmap_anisotropic, repeat_enable;
+#endif
 uniform int layers_c = 1;
 uniform float tile_c = 2.0;
 uniform vec3 tint_c : source_color = vec3(1.0);
@@ -67,7 +75,9 @@ uniform float macro_c = 0.0;
 
 uniform sampler2DArray albedo_d : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_d : filter_linear_mipmap_anisotropic, repeat_enable;
+#ifndef DND_SOFTWARE_SIMULATOR
 uniform sampler2DArray orm_d : filter_linear_mipmap_anisotropic, repeat_enable;
+#endif
 uniform int layers_d = 1;
 uniform float tile_d = 2.0;
 uniform vec3 tint_d : source_color = vec3(1.0);
@@ -101,7 +111,11 @@ struct Layer {
 };
 
 // One surface at this point: its colour (with the broad patches), its normal, how rough and metallic it is, its occlusion.
-Layer layer_of(sampler2DArray albedo, sampler2DArray nrm, sampler2DArray orm, int count, float tile, vec3 tint, float relief,
+Layer layer_of(sampler2DArray albedo, sampler2DArray nrm,
+#ifndef DND_SOFTWARE_SIMULATOR
+		sampler2DArray orm,
+#endif
+		int count, float tile, vec3 tint, float relief,
 		bool use_orm, vec4 light, float macro_k, float macro, vec3 wn, vec2 xz, vec2 gx, vec2 gy) {
 	vec2 uv = xz / tile;
 	vec2 dx = gx / tile;
@@ -117,12 +131,15 @@ Layer layer_of(sampler2DArray albedo, sampler2DArray nrm, sampler2DArray orm, in
 	float r = light.x + (0.45 - dot(l.base, vec3(0.299, 0.587, 0.114))) * light.z;
 	float m = light.y;
 	l.ao = 1.0;
+
+#ifndef DND_SOFTWARE_SIMULATOR
 	if (use_orm) {
 		vec3 o = textureGrad(orm, at, dx, dy).rgb;
 		l.ao = o.r;
 		r = o.g;
 		m = o.b;
 	}
+#endif
 	r += (macro - 0.5) * 0.3 * macro_k;
 	l.rough = min(r, light.w);
 	l.metal = m;
@@ -166,7 +183,11 @@ void fragment() {
 	float m = 0.0;
 	float occ = 0.0;
 	if (b.r > 0.0) {
-		Layer l = layer_of(albedo_a, normal_a, orm_a, layers_a, tile_a, tint_a, relief_a, use_orm_a, light_a, macro_a, macro, wn0, xz, gx, gy);
+		Layer l = layer_of(albedo_a, normal_a,
+#ifndef DND_SOFTWARE_SIMULATOR
+			orm_a,
+#endif
+			layers_a, tile_a, tint_a, relief_a, use_orm_a, light_a, macro_a, macro, wn0, xz, gx, gy);
 		base += l.base * b.r;
 		wn += l.normal * b.r;
 		r += l.rough * b.r;
@@ -174,7 +195,11 @@ void fragment() {
 		occ += l.ao * b.r;
 	}
 	if (b.g > 0.0) {
-		Layer l = layer_of(albedo_b, normal_b, orm_b, layers_b, tile_b, tint_b, relief_b, use_orm_b, light_b, macro_b, macro, wn0, xz, gx, gy);
+		Layer l = layer_of(albedo_b, normal_b,
+#ifndef DND_SOFTWARE_SIMULATOR
+			orm_b,
+#endif
+			layers_b, tile_b, tint_b, relief_b, use_orm_b, light_b, macro_b, macro, wn0, xz, gx, gy);
 		base += l.base * b.g;
 		wn += l.normal * b.g;
 		r += l.rough * b.g;
@@ -182,7 +207,11 @@ void fragment() {
 		occ += l.ao * b.g;
 	}
 	if (b.b > 0.0) {
-		Layer l = layer_of(albedo_c, normal_c, orm_c, layers_c, tile_c, tint_c, relief_c, use_orm_c, light_c, macro_c, macro, wn0, xz, gx, gy);
+		Layer l = layer_of(albedo_c, normal_c,
+#ifndef DND_SOFTWARE_SIMULATOR
+			orm_c,
+#endif
+			layers_c, tile_c, tint_c, relief_c, use_orm_c, light_c, macro_c, macro, wn0, xz, gx, gy);
 		base += l.base * b.b;
 		wn += l.normal * b.b;
 		r += l.rough * b.b;
@@ -190,7 +219,11 @@ void fragment() {
 		occ += l.ao * b.b;
 	}
 	if (b.a > 0.0) {
-		Layer l = layer_of(albedo_d, normal_d, orm_d, layers_d, tile_d, tint_d, relief_d, use_orm_d, light_d, macro_d, macro, wn0, xz, gx, gy);
+		Layer l = layer_of(albedo_d, normal_d,
+#ifndef DND_SOFTWARE_SIMULATOR
+			orm_d,
+#endif
+			layers_d, tile_d, tint_d, relief_d, use_orm_d, light_d, macro_d, macro, wn0, xz, gx, gy);
 		base += l.base * b.a;
 		wn += l.normal * b.a;
 		r += l.rough * b.a;

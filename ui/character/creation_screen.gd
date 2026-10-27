@@ -22,6 +22,9 @@ const TAGS: Array[String] = ["blunt", "loyal", "veteran", "pious", "curious", "s
 ## Text width inside the step panel.
 const BODY_W := 820.0
 
+var _mobile_page: MobilePage
+var _mobile_layout := ""
+
 var builders: Array[CharacterBuilder] = []
 var confirmed: Array[bool] = []
 var slot := 0
@@ -159,6 +162,37 @@ func _free_portrait(app: Dictionary) -> Dictionary:
 
 
 func _build_frame(title: String) -> void:
+	if MobileDevice.enabled():
+		var frame := MobilePage.build(self, title, func() -> void: cancelled.emit())
+		_mobile_page = frame.get_parent().get_parent().get_parent() as MobilePage
+		_mobile_page.scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		if MobileDevice.current != null:
+			MobileDevice.current.geometry_changed.connect(_mobile_resized)
+		_strip = HBoxContainer.new()
+		var strip_scroll := ScrollContainer.new()
+		strip_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		strip_scroll.add_child(_strip)
+		_mobile_page.toolbar.add_child(strip_scroll)
+		var navigation := HBoxContainer.new()
+		_mobile_page.toolbar.add_child(navigation)
+		_rail = VBoxContainer.new()
+		_rail.hide()
+		_body = VBoxContainer.new()
+		_sheet = VBoxContainer.new()
+		_sheet.hide()
+		frame.add_child(_rail)
+		frame.add_child(_body)
+		frame.add_child(_sheet)
+		navigation.add_child(MobileUi.button("Steps", func() -> void:
+			_rail.visible = not _rail.visible
+			_body.visible = not _rail.visible
+			_sheet.hide()))
+		navigation.add_child(MobileUi.button("Character preview", func() -> void:
+			_sheet.visible = not _sheet.visible
+			_body.visible = not _sheet.visible
+			_rail.hide()))
+		_draw()
+		return
 	var frame := UiKit.screen_frame(self, title, Vector2(1540, 830))
 	_strip = HBoxContainer.new()
 	_strip.add_theme_constant_override("separation", 8)
@@ -190,8 +224,41 @@ func b() -> CharacterBuilder:
 
 
 func _draw() -> void:
+	if _mobile_page != null:
+		# Detach the previous step before measuring the next one. Queued children otherwise
+		# keep the old wide step's minimum size alive during a window resize.
+		for container: Container in [_strip, _rail, _body, _sheet]:
+			MobileUi.clear(container)
 	_draw_strip()
 	_draw_rest()
+	if _mobile_page != null:
+		_mobile_layout = _mobile_layout_key()
+		MobileUi.fit(_body)
+		MobileUi.fit(_rail)
+		MobileUi.fit(_sheet)
+		_rail.hide()
+		_sheet.hide()
+		_body.show()
+		_mobile_page.reflow.call_deferred()
+
+
+func _mobile_layout_key() -> String:
+	var width := MobileDevice.safe_rect().size.x
+	return "%s:%d" % [width < 450, 3 if width >= 550 else 2 if width >= 300 else 1]
+
+
+func _mobile_resized() -> void:
+	if _mobile_page == null or is_queued_for_deletion() or _mobile_layout == _mobile_layout_key():
+		return
+	var rail := _rail.visible
+	var preview := _sheet.visible
+	var keep := _mobile_page.scroll.scroll_vertical
+	_draw()
+	_rail.visible = rail
+	_sheet.visible = preview
+	_body.visible = not rail and not preview
+	_mobile_page.reflow.call_deferred()
+	_mobile_page.scroll.set_deferred("scroll_vertical", keep)
 
 
 func _draw_strip() -> void:
@@ -352,7 +419,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _class_step() -> void:
 	_body.add_child(UiParts.section("Class"))
 	var grid := GridContainer.new()
-	grid.columns = 6
+	grid.columns = 3 if MobileDevice.enabled() else 6
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	for o in b().available_classes():
@@ -401,7 +468,7 @@ func _class_step() -> void:
 func _origin_step() -> void:
 	_body.add_child(UiParts.section("Background"))
 	var grid := GridContainer.new()
-	grid.columns = 4
+	grid.columns = 3 if MobileDevice.enabled() else 4
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	for o in b().available_backgrounds():
@@ -418,7 +485,7 @@ func _origin_step() -> void:
 	_body.add_child(grid)
 	_body.add_child(UiParts.section("Species"))
 	var grid2 := GridContainer.new()
-	grid2.columns = 5
+	grid2.columns = 3 if MobileDevice.enabled() else 5
 	grid2.add_theme_constant_override("h_separation", 6)
 	grid2.add_theme_constant_override("v_separation", 6)
 	for o in b().available_species():
@@ -438,7 +505,7 @@ func _origin_step() -> void:
 func _ability_step() -> void:
 	_body.add_child(UiParts.section("Ability scores"))
 	var method := str(b().build.get("ability_method", "standard_array"))
-	var row := HBoxContainer.new()
+	var row: BoxContainer = VBoxContainer.new() if MobileDevice.enabled() and MobileDevice.safe_rect().size.x < 450 else HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	for m: Array in [["standard_array", "Standard Array"], ["point_buy", "Point Cost (27)"], ["roll", "Random (4d6 drop lowest)"]]:
 		var mb := UiKit.button(str(m[1]), func() -> void:
@@ -454,7 +521,8 @@ func _ability_step() -> void:
 		if method == str(m[0]):
 			UiParts.light_up(mb)
 		row.add_child(mb)
-	row.add_child(UiParts.gap())
+	if not MobileDevice.enabled():
+		row.add_child(UiParts.gap())
 	row.add_child(UiKit.button("Recommended", func() -> void:
 		b().apply_recommended_scores()
 		_changed(), 15))
@@ -469,9 +537,17 @@ func _ability_step() -> void:
 		for v: Variant in b().build.get("rolled_scores", []):
 			pool.append(int(v))
 	var ch := b().preview()
-	var cols := HBoxContainer.new()
-	cols.add_theme_constant_override("separation", 10)
-	cols.alignment = BoxContainer.ALIGNMENT_CENTER
+	var cols: Container
+	if MobileDevice.enabled():
+		var grid := GridContainer.new()
+		grid.columns = 2 if MobileDevice.safe_rect().size.x < 450 else 3
+		grid.add_theme_constant_override("h_separation", 6 if MobileDevice.safe_rect().size.x < 450 else 10)
+		cols = grid
+	else:
+		var row_ := HBoxContainer.new()
+		row_.add_theme_constant_override("separation", 10)
+		row_.alignment = BoxContainer.ALIGNMENT_CENTER
+		cols = row_
 	for ab: StringName in Abilities.ALL:
 		var col := VBoxContainer.new()
 		col.add_theme_constant_override("separation", 4)
@@ -623,8 +699,16 @@ func _appearance_step() -> void:
 		return
 	_body.add_child(UiParts.section("Appearance"))
 	_body.add_child(UiKit.label("Pick a look from the company's heroes.", 14, "parchment", BODY_W))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
+	var row: Container
+	if MobileDevice.enabled():
+		var grid := GridContainer.new()
+		grid.columns = 3 if MobileDevice.safe_rect().size.x >= 550 else 2 if MobileDevice.safe_rect().size.x >= 300 else 1
+		grid.add_theme_constant_override("h_separation", 14)
+		grid.add_theme_constant_override("v_separation", 14)
+		row = grid
+	else:
+		row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 14)
 	for look in looks():
 		var col := VBoxContainer.new()
 		col.add_theme_constant_override("separation", 6)
@@ -712,7 +796,7 @@ func _identity_step() -> void:
 	_body.add_child(UiKit.label("Personality tags (two or three): the story reads these for party interjections.", 14, "parchment", BODY_W))
 	var tags := identity.get("tags", []) as Array
 	var grid := GridContainer.new()
-	grid.columns = 6
+	grid.columns = 3 if MobileDevice.enabled() else 6
 	for t in TAGS:
 		var cb := CheckBox.new()
 		cb.text = t

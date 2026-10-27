@@ -31,6 +31,11 @@ const MID_W := 424.0
 ## Text width inside the tab pane (the pane minus its margins and scroll bar).
 const PANE_W := 570.0
 
+var mobile_section := "Overview"
+var _narrow_drawn := false
+var _stacked_spells_drawn := false
+var _short_spells_drawn := false
+
 var root: Node
 var st: StoryState
 var index := 0
@@ -56,12 +61,16 @@ func open(root_: Node, state: StoryState, index_: int) -> void:
 	index = clampi(index_, 0, st.party.size() - 1)
 	_frame = UiKit.screen_frame(self, "Character Sheet", Vector2(1500, 850))
 	_draw()
+	if MobileDevice.enabled() and MobileDevice.current != null:
+		MobileDevice.current.geometry_changed.connect(_mobile_resized)
 
 
 ## Switches to a tab by its title ("Spells", "Effects" ...; the old names still work).
 func show_tab(title: String) -> void:
 	var t := str(TAB_ALIASES.get(title, title))
 	tab = t if t in TABS else TABS[0]
+	if MobileDevice.enabled():
+		mobile_section = tab
 	_draw()
 
 
@@ -70,6 +79,9 @@ func _ch() -> Character:
 
 
 func _draw() -> void:
+	if MobileDevice.enabled():
+		_draw_mobile()
+		return
 	# Keep the scroll position when redrawing the same page (after casting a spell), not after switching.
 	var key := "%d:%s" % [index, tab]
 	var keep := _scroll.scroll_vertical if _scroll != null and is_instance_valid(_scroll) and key == _drawn else 0
@@ -159,7 +171,17 @@ func _hero(ch: Character) -> VBoxContainer:
 	if xp != null:
 		col.add_child(xp)
 	col.add_child(_hit_points(ch))
-	col.add_child(_core_numbers(ch))
+	var numbers := _core_numbers(ch)
+	if _narrow_mobile():
+		var grid := GridContainer.new()
+		grid.columns = 2
+		for figure: Control in numbers.get_children():
+			numbers.remove_child(figure)
+			grid.add_child(figure)
+		numbers.free()
+		col.add_child(grid)
+	else:
+		col.add_child(numbers)
 	col.add_child(_details(ch))
 	return col
 
@@ -489,7 +511,7 @@ func _reach_text(a: WeaponProfile) -> String:
 func _caster_row(ch: Character, class_id: String) -> Control:
 	var e := ch.spellcasting_entry(class_id)
 	var ab := StringName(str(e.get("ability", "int")))
-	var row := HBoxContainer.new()
+	var row: BoxContainer = VBoxContainer.new() if _narrow_mobile() else HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var who := VBoxContainer.new()
 	who.add_theme_constant_override("separation", -2)
@@ -497,7 +519,8 @@ func _caster_row(ch: Character, class_id: String) -> Control:
 	who.add_child(UiKit.label("casts with %s" % Creature.ABILITY_NAMES[ab], 12, "parchment"))
 	who.custom_minimum_size = Vector2(170, 0)
 	row.add_child(who)
-	row.add_child(UiParts.gap())
+	if not _narrow_mobile():
+		row.add_child(UiParts.gap())
 	var dc := ch.spell_save_dc(class_id)
 	var atk := ch.spell_attack_bonus(class_id)
 	row.add_child(_figure_pair("Save DC", str(dc.total()), func() -> Control: return UiParts.breakdown_tip(dc, "Spell save DC")))
@@ -686,11 +709,25 @@ func _spells(ch: Character) -> VBoxContainer:
 	if _cast_note != "":
 		var note := UiKit.label(_cast_note, 15, "bile", PANE_W - 20.0)
 		box.add_child(_row(note))
-	var prepare := _prepare_row(ch)
-	if prepare != null:
-		box.add_child(prepare)
-	for e in ch.spellcasting:
-		box.add_child(_caster_row(ch, str(e["class_id"])))
+	var prepare := _prepare_row(ch, _short_spell_header())
+	if _short_spell_header():
+		var header := HBoxContainer.new()
+		header.add_theme_constant_override("separation", 10)
+		if prepare != null:
+			header.add_child(prepare)
+		var summary := VBoxContainer.new()
+		summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header.add_child(summary)
+		for e in ch.spellcasting:
+			var class_id := str(e["class_id"])
+			summary.add_child(UiKit.label("%s · Save DC %d · Spell attack %s" % [ch.class_name_of(class_id),
+				ch.spell_save_dc(class_id).total(), ch.spell_attack_bonus(class_id).signed()], 14, "parchment"))
+		box.add_child(header)
+	else:
+		if prepare != null:
+			box.add_child(prepare)
+		for e in ch.spellcasting:
+			box.add_child(_caster_row(ch, str(e["class_id"])))
 	var known := ch.known_spells()
 	var item_spells := ItemSpells.entries(st, ch, Dice.roller)
 	if known.is_empty() and item_spells.is_empty():
@@ -730,11 +767,11 @@ func _spells(ch: Character) -> VBoxContainer:
 ## "Prepare spells" for a caster whose spells a Long Rest lets them change: any time outside a fight, no rest needed
 ## (PrepareScreen ANYTIME). In a fight the button is off and the line beside it says why. Null for anyone with nothing
 ## to prepare.
-func _prepare_row(ch: Character) -> Control:
+func _prepare_row(ch: Character, compact: bool = false) -> Control:
 	if PrepareScreen.preparable(st, PrepareScreen.ANYTIME, ch).is_empty():
 		return null
 	var why := PrepareScreen.refusal(in_fight)
-	var row := HFlowContainer.new()
+	var row: Container = VBoxContainer.new() if _narrow_mobile() else HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 12)
 	row.add_theme_constant_override("v_separation", 4)
 	var b := UiKit.button("Prepare spells", _open_prepare.bind(ch), 14, "spells")
@@ -742,7 +779,8 @@ func _prepare_row(ch: Character) -> Control:
 	b.tooltip_text = why if why != "" else "Change which spells %s has ready. No rest needed outside a fight." % ch.name.get_slice(" ", 0)
 	row.add_child(b)
 	var note := why if why != "" else "Change what's ready, any time outside a fight."
-	row.add_child(UiKit.label(note, 13, "rose" if why != "" else "parchment", PANE_W - 190.0))
+	if not compact or why != "":
+		row.add_child(UiKit.label(note, 13, "rose" if why != "" else "parchment", PANE_W - 190.0))
 	return _row(row)
 
 
@@ -800,11 +838,18 @@ func _spell_row(ch: Character, k: Dictionary, s: Dictionary, cast: Dictionary, u
 	left.add_child(head)
 	left.add_child(UiKit.label(_spell_facts(ch, k, s), 13, "parchment"))
 	row.add_child(left)
+	var content: BoxContainer = row
+	var controls: BoxContainer = row
+	if _stacked_spell_controls():
+		content = VBoxContainer.new()
+		content.add_child(row)
+		controls = VBoxContainer.new() if _narrow_mobile() else HBoxContainer.new()
+		content.add_child(controls)
 	if not cast.is_empty():
-		_cast_controls(ch, cast, row)
+		_cast_controls(ch, cast, controls)
 	elif not util.is_empty():
-		_utility_controls(ch, util, row)
-	return _row(row, func() -> Control: return _spell_tip(ch, k, s))
+		_utility_controls(ch, util, controls)
+	return _row(content, func() -> Control: return _spell_tip(ch, k, s))
 
 
 ## The line under a spell's name: how long it takes (unless a tag says so), its range, and what it does
@@ -920,7 +965,7 @@ func _duration(s: Dictionary) -> String:
 
 ## Healing and helpful spells outside a fight (FieldCasting): a slot picker when it can go at more than one level,
 ## and a Cast menu listing who it can go on.
-func _cast_controls(ch: Character, o: Dictionary, row: HBoxContainer) -> void:
+func _cast_controls(ch: Character, o: Dictionary, row: BoxContainer) -> void:
 	var id := str(o["id"])
 	if not bool(o["legal"]):
 		var no := UiParts.small_button("Cast", func() -> void: pass, "spells")
@@ -992,7 +1037,7 @@ func _cast_menu(ch: Character, o: Dictionary, on_pick: Callable) -> MenuButton:
 
 
 ## Exploring spells (Light, Detect Magic, Find Traps ...): Cast, or as a Ritual.
-func _utility_controls(ch: Character, o: Dictionary, row: HBoxContainer) -> void:
+func _utility_controls(ch: Character, o: Dictionary, row: BoxContainer) -> void:
 	var resource_controls: VBoxContainer
 	if not (o.get("resource_casts", []) as Array).is_empty():
 		resource_controls = VBoxContainer.new()
@@ -1449,3 +1494,109 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_Q:
 				tab = TABS[posmod(TABS.find(tab) - 1, TABS.size())]
 				_draw()
+
+
+func _narrow_mobile() -> bool:
+	return MobileDevice.enabled() and MobileDevice.safe_rect().size.x < 450
+
+
+func _stacked_spell_controls() -> bool:
+	# Keep names and rules tags readable beside the slot/target controls on phone and portrait iPad.
+	return MobileDevice.enabled() and MobileDevice.safe_rect().size.x < 1000
+
+
+func _short_spell_header() -> bool:
+	return MobileDevice.enabled() and MobileDevice.safe_rect().size.y < 600 and not _narrow_mobile()
+
+
+func _mobile_resized() -> void:
+	if _frame == null or is_queued_for_deletion():
+		return
+	if _narrow_drawn == _narrow_mobile() and _stacked_spells_drawn == _stacked_spell_controls() and _short_spells_drawn == _short_spell_header():
+		return
+	var page := _frame.get_parent().get_parent().get_parent() as MobilePage
+	var keep := page.scroll.scroll_vertical
+	_draw_mobile()
+	page.reflow.call_deferred()
+	page.scroll.set_deferred("scroll_vertical", keep)
+
+
+func _draw_mobile() -> void:
+	_narrow_drawn = _narrow_mobile()
+	_stacked_spells_drawn = _stacked_spell_controls()
+	_short_spells_drawn = _short_spell_header()
+	MobileUi.clear(_frame)
+	var page := _frame.get_parent().get_parent().get_parent() as MobilePage
+	page.back_action = _close
+	page.scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	MobileUi.clear(page.toolbar)
+	var ch := _ch()
+	var members := HBoxContainer.new()
+	page.toolbar.add_child(members)
+	members.add_child(MobileUi.button("Previous", func() -> void:
+		index = posmod(index - 1, st.party.size())
+		_draw()))
+	members.add_child(MobileUi.button(ch.name, func() -> void:
+		mobile_section = "Overview"
+		_draw()))
+	members.add_child(MobileUi.button("Next", func() -> void:
+		index = posmod(index + 1, st.party.size())
+		_draw()))
+	for button: Button in members.get_children():
+		button.autowrap_mode = TextServer.AUTOWRAP_OFF
+		button.clip_text = true
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var sections: Array[String] = ["Overview", "Abilities"]
+	sections.append_array(TABS)
+	page.toolbar.add_child(MobileUi.tabs(sections, mobile_section, func(value: String) -> void:
+		mobile_section = value
+		_draw()))
+	var content: Control
+	match mobile_section:
+		"Overview": content = _hero(ch)
+		"Abilities": content = _mobile_abilities(ch)
+		"Features": content = _features(ch)
+		"Spells": content = _spells(ch)
+		"Equipment": content = _equipment(ch)
+		"Effects": content = _effects(ch)
+		"Notes": content = _notes(ch)
+		_: content = _actions(ch)
+	MobileUi.fit(content)
+	_frame.add_child(content)
+	if not in_fight and st.can_level_up(ch):
+		_frame.add_child(MobileUi.button("Level up", func() -> void: root.call("open_screen", "level_up", index)))
+	if in_fight:
+		_frame.add_child(MobileUi.text("View only during combat"))
+	page.scroll.scroll_vertical = 0
+
+
+func _mobile_abilities(ch: Character) -> VBoxContainer:
+	var body := VBoxContainer.new()
+	for ability: StringName in Abilities.ALL:
+		var full := str(Creature.ABILITY_NAMES[ability])
+		var save := ch.save_bonus(ability)
+		body.add_child(UiParts.tip_button("%s · %d (%s) · Save %s" % [full, ch.ability_score(ability), UiKit.signed(ch.ability_mod(ability)), save.signed()], func() -> void:
+			_mobile_breakdown(ch.ability_breakdown(ability), full), func() -> Control:
+			return UiParts.breakdown_tip(ch.ability_breakdown(ability), full)))
+		body.add_child(MobileUi.button(full + " saving throw · Details", func() -> void:
+			_mobile_breakdown(save, full + " saving throw")))
+	body.add_child(MobileUi.text("Skills", "gilt_light"))
+	var skills: Array = Abilities.SKILLS.keys()
+	skills.sort()
+	for skill: StringName in skills:
+		var bonus := ch.skill_bonus(skill)
+		var rank := ch.skill_rank(skill)
+		var title := str(skill).replace("_", " ").capitalize()
+		body.add_child(MobileUi.button("%s · %s · %s" % [title, bonus.signed(), "Expertise" if rank >= 2 else "Proficient" if rank == 1 else "Untrained"], func() -> void:
+			_mobile_breakdown(bonus, title)))
+	return body
+
+
+func _mobile_breakdown(value: Breakdown, title: String) -> void:
+	var layer_ := CanvasLayer.new()
+	layer_.layer = layer + 1
+	add_child(layer_)
+	var body := MobilePage.build(layer_, title, func() -> void: layer_.queue_free())
+	var content := UiParts.breakdown_tip(value, title)
+	MobileUi.fit(content)
+	body.add_child(content)

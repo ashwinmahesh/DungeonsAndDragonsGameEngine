@@ -436,6 +436,14 @@ static func spec_for(view: LocationView, encounter_id: String) -> Dictionary:
 
 
 static func _run_combat(view: LocationView, encounter_id: String, spec: Dictionary, e: Encounter, ctokens: Dictionary, surprised: Array[String]) -> void:
+	if MobileDevice.enabled() or view.combat_view.recovery != null:
+		view.combat_view.recovery_writer = func() -> Error:
+			view._save_positions()
+			var journal := view.combat_view.recovery
+			GameState.combat_snapshot = {"location": view.loc_id, "encounter": encounter_id,
+				"data": e.round_snapshot if not e.round_snapshot.is_empty() else EncounterSnapshot.capture(e),
+				"journal": journal.data.duplicate(true)}
+			return SaveSystem.save_combat_recovery()
 	e.keep_round_snapshots = true   # the round-start save, taken as each round begins (_save_round)
 	Bestiary.before_fight(view.st, e)   # creatures met, and those already studied show their defenses (U8)
 	view.combat_view.finished.connect(func(outcome: String) -> void: _end_encounter(view, encounter_id, spec, e, ctokens, outcome))
@@ -448,12 +456,17 @@ static func _run_combat(view: LocationView, encounter_id: String, spec: Dictiona
 static func _save_round(view: LocationView, encounter_id: String, e: Encounter) -> void:
 	if e.state != Encounter.State.ACTIVE:
 		return
+	if view.combat_view.recovery != null and SaveSystem.honour():
+		return   # Honour's one save is its command continuation, never a separate rewind point.
 	view._save_positions()
 	# The fight as its round began, before the lair or the first turn acted (the view hears of the round after).
 	var data := e.round_snapshot if int(e.round_snapshot.get("round", -1)) == e.round_no else EncounterSnapshot.capture(e)
 	data = _without_bystander_guests(view, e, data)
+	var continuation := GameState.combat_snapshot
 	GameState.combat_snapshot = {"location": view.loc_id, "encounter": encounter_id, "data": data}
 	SaveSystem.save_round()
+	if view.combat_view.recovery != null:
+		GameState.combat_snapshot = continuation
 
 
 ## `data`, a fight's saved state, without the squares of the guests who keep out of it (keep_back makes them LOW): the
@@ -497,7 +510,25 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 	view.in_combat = true
 	view.fight_id = encounter_id   # (the sanctum's braziers flare for Vosk's: AmberGlow)
 	ModeController.force(ModeController.Mode.COMBAT)
-	var e := EncounterSnapshot.restore(snapshot["data"] as Dictionary, view.dice, view.st.party)
+	var journal: CombatJournal
+	var e: Encounter
+	if snapshot.has("journal"):
+		journal = CombatJournal.new()
+		journal.data = (snapshot["journal"] as Dictionary).duplicate(true)
+		e = journal.restore(view.dice, view.st.party)
+	elif MobileDevice.enabled():
+		var base := snapshot["data"] as Dictionary
+		var before := EncounterSnapshot.restore(base, view.dice, view.st.party, false)
+		before.shared_turns = GameSettings.shared_turns()
+		before.flanking = GameSettings.flanking()
+		journal = CombatJournal.begin(before, base)
+		e = journal.restore(view.dice, view.st.party)
+	else:
+		e = EncounterSnapshot.restore(snapshot["data"] as Dictionary, view.dice, view.st.party)
+	if e == null:
+		view.in_combat = false
+		ModeController.force(ModeController.Mode.EXPLORATION)
+		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
@@ -506,11 +537,15 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 				if c.side == &"enemy" and c.name() == str((md as Dictionary).get("name", "")):
 					c.creature.set_meta(&"steps_down", (md as Dictionary)["steps_down"])
 	var ctokens := _fight_tokens(view, e, false)
+
 	view.combat_view = CombatView.new()
 	view.combat_view.input_locked = view.input_locked
 	view.combat_view.narrator = view.narrator
 	view.combat_view.story = view.st
 	view.add_child(view.combat_view)
+	view.combat_view.recovery = journal
+	if journal != null:
+		view.combat_view._strike_after_walk = journal.walk_plan(e)
 	var none: Array[String] = []
 	_run_combat(view, encounter_id, spec, e, ctokens, none)
 	return true
@@ -787,6 +822,7 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 	view.in_combat = false
 	view.fight_id = ""
 	GameState.combat_snapshot = {}
+	SaveSystem.clear_combat_recovery(view.loc_id, encounter_id)
 	(view.st.loc_state(view.loc_id).get("custom_fights", {}) as Dictionary).erase(encounter_id)
 	ModeController.force(ModeController.Mode.EXPLORATION)
 	view.rig.follow = view.tokens[view.leader().id] as Node3D

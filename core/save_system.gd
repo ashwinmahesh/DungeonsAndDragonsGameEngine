@@ -20,6 +20,10 @@ var finished_slot := ""
 const AUTOSAVE := "autosave"
 const AUTOSAVES := 5
 const ROUND_START := "round_start"
+const MOBILE_CHECKPOINT := "mobile_checkpoint"
+const COMBAT_RECOVERY := "combat_recovery"
+## 1.0.0 (2001) used 3 without a schema change. Read those files, but write the shared desktop format.
+const LEGACY_IOS_VERSION := 3
 ## Thumbnails (Q9): the middle 16:9 of the screen at this size, as WebP.
 const THUMB := Vector2i(320, 180)
 ## The autosave on arriving somewhere is written before the place is on screen: its picture waits this long.
@@ -112,6 +116,27 @@ func save_round(slot: String = ROUND_START) -> Error:
 	return _write_beside(slot)
 
 
+## Command continuation has its own slot; round-start retry stays independent. Honour retains its single slot.
+func save_combat_recovery() -> Error:
+	return _save(honour_slot(), null, false, false) if honour() else _write_beside(COMBAT_RECOVERY)
+
+
+## Discard only this campaign's completed command continuation, retaining its independent round retry.
+func clear_combat_recovery(location: String, encounter: String) -> void:
+	var data := _read(slot_path(COMBAT_RECOVERY))
+	var combat := data.get("combat", {}) as Dictionary
+	if str(data.get("home_slot", "")) == current_slot and str(combat.get("location", "")) == location \
+			and str(combat.get("encounter", "")) == encounter:
+		delete_slot(COMBAT_RECOVERY)
+
+
+## A mobile exploration continuation never rotates the story's arrival/rest/victory autosaves.
+func save_mobile_checkpoint() -> Error:
+	if not can_save():
+		return ERR_UNAVAILABLE
+	return _save(honour_slot(), null, false, false) if honour() else _write_beside(MOBILE_CHECKPOINT)
+
+
 ## The autosave (AUTOSAVE): anywhere a save is allowed, without making it the game's slot. The ones before it move one
 ## along (autosave_2 ...), and the oldest goes.
 func autosave() -> Error:
@@ -119,9 +144,17 @@ func autosave() -> Error:
 		return ERR_UNAVAILABLE
 	if honour():
 		return _save(honour_slot(), null, true)
-	delete_slot(autosave_slot(AUTOSAVES))
+	var paths: Array[String] = []
+	for n in range(1, AUTOSAVES + 1):
+		paths.append(slot_path(autosave_slot(n)))
+	var rotated := AtomicJson.rotate(paths)
+	if rotated != OK:
+		return rotated
 	for n in range(AUTOSAVES - 1, 0, -1):
-		_move(autosave_slot(n), autosave_slot(n + 1))
+		var source := thumb_path(autosave_slot(n))
+		var destination := thumb_path(autosave_slot(n + 1))
+		if FileAccess.file_exists(source) and DirAccess.copy_absolute(source, destination + ".tmp") == OK:
+			DirAccess.rename_absolute(destination + ".tmp", destination)
 	var err := _write_beside(AUTOSAVE)
 	if err == OK:
 		_thumb_later(AUTOSAVE)
@@ -139,7 +172,7 @@ static func is_autosave(slot: String) -> bool:
 
 ## A save the game writes beside the player's (an autosave, the round start): never the game's own slot.
 static func is_beside(slot: String) -> bool:
-	return slot == ROUND_START or is_autosave(slot)
+	return slot in [ROUND_START, MOBILE_CHECKPOINT, COMBAT_RECOVERY] or is_autosave(slot)
 
 
 ## A save that isn't the game's own slot (the round start, the autosave): it notes the game's slot as `home_slot`.
@@ -150,13 +183,9 @@ func _write_beside(slot: String) -> Error:
 
 
 func _write(slot: String, data: Dictionary) -> Error:
-	DirAccess.make_dir_recursive_absolute(save_dir)
-	var f := FileAccess.open(slot_path(slot), FileAccess.WRITE)
-	if f == null:
-		return FileAccess.get_open_error()
-	f.store_string(JSON.stringify(data, "\t"))
-	f.close()
-	return OK
+	if slot.is_empty() or slot != slot.get_file() or slot in [".", ".."]:
+		return ERR_INVALID_PARAMETER
+	return AtomicJson.write(slot_path(slot), data)
 
 
 ## The campaign's end (ADR 0014): the game as it ends is written to a slot of its own, marked finished with the ending
@@ -192,15 +221,17 @@ func load_slot(slot: String) -> Error:
 ## game's own). One from anywhere else (a backup) is a game without a slot until its first save.
 func load_from(dir: String, slot: String) -> Error:
 	var path := dir.path_join(slot + ".json")
-	if not FileAccess.file_exists(path):
+	if not FileAccess.file_exists(path) and not FileAccess.file_exists(path + ".bak"):
 		return ERR_FILE_NOT_FOUND
-	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not data is Dictionary:
+	var dict := AtomicJson.read(path)
+	if dict.is_empty():
 		return ERR_PARSE_ERROR
-	var dict := data as Dictionary
-	if int(dict.get("version", 0)) > GameState.SAVE_VERSION:
+	if not supports_version(dict):
 		return ERR_FILE_UNRECOGNIZED
 	dict = upgrade(dict)
+	var combat := dict.get("combat", {}) as Dictionary
+	if combat.has("journal") and not CombatJournal.valid(combat["journal"]):
+		return ERR_FILE_CORRUPT
 	# The Unlimited attunement option is the player's (settings.cfg, never the save): the rules library follows it
 	# before the party is built, even when nothing has read the settings yet this run.
 	MagicItems.attunement_off = GameSettings.unlimited_attunement()
@@ -228,8 +259,23 @@ func load_from(dir: String, slot: String) -> Error:
 ## A field added with a default needs no version either (the bestiary, the run's record, XP levelling's `story.xp`,
 ## `story.xp_reserve` and `story.options.levelling`): StoryState.from_dict reads what's there, and pin_levelling names the
 ## older saves' milestone levelling.
+static func supports_version(data: Dictionary) -> bool:
+	return int(data.get("version", 0)) <= GameState.SAVE_VERSION or _legacy_ios_format(data)
+
+
+## Version 3 is reserved for the already distributed iOS preview, whose envelope matches version 2.
+## A bare/unknown future version is still refused; transfer validation also checks the nested campaign shape.
+static func _legacy_ios_format(data: Dictionary) -> bool:
+	return int(data.get("version", 0)) == LEGACY_IOS_VERSION and data.get("story") is Dictionary \
+		and (data["story"] as Dictionary).get("party") is Array and data.get("dice") is Dictionary \
+		and data.get("combat") is Dictionary and data.get("party_positions") is Array \
+		and data.get("current_scene") is String and data.get("saved_at") is String
+
+
 static func upgrade(data: Dictionary) -> Dictionary:
 	var out := data.duplicate(true)
+	if _legacy_ios_format(out):
+		out["version"] = GameState.SAVE_VERSION
 	swap_withdrawn_items(out)
 	swap_regifted_items(out)
 	top_up_charges(out)
@@ -315,6 +361,10 @@ func list_slots(dir: String = "") -> Array[Dictionary]:
 			return not bool(a["newer"])
 		if (str(a["finished"]) == "") != (str(b["finished"]) == ""):
 			return str(a["finished"]) == ""
+		if str(a["saved_at"]) == str(b["saved_at"]):
+			# Give command continuation a consistent priority over every same-second slot.
+			# A special case for only the round slot would not define a strict weak ordering.
+			return str(a["slot"]) == COMBAT_RECOVERY and str(b["slot"]) != COMBAT_RECOVERY
 		return str(a["saved_at"]) > str(b["saved_at"]))
 	return out
 
@@ -344,18 +394,15 @@ func describe(slot: String, dir: String = "") -> Dictionary:
 	return {"slot": slot, "dir": from, "saved_at": str(d.get("saved_at", "")), "location": place,
 		"location_id": str(story.get("location", "")), "level": level,
 		"day": int(story.get("day", 1)), "party": ", ".join(names), "finished": ended,
-		"kind": "autosave" if is_autosave(slot) else ("round" if slot == ROUND_START else ""),
+		"kind": "checkpoint" if slot == MOBILE_CHECKPOINT else "recovery" if (d.get("combat", {}) as Dictionary).has("journal") else "autosave" if is_autosave(slot) else ("round" if slot == ROUND_START else ""),
 		"note": str(d.get("note", "")), "thumb": thumb if FileAccess.file_exists(thumb) else "",
 		"mode": Difficulty.named(mode).name if mode != Difficulty.DEFAULT else "",
-		"newer": int(raw.get("version", 0)) > GameState.SAVE_VERSION}
+		"newer": not supports_version(raw)}
 
 
 ## A save file as a dictionary ({} when it's missing or not JSON).
 static func _read(path: String) -> Dictionary:
-	if not FileAccess.file_exists(path):
-		return {}
-	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return data as Dictionary if data is Dictionary else {}
+	return AtomicJson.read(path)
 
 
 ## The player deletes a save (the saves page): it and its picture go, and the game's own slot with it, so the next save
@@ -370,20 +417,12 @@ func delete_save(slot: String) -> bool:
 
 
 func delete_slot(slot: String) -> void:
-	if has_slot(slot):
-		DirAccess.remove_absolute(slot_path(slot))
+	for suffix: String in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := slot_path(slot) + suffix
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 	if FileAccess.file_exists(thumb_path(slot)):
 		DirAccess.remove_absolute(thumb_path(slot))
-
-
-## Moves a save (and its picture) to another slot's name, over whatever was there.
-func _move(from: String, to: String) -> void:
-	if not has_slot(from):
-		return
-	delete_slot(to)
-	DirAccess.rename_absolute(slot_path(from), slot_path(to))
-	if FileAccess.file_exists(thumb_path(from)):
-		DirAccess.rename_absolute(thumb_path(from), thumb_path(to))
 
 
 # --- Honour's one save (F1) -----------------------------------------------------------------------

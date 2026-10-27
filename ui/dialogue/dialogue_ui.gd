@@ -25,6 +25,8 @@ signal respec_requested(index: int)
 ## whether they went, and calls resume() once the walk is over.
 signal lead_requested(npc: String, to: String)
 
+var _mobile_page: MobilePage
+
 var runner: DialogueRunner
 var _panel: PanelContainer
 var _portrait: TextureRect
@@ -209,6 +211,59 @@ func _ready() -> void:
 	_spread.offset_top = 60
 	_spread.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(_spread)
+	if MobileDevice.enabled():
+		dim.color.a = 0.12
+		var body := MobilePage.build(self, "", toggle_history)
+		(get_child(get_child_count() - 2) as ColorRect).color.a = 0.0
+		_mobile_page = body.get_parent().get_parent().get_parent() as MobilePage
+		_mobile_page.scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		(_mobile_page.find_child("MobileBack", true, false) as Button).text = "History"
+		var hidden := Control.new()
+		hidden.hide()
+		add_child(hidden)
+		_panel.reparent(hidden)
+		# Tall busts sit above the dimmer and behind the compact bottom reading panel.
+		move_child(busts, _mobile_page.get_index() - 1)
+		busts.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		get_viewport().size_changed.connect(_mobile_layout)
+		if MobileDevice.current != null:
+			MobileDevice.current.geometry_changed.connect(_mobile_layout)
+		_mobile_layout()
+		var bar := _mobile_page.heading.get_parent()
+		_mobile_page.heading.hide()
+		_portrait.reparent(bar)
+		_portrait.custom_minimum_size = Vector2(44, 44)
+		_portrait.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		_portrait.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		_name.reparent(bar)
+		_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_name.add_theme_font_size_override("font_size", UiScale.text(18))
+		_name.custom_minimum_size.x = 0
+		_text.reparent(body)
+		_text.custom_minimum_size = Vector2.ZERO
+		_text.add_theme_font_size_override("normal_font_size", UiScale.text(17))
+		_text.add_theme_font_size_override("italics_font_size", UiScale.text(17))
+		body.add_theme_constant_override("separation", 6)
+		_options_scroll.reparent(body)
+		_ends_note.reparent(body)
+		MobileUi.fit(_ends_note)
+		_continue_row.reparent(bar)
+		_hint.hide()
+		_speaker_button.reparent(body)
+		MobileUi.fit(_continue_row)
+		MobileUi.fit(_speaker_button)
+		var cards := ScrollContainer.new()
+		cards.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		body.add_child(cards)
+		_spread.reparent(cards)
+		_spread.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		_spread.custom_minimum_size.x = 0
+		# History is above the full-screen conversation, with independent scrolling.
+		move_child(_history_panel, get_child_count() - 1)
+		MobileUi.fit(_history_panel)
+		_history_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		body.minimum_size_changed.connect(func() -> void: _mobile_layout.call_deferred())
+		_mobile_layout.call_deferred()
 
 
 ## The scroll-back panel over the scene, above the box: every line of this conversation so far, newest at the bottom.
@@ -248,7 +303,25 @@ func _build_history() -> void:
 	add_child(_history_panel)
 
 
+func _mobile_layout() -> void:
+	if _mobile_page == null:
+		return
+	var safe := MobileDevice.safe_rect().grow(-4)
+	var gutter := safe.size.y * 0.96 * 0.66
+	_mobile_page.centered_width = minf(720, safe.size.x * 0.76)
+	var content_height := _mobile_page.body.get_combined_minimum_size().y + 88
+	_mobile_page.bottom_height = minf(safe.size.y * 0.58, maxf(124, content_height))
+	_mobile_page.reflow()
+	busts.mobile_gutter = gutter
+	busts.position = safe.position
+	busts.size = safe.size
+	busts._layout()
+
+
 func toggle_history() -> void:
+	if _mobile_page != null:
+		_history_panel.position = MobileDevice.safe_rect().grow(-4).position
+		_history_panel.size = MobileDevice.safe_rect().grow(-4).size
 	_history_panel.visible = not _history_panel.visible
 	if _history_panel.visible:
 		_history_text.text = "\n\n".join(_history) if not _history.is_empty() else "[i]Nothing said yet.[/i]"
@@ -339,13 +412,17 @@ func _show(beat: Dictionary) -> void:
 		VoiceOver.stop()
 	if cutscene != null and str(beat["kind"]) in ["line", "notice", "check", "options", "pick_member", "guidance"]:
 		# Over a cutscene a line is a caption on the picture; anything to choose or note comes up in the box.
-		var captioned := str(beat["kind"]) == "line"
+		var captioned := str(beat["kind"]) == "line" and _mobile_page == null
 		_panel.visible = not captioned
 		cutscene.show_caption(captioned)
 	if str(beat["kind"]) == "check":
 		if d20 == null:
 			d20 = DiceRoll.new()
-			add_child(d20)
+			if _mobile_page != null:
+				_mobile_page.body.add_child(d20)
+				_mobile_page.body.move_child(d20, 0)
+			else:
+				add_child(d20)
 		d20.roll(DiceRoll.from_beat(beat))
 	elif d20 != null and str(beat["kind"]) not in ["stage", "cutscene"]:
 		d20.queue_free()
@@ -474,7 +551,7 @@ func _show_options(options: Array) -> void:
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		# A long option wraps onto more lines inside the box instead of widening it past the screen's edge.
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.add_theme_font_size_override("font_size", UiScale.text(17))
+		b.add_theme_font_size_override("font_size", UiScale.text(16 if MobileDevice.enabled() else 17))
 		var label := str(opt["label"])
 		var check := opt["check"] as Dictionary
 		var extra := ""
@@ -505,6 +582,8 @@ func _show_options(options: Array) -> void:
 			b.add_child(QuestEndMark.new())
 			_option_look(b, QuestEndMark.SIZE + 18.0)
 			b.set_meta(&"ends", ends)
+			if MobileDevice.enabled():
+				b.text += "\n" + ends
 		# The line under the menu follows the pad's focus and the mouse (an ordinary option clears it).
 		b.focus_entered.connect(_show_ends.bind(b))
 		b.mouse_entered.connect(_show_ends.bind(b))
@@ -532,6 +611,8 @@ func _fit_options() -> void:
 ## Options read as lines of text; the one under the mouse or keyboard gets a crimson band with pointed ends and a
 ## fine gilt edge, like the menu's buttons.
 func _option_look(b: Button, right_margin := 0.0) -> void:
+	if MobileDevice.enabled():
+		b.custom_minimum_size.y = 48
 	var plain := StyleBoxEmpty.new()
 	plain.content_margin_left = 20
 	plain.content_margin_right = right_margin
@@ -560,6 +641,9 @@ func _ends_text(opt: Dictionary) -> String:
 
 ## The line under the menu names what the option under the mouse (else the focused one) closes; null clears the mouse.
 func _show_ends(b: Button) -> void:
+	if MobileDevice.enabled():
+		_ends_note.hide()   # touch choices show the consequence inline before commitment
+		return
 	var shown := b
 	if shown == null:
 		for c in _option_buttons:
@@ -640,6 +724,8 @@ func _clear_options() -> void:
 
 ## A left click on the box or anywhere around it.
 func _clicked(event: InputEvent) -> void:
+	if MobileDevice.enabled():
+		return
 	var mb := event as InputEventMouseButton
 	if mb == null or not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
 		return
@@ -717,7 +803,7 @@ func _cutscene_beat(beat: Dictionary) -> void:
 	if cutscene == null:
 		cutscene = CutsceneView.new()
 		add_child(cutscene)
-		move_child(cutscene, _panel.get_index())   # over the scene's dim, under the box and the History
+		move_child(cutscene, 1 if _mobile_page != null else _panel.get_index())   # over the scene's dim, under the box and the History
 		cutscene.clicked.connect(func() -> void:
 			if _waiting_continue and not history_open() and not cutscene.paused:
 				_advance())
