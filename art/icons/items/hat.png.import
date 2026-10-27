@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crf6wn1y8dpht"
-path="res://.godot/imported/hat.png-0ac301b367a5bd7f65de0e3a30e6c4bc.ctex"
+path="res://.godot/imported/hat.png-70386032ed412fe9470743ded66507b8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hat.png"
-dest_files=["res://.godot/imported/hat.png-0ac301b367a5bd7f65de0e3a30e6c4bc.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hat.png"
+dest_files=["res://.godot/imported/hat.png-70386032ed412fe9470743ded66507b8.ctex"]
 
 [params]
 

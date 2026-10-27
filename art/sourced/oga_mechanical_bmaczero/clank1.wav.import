@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://f7hqfkqvrr2f"
-path="res://.godot/imported/clank1.wav-cbf2b81a72719b8bcb2601b26b920421.sample"
+path="res://.godot/imported/clank1.wav-a37ba3f145a6008c2abba7b4723244e4.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_mechanical_bmaczero/clank1.wav"
-dest_files=["res://.godot/imported/clank1.wav-cbf2b81a72719b8bcb2601b26b920421.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_mechanical_bmaczero/clank1.wav"
+dest_files=["res://.godot/imported/clank1.wav-a37ba3f145a6008c2abba7b4723244e4.sample"]
 
 [params]
 

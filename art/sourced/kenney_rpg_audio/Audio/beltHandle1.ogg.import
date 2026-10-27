@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cxm18s08hycmb"
-path="res://.godot/imported/beltHandle1.ogg-f54c59821756422a5ae080f1a22bbc91.oggvorbisstr"
+path="res://.godot/imported/beltHandle1.ogg-8628d6bfde75e34a42019ab0458605cc.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_rpg_audio/Audio/beltHandle1.ogg"
-dest_files=["res://.godot/imported/beltHandle1.ogg-f54c59821756422a5ae080f1a22bbc91.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_rpg_audio/Audio/beltHandle1.ogg"
+dest_files=["res://.godot/imported/beltHandle1.ogg-8628d6bfde75e34a42019ab0458605cc.oggvorbisstr"]
 
 [params]
 

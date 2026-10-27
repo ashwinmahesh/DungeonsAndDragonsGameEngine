@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgmp2dhbgdc83"
-path="res://.godot/imported/cooks_utensils.png-656d05be2865a52fe1e5571794a90737.ctex"
+path="res://.godot/imported/cooks_utensils.png-97a9d5742f534c0f0353c2ca02892a66.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/cooks_utensils.png"
-dest_files=["res://.godot/imported/cooks_utensils.png-656d05be2865a52fe1e5571794a90737.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/cooks_utensils.png"
+dest_files=["res://.godot/imported/cooks_utensils.png-97a9d5742f534c0f0353c2ca02892a66.ctex"]
 
 [params]
 

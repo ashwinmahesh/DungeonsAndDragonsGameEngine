@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d0arxlaqxl4j7"
-path="res://.godot/imported/javelin.png-25e7c01ece45435f2f162e0d42757ee7.ctex"
+path="res://.godot/imported/javelin.png-b821d5b34240d0164a40850b597dc44c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/javelin.png"
-dest_files=["res://.godot/imported/javelin.png-25e7c01ece45435f2f162e0d42757ee7.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/javelin.png"
+dest_files=["res://.godot/imported/javelin.png-b821d5b34240d0164a40850b597dc44c.ctex"]
 
 [params]
 

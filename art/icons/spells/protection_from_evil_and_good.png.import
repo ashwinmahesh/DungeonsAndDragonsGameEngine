@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddwklf0k55cjv"
-path="res://.godot/imported/protection_from_evil_and_good.png-498d32d0951b324c810d37792cd0028e.ctex"
+path="res://.godot/imported/protection_from_evil_and_good.png-6fa12a231309b095064b043be3b878be.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/protection_from_evil_and_good.png"
-dest_files=["res://.godot/imported/protection_from_evil_and_good.png-498d32d0951b324c810d37792cd0028e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/protection_from_evil_and_good.png"
+dest_files=["res://.godot/imported/protection_from_evil_and_good.png-6fa12a231309b095064b043be3b878be.ctex"]
 
 [params]
 

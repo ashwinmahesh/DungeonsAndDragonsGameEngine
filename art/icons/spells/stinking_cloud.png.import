@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkxn2mti05ey2"
-path="res://.godot/imported/stinking_cloud.png-bdcdc736cf6fb82a827280a5c5aa8a2a.ctex"
+path="res://.godot/imported/stinking_cloud.png-b9cdf99dfba6279aa46caf289a20595f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/stinking_cloud.png"
-dest_files=["res://.godot/imported/stinking_cloud.png-bdcdc736cf6fb82a827280a5c5aa8a2a.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/stinking_cloud.png"
+dest_files=["res://.godot/imported/stinking_cloud.png-b9cdf99dfba6279aa46caf289a20595f.ctex"]
 
 [params]
 

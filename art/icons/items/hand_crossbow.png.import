@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://26p15y87yut5"
-path="res://.godot/imported/hand_crossbow.png-92ed1c24e1b9428e92c9688d076482c0.ctex"
+path="res://.godot/imported/hand_crossbow.png-2568f9f8e177fc979bf587cca27e8446.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hand_crossbow.png"
-dest_files=["res://.godot/imported/hand_crossbow.png-92ed1c24e1b9428e92c9688d076482c0.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hand_crossbow.png"
+dest_files=["res://.godot/imported/hand_crossbow.png-2568f9f8e177fc979bf587cca27e8446.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3hmihsu1qs6s"
-path="res://.godot/imported/wand.png-de28dee44f15d664582f814e0cbae9b0.ctex"
+path="res://.godot/imported/wand.png-d529c3ab38bad50078a7f7950c63d270.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/wand.png"
-dest_files=["res://.godot/imported/wand.png-de28dee44f15d664582f814e0cbae9b0.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/wand.png"
+dest_files=["res://.godot/imported/wand.png-d529c3ab38bad50078a7f7950c63d270.ctex"]
 
 [params]
 

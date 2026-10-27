@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmo2qeqt38jcv"
-path="res://.godot/imported/mass_healing_word.png-1640f91e8a0125363a09739ffc581313.ctex"
+path="res://.godot/imported/mass_healing_word.png-8dfe9dcac73e5964decb7d726989876a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/mass_healing_word.png"
-dest_files=["res://.godot/imported/mass_healing_word.png-1640f91e8a0125363a09739ffc581313.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/mass_healing_word.png"
+dest_files=["res://.godot/imported/mass_healing_word.png-8dfe9dcac73e5964decb7d726989876a.ctex"]
 
 [params]
 

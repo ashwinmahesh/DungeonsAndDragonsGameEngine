@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bsrwfofguxnnd"
-path="res://.godot/imported/cloud_of_daggers.png-28074c0e234731d278948fac4d17a0a2.ctex"
+path="res://.godot/imported/cloud_of_daggers.png-3f3736ac9951f8ec0b978431b9815879.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/cloud_of_daggers.png"
-dest_files=["res://.godot/imported/cloud_of_daggers.png-28074c0e234731d278948fac4d17a0a2.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/cloud_of_daggers.png"
+dest_files=["res://.godot/imported/cloud_of_daggers.png-3f3736ac9951f8ec0b978431b9815879.ctex"]
 
 [params]
 

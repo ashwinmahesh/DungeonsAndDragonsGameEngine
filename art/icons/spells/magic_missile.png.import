@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxdtnfle88lo4"
-path="res://.godot/imported/magic_missile.png-2d9f321f94160216c89815ffbfd65dce.ctex"
+path="res://.godot/imported/magic_missile.png-017b5f272596e4e64a8f30c84294dde2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/magic_missile.png"
-dest_files=["res://.godot/imported/magic_missile.png-2d9f321f94160216c89815ffbfd65dce.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/magic_missile.png"
+dest_files=["res://.godot/imported/magic_missile.png-017b5f272596e4e64a8f30c84294dde2.ctex"]
 
 [params]
 

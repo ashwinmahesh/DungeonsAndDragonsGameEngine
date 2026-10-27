@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://uc0xs52x8gi8"
-path="res://.godot/imported/glassblowers_tools.png-c9062dd364fd1ae9040daded89cb6346.ctex"
+path="res://.godot/imported/glassblowers_tools.png-fb575f5329bd2247d3b1ced43aa087e7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/glassblowers_tools.png"
-dest_files=["res://.godot/imported/glassblowers_tools.png-c9062dd364fd1ae9040daded89cb6346.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/glassblowers_tools.png"
+dest_files=["res://.godot/imported/glassblowers_tools.png-fb575f5329bd2247d3b1ced43aa087e7.ctex"]
 
 [params]
 

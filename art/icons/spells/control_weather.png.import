@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bl7ie1qwjmlqk"
-path="res://.godot/imported/control_weather.png-5395f166c76ea64ff4d887e5b04cd26b.ctex"
+path="res://.godot/imported/control_weather.png-b571617ec16a4f869442f6ff527e2f6b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/control_weather.png"
-dest_files=["res://.godot/imported/control_weather.png-5395f166c76ea64ff4d887e5b04cd26b.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/control_weather.png"
+dest_files=["res://.godot/imported/control_weather.png-b571617ec16a4f869442f6ff527e2f6b.ctex"]
 
 [params]
 

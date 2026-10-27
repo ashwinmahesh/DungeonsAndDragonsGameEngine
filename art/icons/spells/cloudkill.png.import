@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ck30sr8tkgkb3"
-path="res://.godot/imported/cloudkill.png-2e29ffd78e7d9ab3708caf51da0ab171.ctex"
+path="res://.godot/imported/cloudkill.png-9a5ead036a8314de5d3f842cb3726f83.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/cloudkill.png"
-dest_files=["res://.godot/imported/cloudkill.png-2e29ffd78e7d9ab3708caf51da0ab171.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/cloudkill.png"
+dest_files=["res://.godot/imported/cloudkill.png-9a5ead036a8314de5d3f842cb3726f83.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://h1vldom05ubu"
-path="res://.godot/imported/find_the_path.png-372ea6a48cbda4d93a0d19f29c2eb059.ctex"
+path="res://.godot/imported/find_the_path.png-1fa1240d121f7aa995e682986b0db7ff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/find_the_path.png"
-dest_files=["res://.godot/imported/find_the_path.png-372ea6a48cbda4d93a0d19f29c2eb059.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/find_the_path.png"
+dest_files=["res://.godot/imported/find_the_path.png-1fa1240d121f7aa995e682986b0db7ff.ctex"]
 
 [params]
 

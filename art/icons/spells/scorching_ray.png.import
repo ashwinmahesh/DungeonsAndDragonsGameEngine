@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4xshjvrjqmm3"
-path="res://.godot/imported/scorching_ray.png-9102cc1235a196dbe45c3d9186269d9f.ctex"
+path="res://.godot/imported/scorching_ray.png-71779d9483e1aadaeeebc88a81e58d58.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/scorching_ray.png"
-dest_files=["res://.godot/imported/scorching_ray.png-9102cc1235a196dbe45c3d9186269d9f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/scorching_ray.png"
+dest_files=["res://.godot/imported/scorching_ray.png-71779d9483e1aadaeeebc88a81e58d58.ctex"]
 
 [params]
 

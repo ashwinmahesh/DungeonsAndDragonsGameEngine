@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bsxfe71ea1br5"
-path="res://.godot/imported/breastplate.png-e25d338cc5a9373610909a8b2afc35be.ctex"
+path="res://.godot/imported/breastplate.png-526041808509bdb03a622958fb8ac47b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/breastplate.png"
-dest_files=["res://.godot/imported/breastplate.png-e25d338cc5a9373610909a8b2afc35be.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/breastplate.png"
+dest_files=["res://.godot/imported/breastplate.png-526041808509bdb03a622958fb8ac47b.ctex"]
 
 [params]
 

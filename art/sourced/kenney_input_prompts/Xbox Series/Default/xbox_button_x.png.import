@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ceeaenukca5vp"
-path.bptc="res://.godot/imported/xbox_button_x.png-24514d9d9e71dbfe35fc3010c6982a4a.bptc.ctex"
+path.bptc="res://.godot/imported/xbox_button_x.png-535d88248d70562a404ae39e8d1aa13f.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_button_x.png"
-dest_files=["res://.godot/imported/xbox_button_x.png-24514d9d9e71dbfe35fc3010c6982a4a.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_button_x.png"
+dest_files=["res://.godot/imported/xbox_button_x.png-535d88248d70562a404ae39e8d1aa13f.bptc.ctex"]
 
 [params]
 

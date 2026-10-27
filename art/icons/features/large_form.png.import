@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b75olj7x6m6pd"
-path="res://.godot/imported/large_form.png-094640584798557e25118d00fc84b0c4.ctex"
+path="res://.godot/imported/large_form.png-be292d29ca530428ada7df241bd0acb9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/large_form.png"
-dest_files=["res://.godot/imported/large_form.png-094640584798557e25118d00fc84b0c4.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/large_form.png"
+dest_files=["res://.godot/imported/large_form.png-be292d29ca530428ada7df241bd0acb9.ctex"]
 
 [params]
 

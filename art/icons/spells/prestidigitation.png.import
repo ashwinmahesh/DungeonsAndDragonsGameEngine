@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ubxfy7l55c8l"
-path="res://.godot/imported/prestidigitation.png-6a58f233024187539665e763d426dd9e.ctex"
+path="res://.godot/imported/prestidigitation.png-2ed92313e913e29263d02550c40ffce8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/prestidigitation.png"
-dest_files=["res://.godot/imported/prestidigitation.png-6a58f233024187539665e763d426dd9e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/prestidigitation.png"
+dest_files=["res://.godot/imported/prestidigitation.png-2ed92313e913e29263d02550c40ffce8.ctex"]
 
 [params]
 

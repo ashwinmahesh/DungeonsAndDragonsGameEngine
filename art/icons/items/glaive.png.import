@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1mtrtgbrdslq"
-path="res://.godot/imported/glaive.png-1d9686e0e30b7c44930e6d675d083bf2.ctex"
+path="res://.godot/imported/glaive.png-61c8b519200ea20b87d2dc3ad0708740.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/glaive.png"
-dest_files=["res://.godot/imported/glaive.png-1d9686e0e30b7c44930e6d675d083bf2.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/glaive.png"
+dest_files=["res://.godot/imported/glaive.png-61c8b519200ea20b87d2dc3ad0708740.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c68rk6uwq2bsm"
-path="res://.godot/imported/sequester.png-d4cdf477a960efc9ee35796a47997c4f.ctex"
+path="res://.godot/imported/sequester.png-a011c7d7db55438e4ba4b5cbbd6e57ce.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/sequester.png"
-dest_files=["res://.godot/imported/sequester.png-d4cdf477a960efc9ee35796a47997c4f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/sequester.png"
+dest_files=["res://.godot/imported/sequester.png-a011c7d7db55438e4ba4b5cbbd6e57ce.ctex"]
 
 [params]
 

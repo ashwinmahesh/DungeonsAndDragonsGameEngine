@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bspjdvj88p8un"
-path="res://.godot/imported/influence.png-fd337b404a18a60098cb7b93926e358c.ctex"
+path="res://.godot/imported/influence.png-25aea34d4e551baf45a6fd9a0c700c89.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/influence.png"
-dest_files=["res://.godot/imported/influence.png-fd337b404a18a60098cb7b93926e358c.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/influence.png"
+dest_files=["res://.godot/imported/influence.png-25aea34d4e551baf45a6fd9a0c700c89.ctex"]
 
 [params]
 

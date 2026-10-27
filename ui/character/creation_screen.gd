@@ -204,7 +204,7 @@ func _draw_strip() -> void:
 			slot = i
 			_draw(), 16)
 		var art := str((builders[i].build.get("appearance", {}) as Dictionary).get("art", ""))
-		var path := "res://art/portraits/%s.png" % art
+		var path := ArtPaths.of("art/portraits/%s.png" % art)
 		if art != "" and ResourceLoader.exists(path):
 			chip.icon = load(path) as Texture2D
 			chip.expand_icon = true

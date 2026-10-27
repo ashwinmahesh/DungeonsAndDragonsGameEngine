@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c6gngy50vo68h"
-path="res://.godot/imported/compulsion.png-e531e2e74c67fd4668e05be52eb5c562.ctex"
+path="res://.godot/imported/compulsion.png-7541dcb1fe5ea50765c548de108b46e2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/compulsion.png"
-dest_files=["res://.godot/imported/compulsion.png-e531e2e74c67fd4668e05be52eb5c562.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/compulsion.png"
+dest_files=["res://.godot/imported/compulsion.png-7541dcb1fe5ea50765c548de108b46e2.ctex"]
 
 [params]
 

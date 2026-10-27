@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b58uegbki2mhn"
-path="res://.godot/imported/crossbow_bolt.png-b5bbb01bf23659a9a5dd17002b132005.ctex"
+path="res://.godot/imported/crossbow_bolt.png-4a20738cf47d1646aaebdec3ba0dfe1f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/crossbow_bolt.png"
-dest_files=["res://.godot/imported/crossbow_bolt.png-b5bbb01bf23659a9a5dd17002b132005.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/crossbow_bolt.png"
+dest_files=["res://.godot/imported/crossbow_bolt.png-4a20738cf47d1646aaebdec3ba0dfe1f.ctex"]
 
 [params]
 

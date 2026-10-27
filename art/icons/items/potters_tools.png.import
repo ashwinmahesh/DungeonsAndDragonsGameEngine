@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bb5fofmuqcauv"
-path="res://.godot/imported/potters_tools.png-490ba24a83191003e78857e31b6f1465.ctex"
+path="res://.godot/imported/potters_tools.png-c484f772df37d2902b83feba7fa1ecec.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/potters_tools.png"
-dest_files=["res://.godot/imported/potters_tools.png-490ba24a83191003e78857e31b6f1465.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/potters_tools.png"
+dest_files=["res://.godot/imported/potters_tools.png-c484f772df37d2902b83feba7fa1ecec.ctex"]
 
 [params]
 

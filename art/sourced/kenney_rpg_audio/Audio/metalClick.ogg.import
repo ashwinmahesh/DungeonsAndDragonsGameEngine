@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://bq2xkh63bs2j0"
-path="res://.godot/imported/metalClick.ogg-cfac31d4d3601c2ed11ee125f605f542.oggvorbisstr"
+path="res://.godot/imported/metalClick.ogg-a1ace9e56db12717a29499b1b53fd372.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_rpg_audio/Audio/metalClick.ogg"
-dest_files=["res://.godot/imported/metalClick.ogg-cfac31d4d3601c2ed11ee125f605f542.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_rpg_audio/Audio/metalClick.ogg"
+dest_files=["res://.godot/imported/metalClick.ogg-a1ace9e56db12717a29499b1b53fd372.oggvorbisstr"]
 
 [params]
 

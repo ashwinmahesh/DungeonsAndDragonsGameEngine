@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2xok30dn7i15"
-path.bptc="res://.godot/imported/playstation_button_square.png-b65e5d72cd415331143304e4d928cfa5.bptc.ctex"
+path.bptc="res://.godot/imported/playstation_button_square.png-6c3100ed7ae3e7948354e39ebfe39617.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_button_square.png"
-dest_files=["res://.godot/imported/playstation_button_square.png-b65e5d72cd415331143304e4d928cfa5.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_button_square.png"
+dest_files=["res://.godot/imported/playstation_button_square.png-6c3100ed7ae3e7948354e39ebfe39617.bptc.ctex"]
 
 [params]
 

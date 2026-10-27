@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dpkd6jelkrwu1"
-path="res://.godot/imported/resurrection.png-e2c1a8e1d85d6a0752e224c90d5d7faf.ctex"
+path="res://.godot/imported/resurrection.png-6cd416e03a2f2b931293783ebf26a818.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/resurrection.png"
-dest_files=["res://.godot/imported/resurrection.png-e2c1a8e1d85d6a0752e224c90d5d7faf.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/resurrection.png"
+dest_files=["res://.godot/imported/resurrection.png-6cd416e03a2f2b931293783ebf26a818.ctex"]
 
 [params]
 

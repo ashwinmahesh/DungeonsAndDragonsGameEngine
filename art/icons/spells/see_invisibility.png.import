@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgkcm2k2ds0ec"
-path="res://.godot/imported/see_invisibility.png-6ccf1a5b9434572b7ebb314a15cf512e.ctex"
+path="res://.godot/imported/see_invisibility.png-3424087bce858a4640b0c5fb02c170d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/see_invisibility.png"
-dest_files=["res://.godot/imported/see_invisibility.png-6ccf1a5b9434572b7ebb314a15cf512e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/see_invisibility.png"
+dest_files=["res://.godot/imported/see_invisibility.png-3424087bce858a4640b0c5fb02c170d4.ctex"]
 
 [params]
 

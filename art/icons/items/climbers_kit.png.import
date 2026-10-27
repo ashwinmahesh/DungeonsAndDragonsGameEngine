@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cs2vqsmoegdmf"
-path="res://.godot/imported/climbers_kit.png-44ed60bc274903ca91d7ccd5596491dc.ctex"
+path="res://.godot/imported/climbers_kit.png-0e10fa87c30d081cba01c30264f65221.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/climbers_kit.png"
-dest_files=["res://.godot/imported/climbers_kit.png-44ed60bc274903ca91d7ccd5596491dc.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/climbers_kit.png"
+dest_files=["res://.godot/imported/climbers_kit.png-0e10fa87c30d081cba01c30264f65221.ctex"]
 
 [params]
 

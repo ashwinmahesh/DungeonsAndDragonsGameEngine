@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://xwoootgspw8s"
-path="res://.godot/imported/chill_touch.png-735a7b47230f4fd69f8749227bab4498.ctex"
+path="res://.godot/imported/chill_touch.png-0c371851079ae8a0ed004f63953774ed.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/chill_touch.png"
-dest_files=["res://.godot/imported/chill_touch.png-735a7b47230f4fd69f8749227bab4498.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/chill_touch.png"
+dest_files=["res://.godot/imported/chill_touch.png-0c371851079ae8a0ed004f63953774ed.ctex"]
 
 [params]
 

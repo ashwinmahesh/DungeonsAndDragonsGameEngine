@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://y075xco7echr"
-path="res://.godot/imported/sword-1a.wav-333873b8ea28601ee4f37459a6290dd3.sample"
+path="res://.godot/imported/sword-1a.wav-43c08e2a084ef97c0ef37c7d6dced7dc.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_fleshy_fight_leamon/sword-1a.wav"
-dest_files=["res://.godot/imported/sword-1a.wav-333873b8ea28601ee4f37459a6290dd3.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_fleshy_fight_leamon/sword-1a.wav"
+dest_files=["res://.godot/imported/sword-1a.wav-43c08e2a084ef97c0ef37c7d6dced7dc.sample"]
 
 [params]
 

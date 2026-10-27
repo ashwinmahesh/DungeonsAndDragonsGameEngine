@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cpyqjugsoaw58"
-path="res://.godot/imported/qubodupImpactStone.ogg-2724d121d08b40fa80e79e24625119d4.oggvorbisstr"
+path="res://.godot/imported/qubodupImpactStone.ogg-b1869a559cfed0984f98eb235aae9aa0.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_impact_qubodup/qubodupImpactStone.ogg"
-dest_files=["res://.godot/imported/qubodupImpactStone.ogg-2724d121d08b40fa80e79e24625119d4.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_impact_qubodup/qubodupImpactStone.ogg"
+dest_files=["res://.godot/imported/qubodupImpactStone.ogg-b1869a559cfed0984f98eb235aae9aa0.oggvorbisstr"]
 
 [params]
 

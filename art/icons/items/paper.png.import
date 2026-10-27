@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bbkn1yv2bgcl"
-path="res://.godot/imported/paper.png-5d1453c5d23ae23c61c63d79d27c2742.ctex"
+path="res://.godot/imported/paper.png-bd665af5b2c22b85eb2d6613f5c33e6e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/paper.png"
-dest_files=["res://.godot/imported/paper.png-5d1453c5d23ae23c61c63d79d27c2742.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/paper.png"
+dest_files=["res://.godot/imported/paper.png-bd665af5b2c22b85eb2d6613f5c33e6e.ctex"]
 
 [params]
 

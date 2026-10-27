@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd3kj3acvmadq"
-path="res://.godot/imported/ioun_stone.png-de850d84fd2cf6f1e19970bbcacfd7a9.ctex"
+path="res://.godot/imported/ioun_stone.png-0c00ae8935707b9f0a05c8cdc27b4278.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/ioun_stone.png"
-dest_files=["res://.godot/imported/ioun_stone.png-de850d84fd2cf6f1e19970bbcacfd7a9.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/ioun_stone.png"
+dest_files=["res://.godot/imported/ioun_stone.png-0c00ae8935707b9f0a05c8cdc27b4278.ctex"]
 
 [params]
 

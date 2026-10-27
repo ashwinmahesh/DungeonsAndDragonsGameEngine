@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhhuvusjb6ujk"
-path="res://.godot/imported/wrath_of_the_sea.png-02ba3dbc44ae0fab40f7a8f5adac6a74.ctex"
+path="res://.godot/imported/wrath_of_the_sea.png-89ab4d8166e0b5cec23eec333d4f538c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/wrath_of_the_sea.png"
-dest_files=["res://.godot/imported/wrath_of_the_sea.png-02ba3dbc44ae0fab40f7a8f5adac6a74.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/wrath_of_the_sea.png"
+dest_files=["res://.godot/imported/wrath_of_the_sea.png-89ab4d8166e0b5cec23eec333d4f538c.ctex"]
 
 [params]
 

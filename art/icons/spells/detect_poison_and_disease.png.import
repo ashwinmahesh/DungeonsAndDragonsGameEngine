@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cssihgsn44cst"
-path="res://.godot/imported/detect_poison_and_disease.png-bb6ca063937e4f94e9e12d07cbd326f4.ctex"
+path="res://.godot/imported/detect_poison_and_disease.png-fd76cd789421339d61c3ce5feca6e9b5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/detect_poison_and_disease.png"
-dest_files=["res://.godot/imported/detect_poison_and_disease.png-bb6ca063937e4f94e9e12d07cbd326f4.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/detect_poison_and_disease.png"
+dest_files=["res://.godot/imported/detect_poison_and_disease.png-fd76cd789421339d61c3ce5feca6e9b5.ctex"]
 
 [params]
 

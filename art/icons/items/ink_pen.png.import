@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cffu7k4jd8dye"
-path="res://.godot/imported/ink_pen.png-8676134edc7a4d521bebd3e3685d1ed1.ctex"
+path="res://.godot/imported/ink_pen.png-55913aea2a66b811051ac79b9dc45d40.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/ink_pen.png"
-dest_files=["res://.godot/imported/ink_pen.png-8676134edc7a4d521bebd3e3685d1ed1.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/ink_pen.png"
+dest_files=["res://.godot/imported/ink_pen.png-55913aea2a66b811051ac79b9dc45d40.ctex"]
 
 [params]
 

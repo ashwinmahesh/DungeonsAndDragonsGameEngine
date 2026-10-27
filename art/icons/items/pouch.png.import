@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ci6laer6t8dr7"
-path="res://.godot/imported/pouch.png-641ddbe82cd42ba893af3e3b4e574b5a.ctex"
+path="res://.godot/imported/pouch.png-abd22fa7b5dd028374ffe76e73cdd434.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/pouch.png"
-dest_files=["res://.godot/imported/pouch.png-641ddbe82cd42ba893af3e3b4e574b5a.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/pouch.png"
+dest_files=["res://.godot/imported/pouch.png-abd22fa7b5dd028374ffe76e73cdd434.ctex"]
 
 [params]
 

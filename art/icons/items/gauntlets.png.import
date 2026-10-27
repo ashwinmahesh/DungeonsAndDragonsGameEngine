@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cluo0r2wd8gsw"
-path="res://.godot/imported/gauntlets.png-1b8e094f07975472dbb88780cda75a36.ctex"
+path="res://.godot/imported/gauntlets.png-f57b15e3de89456450af585729a03758.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/gauntlets.png"
-dest_files=["res://.godot/imported/gauntlets.png-1b8e094f07975472dbb88780cda75a36.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/gauntlets.png"
+dest_files=["res://.godot/imported/gauntlets.png-f57b15e3de89456450af585729a03758.ctex"]
 
 [params]
 

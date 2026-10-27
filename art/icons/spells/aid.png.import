@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://75t57t1ljeas"
-path="res://.godot/imported/aid.png-ee7547b23751d9086646da1dae0fb639.ctex"
+path="res://.godot/imported/aid.png-49335c0dc966ac490e860bf3564420a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/aid.png"
-dest_files=["res://.godot/imported/aid.png-ee7547b23751d9086646da1dae0fb639.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/aid.png"
+dest_files=["res://.godot/imported/aid.png-49335c0dc966ac490e860bf3564420a9.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://duak5wto6rm8p"
-path="res://.godot/imported/find_steed.png-e059d91ace6827d715709b1e7b8b7372.ctex"
+path="res://.godot/imported/find_steed.png-d87b5d3b200eddc043a5155d8be225e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/find_steed.png"
-dest_files=["res://.godot/imported/find_steed.png-e059d91ace6827d715709b1e7b8b7372.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/find_steed.png"
+dest_files=["res://.godot/imported/find_steed.png-d87b5d3b200eddc043a5155d8be225e3.ctex"]
 
 [params]
 

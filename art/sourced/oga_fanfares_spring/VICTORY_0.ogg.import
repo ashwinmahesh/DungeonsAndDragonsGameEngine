@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://jgk1e61mxe1i"
-path="res://.godot/imported/VICTORY_0.ogg-1cef2b45ecd9cc4e5e3193a01851deb3.oggvorbisstr"
+path="res://.godot/imported/VICTORY_0.ogg-b7b5a075e8a60c0cb2a646a8c7527578.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_fanfares_spring/VICTORY_0.ogg"
-dest_files=["res://.godot/imported/VICTORY_0.ogg-1cef2b45ecd9cc4e5e3193a01851deb3.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_fanfares_spring/VICTORY_0.ogg"
+dest_files=["res://.godot/imported/VICTORY_0.ogg-b7b5a075e8a60c0cb2a646a8c7527578.oggvorbisstr"]
 
 [params]
 

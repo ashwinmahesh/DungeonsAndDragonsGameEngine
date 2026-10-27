@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dldb0i7rgpmy"
-path="res://.godot/imported/sack.png-1de7406814deaff7a8231fc7bde17b57.ctex"
+path="res://.godot/imported/sack.png-c8c7310a2afce5a1e89a2a0a94c16a0d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/sack.png"
-dest_files=["res://.godot/imported/sack.png-1de7406814deaff7a8231fc7bde17b57.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/sack.png"
+dest_files=["res://.godot/imported/sack.png-c8c7310a2afce5a1e89a2a0a94c16a0d.ctex"]
 
 [params]
 

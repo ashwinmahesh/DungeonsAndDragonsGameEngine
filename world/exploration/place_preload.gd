@@ -72,9 +72,9 @@ static func _reading(arts: Array[String], portraits: bool) -> PlacePreload:
 	for art in arts:
 		var wanted: Array[String] = []
 		for sheet: String in DirectionalSprite.SHEETS:
-			wanted.append("res://art/sprites/%s/%s.tres" % [art, sheet])
+			wanted.append(ArtPaths.of("art/sprites/%s/%s.tres" % [art, sheet]))
 		if portraits:
-			wanted.append("res://art/portraits/%s.png" % art)
+			wanted.append(ArtPaths.of("art/portraits/%s.png" % art))
 		for path in wanted:
 			if ResourceLoader.has_cached(path) or not ResourceLoader.exists(path):
 				continue

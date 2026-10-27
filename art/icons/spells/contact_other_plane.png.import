@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://diotmwvl6ltto"
-path="res://.godot/imported/contact_other_plane.png-690398b1c14afb1bd99fc0117cec0278.ctex"
+path="res://.godot/imported/contact_other_plane.png-c612bfe6e8a9a5b6e472a84c961ca9fc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/contact_other_plane.png"
-dest_files=["res://.godot/imported/contact_other_plane.png-690398b1c14afb1bd99fc0117cec0278.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/contact_other_plane.png"
+dest_files=["res://.godot/imported/contact_other_plane.png-c612bfe6e8a9a5b6e472a84c961ca9fc.ctex"]
 
 [params]
 

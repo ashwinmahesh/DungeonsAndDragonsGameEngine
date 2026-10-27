@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://by8l2skhe363k"
-path="res://.godot/imported/speak_with_dead.png-f77d1d7540ec6b116a48ba0e0c274db3.ctex"
+path="res://.godot/imported/speak_with_dead.png-5a0bd6712e3d3a15598e8caa41675b64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/speak_with_dead.png"
-dest_files=["res://.godot/imported/speak_with_dead.png-f77d1d7540ec6b116a48ba0e0c274db3.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/speak_with_dead.png"
+dest_files=["res://.godot/imported/speak_with_dead.png-5a0bd6712e3d3a15598e8caa41675b64.ctex"]
 
 [params]
 

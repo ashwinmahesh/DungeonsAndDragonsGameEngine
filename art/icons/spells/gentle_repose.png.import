@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lsi4j7nx4yb7"
-path="res://.godot/imported/gentle_repose.png-434a3391ce2b95e588fb109c83287255.ctex"
+path="res://.godot/imported/gentle_repose.png-43ed0a883d52e5b6f0dc4c62e8afa154.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/gentle_repose.png"
-dest_files=["res://.godot/imported/gentle_repose.png-434a3391ce2b95e588fb109c83287255.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/gentle_repose.png"
+dest_files=["res://.godot/imported/gentle_repose.png-43ed0a883d52e5b6f0dc4c62e8afa154.ctex"]
 
 [params]
 

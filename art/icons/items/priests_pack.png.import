@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cktv8esun1vbb"
-path="res://.godot/imported/priests_pack.png-fa7f56779884de7d51e7014df18563d6.ctex"
+path="res://.godot/imported/priests_pack.png-717ccac67466de5d3d41ab83873119df.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/priests_pack.png"
-dest_files=["res://.godot/imported/priests_pack.png-fa7f56779884de7d51e7014df18563d6.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/priests_pack.png"
+dest_files=["res://.godot/imported/priests_pack.png-717ccac67466de5d3d41ab83873119df.ctex"]
 
 [params]
 

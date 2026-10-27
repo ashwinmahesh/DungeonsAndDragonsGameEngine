@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://boprrjht62xty"
-path="res://.godot/imported/sleep.png-82b12798f8a0369c60eec3d7b2c3dcc9.ctex"
+path="res://.godot/imported/sleep.png-36b6d70048779c3ca80a3d6374786d36.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/sleep.png"
-dest_files=["res://.godot/imported/sleep.png-82b12798f8a0369c60eec3d7b2c3dcc9.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/sleep.png"
+dest_files=["res://.godot/imported/sleep.png-36b6d70048779c3ca80a3d6374786d36.ctex"]
 
 [params]
 

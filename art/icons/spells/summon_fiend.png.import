@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3hyktkhvrrct"
-path="res://.godot/imported/summon_fiend.png-0db67d712fefb19671a6a1f717db61e5.ctex"
+path="res://.godot/imported/summon_fiend.png-04b8a47f69cd0bac9dbee0c34c4b1843.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/summon_fiend.png"
-dest_files=["res://.godot/imported/summon_fiend.png-0db67d712fefb19671a6a1f717db61e5.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/summon_fiend.png"
+dest_files=["res://.godot/imported/summon_fiend.png-04b8a47f69cd0bac9dbee0c34c4b1843.ctex"]
 
 [params]
 

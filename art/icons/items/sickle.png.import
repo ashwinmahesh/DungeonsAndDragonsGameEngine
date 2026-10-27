@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://uoli3metuuvl"
-path="res://.godot/imported/sickle.png-ab358dd200116a761ad719ce2ea32123.ctex"
+path="res://.godot/imported/sickle.png-c96ebe8d046c6f366cf802ccb276df29.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/sickle.png"
-dest_files=["res://.godot/imported/sickle.png-ab358dd200116a761ad719ce2ea32123.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/sickle.png"
+dest_files=["res://.godot/imported/sickle.png-c96ebe8d046c6f366cf802ccb276df29.ctex"]
 
 [params]
 

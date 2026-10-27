@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vrp1cpdfeils"
-path="res://.godot/imported/witch_bolt.png-8fba5f739ea49660d9e5b561b099be9e.ctex"
+path="res://.godot/imported/witch_bolt.png-b5662b34c1f490ef55a756e32f237de1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/witch_bolt.png"
-dest_files=["res://.godot/imported/witch_bolt.png-8fba5f739ea49660d9e5b561b099be9e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/witch_bolt.png"
+dest_files=["res://.godot/imported/witch_bolt.png-b5662b34c1f490ef55a756e32f237de1.ctex"]
 
 [params]
 

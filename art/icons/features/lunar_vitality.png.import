@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1bp4wconarbj"
-path="res://.godot/imported/lunar_vitality.png-22f55fa34efe6b67ef72c8d0d8abf919.ctex"
+path="res://.godot/imported/lunar_vitality.png-131127951298dea3c9e39c6e0c7884b5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/lunar_vitality.png"
-dest_files=["res://.godot/imported/lunar_vitality.png-22f55fa34efe6b67ef72c8d0d8abf919.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/lunar_vitality.png"
+dest_files=["res://.godot/imported/lunar_vitality.png-131127951298dea3c9e39c6e0c7884b5.ctex"]
 
 [params]
 

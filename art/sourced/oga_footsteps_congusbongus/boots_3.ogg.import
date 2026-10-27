@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cbptwlbb8s1c7"
-path="res://.godot/imported/boots_3.ogg-6f1ab8758808025e3880dc6264f355d4.oggvorbisstr"
+path="res://.godot/imported/boots_3.ogg-8cb034e716a2f89af2f5fbcb8003c7cd.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_footsteps_congusbongus/boots_3.ogg"
-dest_files=["res://.godot/imported/boots_3.ogg-6f1ab8758808025e3880dc6264f355d4.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_footsteps_congusbongus/boots_3.ogg"
+dest_files=["res://.godot/imported/boots_3.ogg-8cb034e716a2f89af2f5fbcb8003c7cd.oggvorbisstr"]
 
 [params]
 

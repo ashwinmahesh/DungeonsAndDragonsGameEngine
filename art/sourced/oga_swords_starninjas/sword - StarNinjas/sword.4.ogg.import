@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://ctuvila6eh8j"
-path="res://.godot/imported/sword.4.ogg-ff01588147f79601c65c9ce516247f02.oggvorbisstr"
+path="res://.godot/imported/sword.4.ogg-9a1400cdc9f2aa740a8cdad4dce45645.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_swords_starninjas/sword - StarNinjas/sword.4.ogg"
-dest_files=["res://.godot/imported/sword.4.ogg-ff01588147f79601c65c9ce516247f02.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_swords_starninjas/sword - StarNinjas/sword.4.ogg"
+dest_files=["res://.godot/imported/sword.4.ogg-9a1400cdc9f2aa740a8cdad4dce45645.oggvorbisstr"]
 
 [params]
 

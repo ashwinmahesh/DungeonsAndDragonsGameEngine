@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddr04xcdqnmii"
-path="res://.godot/imported/mind_spike.png-c94b758d620ca4b623260bae99f79e70.ctex"
+path="res://.godot/imported/mind_spike.png-05d2b3c671bb379a4814662686768cae.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/mind_spike.png"
-dest_files=["res://.godot/imported/mind_spike.png-c94b758d620ca4b623260bae99f79e70.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/mind_spike.png"
+dest_files=["res://.godot/imported/mind_spike.png-05d2b3c671bb379a4814662686768cae.ctex"]
 
 [params]
 

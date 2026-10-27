@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7nued1phl0oa"
-path="res://.godot/imported/wind_walk.png-995d9da7077e1febddc1d256e0e6f541.ctex"
+path="res://.godot/imported/wind_walk.png-dd031b99b01a2e67544644c4cf55479e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/wind_walk.png"
-dest_files=["res://.godot/imported/wind_walk.png-995d9da7077e1febddc1d256e0e6f541.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/wind_walk.png"
+dest_files=["res://.godot/imported/wind_walk.png-dd031b99b01a2e67544644c4cf55479e.ctex"]
 
 [params]
 

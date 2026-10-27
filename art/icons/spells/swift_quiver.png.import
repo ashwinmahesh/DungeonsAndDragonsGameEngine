@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bn2vsm8s4xyb8"
-path="res://.godot/imported/swift_quiver.png-bcc59a85b35c03f05d703d8b7107df74.ctex"
+path="res://.godot/imported/swift_quiver.png-796b11b920bb32147e420399c3c839af.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/swift_quiver.png"
-dest_files=["res://.godot/imported/swift_quiver.png-bcc59a85b35c03f05d703d8b7107df74.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/swift_quiver.png"
+dest_files=["res://.godot/imported/swift_quiver.png-796b11b920bb32147e420399c3c839af.ctex"]
 
 [params]
 

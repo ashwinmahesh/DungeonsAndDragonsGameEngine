@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bl4w330xd7adp"
-path="res://.godot/imported/find_traps.png-86f01f1a5f69a5983893e8827dc6480b.ctex"
+path="res://.godot/imported/find_traps.png-fdb336e8124e9e4da3da80da0a51ec04.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/find_traps.png"
-dest_files=["res://.godot/imported/find_traps.png-86f01f1a5f69a5983893e8827dc6480b.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/find_traps.png"
+dest_files=["res://.godot/imported/find_traps.png-fdb336e8124e9e4da3da80da0a51ec04.ctex"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://ywag2xq4411m"
-path="res://.godot/imported/confirmation_002.ogg-797e54da435ef5b7d8b71760f206287f.oggvorbisstr"
+path="res://.godot/imported/confirmation_002.ogg-80f9d43019bb35ed6f16d95350121252.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_interface_sounds/Audio/confirmation_002.ogg"
-dest_files=["res://.godot/imported/confirmation_002.ogg-797e54da435ef5b7d8b71760f206287f.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_interface_sounds/Audio/confirmation_002.ogg"
+dest_files=["res://.godot/imported/confirmation_002.ogg-80f9d43019bb35ed6f16d95350121252.oggvorbisstr"]
 
 [params]
 

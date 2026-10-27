@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cuv5bdey4n11v"
-path="res://.godot/imported/alchemists_fire.png-2846b13f7299e186035a0fc7c4eb7384.ctex"
+path="res://.godot/imported/alchemists_fire.png-463d11341006d6c469aa8dcd52d145c8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/alchemists_fire.png"
-dest_files=["res://.godot/imported/alchemists_fire.png-2846b13f7299e186035a0fc7c4eb7384.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/alchemists_fire.png"
+dest_files=["res://.godot/imported/alchemists_fire.png-463d11341006d6c469aa8dcd52d145c8.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgryrre4omtav"
-path="res://.godot/imported/pass_without_trace.png-51145a8838666dc5bb644e642b94a511.ctex"
+path="res://.godot/imported/pass_without_trace.png-8c0010e53b0f881b888f87045ba09e09.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/pass_without_trace.png"
-dest_files=["res://.godot/imported/pass_without_trace.png-51145a8838666dc5bb644e642b94a511.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/pass_without_trace.png"
+dest_files=["res://.godot/imported/pass_without_trace.png-8c0010e53b0f881b888f87045ba09e09.ctex"]
 
 [params]
 

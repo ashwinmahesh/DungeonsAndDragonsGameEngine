@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgcsconwe5r2k"
-path="res://.godot/imported/drum.png-34581fe53506cdbebfe7aa34831b6e8f.ctex"
+path="res://.godot/imported/drum.png-980e7f0f135abe75bfe1dfb98547d86c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/drum.png"
-dest_files=["res://.godot/imported/drum.png-34581fe53506cdbebfe7aa34831b6e8f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/drum.png"
+dest_files=["res://.godot/imported/drum.png-980e7f0f135abe75bfe1dfb98547d86c.ctex"]
 
 [params]
 

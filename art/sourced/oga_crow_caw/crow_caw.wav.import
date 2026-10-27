@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://dow1cpc7x0m5o"
-path="res://.godot/imported/crow_caw.wav-834d54983b823072825107181cf1ad40.sample"
+path="res://.godot/imported/crow_caw.wav-3ec3532f874b618af32a1e2dae349a2b.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_crow_caw/crow_caw.wav"
-dest_files=["res://.godot/imported/crow_caw.wav-834d54983b823072825107181cf1ad40.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_crow_caw/crow_caw.wav"
+dest_files=["res://.godot/imported/crow_caw.wav-3ec3532f874b618af32a1e2dae349a2b.sample"]
 
 [params]
 

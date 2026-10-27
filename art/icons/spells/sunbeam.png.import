@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ci8had5y7viq1"
-path="res://.godot/imported/sunbeam.png-1600f26821e75e1e5061a00590c7da4e.ctex"
+path="res://.godot/imported/sunbeam.png-d0f3c4cafdc03473267085ee2b28665a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/sunbeam.png"
-dest_files=["res://.godot/imported/sunbeam.png-1600f26821e75e1e5061a00590c7da4e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/sunbeam.png"
+dest_files=["res://.godot/imported/sunbeam.png-d0f3c4cafdc03473267085ee2b28665a.ctex"]
 
 [params]
 

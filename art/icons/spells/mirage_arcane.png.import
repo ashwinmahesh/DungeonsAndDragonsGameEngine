@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bojw5qn05fn40"
-path="res://.godot/imported/mirage_arcane.png-d7ca2a62efeb82d21932099b0377bb44.ctex"
+path="res://.godot/imported/mirage_arcane.png-8bfa7302c52985a6d31cb8be23082cbc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/mirage_arcane.png"
-dest_files=["res://.godot/imported/mirage_arcane.png-d7ca2a62efeb82d21932099b0377bb44.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/mirage_arcane.png"
+dest_files=["res://.godot/imported/mirage_arcane.png-8bfa7302c52985a6d31cb8be23082cbc.ctex"]
 
 [params]
 

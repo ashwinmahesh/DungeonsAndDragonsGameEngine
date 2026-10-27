@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crv5a4fcq2r2c"
-path="res://.godot/imported/conjure_fey.png-c690c405ab7ee1a2153f68bae90fc265.ctex"
+path="res://.godot/imported/conjure_fey.png-949c830ae352696a2e602445737e4caa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/conjure_fey.png"
-dest_files=["res://.godot/imported/conjure_fey.png-c690c405ab7ee1a2153f68bae90fc265.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/conjure_fey.png"
+dest_files=["res://.godot/imported/conjure_fey.png-949c830ae352696a2e602445737e4caa.ctex"]
 
 [params]
 

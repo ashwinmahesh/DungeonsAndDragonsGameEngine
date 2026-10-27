@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://can2gbqcgedrm"
-path.bptc="res://.godot/imported/xbox_dpad_down.png-34624e0908c8187a7b9344a249c9aae9.bptc.ctex"
+path.bptc="res://.godot/imported/xbox_dpad_down.png-053d9310b1d62e3b00fa1d5ad4f82a9a.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_dpad_down.png"
-dest_files=["res://.godot/imported/xbox_dpad_down.png-34624e0908c8187a7b9344a249c9aae9.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_dpad_down.png"
+dest_files=["res://.godot/imported/xbox_dpad_down.png-053d9310b1d62e3b00fa1d5ad4f82a9a.bptc.ctex"]
 
 [params]
 

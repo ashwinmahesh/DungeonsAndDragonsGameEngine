@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkdc2h12uoj73"
-path="res://.godot/imported/commune_with_nature.png-62238af93c04a403c159597ca187dd48.ctex"
+path="res://.godot/imported/commune_with_nature.png-e75b8bbfb4e15cc4a10ece384118c672.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/commune_with_nature.png"
-dest_files=["res://.godot/imported/commune_with_nature.png-62238af93c04a403c159597ca187dd48.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/commune_with_nature.png"
+dest_files=["res://.godot/imported/commune_with_nature.png-e75b8bbfb4e15cc4a10ece384118c672.ctex"]
 
 [params]
 

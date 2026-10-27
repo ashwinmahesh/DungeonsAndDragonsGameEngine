@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dpd6yb3krkit6"
-path="res://.godot/imported/flurry_of_blows.png-ec80499db70af64ef99ddf3c0d584665.ctex"
+path="res://.godot/imported/flurry_of_blows.png-c6109418dbbe7a0d822bd0c9692583ce.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/flurry_of_blows.png"
-dest_files=["res://.godot/imported/flurry_of_blows.png-ec80499db70af64ef99ddf3c0d584665.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/flurry_of_blows.png"
+dest_files=["res://.godot/imported/flurry_of_blows.png-c6109418dbbe7a0d822bd0c9692583ce.ctex"]
 
 [params]
 

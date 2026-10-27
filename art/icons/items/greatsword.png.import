@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqdeyi2x5khw4"
-path="res://.godot/imported/greatsword.png-abbe56879579bab5035010feb82a6f5c.ctex"
+path="res://.godot/imported/greatsword.png-0dd982ce449b784e7345d706117b00a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/greatsword.png"
-dest_files=["res://.godot/imported/greatsword.png-abbe56879579bab5035010feb82a6f5c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/greatsword.png"
+dest_files=["res://.godot/imported/greatsword.png-0dd982ce449b784e7345d706117b00a3.ctex"]
 
 [params]
 

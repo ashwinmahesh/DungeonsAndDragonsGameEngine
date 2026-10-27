@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dy4b4bc0i3yx3"
-path="res://.godot/imported/lamp.png-b895b4b70d5326a7febb8b23acaed9d1.ctex"
+path="res://.godot/imported/lamp.png-74127b3290c81ae237a4907d4fa8d6f4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/lamp.png"
-dest_files=["res://.godot/imported/lamp.png-b895b4b70d5326a7febb8b23acaed9d1.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/lamp.png"
+dest_files=["res://.godot/imported/lamp.png-74127b3290c81ae237a4907d4fa8d6f4.ctex"]
 
 [params]
 

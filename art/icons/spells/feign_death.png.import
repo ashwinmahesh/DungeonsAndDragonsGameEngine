@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bbmcb0vd3g70x"
-path="res://.godot/imported/feign_death.png-4e79c0a98f4d4943552da5d05d6a6bab.ctex"
+path="res://.godot/imported/feign_death.png-448263aac7c0fe8e6ed94e8a05e1db51.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/feign_death.png"
-dest_files=["res://.godot/imported/feign_death.png-4e79c0a98f4d4943552da5d05d6a6bab.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/feign_death.png"
+dest_files=["res://.godot/imported/feign_death.png-448263aac7c0fe8e6ed94e8a05e1db51.ctex"]
 
 [params]
 

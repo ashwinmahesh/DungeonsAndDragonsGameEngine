@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://slr6vumq12ne"
-path="res://.godot/imported/EBGaramond[wght].ttf-ddfa554a3d14a93a051c4c07e2214c22.fontdata"
+path="res://.godot/imported/EBGaramond[wght].ttf-329734ed95ab41487b5da51f9694812e.fontdata"
 
 [deps]
 
-source_file="res://art/sourced/google_fonts/ebgaramond/EBGaramond[wght].ttf"
-dest_files=["res://.godot/imported/EBGaramond[wght].ttf-ddfa554a3d14a93a051c4c07e2214c22.fontdata"]
+source_file="res://addons/dnd_core/art/sourced/google_fonts/ebgaramond/EBGaramond[wght].ttf"
+dest_files=["res://.godot/imported/EBGaramond[wght].ttf-329734ed95ab41487b5da51f9694812e.fontdata"]
 
 [params]
 

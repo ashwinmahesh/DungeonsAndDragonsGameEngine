@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qv8yjm7tyyay"
-path="res://.godot/imported/firearm_bullet.png-0455cc61a25d63b4cf3d46c7475b81d1.ctex"
+path="res://.godot/imported/firearm_bullet.png-1596518cb5e43e4f2b042e019607e5c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/firearm_bullet.png"
-dest_files=["res://.godot/imported/firearm_bullet.png-0455cc61a25d63b4cf3d46c7475b81d1.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/firearm_bullet.png"
+dest_files=["res://.godot/imported/firearm_bullet.png-1596518cb5e43e4f2b042e019607e5c6.ctex"]
 
 [params]
 

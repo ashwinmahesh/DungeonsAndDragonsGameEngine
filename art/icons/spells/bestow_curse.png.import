@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba7oxraec3rvs"
-path="res://.godot/imported/bestow_curse.png-716fc0f89051f46eb284a73aebc2fa33.ctex"
+path="res://.godot/imported/bestow_curse.png-7f3bddfc587903572f3fa946bcff74c7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/bestow_curse.png"
-dest_files=["res://.godot/imported/bestow_curse.png-716fc0f89051f46eb284a73aebc2fa33.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/bestow_curse.png"
+dest_files=["res://.godot/imported/bestow_curse.png-7f3bddfc587903572f3fa946bcff74c7.ctex"]
 
 [params]
 

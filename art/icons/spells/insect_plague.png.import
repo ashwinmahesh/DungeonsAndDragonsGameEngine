@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://046buuxgjwv1"
-path="res://.godot/imported/insect_plague.png-5279c1447ccd600ba24308e2066ebecb.ctex"
+path="res://.godot/imported/insect_plague.png-d054ca8111de5fed825df43a15e8c679.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/insect_plague.png"
-dest_files=["res://.godot/imported/insect_plague.png-5279c1447ccd600ba24308e2066ebecb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/insect_plague.png"
+dest_files=["res://.godot/imported/insect_plague.png-d054ca8111de5fed825df43a15e8c679.ctex"]
 
 [params]
 

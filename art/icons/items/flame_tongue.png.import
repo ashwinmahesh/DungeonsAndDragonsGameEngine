@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7tnvqr3gxlg2"
-path="res://.godot/imported/flame_tongue.png-ac392e03146631f9f6ed47ec1286c515.ctex"
+path="res://.godot/imported/flame_tongue.png-f4a9e1ed77f9a5bd9df90cf735a8c43a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/flame_tongue.png"
-dest_files=["res://.godot/imported/flame_tongue.png-ac392e03146631f9f6ed47ec1286c515.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/flame_tongue.png"
+dest_files=["res://.godot/imported/flame_tongue.png-f4a9e1ed77f9a5bd9df90cf735a8c43a.ctex"]
 
 [params]
 

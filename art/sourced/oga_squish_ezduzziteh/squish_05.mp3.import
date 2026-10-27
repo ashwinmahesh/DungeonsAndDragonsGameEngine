@@ -3,12 +3,12 @@
 importer="mp3"
 type="AudioStreamMP3"
 uid="uid://c58apulpa7661"
-path="res://.godot/imported/squish_05.mp3-992c5feed2f4fefd6b8d91f50fb81f85.mp3str"
+path="res://.godot/imported/squish_05.mp3-c2065a19d0f740425c057e1fb91ec4c2.mp3str"
 
 [deps]
 
-source_file="res://art/sourced/oga_squish_ezduzziteh/squish_05.mp3"
-dest_files=["res://.godot/imported/squish_05.mp3-992c5feed2f4fefd6b8d91f50fb81f85.mp3str"]
+source_file="res://addons/dnd_core/art/sourced/oga_squish_ezduzziteh/squish_05.mp3"
+dest_files=["res://.godot/imported/squish_05.mp3-c2065a19d0f740425c057e1fb91ec4c2.mp3str"]
 
 [params]
 

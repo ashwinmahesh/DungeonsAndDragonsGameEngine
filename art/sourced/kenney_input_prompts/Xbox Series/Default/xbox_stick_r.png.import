@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dr2e0cyxyxxq2"
-path.bptc="res://.godot/imported/xbox_stick_r.png-67bc626d1930ee4f1e98a0556278cb48.bptc.ctex"
+path.bptc="res://.godot/imported/xbox_stick_r.png-8fbf75b58d11dcc4057273b767e094f0.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_stick_r.png"
-dest_files=["res://.godot/imported/xbox_stick_r.png-67bc626d1930ee4f1e98a0556278cb48.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Xbox Series/Default/xbox_stick_r.png"
+dest_files=["res://.godot/imported/xbox_stick_r.png-8fbf75b58d11dcc4057273b767e094f0.bptc.ctex"]
 
 [params]
 

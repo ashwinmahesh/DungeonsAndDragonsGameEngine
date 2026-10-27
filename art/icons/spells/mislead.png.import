@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2x46ftr3lw7j"
-path="res://.godot/imported/mislead.png-edcd547f5d8c33cedddb500558ffc759.ctex"
+path="res://.godot/imported/mislead.png-f5e29c0b0fc0fc88402b8ac411eafd37.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/mislead.png"
-dest_files=["res://.godot/imported/mislead.png-edcd547f5d8c33cedddb500558ffc759.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/mislead.png"
+dest_files=["res://.godot/imported/mislead.png-f5e29c0b0fc0fc88402b8ac411eafd37.ctex"]
 
 [params]
 

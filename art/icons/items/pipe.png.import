@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpolyxsgirirx"
-path="res://.godot/imported/pipe.png-5709aa0deb0a18c6262eb69de874c731.ctex"
+path="res://.godot/imported/pipe.png-17e4608101e8dd865a8b8a2e585e839c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/pipe.png"
-dest_files=["res://.godot/imported/pipe.png-5709aa0deb0a18c6262eb69de874c731.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/pipe.png"
+dest_files=["res://.godot/imported/pipe.png-17e4608101e8dd865a8b8a2e585e839c.ctex"]
 
 [params]
 

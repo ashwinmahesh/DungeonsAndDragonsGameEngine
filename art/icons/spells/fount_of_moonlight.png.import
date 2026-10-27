@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djfg3xehgili"
-path="res://.godot/imported/fount_of_moonlight.png-3ab2b580f4b875aa13d4308cf8fcf3ab.ctex"
+path="res://.godot/imported/fount_of_moonlight.png-5193cb88bc840eb94dc828972e1390d1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/fount_of_moonlight.png"
-dest_files=["res://.godot/imported/fount_of_moonlight.png-3ab2b580f4b875aa13d4308cf8fcf3ab.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/fount_of_moonlight.png"
+dest_files=["res://.godot/imported/fount_of_moonlight.png-5193cb88bc840eb94dc828972e1390d1.ctex"]
 
 [params]
 

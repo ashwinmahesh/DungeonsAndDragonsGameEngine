@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhcw81bt8ud21"
-path="res://.godot/imported/block_and_tackle.png-141eb0938a429e09addf6f82654934dc.ctex"
+path="res://.godot/imported/block_and_tackle.png-cc66f8dfebc16e2945955020a1d69f81.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/block_and_tackle.png"
-dest_files=["res://.godot/imported/block_and_tackle.png-141eb0938a429e09addf6f82654934dc.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/block_and_tackle.png"
+dest_files=["res://.godot/imported/block_and_tackle.png-cc66f8dfebc16e2945955020a1d69f81.ctex"]
 
 [params]
 

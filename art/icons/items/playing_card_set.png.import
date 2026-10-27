@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crncbc2fh738p"
-path="res://.godot/imported/playing_card_set.png-5ce69551232a4d72a3d661b64a191a78.ctex"
+path="res://.godot/imported/playing_card_set.png-d26296d56660003bc019b83d9af1ef8d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/playing_card_set.png"
-dest_files=["res://.godot/imported/playing_card_set.png-5ce69551232a4d72a3d661b64a191a78.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/playing_card_set.png"
+dest_files=["res://.godot/imported/playing_card_set.png-d26296d56660003bc019b83d9af1ef8d.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw65qugqvn7y"
-path="res://.godot/imported/poison_spray.png-7064a83b103c70e699cb0b18a51926ed.ctex"
+path="res://.godot/imported/poison_spray.png-e7d173e7d17e2ce17b888a3b7de0a555.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/poison_spray.png"
-dest_files=["res://.godot/imported/poison_spray.png-7064a83b103c70e699cb0b18a51926ed.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/poison_spray.png"
+dest_files=["res://.godot/imported/poison_spray.png-e7d173e7d17e2ce17b888a3b7de0a555.ctex"]
 
 [params]
 

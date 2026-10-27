@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bb1iqt3axb77h"
-path="res://.godot/imported/wish.png-c04058cc25bd62fc9f3858154b7db21d.ctex"
+path="res://.godot/imported/wish.png-767daf340620a5336d198be51196493b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/wish.png"
-dest_files=["res://.godot/imported/wish.png-c04058cc25bd62fc9f3858154b7db21d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/wish.png"
+dest_files=["res://.godot/imported/wish.png-767daf340620a5336d198be51196493b.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://baqu3s7svd38u"
-path="res://.godot/imported/rapier.png-102222fa5d41768870e89c2ea191c823.ctex"
+path="res://.godot/imported/rapier.png-46ec73aae00cb9503359a5978cabf9d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/rapier.png"
-dest_files=["res://.godot/imported/rapier.png-102222fa5d41768870e89c2ea191c823.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/rapier.png"
+dest_files=["res://.godot/imported/rapier.png-46ec73aae00cb9503359a5978cabf9d2.ctex"]
 
 [params]
 

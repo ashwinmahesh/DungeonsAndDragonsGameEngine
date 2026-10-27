@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu4dilhfgnwpy"
-path.bptc="res://.godot/imported/playstation5_button_options.png-5bd4d6855def49229ec1f8a8acc0e17f.bptc.ctex"
+path.bptc="res://.godot/imported/playstation5_button_options.png-93e7f1f92a64f448dfa06bba2574bf07.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation5_button_options.png"
-dest_files=["res://.godot/imported/playstation5_button_options.png-5bd4d6855def49229ec1f8a8acc0e17f.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation5_button_options.png"
+dest_files=["res://.godot/imported/playstation5_button_options.png-93e7f1f92a64f448dfa06bba2574bf07.bptc.ctex"]
 
 [params]
 

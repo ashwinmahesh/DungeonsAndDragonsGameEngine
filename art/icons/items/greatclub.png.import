@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ctphu18lnx7xg"
-path="res://.godot/imported/greatclub.png-3d32a31d959344f00b7ebdf54d58841d.ctex"
+path="res://.godot/imported/greatclub.png-f8f5c36c27f19e6101db26075bf1a4ee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/greatclub.png"
-dest_files=["res://.godot/imported/greatclub.png-3d32a31d959344f00b7ebdf54d58841d.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/greatclub.png"
+dest_files=["res://.godot/imported/greatclub.png-f8f5c36c27f19e6101db26075bf1a4ee.ctex"]
 
 [params]
 

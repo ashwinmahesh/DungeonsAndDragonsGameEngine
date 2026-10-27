@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jcqtv1ceahwk"
-path="res://.godot/imported/dart.png-0d1cf6ac05d066b88f58c8226f455216.ctex"
+path="res://.godot/imported/dart.png-9531877eed2b17e0e518c213c1d42f42.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dart.png"
-dest_files=["res://.godot/imported/dart.png-0d1cf6ac05d066b88f58c8226f455216.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dart.png"
+dest_files=["res://.godot/imported/dart.png-9531877eed2b17e0e518c213c1d42f42.ctex"]
 
 [params]
 

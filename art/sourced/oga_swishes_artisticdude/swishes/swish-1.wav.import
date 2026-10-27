@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://b7m3gfpcwrsg2"
-path="res://.godot/imported/swish-1.wav-84cf55dcc6f983637bad1de951b3b53d.sample"
+path="res://.godot/imported/swish-1.wav-54853f4fae56a940b99ba67b1c2a5b30.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_swishes_artisticdude/swishes/swish-1.wav"
-dest_files=["res://.godot/imported/swish-1.wav-84cf55dcc6f983637bad1de951b3b53d.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_swishes_artisticdude/swishes/swish-1.wav"
+dest_files=["res://.godot/imported/swish-1.wav-54853f4fae56a940b99ba67b1c2a5b30.sample"]
 
 [params]
 

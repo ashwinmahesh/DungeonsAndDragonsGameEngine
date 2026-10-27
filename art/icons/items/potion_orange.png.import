@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqsmo3k4vp3wb"
-path="res://.godot/imported/potion_orange.png-68c8dbff4380acf5e82820896cdb18a9.ctex"
+path="res://.godot/imported/potion_orange.png-e80ccc5a8b3381849779510cda19e71e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/potion_orange.png"
-dest_files=["res://.godot/imported/potion_orange.png-68c8dbff4380acf5e82820896cdb18a9.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/potion_orange.png"
+dest_files=["res://.godot/imported/potion_orange.png-e80ccc5a8b3381849779510cda19e71e.ctex"]
 
 [params]
 

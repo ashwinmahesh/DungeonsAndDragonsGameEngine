@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dq8wm4cawxwud"
-path="res://.godot/imported/dominate_beast.png-6a02e4982ec92f7a92c918e5e524891c.ctex"
+path="res://.godot/imported/dominate_beast.png-11957249c97ec92c7b2a48603408a1ea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/dominate_beast.png"
-dest_files=["res://.godot/imported/dominate_beast.png-6a02e4982ec92f7a92c918e5e524891c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/dominate_beast.png"
+dest_files=["res://.godot/imported/dominate_beast.png-11957249c97ec92c7b2a48603408a1ea.ctex"]
 
 [params]
 

@@ -756,7 +756,7 @@ static func framed_portrait(art_id: String, side: float, down: bool = false, dea
 ## A party member's chip: their portrait and first name, the chosen one lit, greyed when they're down.
 static func chip(ch: Character, lit: bool, on_press: Callable, width: float = 132.0) -> Button:
 	var b := UiKit.button(ch.name.get_slice(" ", 0), on_press, 16)
-	var path := "res://art/portraits/%s.png" % CombatToken.art_for(ch)
+	var path := ArtPaths.of("art/portraits/%s.png" % CombatToken.art_for(ch))
 	if ResourceLoader.exists(path):
 		b.icon = load(path) as Texture2D
 	# The portrait keeps its own square, whatever the name: stretched into what a long name left (Ratatouille) it was

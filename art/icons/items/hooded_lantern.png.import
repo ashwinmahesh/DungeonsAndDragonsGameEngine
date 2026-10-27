@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://u0hqcsldyjec"
-path="res://.godot/imported/hooded_lantern.png-582c2ee38f6e4b0f525af3a1918fe832.ctex"
+path="res://.godot/imported/hooded_lantern.png-468209a5316e7e1529f1c6176f810e8e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hooded_lantern.png"
-dest_files=["res://.godot/imported/hooded_lantern.png-582c2ee38f6e4b0f525af3a1918fe832.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hooded_lantern.png"
+dest_files=["res://.godot/imported/hooded_lantern.png-468209a5316e7e1529f1c6176f810e8e.ctex"]
 
 [params]
 

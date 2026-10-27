@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://md6wd4a0t8yh"
-path="res://.godot/imported/arcane_lock.png-93ea8d3e2678d2718538a3d119e5ccaa.ctex"
+path="res://.godot/imported/arcane_lock.png-6a031753303e012c12af675c2fe0253f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/arcane_lock.png"
-dest_files=["res://.godot/imported/arcane_lock.png-93ea8d3e2678d2718538a3d119e5ccaa.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/arcane_lock.png"
+dest_files=["res://.godot/imported/arcane_lock.png-6a031753303e012c12af675c2fe0253f.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddexru6tb7r20"
-path="res://.godot/imported/staggering_smite.png-008be69194a90b2db912ff3c4602a18c.ctex"
+path="res://.godot/imported/staggering_smite.png-e4d18a3d9fa9e30562e07a1f2a03fb38.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/staggering_smite.png"
-dest_files=["res://.godot/imported/staggering_smite.png-008be69194a90b2db912ff3c4602a18c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/staggering_smite.png"
+dest_files=["res://.godot/imported/staggering_smite.png-e4d18a3d9fa9e30562e07a1f2a03fb38.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcgwqvr8peppq"
-path.bptc="res://.godot/imported/switch_button_minus.png-51cf4925561eddc6c74574eb75d28355.bptc.ctex"
+path.bptc="res://.godot/imported/switch_button_minus.png-e4f2249869c935abf1a8ef4458071779.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_button_minus.png"
-dest_files=["res://.godot/imported/switch_button_minus.png-51cf4925561eddc6c74574eb75d28355.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_button_minus.png"
+dest_files=["res://.godot/imported/switch_button_minus.png-e4f2249869c935abf1a8ef4458071779.bptc.ctex"]
 
 [params]
 

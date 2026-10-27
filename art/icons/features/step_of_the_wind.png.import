@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwtlgjxjwp8gn"
-path="res://.godot/imported/step_of_the_wind.png-70ad842f1b2f38a72cc46a3de0c38449.ctex"
+path="res://.godot/imported/step_of_the_wind.png-30a72c541370ffbd5934d5d38c589a89.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/step_of_the_wind.png"
-dest_files=["res://.godot/imported/step_of_the_wind.png-70ad842f1b2f38a72cc46a3de0c38449.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/step_of_the_wind.png"
+dest_files=["res://.godot/imported/step_of_the_wind.png-30a72c541370ffbd5934d5d38c589a89.ctex"]
 
 [params]
 

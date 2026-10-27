@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://bvsynt7v4idi"
-path="res://.godot/imported/piercing-1a.wav-2f1fe1ff9b2123c39dc145c2bb6390b1.sample"
+path="res://.godot/imported/piercing-1a.wav-7ce2aefaabb26deedcb5979335f4e047.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_fleshy_fight_leamon/piercing-1a.wav"
-dest_files=["res://.godot/imported/piercing-1a.wav-2f1fe1ff9b2123c39dc145c2bb6390b1.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_fleshy_fight_leamon/piercing-1a.wav"
+dest_files=["res://.godot/imported/piercing-1a.wav-7ce2aefaabb26deedcb5979335f4e047.sample"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dogmvmh71j6pi"
-path="res://.godot/imported/tankard.png-6e4ce2039635be6b7212bbf920c9129b.ctex"
+path="res://.godot/imported/tankard.png-d55f31e81e3452b22e59b0857908362d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/tankard.png"
-dest_files=["res://.godot/imported/tankard.png-6e4ce2039635be6b7212bbf920c9129b.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/tankard.png"
+dest_files=["res://.godot/imported/tankard.png-d55f31e81e3452b22e59b0857908362d.ctex"]
 
 [params]
 

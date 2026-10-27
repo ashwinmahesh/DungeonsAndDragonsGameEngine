@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dh6dat74jlsar"
-path="res://.godot/imported/searing_smite.png-a3629d6a6577bca1a3b0fa98b3c4f513.ctex"
+path="res://.godot/imported/searing_smite.png-b1b701841f4e0c6dbcf6754e94b04c02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/searing_smite.png"
-dest_files=["res://.godot/imported/searing_smite.png-a3629d6a6577bca1a3b0fa98b3c4f513.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/searing_smite.png"
+dest_files=["res://.godot/imported/searing_smite.png-b1b701841f4e0c6dbcf6754e94b04c02.ctex"]
 
 [params]
 

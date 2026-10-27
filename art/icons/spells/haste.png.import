@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ctxl1ypprytx6"
-path="res://.godot/imported/haste.png-9d585bc14cd0359d30af4acd4181d3fe.ctex"
+path="res://.godot/imported/haste.png-9fdd4ea9cde2edd53de9073002bedd11.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/haste.png"
-dest_files=["res://.godot/imported/haste.png-9d585bc14cd0359d30af4acd4181d3fe.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/haste.png"
+dest_files=["res://.godot/imported/haste.png-9fdd4ea9cde2edd53de9073002bedd11.ctex"]
 
 [params]
 

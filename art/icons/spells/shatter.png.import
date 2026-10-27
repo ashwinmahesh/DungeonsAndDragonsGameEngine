@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3wpm67h7gg4c"
-path="res://.godot/imported/shatter.png-cb55c652dcd5444e638e22f6a58a43e7.ctex"
+path="res://.godot/imported/shatter.png-456a3933e95d7e3af88ae8d888d563cd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/shatter.png"
-dest_files=["res://.godot/imported/shatter.png-cb55c652dcd5444e638e22f6a58a43e7.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/shatter.png"
+dest_files=["res://.godot/imported/shatter.png-456a3933e95d7e3af88ae8d888d563cd.ctex"]
 
 [params]
 

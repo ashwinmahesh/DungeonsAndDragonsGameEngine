@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c6tao57tq3s3"
-path="res://.godot/imported/detect_thoughts.png-131776f856d438d50591dc7998de41ba.ctex"
+path="res://.godot/imported/detect_thoughts.png-1ecb9ee1a53d3d9c449f09508058b2d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/detect_thoughts.png"
-dest_files=["res://.godot/imported/detect_thoughts.png-131776f856d438d50591dc7998de41ba.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/detect_thoughts.png"
+dest_files=["res://.godot/imported/detect_thoughts.png-1ecb9ee1a53d3d9c449f09508058b2d2.ctex"]
 
 [params]
 

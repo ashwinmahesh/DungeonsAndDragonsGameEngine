@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bg1nqe51i7evm"
-path="res://.godot/imported/ray_of_frost.png-7b99be92951089ec58043522937c9a64.ctex"
+path="res://.godot/imported/ray_of_frost.png-3c0540605f4192991ebac3153c46a396.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/ray_of_frost.png"
-dest_files=["res://.godot/imported/ray_of_frost.png-7b99be92951089ec58043522937c9a64.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/ray_of_frost.png"
+dest_files=["res://.godot/imported/ray_of_frost.png-3c0540605f4192991ebac3153c46a396.ctex"]
 
 [params]
 

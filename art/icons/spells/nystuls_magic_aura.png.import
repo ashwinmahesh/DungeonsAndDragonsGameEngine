@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfk0lmog6u2ll"
-path="res://.godot/imported/nystuls_magic_aura.png-c2be17514d67fcff9977c5007ae70e5c.ctex"
+path="res://.godot/imported/nystuls_magic_aura.png-50088402e2ce14734a30f1ff521d3112.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/nystuls_magic_aura.png"
-dest_files=["res://.godot/imported/nystuls_magic_aura.png-c2be17514d67fcff9977c5007ae70e5c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/nystuls_magic_aura.png"
+dest_files=["res://.godot/imported/nystuls_magic_aura.png-50088402e2ce14734a30f1ff521d3112.ctex"]
 
 [params]
 

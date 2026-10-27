@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfr0wg5exwmdl"
-path="res://.godot/imported/carpenters_tools.png-5ec04db068ddf1876e6613fc1ce842e6.ctex"
+path="res://.godot/imported/carpenters_tools.png-bc9c3f7bd1f26bc4f350847165628532.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/carpenters_tools.png"
-dest_files=["res://.godot/imported/carpenters_tools.png-5ec04db068ddf1876e6613fc1ce842e6.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/carpenters_tools.png"
+dest_files=["res://.godot/imported/carpenters_tools.png-bc9c3f7bd1f26bc4f350847165628532.ctex"]
 
 [params]
 

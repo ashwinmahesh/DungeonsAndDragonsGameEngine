@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkbbbj6u2vyuu"
-path="res://.godot/imported/acid.png-04d97c7d16838fb924ba6a3c9783056e.ctex"
+path="res://.godot/imported/acid.png-da275f434d2ee4eb4666078c98db63a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/acid.png"
-dest_files=["res://.godot/imported/acid.png-04d97c7d16838fb924ba6a3c9783056e.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/acid.png"
+dest_files=["res://.godot/imported/acid.png-da275f434d2ee4eb4666078c98db63a9.ctex"]
 
 [params]
 

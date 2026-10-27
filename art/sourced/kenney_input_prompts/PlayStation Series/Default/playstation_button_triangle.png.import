@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxh8jcc43dhwl"
-path.bptc="res://.godot/imported/playstation_button_triangle.png-d18c8c0c3531114a01326c0e5291a055.bptc.ctex"
+path.bptc="res://.godot/imported/playstation_button_triangle.png-02bf848cd532167eb294e012e7fb9b73.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_button_triangle.png"
-dest_files=["res://.godot/imported/playstation_button_triangle.png-d18c8c0c3531114a01326c0e5291a055.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_button_triangle.png"
+dest_files=["res://.godot/imported/playstation_button_triangle.png-02bf848cd532167eb294e012e7fb9b73.bptc.ctex"]
 
 [params]
 

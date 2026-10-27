@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxxhkb4jqvt31"
-path="res://.godot/imported/brewers_supplies.png-877cc55466754a4c3dfddc9003a5c1a7.ctex"
+path="res://.godot/imported/brewers_supplies.png-56a4a6a328332b260ad747de734bc0b0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/brewers_supplies.png"
-dest_files=["res://.godot/imported/brewers_supplies.png-877cc55466754a4c3dfddc9003a5c1a7.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/brewers_supplies.png"
+dest_files=["res://.godot/imported/brewers_supplies.png-56a4a6a328332b260ad747de734bc0b0.ctex"]
 
 [params]
 

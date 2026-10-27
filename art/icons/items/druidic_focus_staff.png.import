@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cp1y8xxb8l1gm"
-path="res://.godot/imported/druidic_focus_staff.png-e89d99a88480aa548a8356ffdb2072e4.ctex"
+path="res://.godot/imported/druidic_focus_staff.png-e3178544e8a970c09212470270c8f158.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/druidic_focus_staff.png"
-dest_files=["res://.godot/imported/druidic_focus_staff.png-e89d99a88480aa548a8356ffdb2072e4.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/druidic_focus_staff.png"
+dest_files=["res://.godot/imported/druidic_focus_staff.png-e3178544e8a970c09212470270c8f158.ctex"]
 
 [params]
 

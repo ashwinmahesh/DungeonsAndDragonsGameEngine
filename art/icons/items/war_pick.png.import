@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://chr0fnv520rl8"
-path="res://.godot/imported/war_pick.png-54fb85b015afdb8b01cf3b7dc344fffa.ctex"
+path="res://.godot/imported/war_pick.png-a8d8051c0ece4bf14ee23f46e3e70ba7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/war_pick.png"
-dest_files=["res://.godot/imported/war_pick.png-54fb85b015afdb8b01cf3b7dc344fffa.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/war_pick.png"
+dest_files=["res://.godot/imported/war_pick.png-a8d8051c0ece4bf14ee23f46e3e70ba7.ctex"]
 
 [params]
 

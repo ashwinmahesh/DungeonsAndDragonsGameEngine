@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqjga35o1dpo5"
-path="res://.godot/imported/protection_from_poison.png-507eddbf71aa23e59ee6863a51dc965d.ctex"
+path="res://.godot/imported/protection_from_poison.png-b0d55bf0a6b540a52c81e10daf841224.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/protection_from_poison.png"
-dest_files=["res://.godot/imported/protection_from_poison.png-507eddbf71aa23e59ee6863a51dc965d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/protection_from_poison.png"
+dest_files=["res://.godot/imported/protection_from_poison.png-b0d55bf0a6b540a52c81e10daf841224.ctex"]
 
 [params]
 

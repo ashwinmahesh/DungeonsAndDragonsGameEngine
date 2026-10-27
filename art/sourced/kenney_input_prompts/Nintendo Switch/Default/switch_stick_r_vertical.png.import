@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgs4uxx4g5pxc"
-path.bptc="res://.godot/imported/switch_stick_r_vertical.png-2d84190105185b41f89402fb2d72187d.bptc.ctex"
+path.bptc="res://.godot/imported/switch_stick_r_vertical.png-c817e376f6820077c289b2a7908ab2f1.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_stick_r_vertical.png"
-dest_files=["res://.godot/imported/switch_stick_r_vertical.png-2d84190105185b41f89402fb2d72187d.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_stick_r_vertical.png"
+dest_files=["res://.godot/imported/switch_stick_r_vertical.png-c817e376f6820077c289b2a7908ab2f1.bptc.ctex"]
 
 [params]
 

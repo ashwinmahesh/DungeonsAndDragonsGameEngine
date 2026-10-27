@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1kyldlufebar"
-path="res://.godot/imported/thunderous_smite.png-fbeba15c59f0e8dc6cc347283d76b150.ctex"
+path="res://.godot/imported/thunderous_smite.png-1c8801f46dca347c075622f3b676a06e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/thunderous_smite.png"
-dest_files=["res://.godot/imported/thunderous_smite.png-fbeba15c59f0e8dc6cc347283d76b150.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/thunderous_smite.png"
+dest_files=["res://.godot/imported/thunderous_smite.png-1c8801f46dca347c075622f3b676a06e.ctex"]
 
 [params]
 

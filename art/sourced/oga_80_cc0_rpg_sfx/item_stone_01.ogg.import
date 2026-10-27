@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://crykcf7p5ptcn"
-path="res://.godot/imported/item_stone_01.ogg-84ac1400a6443ddc69158dafc620ee68.oggvorbisstr"
+path="res://.godot/imported/item_stone_01.ogg-c4d5a9117e49730bd6f2f76aad0b1824.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_80_cc0_rpg_sfx/item_stone_01.ogg"
-dest_files=["res://.godot/imported/item_stone_01.ogg-84ac1400a6443ddc69158dafc620ee68.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_80_cc0_rpg_sfx/item_stone_01.ogg"
+dest_files=["res://.godot/imported/item_stone_01.ogg-c4d5a9117e49730bd6f2f76aad0b1824.oggvorbisstr"]
 
 [params]
 

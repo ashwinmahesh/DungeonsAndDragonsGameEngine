@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bm0qy1hwkivb1"
-path="res://.godot/imported/the_third_eye.png-3594fe662024f16cb017ca5e0f5688c1.ctex"
+path="res://.godot/imported/the_third_eye.png-efaa9498aa02a3474094931fce5cd4fb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/the_third_eye.png"
-dest_files=["res://.godot/imported/the_third_eye.png-3594fe662024f16cb017ca5e0f5688c1.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/the_third_eye.png"
+dest_files=["res://.godot/imported/the_third_eye.png-efaa9498aa02a3474094931fce5cd4fb.ctex"]
 
 [params]
 

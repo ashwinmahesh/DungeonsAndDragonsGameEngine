@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjm141wv61hmg"
-path="res://.godot/imported/phantasmal_force.png-2c3d4c9028f2ae8a8d5db4353f6891f6.ctex"
+path="res://.godot/imported/phantasmal_force.png-caa5d075c853f92764f9868c5c6b42d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/phantasmal_force.png"
-dest_files=["res://.godot/imported/phantasmal_force.png-2c3d4c9028f2ae8a8d5db4353f6891f6.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/phantasmal_force.png"
+dest_files=["res://.godot/imported/phantasmal_force.png-caa5d075c853f92764f9868c5c6b42d3.ctex"]
 
 [params]
 

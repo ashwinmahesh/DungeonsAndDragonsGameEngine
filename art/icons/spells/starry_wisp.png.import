@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3kkbu8qhqwuy"
-path="res://.godot/imported/starry_wisp.png-55f3a244c4e0ed66741f334ec78fa61f.ctex"
+path="res://.godot/imported/starry_wisp.png-1efacf74965cb7d1b03a8f1d6cdf19f6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/starry_wisp.png"
-dest_files=["res://.godot/imported/starry_wisp.png-55f3a244c4e0ed66741f334ec78fa61f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/starry_wisp.png"
+dest_files=["res://.godot/imported/starry_wisp.png-1efacf74965cb7d1b03a8f1d6cdf19f6.ctex"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://ddpuuspx6ndi7"
-path="res://.godot/imported/Deep Break 9.wav-f762ef6021fe4f6b373ed3752e8867f1.sample"
+path="res://.godot/imported/Deep Break 9.wav-9ed1b8e19320163083710c9a218a61c2.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_deep_bone_breaks/Deep Break 9.wav"
-dest_files=["res://.godot/imported/Deep Break 9.wav-f762ef6021fe4f6b373ed3752e8867f1.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_deep_bone_breaks/Deep Break 9.wav"
+dest_files=["res://.godot/imported/Deep Break 9.wav-9ed1b8e19320163083710c9a218a61c2.sample"]
 
 [params]
 

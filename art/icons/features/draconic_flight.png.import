@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cbt63qt7aaqax"
-path="res://.godot/imported/draconic_flight.png-209f229f0382a8c7e10707fe0e541516.ctex"
+path="res://.godot/imported/draconic_flight.png-0de08c560581dd6e83dc34710391862c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/draconic_flight.png"
-dest_files=["res://.godot/imported/draconic_flight.png-209f229f0382a8c7e10707fe0e541516.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/draconic_flight.png"
+dest_files=["res://.godot/imported/draconic_flight.png-0de08c560581dd6e83dc34710391862c.ctex"]
 
 [params]
 

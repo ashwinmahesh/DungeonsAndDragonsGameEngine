@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0k13fewwl6as"
-path="res://.godot/imported/inflict_wounds.png-deaafac1b4765c80fe79eab13530dea8.ctex"
+path="res://.godot/imported/inflict_wounds.png-1791b3127790f135643db6e9eeb9b674.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/inflict_wounds.png"
-dest_files=["res://.godot/imported/inflict_wounds.png-deaafac1b4765c80fe79eab13530dea8.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/inflict_wounds.png"
+dest_files=["res://.godot/imported/inflict_wounds.png-1791b3127790f135643db6e9eeb9b674.ctex"]
 
 [params]
 

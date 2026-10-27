@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://dd014broh7ow8"
-path="res://.godot/imported/metal_02.ogg-da5e16f26573ffbcf39ca420f63ed0b8.oggvorbisstr"
+path="res://.godot/imported/metal_02.ogg-0302636647e5c13d5973456225030770.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_80_cc0_rpg_sfx/metal_02.ogg"
-dest_files=["res://.godot/imported/metal_02.ogg-da5e16f26573ffbcf39ca420f63ed0b8.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_80_cc0_rpg_sfx/metal_02.ogg"
+dest_files=["res://.godot/imported/metal_02.ogg-0302636647e5c13d5973456225030770.oggvorbisstr"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qxc2vqa5nms7"
-path="res://.godot/imported/burglars_pack.png-0b20ec3415cfe7208a38f65b13eb2b84.ctex"
+path="res://.godot/imported/burglars_pack.png-36425d0434cbbdec739c2e97ca3e1860.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/burglars_pack.png"
-dest_files=["res://.godot/imported/burglars_pack.png-0b20ec3415cfe7208a38f65b13eb2b84.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/burglars_pack.png"
+dest_files=["res://.godot/imported/burglars_pack.png-36425d0434cbbdec739c2e97ca3e1860.ctex"]
 
 [params]
 

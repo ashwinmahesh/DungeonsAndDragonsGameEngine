@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bh55wuxkt3p57"
-path="res://.godot/imported/hypnotic_presence.png-e61cd8528b80c1fc8438709297b2a584.ctex"
+path="res://.godot/imported/hypnotic_presence.png-966d61ba755b5f98b26ec1ade2d82808.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/hypnotic_presence.png"
-dest_files=["res://.godot/imported/hypnotic_presence.png-e61cd8528b80c1fc8438709297b2a584.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/hypnotic_presence.png"
+dest_files=["res://.godot/imported/hypnotic_presence.png-966d61ba755b5f98b26ec1ade2d82808.ctex"]
 
 [params]
 

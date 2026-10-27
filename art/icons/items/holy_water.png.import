@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcsjh0fikpqcv"
-path="res://.godot/imported/holy_water.png-dc3098aac97789c155a47c7b16a2c9b8.ctex"
+path="res://.godot/imported/holy_water.png-49c9d988a66988da0e15230a5751c04d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/holy_water.png"
-dest_files=["res://.godot/imported/holy_water.png-dc3098aac97789c155a47c7b16a2c9b8.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/holy_water.png"
+dest_files=["res://.godot/imported/holy_water.png-49c9d988a66988da0e15230a5751c04d.ctex"]
 
 [params]
 

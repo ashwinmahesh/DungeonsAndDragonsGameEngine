@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk0ujy4cddps3"
-path="res://.godot/imported/hunting_trap.png-2339f4e4a609e42325739a56419f3120.ctex"
+path="res://.godot/imported/hunting_trap.png-58c3fb15be35f3799c596f26abc013a5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hunting_trap.png"
-dest_files=["res://.godot/imported/hunting_trap.png-2339f4e4a609e42325739a56419f3120.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hunting_trap.png"
+dest_files=["res://.godot/imported/hunting_trap.png-58c3fb15be35f3799c596f26abc013a5.ctex"]
 
 [params]
 

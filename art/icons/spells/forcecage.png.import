@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ues4qxtlpt0k"
-path="res://.godot/imported/forcecage.png-9cbe74b646f43ea84f2179bbe58be9b5.ctex"
+path="res://.godot/imported/forcecage.png-523d8f3622858690634568a171a6c273.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/forcecage.png"
-dest_files=["res://.godot/imported/forcecage.png-9cbe74b646f43ea84f2179bbe58be9b5.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/forcecage.png"
+dest_files=["res://.godot/imported/forcecage.png-523d8f3622858690634568a171a6c273.ctex"]
 
 [params]
 

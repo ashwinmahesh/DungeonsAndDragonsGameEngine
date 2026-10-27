@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b07mb486flfen"
-path="res://.godot/imported/finger_of_death.png-b991a597d5c154558c73cb3b88aece96.ctex"
+path="res://.godot/imported/finger_of_death.png-285cc48d7e337a1acf4b780bf90add46.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/finger_of_death.png"
-dest_files=["res://.godot/imported/finger_of_death.png-b991a597d5c154558c73cb3b88aece96.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/finger_of_death.png"
+dest_files=["res://.godot/imported/finger_of_death.png-285cc48d7e337a1acf4b780bf90add46.ctex"]
 
 [params]
 

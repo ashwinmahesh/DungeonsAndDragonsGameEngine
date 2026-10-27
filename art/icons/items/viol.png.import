@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5pxequf1wbt4"
-path="res://.godot/imported/viol.png-48bd8ec801813f44d9b3249bad2a5244.ctex"
+path="res://.godot/imported/viol.png-f71419fcb9431c125db0c4ec83319aa0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/viol.png"
-dest_files=["res://.godot/imported/viol.png-48bd8ec801813f44d9b3249bad2a5244.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/viol.png"
+dest_files=["res://.godot/imported/viol.png-f71419fcb9431c125db0c4ec83319aa0.ctex"]
 
 [params]
 

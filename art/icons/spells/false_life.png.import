@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bixe4jtgksole"
-path="res://.godot/imported/false_life.png-a7b8a6cf2d5930e6d17d932f1ed23622.ctex"
+path="res://.godot/imported/false_life.png-b53dddb7413b76e5a7af6db6dbe40dd7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/false_life.png"
-dest_files=["res://.godot/imported/false_life.png-a7b8a6cf2d5930e6d17d932f1ed23622.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/false_life.png"
+dest_files=["res://.godot/imported/false_life.png-b53dddb7413b76e5a7af6db6dbe40dd7.ctex"]
 
 [params]
 

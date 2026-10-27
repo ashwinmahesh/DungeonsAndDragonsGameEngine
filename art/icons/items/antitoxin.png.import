@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bj8redgcaoi7p"
-path="res://.godot/imported/antitoxin.png-e0c002a257bd30ad0ce733aacda85d12.ctex"
+path="res://.godot/imported/antitoxin.png-06e42ce2024caa24b2a2978157eda611.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/antitoxin.png"
-dest_files=["res://.godot/imported/antitoxin.png-e0c002a257bd30ad0ce733aacda85d12.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/antitoxin.png"
+dest_files=["res://.godot/imported/antitoxin.png-06e42ce2024caa24b2a2978157eda611.ctex"]
 
 [params]
 

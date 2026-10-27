@@ -108,7 +108,7 @@ static func _has_art(app: Dictionary, category: String, id: String) -> bool:
 		"hair", "beards":
 			return id == "none" or FileAccess.file_exists(_piece_png(category, id, ""))
 		"portraits":
-			return ResourceLoader.exists("res://art/portraits/%s.png" % id)
+			return ArtPaths.exists("art/portraits/%s.png" % id)
 	return true
 
 

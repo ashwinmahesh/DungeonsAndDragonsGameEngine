@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://yekqqlqc17v4"
-path="res://.godot/imported/magical_1_0.ogg-f5fb309cfe4822917ceb79e4af62c0d9.oggvorbisstr"
+path="res://.godot/imported/magical_1_0.ogg-034d8bfd77b23b1a92e9f89bcbc78420.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_magic_spell_sfx_jaggedstone/magical_1_0.ogg"
-dest_files=["res://.godot/imported/magical_1_0.ogg-f5fb309cfe4822917ceb79e4af62c0d9.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_magic_spell_sfx_jaggedstone/magical_1_0.ogg"
+dest_files=["res://.godot/imported/magical_1_0.ogg-034d8bfd77b23b1a92e9f89bcbc78420.oggvorbisstr"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cv7qjt2opa3qa"
-path="res://.godot/imported/halberd.png-dc72f9f73be289ec2355b24e16f7ef0a.ctex"
+path="res://.godot/imported/halberd.png-64260ff7f63eaaa5465107ade89b8046.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/halberd.png"
-dest_files=["res://.godot/imported/halberd.png-dc72f9f73be289ec2355b24e16f7ef0a.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/halberd.png"
+dest_files=["res://.godot/imported/halberd.png-64260ff7f63eaaa5465107ade89b8046.ctex"]
 
 [params]
 

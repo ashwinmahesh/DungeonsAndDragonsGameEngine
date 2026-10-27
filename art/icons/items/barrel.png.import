@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1ct6j4i1xgr3"
-path="res://.godot/imported/barrel.png-630b37df9eb4740c8b98bebed8d93a1f.ctex"
+path="res://.godot/imported/barrel.png-4caa8dc6cfedd1cdb956edfc58dbf35c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/barrel.png"
-dest_files=["res://.godot/imported/barrel.png-630b37df9eb4740c8b98bebed8d93a1f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/barrel.png"
+dest_files=["res://.godot/imported/barrel.png-4caa8dc6cfedd1cdb956edfc58dbf35c.ctex"]
 
 [params]
 

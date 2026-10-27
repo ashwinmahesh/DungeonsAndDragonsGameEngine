@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxqgfnbcjfsid"
-path="res://.godot/imported/druidic_focus_mistletoe.png-8952928dddb761af6ff4941bcd4c4293.ctex"
+path="res://.godot/imported/druidic_focus_mistletoe.png-f7f5973ea860f1770e2621eed0936d10.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/druidic_focus_mistletoe.png"
-dest_files=["res://.godot/imported/druidic_focus_mistletoe.png-8952928dddb761af6ff4941bcd4c4293.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/druidic_focus_mistletoe.png"
+dest_files=["res://.godot/imported/druidic_focus_mistletoe.png-f7f5973ea860f1770e2621eed0936d10.ctex"]
 
 [params]
 

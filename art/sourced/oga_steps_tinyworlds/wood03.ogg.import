@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cojttde4pmj7t"
-path="res://.godot/imported/wood03.ogg-0c8a3d5e4adf4b2ce7f37a985abc066f.oggvorbisstr"
+path="res://.godot/imported/wood03.ogg-679356b4b612bedcceb25ff7cb1974ed.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_steps_tinyworlds/wood03.ogg"
-dest_files=["res://.godot/imported/wood03.ogg-0c8a3d5e4adf4b2ce7f37a985abc066f.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_steps_tinyworlds/wood03.ogg"
+dest_files=["res://.godot/imported/wood03.ogg-679356b4b612bedcceb25ff7cb1974ed.oggvorbisstr"]
 
 [params]
 

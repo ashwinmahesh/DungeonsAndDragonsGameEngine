@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cfcflf70ypeuo"
-path="res://.godot/imported/creature_hurt_01.ogg-367dbec1543baef77d3d8e9e8c2a0527.oggvorbisstr"
+path="res://.godot/imported/creature_hurt_01.ogg-b70b972f33ef20daae87020a3b531f67.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_80_cc0_rpg_sfx/creature_hurt_01.ogg"
-dest_files=["res://.godot/imported/creature_hurt_01.ogg-367dbec1543baef77d3d8e9e8c2a0527.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_80_cc0_rpg_sfx/creature_hurt_01.ogg"
+dest_files=["res://.godot/imported/creature_hurt_01.ogg-b70b972f33ef20daae87020a3b531f67.oggvorbisstr"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dmi2i0cw4yxux"
-path="res://.godot/imported/cunning_strike.png-51ab27e95ad76ab9ff1ce5f0f9742830.ctex"
+path="res://.godot/imported/cunning_strike.png-09c2eb049ad12ada7a307251521cf43a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/cunning_strike.png"
-dest_files=["res://.godot/imported/cunning_strike.png-51ab27e95ad76ab9ff1ce5f0f9742830.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/cunning_strike.png"
+dest_files=["res://.godot/imported/cunning_strike.png-09c2eb049ad12ada7a307251521cf43a.ctex"]
 
 [params]
 

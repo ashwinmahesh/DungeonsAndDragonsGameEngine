@@ -155,7 +155,7 @@ func _chip(i: int) -> Control:
 	b.text = m.name.get_slice(" ", 0)
 	b.add_theme_font_size_override("font_size", 16)
 	UiKit.button_look(b)
-	var path := "res://art/portraits/%s.png" % CombatToken.art_for(m)
+	var path := ArtPaths.of("art/portraits/%s.png" % CombatToken.art_for(m))
 	if ResourceLoader.exists(path):
 		b.icon = load(path) as Texture2D
 	b.expand_icon = true

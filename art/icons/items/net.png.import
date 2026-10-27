@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://digv6tgu66b2v"
-path="res://.godot/imported/net.png-84524d26a8704dd03dca316aaa9dcd0a.ctex"
+path="res://.godot/imported/net.png-df25b3e8e02f6279a4293b3599405437.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/net.png"
-dest_files=["res://.godot/imported/net.png-84524d26a8704dd03dca316aaa9dcd0a.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/net.png"
+dest_files=["res://.godot/imported/net.png-df25b3e8e02f6279a4293b3599405437.ctex"]
 
 [params]
 

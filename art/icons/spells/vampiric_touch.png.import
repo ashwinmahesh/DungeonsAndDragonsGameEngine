@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dh66sby1gjpm"
-path="res://.godot/imported/vampiric_touch.png-6f1bf17813f17c9ac3e672a1d05fd5f9.ctex"
+path="res://.godot/imported/vampiric_touch.png-8f5df8fe9e3a57899a8e17793fd9a64f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/vampiric_touch.png"
-dest_files=["res://.godot/imported/vampiric_touch.png-6f1bf17813f17c9ac3e672a1d05fd5f9.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/vampiric_touch.png"
+dest_files=["res://.godot/imported/vampiric_touch.png-8f5df8fe9e3a57899a8e17793fd9a64f.ctex"]
 
 [params]
 

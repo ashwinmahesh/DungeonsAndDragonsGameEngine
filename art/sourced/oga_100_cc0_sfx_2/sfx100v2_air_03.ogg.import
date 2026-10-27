@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://barjcvrb6582t"
-path="res://.godot/imported/sfx100v2_air_03.ogg-6daa833416b3138c418bd7b980afe95b.oggvorbisstr"
+path="res://.godot/imported/sfx100v2_air_03.ogg-250cde275935a594a63caa8b523fd08e.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_100_cc0_sfx_2/sfx100v2_air_03.ogg"
-dest_files=["res://.godot/imported/sfx100v2_air_03.ogg-6daa833416b3138c418bd7b980afe95b.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_100_cc0_sfx_2/sfx100v2_air_03.ogg"
+dest_files=["res://.godot/imported/sfx100v2_air_03.ogg-250cde275935a594a63caa8b523fd08e.oggvorbisstr"]
 
 [params]
 

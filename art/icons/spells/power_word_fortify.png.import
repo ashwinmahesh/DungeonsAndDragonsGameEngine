@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7qu4hln6wtpe"
-path="res://.godot/imported/power_word_fortify.png-22e3e864ce06f634cc7b3f8056f9bccb.ctex"
+path="res://.godot/imported/power_word_fortify.png-6a5f9635ecd7d33f56b658965f6ed4bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/power_word_fortify.png"
-dest_files=["res://.godot/imported/power_word_fortify.png-22e3e864ce06f634cc7b3f8056f9bccb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/power_word_fortify.png"
+dest_files=["res://.godot/imported/power_word_fortify.png-6a5f9635ecd7d33f56b658965f6ed4bf.ctex"]
 
 [params]
 

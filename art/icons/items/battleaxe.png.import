@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cywvwybvpty4a"
-path="res://.godot/imported/battleaxe.png-f326627482e5511bd7b5df97040b660c.ctex"
+path="res://.godot/imported/battleaxe.png-19313d81d3a99b0eca8ee884d8e9d720.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/battleaxe.png"
-dest_files=["res://.godot/imported/battleaxe.png-f326627482e5511bd7b5df97040b660c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/battleaxe.png"
+dest_files=["res://.godot/imported/battleaxe.png-19313d81d3a99b0eca8ee884d8e9d720.ctex"]
 
 [params]
 

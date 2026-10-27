@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4mlh1be75bur"
-path="res://.godot/imported/vow_of_enmity.png-6b22f6929bb58276ed96e4a5d40df915.ctex"
+path="res://.godot/imported/vow_of_enmity.png-3e6642e25dfe8af45857d207347ac854.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/vow_of_enmity.png"
-dest_files=["res://.godot/imported/vow_of_enmity.png-6b22f6929bb58276ed96e4a5d40df915.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/vow_of_enmity.png"
+dest_files=["res://.godot/imported/vow_of_enmity.png-3e6642e25dfe8af45857d207347ac854.ctex"]
 
 [params]
 

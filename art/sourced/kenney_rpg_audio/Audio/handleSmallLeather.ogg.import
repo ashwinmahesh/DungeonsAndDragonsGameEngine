@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://pyfuq7imwpw7"
-path="res://.godot/imported/handleSmallLeather.ogg-0af5b687be8a954104daeb434c25389e.oggvorbisstr"
+path="res://.godot/imported/handleSmallLeather.ogg-02167a961ddb964db1da4f0cbf142ab3.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_rpg_audio/Audio/handleSmallLeather.ogg"
-dest_files=["res://.godot/imported/handleSmallLeather.ogg-0af5b687be8a954104daeb434c25389e.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_rpg_audio/Audio/handleSmallLeather.ogg"
+dest_files=["res://.godot/imported/handleSmallLeather.ogg-02167a961ddb964db1da4f0cbf142ab3.oggvorbisstr"]
 
 [params]
 

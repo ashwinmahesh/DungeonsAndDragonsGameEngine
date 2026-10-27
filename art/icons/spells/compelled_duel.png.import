@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cu846ryn1fyln"
-path="res://.godot/imported/compelled_duel.png-ab0fe22be79679fcbb48d5299da22b53.ctex"
+path="res://.godot/imported/compelled_duel.png-513b68cda0bd2fa4e2c24a1bf67dd658.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/compelled_duel.png"
-dest_files=["res://.godot/imported/compelled_duel.png-ab0fe22be79679fcbb48d5299da22b53.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/compelled_duel.png"
+dest_files=["res://.godot/imported/compelled_duel.png-513b68cda0bd2fa4e2c24a1bf67dd658.ctex"]
 
 [params]
 

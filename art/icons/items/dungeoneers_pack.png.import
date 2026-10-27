@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cyrf7w13nbish"
-path="res://.godot/imported/dungeoneers_pack.png-fc7e14dca21e50102b3f79e80b1a2d8b.ctex"
+path="res://.godot/imported/dungeoneers_pack.png-9ec7e20d1c4383aedf0e5b0d82da460a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dungeoneers_pack.png"
-dest_files=["res://.godot/imported/dungeoneers_pack.png-fc7e14dca21e50102b3f79e80b1a2d8b.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dungeoneers_pack.png"
+dest_files=["res://.godot/imported/dungeoneers_pack.png-9ec7e20d1c4383aedf0e5b0d82da460a.ctex"]
 
 [params]
 

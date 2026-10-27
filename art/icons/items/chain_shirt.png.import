@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccfurt04wmebg"
-path="res://.godot/imported/chain_shirt.png-730672638d3124d003b4070abf997792.ctex"
+path="res://.godot/imported/chain_shirt.png-ef48f5f38a60ab29398398ce5bb61d88.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/chain_shirt.png"
-dest_files=["res://.godot/imported/chain_shirt.png-730672638d3124d003b4070abf997792.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/chain_shirt.png"
+dest_files=["res://.godot/imported/chain_shirt.png-ef48f5f38a60ab29398398ce5bb61d88.ctex"]
 
 [params]
 

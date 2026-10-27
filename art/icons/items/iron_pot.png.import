@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dformm84p6x8v"
-path="res://.godot/imported/iron_pot.png-348ca67a3795f926df8a4f379bb4dd14.ctex"
+path="res://.godot/imported/iron_pot.png-f4572fbc58b160f517e454d5099494c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/iron_pot.png"
-dest_files=["res://.godot/imported/iron_pot.png-348ca67a3795f926df8a4f379bb4dd14.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/iron_pot.png"
+dest_files=["res://.godot/imported/iron_pot.png-f4572fbc58b160f517e454d5099494c6.ctex"]
 
 [params]
 

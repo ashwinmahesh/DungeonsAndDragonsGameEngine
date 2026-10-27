@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://da07dig6tjm7i"
-path="res://.godot/imported/conjure_minor_elementals.png-63e1a326004f59c691a521746d0a67c2.ctex"
+path="res://.godot/imported/conjure_minor_elementals.png-65496323b1d10e86edcc7d68eb8cac73.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/conjure_minor_elementals.png"
-dest_files=["res://.godot/imported/conjure_minor_elementals.png-63e1a326004f59c691a521746d0a67c2.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/conjure_minor_elementals.png"
+dest_files=["res://.godot/imported/conjure_minor_elementals.png-65496323b1d10e86edcc7d68eb8cac73.ctex"]
 
 [params]
 

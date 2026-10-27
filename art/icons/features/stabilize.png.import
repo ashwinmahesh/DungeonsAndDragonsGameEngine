@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cds1pctun0d27"
-path="res://.godot/imported/stabilize.png-02628c864c22eae57620a4906e3654ab.ctex"
+path="res://.godot/imported/stabilize.png-1459386e66b9b69cbf1529cb08b0dabd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/stabilize.png"
-dest_files=["res://.godot/imported/stabilize.png-02628c864c22eae57620a4906e3654ab.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/stabilize.png"
+dest_files=["res://.godot/imported/stabilize.png-1459386e66b9b69cbf1529cb08b0dabd.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dlwmujce8731s"
-path="res://.godot/imported/speak_with_animals.png-6ff0c62bad0070a185b68cc3ce7d9e86.ctex"
+path="res://.godot/imported/speak_with_animals.png-3f33cb2780444dba7c563f6b9b4770f0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/speak_with_animals.png"
-dest_files=["res://.godot/imported/speak_with_animals.png-6ff0c62bad0070a185b68cc3ce7d9e86.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/speak_with_animals.png"
+dest_files=["res://.godot/imported/speak_with_animals.png-3f33cb2780444dba7c563f6b9b4770f0.ctex"]
 
 [params]
 

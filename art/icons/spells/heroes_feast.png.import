@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://k251eenwra4y"
-path="res://.godot/imported/heroes_feast.png-784aba43fea3d116c5bf54b32452a777.ctex"
+path="res://.godot/imported/heroes_feast.png-a8d214efa708eb314c17bc763ae52884.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/heroes_feast.png"
-dest_files=["res://.godot/imported/heroes_feast.png-784aba43fea3d116c5bf54b32452a777.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/heroes_feast.png"
+dest_files=["res://.godot/imported/heroes_feast.png-a8d214efa708eb314c17bc763ae52884.ctex"]
 
 [params]
 

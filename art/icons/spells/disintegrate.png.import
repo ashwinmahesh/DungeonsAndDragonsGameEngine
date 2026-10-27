@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c62pcv45xdp0p"
-path="res://.godot/imported/disintegrate.png-5350859264e920428eaccde10309e2b2.ctex"
+path="res://.godot/imported/disintegrate.png-45c217bbee3ee31e1be04dc679aa05a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/disintegrate.png"
-dest_files=["res://.godot/imported/disintegrate.png-5350859264e920428eaccde10309e2b2.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/disintegrate.png"
+dest_files=["res://.godot/imported/disintegrate.png-45c217bbee3ee31e1be04dc679aa05a9.ctex"]
 
 [params]
 

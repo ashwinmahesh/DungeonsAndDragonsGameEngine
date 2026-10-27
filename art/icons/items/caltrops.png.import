@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cb7w37macypxs"
-path="res://.godot/imported/caltrops.png-c5de09077275910784f25566762cac81.ctex"
+path="res://.godot/imported/caltrops.png-1478ad2156d40d0e31111a3b82397a63.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/caltrops.png"
-dest_files=["res://.godot/imported/caltrops.png-c5de09077275910784f25566762cac81.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/caltrops.png"
+dest_files=["res://.godot/imported/caltrops.png-1478ad2156d40d0e31111a3b82397a63.ctex"]
 
 [params]
 

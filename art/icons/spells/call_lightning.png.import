@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bitd5lbrf8n4w"
-path="res://.godot/imported/call_lightning.png-93451a181fe54c068ac9e8ddc102e5a7.ctex"
+path="res://.godot/imported/call_lightning.png-d2e400521758b4d251be42319d3cbcd3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/call_lightning.png"
-dest_files=["res://.godot/imported/call_lightning.png-93451a181fe54c068ac9e8ddc102e5a7.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/call_lightning.png"
+dest_files=["res://.godot/imported/call_lightning.png-d2e400521758b4d251be42319d3cbcd3.ctex"]
 
 [params]
 

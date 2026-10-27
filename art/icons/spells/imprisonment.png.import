@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://du66585ntk310"
-path="res://.godot/imported/imprisonment.png-0cdbb9245274727732aad3337daba326.ctex"
+path="res://.godot/imported/imprisonment.png-4c9b3341bccb55b448b210954f2d947b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/imprisonment.png"
-dest_files=["res://.godot/imported/imprisonment.png-0cdbb9245274727732aad3337daba326.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/imprisonment.png"
+dest_files=["res://.godot/imported/imprisonment.png-4c9b3341bccb55b448b210954f2d947b.ctex"]
 
 [params]
 

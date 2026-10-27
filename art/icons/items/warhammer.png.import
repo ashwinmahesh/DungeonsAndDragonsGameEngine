@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkpcqjpxija82"
-path="res://.godot/imported/warhammer.png-6ffa3e1dc4776c777f90e5074d37f9bf.ctex"
+path="res://.godot/imported/warhammer.png-bc7baf67dab4069402c1f25ec88652cd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/warhammer.png"
-dest_files=["res://.godot/imported/warhammer.png-6ffa3e1dc4776c777f90e5074d37f9bf.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/warhammer.png"
+dest_files=["res://.godot/imported/warhammer.png-bc7baf67dab4069402c1f25ec88652cd.ctex"]
 
 [params]
 

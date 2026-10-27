@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdopxctmroyta"
-path="res://.godot/imported/forgery_kit.png-dabc3a9e60d162cb61d522e703517783.ctex"
+path="res://.godot/imported/forgery_kit.png-f80d4de372dc7a9faa3b535a9712a941.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/forgery_kit.png"
-dest_files=["res://.godot/imported/forgery_kit.png-dabc3a9e60d162cb61d522e703517783.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/forgery_kit.png"
+dest_files=["res://.godot/imported/forgery_kit.png-f80d4de372dc7a9faa3b535a9712a941.ctex"]
 
 [params]
 

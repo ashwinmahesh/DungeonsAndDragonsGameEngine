@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwnuofxqadjh7"
-path="res://.godot/imported/word_of_recall.png-0754c5374648a032ebb70ef5530364f6.ctex"
+path="res://.godot/imported/word_of_recall.png-a282992ba6060a5e1954aa162bc28bf4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/word_of_recall.png"
-dest_files=["res://.godot/imported/word_of_recall.png-0754c5374648a032ebb70ef5530364f6.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/word_of_recall.png"
+dest_files=["res://.godot/imported/word_of_recall.png-a282992ba6060a5e1954aa162bc28bf4.ctex"]
 
 [params]
 

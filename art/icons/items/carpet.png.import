@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f8e7p3kwr0hu"
-path="res://.godot/imported/carpet.png-bebb717275e9cabcbacd9027f03bf2fe.ctex"
+path="res://.godot/imported/carpet.png-4d375625bf77c63837eefaa83c0fdd95.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/carpet.png"
-dest_files=["res://.godot/imported/carpet.png-bebb717275e9cabcbacd9027f03bf2fe.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/carpet.png"
+dest_files=["res://.godot/imported/carpet.png-4d375625bf77c63837eefaa83c0fdd95.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bq5jlhkf4aeq8"
-path="res://.godot/imported/wall_of_thorns.png-d31df9c339da38ead8ecbb5d17021214.ctex"
+path="res://.godot/imported/wall_of_thorns.png-3f079b7f70579001472afa64f44178d7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/wall_of_thorns.png"
-dest_files=["res://.godot/imported/wall_of_thorns.png-d31df9c339da38ead8ecbb5d17021214.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/wall_of_thorns.png"
+dest_files=["res://.godot/imported/wall_of_thorns.png-3f079b7f70579001472afa64f44178d7.ctex"]
 
 [params]
 

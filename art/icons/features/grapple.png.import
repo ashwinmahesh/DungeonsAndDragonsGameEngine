@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fcmta0bxhp6a"
-path="res://.godot/imported/grapple.png-3ab53531ce922c25bb3aa2fac4ce4e1d.ctex"
+path="res://.godot/imported/grapple.png-81db740dc26e689a89838905d2eca479.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/grapple.png"
-dest_files=["res://.godot/imported/grapple.png-3ab53531ce922c25bb3aa2fac4ce4e1d.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/grapple.png"
+dest_files=["res://.godot/imported/grapple.png-81db740dc26e689a89838905d2eca479.ctex"]
 
 [params]
 

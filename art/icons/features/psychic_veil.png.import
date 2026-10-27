@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://508ulxb3b350"
-path="res://.godot/imported/psychic_veil.png-be883a78d1a89846fe537e579d7f60dc.ctex"
+path="res://.godot/imported/psychic_veil.png-04fd2858a1aa0706262b8f8179fd9360.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/psychic_veil.png"
-dest_files=["res://.godot/imported/psychic_veil.png-be883a78d1a89846fe537e579d7f60dc.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/psychic_veil.png"
+dest_files=["res://.godot/imported/psychic_veil.png-04fd2858a1aa0706262b8f8179fd9360.ctex"]
 
 [params]
 

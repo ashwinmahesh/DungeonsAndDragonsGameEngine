@@ -7,7 +7,7 @@ extends Node3D
 ## conditions. It only shows state; the encounter decides everything.
 
 ## Per-creature facts: sprite height, own light and art aliases (art/creature_looks.json; tools/art/new_creatures.py adds heights).
-const LOOKS := "res://art/creature_looks.json"
+const LOOKS := "art/creature_looks.json"   # the core's, with the game's own creatures merged over it (ArtPaths.json)
 
 ## Sprite height in world units (1 unit = 5 ft) by creature, so a halfling stands half a human's height. A creature
 ## is drawn as big as its size's squares ask (DrawnCreatures.BANDS, test_creature_sizes: a Large one at least 1.3, a
@@ -26,8 +26,7 @@ static var ART_ALIASES: Dictionary = _look_table("art_aliases")
 ## One table of art/creature_looks.json (heights, own_light, art_aliases): the per-creature facts live in data, so the combat
 ## code names no creature (docs/plans/engine_split.md).
 static func _look_table(key: String) -> Dictionary:
-	var all := JSON.parse_string(FileAccess.get_file_as_string(LOOKS)) as Dictionary
-	return all[key] as Dictionary
+	return ArtPaths.json(LOOKS).get(key, {}) as Dictionary
 
 ## The art each character on the field wears, by creature id: an Echo Knight's echo (`look_of` in its stat block) is
 ## drawn as a ghostly copy of its knight.
@@ -166,7 +165,7 @@ static func art_for(cr: Creature) -> String:
 			return look
 		# A pregen with art of its own (the six on the roster) wears it; anyone else borrows a look by class.
 		for own: String in [cr.id, cr.name.to_snake_case()]:
-			if own != "" and ResourceLoader.exists("res://art/sprites/%s/walk.tres" % own):
+			if own != "" and ArtPaths.exists("art/sprites/%s/walk.tres" % own):
 				return own
 		return default_look(cr as Character)
 	return cr.name.to_snake_case()

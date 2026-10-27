@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://bsjr073i7d1bq"
-path="res://.godot/imported/creature_roar_01.ogg-c395881f574026d275feaab7ffdf6dd6.oggvorbisstr"
+path="res://.godot/imported/creature_roar_01.ogg-fc1d7f9d5f2289722a725277f984cf0b.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_80_cc0_rpg_sfx/creature_roar_01.ogg"
-dest_files=["res://.godot/imported/creature_roar_01.ogg-c395881f574026d275feaab7ffdf6dd6.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_80_cc0_rpg_sfx/creature_roar_01.ogg"
+dest_files=["res://.godot/imported/creature_roar_01.ogg-fc1d7f9d5f2289722a725277f984cf0b.oggvorbisstr"]
 
 [params]
 

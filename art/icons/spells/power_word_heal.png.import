@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6042ydb7ebie"
-path="res://.godot/imported/power_word_heal.png-8e1eef946164946700ec44b5e5094728.ctex"
+path="res://.godot/imported/power_word_heal.png-7d7a441aab59022ffff6c880b039a01d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/power_word_heal.png"
-dest_files=["res://.godot/imported/power_word_heal.png-8e1eef946164946700ec44b5e5094728.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/power_word_heal.png"
+dest_files=["res://.godot/imported/power_word_heal.png-7d7a441aab59022ffff6c880b039a01d.ctex"]
 
 [params]
 

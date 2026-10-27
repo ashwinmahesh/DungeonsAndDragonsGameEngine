@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://caxw6dy8seycu"
-path="res://.godot/imported/punch_1a.wav-b094f9412ccb9d9643590e41816d36ef.sample"
+path="res://.godot/imported/punch_1a.wav-4bfaca8bf7e50070d0d43825c71b0d6f.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_fleshy_fight_leamon/punch_1a.wav"
-dest_files=["res://.godot/imported/punch_1a.wav-b094f9412ccb9d9643590e41816d36ef.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_fleshy_fight_leamon/punch_1a.wav"
+dest_files=["res://.godot/imported/punch_1a.wav-4bfaca8bf7e50070d0d43825c71b0d6f.sample"]
 
 [params]
 

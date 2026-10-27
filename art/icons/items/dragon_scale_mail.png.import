@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://blsgl2q520a8v"
-path="res://.godot/imported/dragon_scale_mail.png-e13c0e1ed728081ee0872758b58b7ea6.ctex"
+path="res://.godot/imported/dragon_scale_mail.png-b8845ea43046574539dd3d7a9b4222f0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dragon_scale_mail.png"
-dest_files=["res://.godot/imported/dragon_scale_mail.png-e13c0e1ed728081ee0872758b58b7ea6.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dragon_scale_mail.png"
+dest_files=["res://.godot/imported/dragon_scale_mail.png-b8845ea43046574539dd3d7a9b4222f0.ctex"]
 
 [params]
 

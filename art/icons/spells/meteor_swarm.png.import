@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://46tfvi6tm0dg"
-path="res://.godot/imported/meteor_swarm.png-797ad3ab29a75b36b543e431f32f6cca.ctex"
+path="res://.godot/imported/meteor_swarm.png-686302e60a2a8e3f23d1a77358d35df7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/meteor_swarm.png"
-dest_files=["res://.godot/imported/meteor_swarm.png-797ad3ab29a75b36b543e431f32f6cca.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/meteor_swarm.png"
+dest_files=["res://.godot/imported/meteor_swarm.png-686302e60a2a8e3f23d1a77358d35df7.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1q5ji42skk6s"
-path="res://.godot/imported/locate_creature.png-a9aa67a54762c9fcb06a45bdacf3908c.ctex"
+path="res://.godot/imported/locate_creature.png-b12f162b342ce162698b32d2f1abea3c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/locate_creature.png"
-dest_files=["res://.godot/imported/locate_creature.png-a9aa67a54762c9fcb06a45bdacf3908c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/locate_creature.png"
+dest_files=["res://.godot/imported/locate_creature.png-b12f162b342ce162698b32d2f1abea3c.ctex"]
 
 [params]
 

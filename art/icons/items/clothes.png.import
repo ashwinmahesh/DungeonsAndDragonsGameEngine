@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://68q1a13a0rgv"
-path="res://.godot/imported/clothes.png-0661821ea99e524138825ed647d5270c.ctex"
+path="res://.godot/imported/clothes.png-34a57eb65082853ffd875aa415715d50.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/clothes.png"
-dest_files=["res://.godot/imported/clothes.png-0661821ea99e524138825ed647d5270c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/clothes.png"
+dest_files=["res://.godot/imported/clothes.png-34a57eb65082853ffd875aa415715d50.ctex"]
 
 [params]
 

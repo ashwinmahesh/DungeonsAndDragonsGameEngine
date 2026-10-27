@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dltvekibfs1t7"
-path="res://.godot/imported/amulet.png-a7f30eed4011e47e76ae4fe408914b11.ctex"
+path="res://.godot/imported/amulet.png-e125affe793a4160d81ea2c8307d763b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/amulet.png"
-dest_files=["res://.godot/imported/amulet.png-a7f30eed4011e47e76ae4fe408914b11.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/amulet.png"
+dest_files=["res://.godot/imported/amulet.png-e125affe793a4160d81ea2c8307d763b.ctex"]
 
 [params]
 

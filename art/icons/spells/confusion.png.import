@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0j6vr76ynx8l"
-path="res://.godot/imported/confusion.png-76f4e7c1e83ab5b873b7f4856ec3b73c.ctex"
+path="res://.godot/imported/confusion.png-a25bd423704f5e5c568343960e8f3587.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/confusion.png"
-dest_files=["res://.godot/imported/confusion.png-76f4e7c1e83ab5b873b7f4856ec3b73c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/confusion.png"
+dest_files=["res://.godot/imported/confusion.png-a25bd423704f5e5c568343960e8f3587.ctex"]
 
 [params]
 

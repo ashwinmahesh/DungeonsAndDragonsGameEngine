@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://bcomkfjfvfakh"
-path="res://.godot/imported/pumpkin_break_02.ogg-0e404ee11b32f740ba6a6c6184e35d13.oggvorbisstr"
+path="res://.godot/imported/pumpkin_break_02.ogg-9bd23069a4751978b57c05570052d97a.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_break_pumpkin_tinyworlds/pumpkin_break_02.ogg"
-dest_files=["res://.godot/imported/pumpkin_break_02.ogg-0e404ee11b32f740ba6a6c6184e35d13.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_break_pumpkin_tinyworlds/pumpkin_break_02.ogg"
+dest_files=["res://.godot/imported/pumpkin_break_02.ogg-9bd23069a4751978b57c05570052d97a.oggvorbisstr"]
 
 [params]
 

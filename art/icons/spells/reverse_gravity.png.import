@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cgs8ygixqlm3i"
-path="res://.godot/imported/reverse_gravity.png-71eba354a607a30d996c77a53f1a80ab.ctex"
+path="res://.godot/imported/reverse_gravity.png-adfeb53996d4fc8a6e9abfd842292523.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/reverse_gravity.png"
-dest_files=["res://.godot/imported/reverse_gravity.png-71eba354a607a30d996c77a53f1a80ab.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/reverse_gravity.png"
+dest_files=["res://.godot/imported/reverse_gravity.png-adfeb53996d4fc8a6e9abfd842292523.ctex"]
 
 [params]
 

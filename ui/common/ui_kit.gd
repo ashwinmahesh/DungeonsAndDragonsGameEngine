@@ -424,7 +424,7 @@ static func stat(name_text: String, value: String, breakdown: Breakdown = null) 
 
 static func portrait(art_id: String, size: float = 96.0) -> TextureRect:
 	var t := TextureRect.new()
-	var path := "res://art/portraits/%s.png" % art_id
+	var path := ArtPaths.of("art/portraits/%s.png" % art_id)
 	t.texture = load(path) as Texture2D if ResourceLoader.exists(path) else null
 	t.custom_minimum_size = Vector2(size, size)
 	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE

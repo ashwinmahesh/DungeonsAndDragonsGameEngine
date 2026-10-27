@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1v1s7rb3y0x4"
-path="res://.godot/imported/purify_food_and_drink.png-27cb73c0f3ab9fdd2542921817469f74.ctex"
+path="res://.godot/imported/purify_food_and_drink.png-f840aa07152ffa3b9dd29f374b1661c7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/purify_food_and_drink.png"
-dest_files=["res://.godot/imported/purify_food_and_drink.png-27cb73c0f3ab9fdd2542921817469f74.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/purify_food_and_drink.png"
+dest_files=["res://.godot/imported/purify_food_and_drink.png-f840aa07152ffa3b9dd29f374b1661c7.ctex"]
 
 [params]
 

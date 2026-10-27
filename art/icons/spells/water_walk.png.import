@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dj6e6cflebq8l"
-path="res://.godot/imported/water_walk.png-5c8216cf67db20ea6f1799c849dd2ebb.ctex"
+path="res://.godot/imported/water_walk.png-9766656056c13a9657f856b2ea18032f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/water_walk.png"
-dest_files=["res://.godot/imported/water_walk.png-5c8216cf67db20ea6f1799c849dd2ebb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/water_walk.png"
+dest_files=["res://.godot/imported/water_walk.png-9766656056c13a9657f856b2ea18032f.ctex"]
 
 [params]
 

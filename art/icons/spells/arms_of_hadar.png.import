@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfeweum60gtc1"
-path="res://.godot/imported/arms_of_hadar.png-c80a88b2060c0895030ff3ebc7aee4ca.ctex"
+path="res://.godot/imported/arms_of_hadar.png-0d372ed9adfbb697466ab02d60f30cfa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/arms_of_hadar.png"
-dest_files=["res://.godot/imported/arms_of_hadar.png-c80a88b2060c0895030ff3ebc7aee4ca.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/arms_of_hadar.png"
+dest_files=["res://.godot/imported/arms_of_hadar.png-0d372ed9adfbb697466ab02d60f30cfa.ctex"]
 
 [params]
 

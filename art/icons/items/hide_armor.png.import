@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5n7b0queuxvf"
-path="res://.godot/imported/hide_armor.png-d47234a097ddd3e05785b27288b3afe3.ctex"
+path="res://.godot/imported/hide_armor.png-0034ca6ee569d2a38d2ca08aff5e678f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hide_armor.png"
-dest_files=["res://.godot/imported/hide_armor.png-d47234a097ddd3e05785b27288b3afe3.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hide_armor.png"
+dest_files=["res://.godot/imported/hide_armor.png-0034ca6ee569d2a38d2ca08aff5e678f.ctex"]
 
 [params]
 

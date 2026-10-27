@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://j0bok2d1kof4"
-path="res://.godot/imported/plant_growth.png-7f0ecb4c124bc6a2321e8ec186e8846b.ctex"
+path="res://.godot/imported/plant_growth.png-bf9197f066ddec408962409949375311.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/plant_growth.png"
-dest_files=["res://.godot/imported/plant_growth.png-7f0ecb4c124bc6a2321e8ec186e8846b.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/plant_growth.png"
+dest_files=["res://.godot/imported/plant_growth.png-bf9197f066ddec408962409949375311.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clxjovooctoui"
-path="res://.godot/imported/barkskin.png-7d5722c2119ca78072dc64f83b693daf.ctex"
+path="res://.godot/imported/barkskin.png-db310b61298481114f09c6d212674895.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/barkskin.png"
-dest_files=["res://.godot/imported/barkskin.png-7d5722c2119ca78072dc64f83b693daf.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/barkskin.png"
+dest_files=["res://.godot/imported/barkskin.png-db310b61298481114f09c6d212674895.ctex"]
 
 [params]
 

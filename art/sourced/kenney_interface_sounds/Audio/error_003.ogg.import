@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cbuyetiax4wa1"
-path="res://.godot/imported/error_003.ogg-98e358d3a8002330bf087b5a06621805.oggvorbisstr"
+path="res://.godot/imported/error_003.ogg-70985237b17e79de0c529aafa369d1b4.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_interface_sounds/Audio/error_003.ogg"
-dest_files=["res://.godot/imported/error_003.ogg-98e358d3a8002330bf087b5a06621805.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_interface_sounds/Audio/error_003.ogg"
+dest_files=["res://.godot/imported/error_003.ogg-70985237b17e79de0c529aafa369d1b4.oggvorbisstr"]
 
 [params]
 

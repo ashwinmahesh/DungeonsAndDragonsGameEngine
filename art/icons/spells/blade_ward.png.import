@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://j304q1m6ecqc"
-path="res://.godot/imported/blade_ward.png-3df7c874348e1ce381c683f9b52c2e01.ctex"
+path="res://.godot/imported/blade_ward.png-e17589b980a65ec56b40efe71a560f50.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/blade_ward.png"
-dest_files=["res://.godot/imported/blade_ward.png-3df7c874348e1ce381c683f9b52c2e01.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/blade_ward.png"
+dest_files=["res://.godot/imported/blade_ward.png-e17589b980a65ec56b40efe71a560f50.ctex"]
 
 [params]
 

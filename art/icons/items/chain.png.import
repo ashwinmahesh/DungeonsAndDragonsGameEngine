@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bifcah38iv2mo"
-path="res://.godot/imported/chain.png-d5e7bdb99ab344f0a6227c20d373004e.ctex"
+path="res://.godot/imported/chain.png-9a0a1677b458a6c2d92561682e98ca8a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/chain.png"
-dest_files=["res://.godot/imported/chain.png-d5e7bdb99ab344f0a6227c20d373004e.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/chain.png"
+dest_files=["res://.godot/imported/chain.png-9a0a1677b458a6c2d92561682e98ca8a.ctex"]
 
 [params]
 

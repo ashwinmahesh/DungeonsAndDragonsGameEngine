@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i77ava47k2fo"
-path="res://.godot/imported/zone_of_truth.png-ae42d841f9b2e40b3dc6daa153864663.ctex"
+path="res://.godot/imported/zone_of_truth.png-4aa7a38a32268eec6a39f6fe5fe15477.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/zone_of_truth.png"
-dest_files=["res://.godot/imported/zone_of_truth.png-ae42d841f9b2e40b3dc6daa153864663.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/zone_of_truth.png"
+dest_files=["res://.godot/imported/zone_of_truth.png-4aa7a38a32268eec6a39f6fe5fe15477.ctex"]
 
 [params]
 

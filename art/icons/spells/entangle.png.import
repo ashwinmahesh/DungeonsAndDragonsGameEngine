@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0fgpfqc11wmj"
-path="res://.godot/imported/entangle.png-7ece73d17c12709f9b29b94bc4f95750.ctex"
+path="res://.godot/imported/entangle.png-bd573b28fbb1b556873bba762531908c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/entangle.png"
-dest_files=["res://.godot/imported/entangle.png-7ece73d17c12709f9b29b94bc4f95750.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/entangle.png"
+dest_files=["res://.godot/imported/entangle.png-bd573b28fbb1b556873bba762531908c.ctex"]
 
 [params]
 

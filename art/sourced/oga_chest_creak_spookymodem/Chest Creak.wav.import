@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://b14jctvm1t2mf"
-path="res://.godot/imported/Chest Creak.wav-36b780896982148b92229ce4c906d2fb.sample"
+path="res://.godot/imported/Chest Creak.wav-65f3bb1528d5a0017d94dcbb535f7176.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_chest_creak_spookymodem/Chest Creak.wav"
-dest_files=["res://.godot/imported/Chest Creak.wav-36b780896982148b92229ce4c906d2fb.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_chest_creak_spookymodem/Chest Creak.wav"
+dest_files=["res://.godot/imported/Chest Creak.wav-65f3bb1528d5a0017d94dcbb535f7176.sample"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cv4i6onv2b2ba"
-path="res://.godot/imported/footstep_wood_001.ogg-371ff9cf74819e38653d12d3f952d71c.oggvorbisstr"
+path="res://.godot/imported/footstep_wood_001.ogg-d7e8c7c64cb4b62391d7c8e485856a35.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_impact_sounds/Audio/footstep_wood_001.ogg"
-dest_files=["res://.godot/imported/footstep_wood_001.ogg-371ff9cf74819e38653d12d3f952d71c.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_impact_sounds/Audio/footstep_wood_001.ogg"
+dest_files=["res://.godot/imported/footstep_wood_001.ogg-d7e8c7c64cb4b62391d7c8e485856a35.oggvorbisstr"]
 
 [params]
 

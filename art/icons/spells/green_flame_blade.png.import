@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://chcksmrun1fwj"
-path="res://.godot/imported/green_flame_blade.png-4441e65cb8041b81b19248cdf3bafc38.ctex"
+path="res://.godot/imported/green_flame_blade.png-68eff198ca4a964ab38e9377c78a7b73.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/green_flame_blade.png"
-dest_files=["res://.godot/imported/green_flame_blade.png-4441e65cb8041b81b19248cdf3bafc38.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/green_flame_blade.png"
+dest_files=["res://.godot/imported/green_flame_blade.png-68eff198ca4a964ab38e9377c78a7b73.ctex"]
 
 [params]
 

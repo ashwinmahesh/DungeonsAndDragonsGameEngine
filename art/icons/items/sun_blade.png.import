@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://del3h06ev3ter"
-path="res://.godot/imported/sun_blade.png-15d42dfd5c444633b85d184b9c4c6291.ctex"
+path="res://.godot/imported/sun_blade.png-db3f3d1a11203b4938918a751b6e037d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/sun_blade.png"
-dest_files=["res://.godot/imported/sun_blade.png-15d42dfd5c444633b85d184b9c4c6291.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/sun_blade.png"
+dest_files=["res://.godot/imported/sun_blade.png-db3f3d1a11203b4938918a751b6e037d.ctex"]
 
 [params]
 

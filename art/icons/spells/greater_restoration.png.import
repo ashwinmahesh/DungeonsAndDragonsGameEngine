@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw23kokvnwngy"
-path="res://.godot/imported/greater_restoration.png-fca320b7a0514deab26d8d632e5ba4a2.ctex"
+path="res://.godot/imported/greater_restoration.png-ce46450cae715efb9bfcd52fe52c2204.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/greater_restoration.png"
-dest_files=["res://.godot/imported/greater_restoration.png-fca320b7a0514deab26d8d632e5ba4a2.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/greater_restoration.png"
+dest_files=["res://.godot/imported/greater_restoration.png-ce46450cae715efb9bfcd52fe52c2204.ctex"]
 
 [params]
 

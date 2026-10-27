@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dowo5yo2jevwn"
-path="res://.godot/imported/bulwark_of_force.png-73073cb03aae0ea232d3d23dc3507062.ctex"
+path="res://.godot/imported/bulwark_of_force.png-ad6103135fae7686039835e2c4a81e22.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/bulwark_of_force.png"
-dest_files=["res://.godot/imported/bulwark_of_force.png-73073cb03aae0ea232d3d23dc3507062.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/bulwark_of_force.png"
+dest_files=["res://.godot/imported/bulwark_of_force.png-ad6103135fae7686039835e2c4a81e22.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://si7plectyw68"
-path="res://.godot/imported/sleet_storm.png-4d2c665f7c20f413298365dbc259cf0f.ctex"
+path="res://.godot/imported/sleet_storm.png-2ffbe4e12b07a2459d685bf9dc8de69c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/sleet_storm.png"
-dest_files=["res://.godot/imported/sleet_storm.png-4d2c665f7c20f413298365dbc259cf0f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/sleet_storm.png"
+dest_files=["res://.godot/imported/sleet_storm.png-2ffbe4e12b07a2459d685bf9dc8de69c.ctex"]
 
 [params]
 

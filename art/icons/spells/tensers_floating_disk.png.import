@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://38om67hr8134"
-path="res://.godot/imported/tensers_floating_disk.png-0e14be7db27b6a1e31920e346d46aeab.ctex"
+path="res://.godot/imported/tensers_floating_disk.png-f5ec651bc2c5e1bb5d99dd1ef4b29062.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/tensers_floating_disk.png"
-dest_files=["res://.godot/imported/tensers_floating_disk.png-0e14be7db27b6a1e31920e346d46aeab.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/tensers_floating_disk.png"
+dest_files=["res://.godot/imported/tensers_floating_disk.png-f5ec651bc2c5e1bb5d99dd1ef4b29062.ctex"]
 
 [params]
 

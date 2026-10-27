@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmtmirnbhk7nq"
-path="res://.godot/imported/vial.png-c694c5546ecad66624208063efd17a66.ctex"
+path="res://.godot/imported/vial.png-2fa528f5fea45e57cfd8890bfa961eff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/vial.png"
-dest_files=["res://.godot/imported/vial.png-c694c5546ecad66624208063efd17a66.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/vial.png"
+dest_files=["res://.godot/imported/vial.png-2fa528f5fea45e57cfd8890bfa961eff.ctex"]
 
 [params]
 

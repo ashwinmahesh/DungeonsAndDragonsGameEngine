@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7xo2064gcb61"
-path="res://.godot/imported/manacles.png-7bd155d12719de38e1ebc37378a8cba5.ctex"
+path="res://.godot/imported/manacles.png-e84eac9eae709c208298fb4e6a322130.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/manacles.png"
-dest_files=["res://.godot/imported/manacles.png-7bd155d12719de38e1ebc37378a8cba5.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/manacles.png"
+dest_files=["res://.godot/imported/manacles.png-e84eac9eae709c208298fb4e6a322130.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kcisrt0rtgja"
-path="res://.godot/imported/yolandes_regal_presence.png-e33c955b8d8702815ac77939753c9eee.ctex"
+path="res://.godot/imported/yolandes_regal_presence.png-f039933b43de7ead6444ed178bef7ff6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/yolandes_regal_presence.png"
-dest_files=["res://.godot/imported/yolandes_regal_presence.png-e33c955b8d8702815ac77939753c9eee.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/yolandes_regal_presence.png"
+dest_files=["res://.godot/imported/yolandes_regal_presence.png-f039933b43de7ead6444ed178bef7ff6.ctex"]
 
 [params]
 

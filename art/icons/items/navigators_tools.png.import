@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c67csvljstjl"
-path="res://.godot/imported/navigators_tools.png-862b781c03d93ba96839bebd77360357.ctex"
+path="res://.godot/imported/navigators_tools.png-f38669d10a392734f34299ae57df8c08.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/navigators_tools.png"
-dest_files=["res://.godot/imported/navigators_tools.png-862b781c03d93ba96839bebd77360357.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/navigators_tools.png"
+dest_files=["res://.godot/imported/navigators_tools.png-f38669d10a392734f34299ae57df8c08.ctex"]
 
 [params]
 

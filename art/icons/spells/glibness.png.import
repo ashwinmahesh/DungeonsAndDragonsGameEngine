@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvxfqiba62ub"
-path="res://.godot/imported/glibness.png-80a38bf4baf329672d5986c3328fc1fd.ctex"
+path="res://.godot/imported/glibness.png-a6834cd3ec51c8550e3031977000fc6e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/glibness.png"
-dest_files=["res://.godot/imported/glibness.png-80a38bf4baf329672d5986c3328fc1fd.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/glibness.png"
+dest_files=["res://.godot/imported/glibness.png-a6834cd3ec51c8550e3031977000fc6e.ctex"]
 
 [params]
 

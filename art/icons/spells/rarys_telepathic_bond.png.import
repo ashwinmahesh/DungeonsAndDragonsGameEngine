@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bc65y2aschdld"
-path="res://.godot/imported/rarys_telepathic_bond.png-deb8b61d969e2ae92dd74ee6824ef036.ctex"
+path="res://.godot/imported/rarys_telepathic_bond.png-dc9f1d425db467d5a1cbe5435933caf8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/rarys_telepathic_bond.png"
-dest_files=["res://.godot/imported/rarys_telepathic_bond.png-deb8b61d969e2ae92dd74ee6824ef036.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/rarys_telepathic_bond.png"
+dest_files=["res://.godot/imported/rarys_telepathic_bond.png-dc9f1d425db467d5a1cbe5435933caf8.ctex"]
 
 [params]
 

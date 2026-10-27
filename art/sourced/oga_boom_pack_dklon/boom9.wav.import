@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://defyo76q6f12m"
-path="res://.godot/imported/boom9.wav-a5065b727cacac3a823bff2e93555949.sample"
+path="res://.godot/imported/boom9.wav-3f5cb86b0e5ae4fcc3655f6b9b204b17.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_boom_pack_dklon/boom9.wav"
-dest_files=["res://.godot/imported/boom9.wav-a5065b727cacac3a823bff2e93555949.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_boom_pack_dklon/boom9.wav"
+dest_files=["res://.godot/imported/boom9.wav-3f5cb86b0e5ae4fcc3655f6b9b204b17.sample"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jwnwaet120yv"
-path="res://.godot/imported/guiding_bolt.png-dc1f69aeb46d809e4135412914a2b5d3.ctex"
+path="res://.godot/imported/guiding_bolt.png-cf243c4969aa694fea4a4684df74ac3a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/guiding_bolt.png"
-dest_files=["res://.godot/imported/guiding_bolt.png-dc1f69aeb46d809e4135412914a2b5d3.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/guiding_bolt.png"
+dest_files=["res://.godot/imported/guiding_bolt.png-cf243c4969aa694fea4a4684df74ac3a.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccmc1deh8x8a8"
-path="res://.godot/imported/iron_spike.png-04c720e5b5d04bad271cd18ff59c286d.ctex"
+path="res://.godot/imported/iron_spike.png-c2dbeac980c24dad4ac7351ecabf8504.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/iron_spike.png"
-dest_files=["res://.godot/imported/iron_spike.png-04c720e5b5d04bad271cd18ff59c286d.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/iron_spike.png"
+dest_files=["res://.godot/imported/iron_spike.png-c2dbeac980c24dad4ac7351ecabf8504.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwry1cqi3w0ur"
-path="res://.godot/imported/portent.png-3df13cf986910993951b56fe5cc2e240.ctex"
+path="res://.godot/imported/portent.png-0427d3be7eb1d0287aa234375f5fdfe7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/portent.png"
-dest_files=["res://.godot/imported/portent.png-3df13cf986910993951b56fe5cc2e240.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/portent.png"
+dest_files=["res://.godot/imported/portent.png-0427d3be7eb1d0287aa234375f5fdfe7.ctex"]
 
 [params]
 

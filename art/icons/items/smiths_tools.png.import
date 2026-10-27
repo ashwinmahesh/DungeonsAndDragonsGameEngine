@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bn5321sllpk8k"
-path="res://.godot/imported/smiths_tools.png-6be86f7ad569f7ea06512e2f6d4d7aad.ctex"
+path="res://.godot/imported/smiths_tools.png-ce9de8193af29fe391cee9c87b9c3dd6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/smiths_tools.png"
-dest_files=["res://.godot/imported/smiths_tools.png-6be86f7ad569f7ea06512e2f6d4d7aad.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/smiths_tools.png"
+dest_files=["res://.godot/imported/smiths_tools.png-ce9de8193af29fe391cee9c87b9c3dd6.ctex"]
 
 [params]
 

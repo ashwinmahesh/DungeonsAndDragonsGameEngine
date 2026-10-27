@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byqpraaptgcem"
-path="res://.godot/imported/fly.png-56539a156ab2d819cf5ee7550e091fdb.ctex"
+path="res://.godot/imported/fly.png-272ff628695ed855a353062a46dd2234.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/fly.png"
-dest_files=["res://.godot/imported/fly.png-56539a156ab2d819cf5ee7550e091fdb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/fly.png"
+dest_files=["res://.godot/imported/fly.png-272ff628695ed855a353062a46dd2234.ctex"]
 
 [params]
 

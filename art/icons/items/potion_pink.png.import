@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm8sameekdaq2"
-path="res://.godot/imported/potion_pink.png-6cb3ab276cda33c5ca38431850b045d8.ctex"
+path="res://.godot/imported/potion_pink.png-7ec36d4b70968fcaf421b4cf0d27e655.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/potion_pink.png"
-dest_files=["res://.godot/imported/potion_pink.png-6cb3ab276cda33c5ca38431850b045d8.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/potion_pink.png"
+dest_files=["res://.godot/imported/potion_pink.png-7ec36d4b70968fcaf421b4cf0d27e655.ctex"]
 
 [params]
 

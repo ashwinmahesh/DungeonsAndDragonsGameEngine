@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwsn24o80ls1i"
-path="res://.godot/imported/dream.png-4ee887f998b2cb640b4e86aca838807d.ctex"
+path="res://.godot/imported/dream.png-95fe874f8f4e218519cc7da2faeb69bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/dream.png"
-dest_files=["res://.godot/imported/dream.png-4ee887f998b2cb640b4e86aca838807d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/dream.png"
+dest_files=["res://.godot/imported/dream.png-95fe874f8f4e218519cc7da2faeb69bf.ctex"]
 
 [params]
 

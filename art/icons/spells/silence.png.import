@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1ywox1pu5ibm"
-path="res://.godot/imported/silence.png-e558cc3f5e1b35d8be8e26d57ef3e52e.ctex"
+path="res://.godot/imported/silence.png-092aeab24086a4cdf4c491743439236f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/silence.png"
-dest_files=["res://.godot/imported/silence.png-e558cc3f5e1b35d8be8e26d57ef3e52e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/silence.png"
+dest_files=["res://.godot/imported/silence.png-092aeab24086a4cdf4c491743439236f.ctex"]
 
 [params]
 

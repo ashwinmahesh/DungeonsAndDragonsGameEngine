@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ppy3ovhh83xm"
-path="res://.godot/imported/magic_jar.png-8f334057d763b2a406f9d6b5c64211a5.ctex"
+path="res://.godot/imported/magic_jar.png-7598fb78cc690cdffa2c74a676556c3b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/magic_jar.png"
-dest_files=["res://.godot/imported/magic_jar.png-8f334057d763b2a406f9d6b5c64211a5.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/magic_jar.png"
+dest_files=["res://.godot/imported/magic_jar.png-7598fb78cc690cdffa2c74a676556c3b.ctex"]
 
 [params]
 

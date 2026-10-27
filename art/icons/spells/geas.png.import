@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bt100n42svf6r"
-path="res://.godot/imported/geas.png-4dfa8339bb245f6dcfe59b720188ec99.ctex"
+path="res://.godot/imported/geas.png-e18f4792a426e5d8f980eada7e724b23.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/geas.png"
-dest_files=["res://.godot/imported/geas.png-4dfa8339bb245f6dcfe59b720188ec99.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/geas.png"
+dest_files=["res://.godot/imported/geas.png-e18f4792a426e5d8f980eada7e724b23.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwedl7n3pribm"
-path="res://.godot/imported/summon_aberration.png-e657efb62dfb64abf0ded93dc0c99517.ctex"
+path="res://.godot/imported/summon_aberration.png-845027c713103bc0fbd20f04c0c21080.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/summon_aberration.png"
-dest_files=["res://.godot/imported/summon_aberration.png-e657efb62dfb64abf0ded93dc0c99517.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/summon_aberration.png"
+dest_files=["res://.godot/imported/summon_aberration.png-845027c713103bc0fbd20f04c0c21080.ctex"]
 
 [params]
 

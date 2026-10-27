@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ggtyk4v5dqq7"
-path="res://.godot/imported/dissonant_whispers.png-5f651cd96b32fa536cc9812c375d623b.ctex"
+path="res://.godot/imported/dissonant_whispers.png-8a63a6609cfe2aeabab6f71b4234b55a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/dissonant_whispers.png"
-dest_files=["res://.godot/imported/dissonant_whispers.png-5f651cd96b32fa536cc9812c375d623b.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/dissonant_whispers.png"
+dest_files=["res://.godot/imported/dissonant_whispers.png-8a63a6609cfe2aeabab6f71b4234b55a.ctex"]
 
 [params]
 

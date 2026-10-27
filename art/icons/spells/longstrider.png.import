@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkbcxuftobopp"
-path="res://.godot/imported/longstrider.png-c1e29890446dceda1f645fbfb0002623.ctex"
+path="res://.godot/imported/longstrider.png-e32f88821dde24cef689a2914d584fbd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/longstrider.png"
-dest_files=["res://.godot/imported/longstrider.png-c1e29890446dceda1f645fbfb0002623.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/longstrider.png"
+dest_files=["res://.godot/imported/longstrider.png-e32f88821dde24cef689a2914d584fbd.ctex"]
 
 [params]
 

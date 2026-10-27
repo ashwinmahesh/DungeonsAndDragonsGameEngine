@@ -151,13 +151,13 @@ static func frames_for(art_id: String) -> SpriteFrames:
 		if kept != null:
 			return kept
 		_frames_cache.erase(art_id)
-	var walk_path := "res://art/sprites/%s/walk.tres" % art_id
+	var walk_path := ArtPaths.of("art/sprites/%s/walk.tres" % art_id)
 	if not ResourceLoader.exists(walk_path):
 		return null
 	var walk := load(walk_path) as SpriteFrames
 	var sources: Array[SpriteFrames] = [walk]
 	for sheet: String in SHEETS.slice(1):
-		var path := "res://art/sprites/%s/%s.tres" % [art_id, sheet]
+		var path := ArtPaths.of("art/sprites/%s/%s.tres" % [art_id, sheet])
 		if ResourceLoader.exists(path):
 			sources.append(load(path) as SpriteFrames)
 	var frames := walk

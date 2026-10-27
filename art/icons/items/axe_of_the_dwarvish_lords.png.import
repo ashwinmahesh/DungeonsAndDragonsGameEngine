@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgdym3jui5yak"
-path="res://.godot/imported/axe_of_the_dwarvish_lords.png-16a8918c1bd81a76be76603e36f2cd04.ctex"
+path="res://.godot/imported/axe_of_the_dwarvish_lords.png-b4ca0f387281dee9801bce5b42501a3e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/axe_of_the_dwarvish_lords.png"
-dest_files=["res://.godot/imported/axe_of_the_dwarvish_lords.png-16a8918c1bd81a76be76603e36f2cd04.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/axe_of_the_dwarvish_lords.png"
+dest_files=["res://.godot/imported/axe_of_the_dwarvish_lords.png-b4ca0f387281dee9801bce5b42501a3e.ctex"]
 
 [params]
 

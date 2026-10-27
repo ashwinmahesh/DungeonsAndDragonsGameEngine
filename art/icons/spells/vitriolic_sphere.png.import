@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6o0veiehs0eb"
-path="res://.godot/imported/vitriolic_sphere.png-2f1905170a26a2cf8d86fb8db0b70dc3.ctex"
+path="res://.godot/imported/vitriolic_sphere.png-f47e7d9c09982268299990f6e0154df1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/vitriolic_sphere.png"
-dest_files=["res://.godot/imported/vitriolic_sphere.png-2f1905170a26a2cf8d86fb8db0b70dc3.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/vitriolic_sphere.png"
+dest_files=["res://.godot/imported/vitriolic_sphere.png-f47e7d9c09982268299990f6e0154df1.ctex"]
 
 [params]
 

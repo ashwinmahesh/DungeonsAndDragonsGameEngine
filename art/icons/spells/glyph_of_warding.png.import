@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b66pagvwswqwv"
-path="res://.godot/imported/glyph_of_warding.png-66dbc6fc23be6006e6169919cc44df25.ctex"
+path="res://.godot/imported/glyph_of_warding.png-4b2fc45561154111ff43812595a25806.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/glyph_of_warding.png"
-dest_files=["res://.godot/imported/glyph_of_warding.png-66dbc6fc23be6006e6169919cc44df25.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/glyph_of_warding.png"
+dest_files=["res://.godot/imported/glyph_of_warding.png-4b2fc45561154111ff43812595a25806.ctex"]
 
 [params]
 

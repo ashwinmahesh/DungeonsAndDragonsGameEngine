@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deks6ouynb0l"
-path="res://.godot/imported/true_strike.png-a7b227a6a6cb4e147d7f5a5efdf31156.ctex"
+path="res://.godot/imported/true_strike.png-0c76be03b0ad72c46f10ad300b9a6089.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/true_strike.png"
-dest_files=["res://.godot/imported/true_strike.png-a7b227a6a6cb4e147d7f5a5efdf31156.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/true_strike.png"
+dest_files=["res://.godot/imported/true_strike.png-0c76be03b0ad72c46f10ad300b9a6089.ctex"]
 
 [params]
 

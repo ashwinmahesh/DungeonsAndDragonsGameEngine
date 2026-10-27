@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://trokfdhiajdr"
-path="res://.godot/imported/splint_armor.png-6182ec2dd2d819299ef76a2101ede5ea.ctex"
+path="res://.godot/imported/splint_armor.png-e8fb4b38bcf93c36374dce0452a69429.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/splint_armor.png"
-dest_files=["res://.godot/imported/splint_armor.png-6182ec2dd2d819299ef76a2101ede5ea.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/splint_armor.png"
+dest_files=["res://.godot/imported/splint_armor.png-e8fb4b38bcf93c36374dce0452a69429.ctex"]
 
 [params]
 

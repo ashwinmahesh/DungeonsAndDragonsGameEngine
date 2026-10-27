@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3k35potpilp5"
-path="res://.godot/imported/trident.png-a86544c974cdcb0610d15e0c9af0aabd.ctex"
+path="res://.godot/imported/trident.png-2ec922e50a914ed813235ee0fa55aa93.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/trident.png"
-dest_files=["res://.godot/imported/trident.png-a86544c974cdcb0610d15e0c9af0aabd.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/trident.png"
+dest_files=["res://.godot/imported/trident.png-2ec922e50a914ed813235ee0fa55aa93.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccj45i5f54bsf"
-path.bptc="res://.godot/imported/playstation_stick_l.png-e88e77e569e37f09eb4bb36f17326c66.bptc.ctex"
+path.bptc="res://.godot/imported/playstation_stick_l.png-da615cea4721401cfd52013ce04e9101.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_stick_l.png"
-dest_files=["res://.godot/imported/playstation_stick_l.png-e88e77e569e37f09eb4bb36f17326c66.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_stick_l.png"
+dest_files=["res://.godot/imported/playstation_stick_l.png-da615cea4721401cfd52013ce04e9101.bptc.ctex"]
 
 [params]
 

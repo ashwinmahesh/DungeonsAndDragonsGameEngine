@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://botl1srqp5ojt"
-path="res://.godot/imported/suggestion.png-e09a4797fa323afe8c8277ac1832402e.ctex"
+path="res://.godot/imported/suggestion.png-20519dc419dbcd299458fd227ad16169.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/suggestion.png"
-dest_files=["res://.godot/imported/suggestion.png-e09a4797fa323afe8c8277ac1832402e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/suggestion.png"
+dest_files=["res://.godot/imported/suggestion.png-20519dc419dbcd299458fd227ad16169.ctex"]
 
 [params]
 

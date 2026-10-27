@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2k7mv0v32wud"
-path="res://.godot/imported/alchemists_supplies.png-8dac31cddfd22ad7a6f3a5e76e4a5ab4.ctex"
+path="res://.godot/imported/alchemists_supplies.png-b3af74b5dd7e285d8dc10b422b24cd47.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/alchemists_supplies.png"
-dest_files=["res://.godot/imported/alchemists_supplies.png-8dac31cddfd22ad7a6f3a5e76e4a5ab4.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/alchemists_supplies.png"
+dest_files=["res://.godot/imported/alchemists_supplies.png-b3af74b5dd7e285d8dc10b422b24cd47.ctex"]
 
 [params]
 

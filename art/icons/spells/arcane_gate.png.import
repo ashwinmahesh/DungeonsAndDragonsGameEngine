@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c16tuynvfo7x7"
-path="res://.godot/imported/arcane_gate.png-38f3ec31c7357383bb1c8647a4726c62.ctex"
+path="res://.godot/imported/arcane_gate.png-83e0f0c7cb4166de2303b3c21998201c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/arcane_gate.png"
-dest_files=["res://.godot/imported/arcane_gate.png-38f3ec31c7357383bb1c8647a4726c62.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/arcane_gate.png"
+dest_files=["res://.godot/imported/arcane_gate.png-83e0f0c7cb4166de2303b3c21998201c.ctex"]
 
 [params]
 

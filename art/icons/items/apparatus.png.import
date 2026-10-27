@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b77yd61w5r2eh"
-path="res://.godot/imported/apparatus.png-f1d4b2fa078c6ae007835323e301565f.ctex"
+path="res://.godot/imported/apparatus.png-2fbb9239ff8f3ef2fe7c613410064615.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/apparatus.png"
-dest_files=["res://.godot/imported/apparatus.png-f1d4b2fa078c6ae007835323e301565f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/apparatus.png"
+dest_files=["res://.godot/imported/apparatus.png-2fbb9239ff8f3ef2fe7c613410064615.ctex"]
 
 [params]
 

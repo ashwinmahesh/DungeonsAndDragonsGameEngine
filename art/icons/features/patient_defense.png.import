@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgjulfh5rsyey"
-path="res://.godot/imported/patient_defense.png-3b21e25cbcc8633106765d482ba6e0a7.ctex"
+path="res://.godot/imported/patient_defense.png-9aa2e6773dd4f466707b500375f7aebb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/patient_defense.png"
-dest_files=["res://.godot/imported/patient_defense.png-3b21e25cbcc8633106765d482ba6e0a7.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/patient_defense.png"
+dest_files=["res://.godot/imported/patient_defense.png-9aa2e6773dd4f466707b500375f7aebb.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpye67x47vxe"
-path="res://.godot/imported/padded_armor.png-59485f887330d3d278b91aee32b7a064.ctex"
+path="res://.godot/imported/padded_armor.png-c277907f139a52f9526d74e29a9bcc64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/padded_armor.png"
-dest_files=["res://.godot/imported/padded_armor.png-59485f887330d3d278b91aee32b7a064.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/padded_armor.png"
+dest_files=["res://.godot/imported/padded_armor.png-c277907f139a52f9526d74e29a9bcc64.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://drc7djplh72h2"
-path="res://.godot/imported/preserve_life.png-1315da9818c7b7e95354af5b56449441.ctex"
+path="res://.godot/imported/preserve_life.png-15ce6ae7b18deab020c6a6096cce4756.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/preserve_life.png"
-dest_files=["res://.godot/imported/preserve_life.png-1315da9818c7b7e95354af5b56449441.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/preserve_life.png"
+dest_files=["res://.godot/imported/preserve_life.png-15ce6ae7b18deab020c6a6096cce4756.ctex"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://c8llxipkjxvi5"
-path="res://.godot/imported/LOSE_0.ogg-d9a8480aa6e8c8c1ef97a4d32908384c.oggvorbisstr"
+path="res://.godot/imported/LOSE_0.ogg-8d01e0acb9448d35bd87fa9165367863.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_fanfares_spring/LOSE_0.ogg"
-dest_files=["res://.godot/imported/LOSE_0.ogg-d9a8480aa6e8c8c1ef97a4d32908384c.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_fanfares_spring/LOSE_0.ogg"
+dest_files=["res://.godot/imported/LOSE_0.ogg-8d01e0acb9448d35bd87fa9165367863.oggvorbisstr"]
 
 [params]
 

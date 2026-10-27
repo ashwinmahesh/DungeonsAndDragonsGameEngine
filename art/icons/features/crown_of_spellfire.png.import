@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://l2dysspp3bwh"
-path="res://.godot/imported/crown_of_spellfire.png-af51840d752fe42855f57aaff2ac92c1.ctex"
+path="res://.godot/imported/crown_of_spellfire.png-cf9b1759d4345ff90f48caea1883c309.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/crown_of_spellfire.png"
-dest_files=["res://.godot/imported/crown_of_spellfire.png-af51840d752fe42855f57aaff2ac92c1.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/crown_of_spellfire.png"
+dest_files=["res://.godot/imported/crown_of_spellfire.png-cf9b1759d4345ff90f48caea1883c309.ctex"]
 
 [params]
 

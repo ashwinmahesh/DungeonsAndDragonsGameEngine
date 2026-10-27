@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfc0kvq7mjlmt"
-path="res://.godot/imported/storm_of_vengeance.png-f86f889aa9bbe308653316a193e559e8.ctex"
+path="res://.godot/imported/storm_of_vengeance.png-d757eab9eb07534dbfc792f8f42775db.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/storm_of_vengeance.png"
-dest_files=["res://.godot/imported/storm_of_vengeance.png-f86f889aa9bbe308653316a193e559e8.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/storm_of_vengeance.png"
+dest_files=["res://.godot/imported/storm_of_vengeance.png-d757eab9eb07534dbfc792f8f42775db.ctex"]
 
 [params]
 

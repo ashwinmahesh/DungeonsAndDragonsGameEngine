@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3d7qnwmq2f0h"
-path="res://.godot/imported/poisoners_kit.png-daca6d2a53fa0156266c47a6a33fc15d.ctex"
+path="res://.godot/imported/poisoners_kit.png-dc46c79d7bd169efe05db29c93b7264f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/poisoners_kit.png"
-dest_files=["res://.godot/imported/poisoners_kit.png-daca6d2a53fa0156266c47a6a33fc15d.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/poisoners_kit.png"
+dest_files=["res://.godot/imported/poisoners_kit.png-dc46c79d7bd169efe05db29c93b7264f.ctex"]
 
 [params]
 

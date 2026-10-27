@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dmm2uxjrctq65"
-path="res://.godot/imported/luck_blade.png-1eb65c734e2f3c4a5fecfe9642bc349c.ctex"
+path="res://.godot/imported/luck_blade.png-9c26d3f4163b5f42bbc2041374cea511.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/luck_blade.png"
-dest_files=["res://.godot/imported/luck_blade.png-1eb65c734e2f3c4a5fecfe9642bc349c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/luck_blade.png"
+dest_files=["res://.godot/imported/luck_blade.png-9c26d3f4163b5f42bbc2041374cea511.ctex"]
 
 [params]
 

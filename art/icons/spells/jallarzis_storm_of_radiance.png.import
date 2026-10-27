@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3gbp00rfsbbw"
-path="res://.godot/imported/jallarzis_storm_of_radiance.png-3c423ef27c1dfd0752ba9dcc23a08f85.ctex"
+path="res://.godot/imported/jallarzis_storm_of_radiance.png-5650964122da54dcaca2a28d7b9e1c8d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/jallarzis_storm_of_radiance.png"
-dest_files=["res://.godot/imported/jallarzis_storm_of_radiance.png-3c423ef27c1dfd0752ba9dcc23a08f85.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/jallarzis_storm_of_radiance.png"
+dest_files=["res://.godot/imported/jallarzis_storm_of_radiance.png-5650964122da54dcaca2a28d7b9e1c8d.ctex"]
 
 [params]
 

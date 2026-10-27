@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cg3wc58xoi03a"
-path="res://.godot/imported/sanctuary.png-f369dd5894b3facf3cb33ad3d6ced629.ctex"
+path="res://.godot/imported/sanctuary.png-20da374768e838b39adfec44405fa184.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/sanctuary.png"
-dest_files=["res://.godot/imported/sanctuary.png-f369dd5894b3facf3cb33ad3d6ced629.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/sanctuary.png"
+dest_files=["res://.godot/imported/sanctuary.png-20da374768e838b39adfec44405fa184.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3pk2htr0n3im"
-path="res://.godot/imported/quarterstaff.png-672c793a767a9c4c431c8fb6b9d25d21.ctex"
+path="res://.godot/imported/quarterstaff.png-1158b365a46197957b642a54ca840c02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/quarterstaff.png"
-dest_files=["res://.godot/imported/quarterstaff.png-672c793a767a9c4c431c8fb6b9d25d21.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/quarterstaff.png"
+dest_files=["res://.godot/imported/quarterstaff.png-1158b365a46197957b642a54ca840c02.ctex"]
 
 [params]
 

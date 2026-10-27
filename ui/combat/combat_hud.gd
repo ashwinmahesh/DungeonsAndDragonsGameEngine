@@ -2263,7 +2263,7 @@ func _portrait_for(c: Combatant) -> Texture2D:
 	var aid := CombatToken.portrait_id(c)
 	if _portraits.has(aid):
 		return _portraits[aid] as Texture2D
-	var path := "res://art/portraits/%s.png" % aid
+	var path := ArtPaths.of("art/portraits/%s.png" % aid)
 	var tex: Texture2D = load(path) as Texture2D if ResourceLoader.exists(path) else null
 	_portraits[aid] = tex
 	return tex

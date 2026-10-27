@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cuw38a0mheijq"
-path="res://.godot/imported/dagger.png-dc0af2cb8b2246f8515a0dd0d9736238.ctex"
+path="res://.godot/imported/dagger.png-7e33424428fd5aee608a7788e4b9f260.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dagger.png"
-dest_files=["res://.godot/imported/dagger.png-dc0af2cb8b2246f8515a0dd0d9736238.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dagger.png"
+dest_files=["res://.godot/imported/dagger.png-7e33424428fd5aee608a7788e4b9f260.ctex"]
 
 [params]
 

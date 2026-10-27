@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cigknnp8men75"
-path="res://.godot/imported/zealous_presence.png-ca8943d0a3cb0edd86be61e641ffc8a4.ctex"
+path="res://.godot/imported/zealous_presence.png-5d0fc1f3805322edfefaebdf49c8bb66.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/zealous_presence.png"
-dest_files=["res://.godot/imported/zealous_presence.png-ca8943d0a3cb0edd86be61e641ffc8a4.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/zealous_presence.png"
+dest_files=["res://.godot/imported/zealous_presence.png-5d0fc1f3805322edfefaebdf49c8bb66.ctex"]
 
 [params]
 

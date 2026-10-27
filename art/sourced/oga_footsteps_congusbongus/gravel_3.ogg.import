@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://ftgr1b6enqlh"
-path="res://.godot/imported/gravel_3.ogg-289c777c51b92e8bd12dff2226a00a3d.oggvorbisstr"
+path="res://.godot/imported/gravel_3.ogg-9b75f1ed9503e395dee1b5c165de5c7c.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_footsteps_congusbongus/gravel_3.ogg"
-dest_files=["res://.godot/imported/gravel_3.ogg-289c777c51b92e8bd12dff2226a00a3d.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_footsteps_congusbongus/gravel_3.ogg"
+dest_files=["res://.godot/imported/gravel_3.ogg-9b75f1ed9503e395dee1b5c165de5c7c.oggvorbisstr"]
 
 [params]
 

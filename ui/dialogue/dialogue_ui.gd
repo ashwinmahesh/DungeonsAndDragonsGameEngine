@@ -456,7 +456,7 @@ func _line(beat: Dictionary) -> void:
 
 ## The speaker's portrait (art/portraits/<id>.png) in the gilt frame; none if there's no such art.
 func _show_portrait(art_id: String) -> void:
-	var path := "res://art/portraits/%s.png" % art_id
+	var path := ArtPaths.of("art/portraits/%s.png" % art_id)
 	_portrait.texture = load(path) as Texture2D if art_id != "" and ResourceLoader.exists(path) else null
 	_frame_art.queue_redraw()
 

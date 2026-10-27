@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccpmt8csrkcfk"
-path="res://.godot/imported/blackrazor.png-acbe205a16008b6c7964b84afdbfaa7f.ctex"
+path="res://.godot/imported/blackrazor.png-867d8096b940c0ee60d2785659018b56.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/blackrazor.png"
-dest_files=["res://.godot/imported/blackrazor.png-acbe205a16008b6c7964b84afdbfaa7f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/blackrazor.png"
+dest_files=["res://.godot/imported/blackrazor.png-867d8096b940c0ee60d2785659018b56.ctex"]
 
 [params]
 

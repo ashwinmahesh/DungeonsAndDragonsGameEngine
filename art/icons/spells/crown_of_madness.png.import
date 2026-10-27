@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dasnqe67weidl"
-path="res://.godot/imported/crown_of_madness.png-bb527dc0b070f6e8b3056aa6da9c8d89.ctex"
+path="res://.godot/imported/crown_of_madness.png-2f3c39966bdfa517860de1466e9ce689.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/crown_of_madness.png"
-dest_files=["res://.godot/imported/crown_of_madness.png-bb527dc0b070f6e8b3056aa6da9c8d89.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/crown_of_madness.png"
+dest_files=["res://.godot/imported/crown_of_madness.png-2f3c39966bdfa517860de1466e9ce689.ctex"]
 
 [params]
 

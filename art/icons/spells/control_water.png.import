@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkx3swgawv3oa"
-path="res://.godot/imported/control_water.png-eee6eb2fe2b1e74def041a0050501710.ctex"
+path="res://.godot/imported/control_water.png-8d973550cf475486334d3c88a915274c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/control_water.png"
-dest_files=["res://.godot/imported/control_water.png-eee6eb2fe2b1e74def041a0050501710.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/control_water.png"
+dest_files=["res://.godot/imported/control_water.png-8d973550cf475486334d3c88a915274c.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://baxxqfub1wdu"
-path="res://.godot/imported/cartographers_tools.png-0d1f35db0eecbd19b7d7f3e1062935f5.ctex"
+path="res://.godot/imported/cartographers_tools.png-b790c6d97c3189ce3f5bf33b17539c3a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/cartographers_tools.png"
-dest_files=["res://.godot/imported/cartographers_tools.png-0d1f35db0eecbd19b7d7f3e1062935f5.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/cartographers_tools.png"
+dest_files=["res://.godot/imported/cartographers_tools.png-b790c6d97c3189ce3f5bf33b17539c3a.ctex"]
 
 [params]
 

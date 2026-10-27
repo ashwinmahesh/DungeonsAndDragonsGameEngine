@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ch0ys5n13f2vq"
-path="res://.godot/imported/animal_messenger.png-c66f32f82814685973c0d5d724a58a73.ctex"
+path="res://.godot/imported/animal_messenger.png-dfe820bd787c85b0c1e850eb1d4f8d9b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/animal_messenger.png"
-dest_files=["res://.godot/imported/animal_messenger.png-c66f32f82814685973c0d5d724a58a73.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/animal_messenger.png"
+dest_files=["res://.godot/imported/animal_messenger.png-dfe820bd787c85b0c1e850eb1d4f8d9b.ctex"]
 
 [params]
 

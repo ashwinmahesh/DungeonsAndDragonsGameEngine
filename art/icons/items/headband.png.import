@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6vls1ulf0182"
-path="res://.godot/imported/headband.png-08263e9a23effd5b846509f8c0c42d3a.ctex"
+path="res://.godot/imported/headband.png-b9c134facf990037d2e47ccb541e6500.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/headband.png"
-dest_files=["res://.godot/imported/headband.png-08263e9a23effd5b846509f8c0c42d3a.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/headband.png"
+dest_files=["res://.godot/imported/headband.png-b9c134facf990037d2e47ccb541e6500.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxct3igttjhb3"
-path="res://.godot/imported/greataxe.png-9d5774f032346952bbfde07e8819645a.ctex"
+path="res://.godot/imported/greataxe.png-9f3f8febd2af5e498ae662321fa0aded.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/greataxe.png"
-dest_files=["res://.godot/imported/greataxe.png-9d5774f032346952bbfde07e8819645a.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/greataxe.png"
+dest_files=["res://.godot/imported/greataxe.png-9f3f8febd2af5e498ae662321fa0aded.ctex"]
 
 [params]
 

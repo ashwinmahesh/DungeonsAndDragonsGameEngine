@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwy6mje6gb8fd"
-path="res://.godot/imported/hunters_mark.png-3bdcbbb74aa9b585b80bf38ab912a987.ctex"
+path="res://.godot/imported/hunters_mark.png-bc4f5de974dd51b6817a29d2f2436ed6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/hunters_mark.png"
-dest_files=["res://.godot/imported/hunters_mark.png-3bdcbbb74aa9b585b80bf38ab912a987.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/hunters_mark.png"
+dest_files=["res://.godot/imported/hunters_mark.png-bc4f5de974dd51b6817a29d2f2436ed6.ctex"]
 
 [params]
 

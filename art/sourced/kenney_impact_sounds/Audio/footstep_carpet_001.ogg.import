@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cm8gp27pnvgoy"
-path="res://.godot/imported/footstep_carpet_001.ogg-e972581e8e7688003e546c684dc07d54.oggvorbisstr"
+path="res://.godot/imported/footstep_carpet_001.ogg-86367ee2d6a2b41e046103429239f308.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_impact_sounds/Audio/footstep_carpet_001.ogg"
-dest_files=["res://.godot/imported/footstep_carpet_001.ogg-e972581e8e7688003e546c684dc07d54.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_impact_sounds/Audio/footstep_carpet_001.ogg"
+dest_files=["res://.godot/imported/footstep_carpet_001.ogg-86367ee2d6a2b41e046103429239f308.oggvorbisstr"]
 
 [params]
 

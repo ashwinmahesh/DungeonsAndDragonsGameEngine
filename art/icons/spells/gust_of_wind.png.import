@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cuvyjg5vmq3l3"
-path="res://.godot/imported/gust_of_wind.png-0b08903e1df89d74590d66d8bb1daf07.ctex"
+path="res://.godot/imported/gust_of_wind.png-0a89615fdbfe08871bee0ea95e49b780.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/gust_of_wind.png"
-dest_files=["res://.godot/imported/gust_of_wind.png-0b08903e1df89d74590d66d8bb1daf07.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/gust_of_wind.png"
+dest_files=["res://.godot/imported/gust_of_wind.png-0a89615fdbfe08871bee0ea95e49b780.ctex"]
 
 [params]
 

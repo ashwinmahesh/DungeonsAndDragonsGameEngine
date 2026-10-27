@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://e0y1ep55dsd4"
-path="res://.godot/imported/arcane_vigor.png-4269a71bc10012ffe3e18d3cacce9d32.ctex"
+path="res://.godot/imported/arcane_vigor.png-55553b211b31eec3449d70bc6fe6b281.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/arcane_vigor.png"
-dest_files=["res://.godot/imported/arcane_vigor.png-4269a71bc10012ffe3e18d3cacce9d32.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/arcane_vigor.png"
+dest_files=["res://.godot/imported/arcane_vigor.png-55553b211b31eec3449d70bc6fe6b281.ctex"]
 
 [params]
 

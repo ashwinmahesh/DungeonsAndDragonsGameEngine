@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bjquvp0b4vwhk"
-path="res://.godot/imported/conjure_woodland_beings.png-3f4f516a1925ce0ef2c6186ed2a13d63.ctex"
+path="res://.godot/imported/conjure_woodland_beings.png-c2aa4c98be6f9c8803b235f551c3b0fd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/conjure_woodland_beings.png"
-dest_files=["res://.godot/imported/conjure_woodland_beings.png-3f4f516a1925ce0ef2c6186ed2a13d63.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/conjure_woodland_beings.png"
+dest_files=["res://.godot/imported/conjure_woodland_beings.png-c2aa4c98be6f9c8803b235f551c3b0fd.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjd665hjljid2"
-path="res://.godot/imported/telekinesis.png-3d7f18d59b5fe58f99c755f781479587.ctex"
+path="res://.godot/imported/telekinesis.png-e290f718ccfda39121f7704bf106f8f4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/telekinesis.png"
-dest_files=["res://.godot/imported/telekinesis.png-3d7f18d59b5fe58f99c755f781479587.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/telekinesis.png"
+dest_files=["res://.godot/imported/telekinesis.png-e290f718ccfda39121f7704bf106f8f4.ctex"]
 
 [params]
 

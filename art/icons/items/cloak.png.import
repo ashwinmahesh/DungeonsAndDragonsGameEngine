@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hnqy1qh6gm26"
-path="res://.godot/imported/cloak.png-8eb4aef192444253555487df5d37575d.ctex"
+path="res://.godot/imported/cloak.png-4191df2188da9838313767c178fb7b74.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/cloak.png"
-dest_files=["res://.godot/imported/cloak.png-8eb4aef192444253555487df5d37575d.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/cloak.png"
+dest_files=["res://.godot/imported/cloak.png-4191df2188da9838313767c178fb7b74.ctex"]
 
 [params]
 

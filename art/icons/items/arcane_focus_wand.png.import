@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cuyvnyn6d0m6u"
-path="res://.godot/imported/arcane_focus_wand.png-6a53d996559dcb161bfacb119ad4698e.ctex"
+path="res://.godot/imported/arcane_focus_wand.png-91af927a84791fb533698669ac4ac6ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/arcane_focus_wand.png"
-dest_files=["res://.godot/imported/arcane_focus_wand.png-6a53d996559dcb161bfacb119ad4698e.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/arcane_focus_wand.png"
+dest_files=["res://.godot/imported/arcane_focus_wand.png-91af927a84791fb533698669ac4ac6ab.ctex"]
 
 [params]
 

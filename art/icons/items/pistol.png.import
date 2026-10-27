@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bjgwjesjk2uuj"
-path="res://.godot/imported/pistol.png-56cfee059ab486f01311dcf43c5f545e.ctex"
+path="res://.godot/imported/pistol.png-2f08ac5c590cfbd0353172a7500860c3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/pistol.png"
-dest_files=["res://.godot/imported/pistol.png-56cfee059ab486f01311dcf43c5f545e.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/pistol.png"
+dest_files=["res://.godot/imported/pistol.png-2f08ac5c590cfbd0353172a7500860c3.ctex"]
 
 [params]
 

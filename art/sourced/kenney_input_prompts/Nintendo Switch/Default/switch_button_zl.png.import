@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cixd7ljq400kf"
-path.bptc="res://.godot/imported/switch_button_zl.png-32ff55a44b24998532d2a08f50789aae.bptc.ctex"
+path.bptc="res://.godot/imported/switch_button_zl.png-5cc36e729926d0ba6349419dc5846a12.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_button_zl.png"
-dest_files=["res://.godot/imported/switch_button_zl.png-32ff55a44b24998532d2a08f50789aae.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/Nintendo Switch/Default/switch_button_zl.png"
+dest_files=["res://.godot/imported/switch_button_zl.png-5cc36e729926d0ba6349419dc5846a12.bptc.ctex"]
 
 [params]
 

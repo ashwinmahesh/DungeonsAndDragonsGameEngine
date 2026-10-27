@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://br7x3s6o7f2pb"
-path="res://.godot/imported/bladesong.png-848ea0bbee0c6915369ef7d1c982b283.ctex"
+path="res://.godot/imported/bladesong.png-829259fa0db9f1475f31602dff45cfbc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/bladesong.png"
-dest_files=["res://.godot/imported/bladesong.png-848ea0bbee0c6915369ef7d1c982b283.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/bladesong.png"
+dest_files=["res://.godot/imported/bladesong.png-829259fa0db9f1475f31602dff45cfbc.ctex"]
 
 [params]
 

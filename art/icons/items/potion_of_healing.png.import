@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cphv7nj0m33he"
-path="res://.godot/imported/potion_of_healing.png-a657596d8ede0324c05cc4694d9a09a1.ctex"
+path="res://.godot/imported/potion_of_healing.png-511aa7d91a7584d4f734767c94305cbb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/potion_of_healing.png"
-dest_files=["res://.godot/imported/potion_of_healing.png-a657596d8ede0324c05cc4694d9a09a1.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/potion_of_healing.png"
+dest_files=["res://.godot/imported/potion_of_healing.png-511aa7d91a7584d4f734767c94305cbb.ctex"]
 
 [params]
 

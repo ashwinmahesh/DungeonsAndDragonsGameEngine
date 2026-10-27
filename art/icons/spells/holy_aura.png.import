@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqip245c1ooi"
-path="res://.godot/imported/holy_aura.png-54d3ac28014119019116be3eaff882c0.ctex"
+path="res://.godot/imported/holy_aura.png-d9ec9b74ad765ae8df845ce758394515.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/holy_aura.png"
-dest_files=["res://.godot/imported/holy_aura.png-54d3ac28014119019116be3eaff882c0.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/holy_aura.png"
+dest_files=["res://.godot/imported/holy_aura.png-d9ec9b74ad765ae8df845ce758394515.ctex"]
 
 [params]
 

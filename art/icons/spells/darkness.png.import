@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhbq14lpqpa6u"
-path="res://.godot/imported/darkness.png-1e0e0607672e636254903448eebddfd7.ctex"
+path="res://.godot/imported/darkness.png-990a612bd6c716ed8192c63c168137d0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/darkness.png"
-dest_files=["res://.godot/imported/darkness.png-1e0e0607672e636254903448eebddfd7.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/darkness.png"
+dest_files=["res://.godot/imported/darkness.png-990a612bd6c716ed8192c63c168137d0.ctex"]
 
 [params]
 

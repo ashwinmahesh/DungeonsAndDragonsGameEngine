@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://bgm7tmqwvt7ro"
-path="res://.godot/imported/sword_clash.7.ogg-aaa1c3f67bd2649c6b1589206ec14074.oggvorbisstr"
+path="res://.godot/imported/sword_clash.7.ogg-ccd8e3eaf68329bf3313dcb4bca8446a.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_swords_starninjas/sword_clash.7.ogg"
-dest_files=["res://.godot/imported/sword_clash.7.ogg-aaa1c3f67bd2649c6b1589206ec14074.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_swords_starninjas/sword_clash.7.ogg"
+dest_files=["res://.godot/imported/sword_clash.7.ogg-ccd8e3eaf68329bf3313dcb4bca8446a.oggvorbisstr"]
 
 [params]
 

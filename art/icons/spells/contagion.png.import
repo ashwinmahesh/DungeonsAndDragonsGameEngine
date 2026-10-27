@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://h0jpyynuvtck"
-path="res://.godot/imported/contagion.png-123af0b849514dac4293b8d40b4964db.ctex"
+path="res://.godot/imported/contagion.png-2eb0347b143e653bf716278485605e28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/contagion.png"
-dest_files=["res://.godot/imported/contagion.png-123af0b849514dac4293b8d40b4964db.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/contagion.png"
+dest_files=["res://.godot/imported/contagion.png-2eb0347b143e653bf716278485605e28.ctex"]
 
 [params]
 

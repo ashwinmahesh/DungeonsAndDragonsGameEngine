@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxndv1uxpa203"
-path="res://.godot/imported/leatherworkers_tools.png-ba825f83961afe1371f4171a2670d822.ctex"
+path="res://.godot/imported/leatherworkers_tools.png-5487ac61ac78a0b8830af79c0bfb96a1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/leatherworkers_tools.png"
-dest_files=["res://.godot/imported/leatherworkers_tools.png-ba825f83961afe1371f4171a2670d822.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/leatherworkers_tools.png"
+dest_files=["res://.godot/imported/leatherworkers_tools.png-5487ac61ac78a0b8830af79c0bfb96a1.ctex"]
 
 [params]
 

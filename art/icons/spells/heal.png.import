@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deb0iqefs3qs3"
-path="res://.godot/imported/heal.png-835f803313e370677d20749e70a8c68c.ctex"
+path="res://.godot/imported/heal.png-2570cbcfcaa6029fa2ae1e586caa53ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/heal.png"
-dest_files=["res://.godot/imported/heal.png-835f803313e370677d20749e70a8c68c.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/heal.png"
+dest_files=["res://.godot/imported/heal.png-2570cbcfcaa6029fa2ae1e586caa53ab.ctex"]
 
 [params]
 

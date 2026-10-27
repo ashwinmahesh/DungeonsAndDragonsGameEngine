@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://c7fyawewv6qqq"
-path="res://.godot/imported/footstep04.ogg-49f1a8c728908604f0d568a17d0090ea.oggvorbisstr"
+path="res://.godot/imported/footstep04.ogg-95e0cb65f4fd7224c7aee9a244d30ebf.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_rpg_audio/Audio/footstep04.ogg"
-dest_files=["res://.godot/imported/footstep04.ogg-49f1a8c728908604f0d568a17d0090ea.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_rpg_audio/Audio/footstep04.ogg"
+dest_files=["res://.godot/imported/footstep04.ogg-95e0cb65f4fd7224c7aee9a244d30ebf.oggvorbisstr"]
 
 [params]
 

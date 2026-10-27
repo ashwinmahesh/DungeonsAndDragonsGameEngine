@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://baflvh3db0tit"
-path="res://.godot/imported/mace.png-fb4b86b836028d0e8fdb7df5436c2070.ctex"
+path="res://.godot/imported/mace.png-a0c70d727b8f74b507fb920855cf0ec2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/mace.png"
-dest_files=["res://.godot/imported/mace.png-fb4b86b836028d0e8fdb7df5436c2070.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/mace.png"
+dest_files=["res://.godot/imported/mace.png-a0c70d727b8f74b507fb920855cf0ec2.ctex"]
 
 [params]
 

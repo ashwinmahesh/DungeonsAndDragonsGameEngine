@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfr06lig6g25j"
-path="res://.godot/imported/knock.png-ef5bedf7da4d18e375cee8b5592fef98.ctex"
+path="res://.godot/imported/knock.png-14e46f3a8c2b6aac6d6ef479681ec29b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/knock.png"
-dest_files=["res://.godot/imported/knock.png-ef5bedf7da4d18e375cee8b5592fef98.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/knock.png"
+dest_files=["res://.godot/imported/knock.png-14e46f3a8c2b6aac6d6ef479681ec29b.ctex"]
 
 [params]
 

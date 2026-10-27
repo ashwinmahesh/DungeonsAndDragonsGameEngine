@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://buynaqglve5gj"
-path="res://.godot/imported/horseshoes.png-4857770a6f3256e8421481826f2bdbd9.ctex"
+path="res://.godot/imported/horseshoes.png-f765a9b128f6bd7af4cafb43636e7839.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/horseshoes.png"
-dest_files=["res://.godot/imported/horseshoes.png-4857770a6f3256e8421481826f2bdbd9.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/horseshoes.png"
+dest_files=["res://.godot/imported/horseshoes.png-f765a9b128f6bd7af4cafb43636e7839.ctex"]
 
 [params]
 

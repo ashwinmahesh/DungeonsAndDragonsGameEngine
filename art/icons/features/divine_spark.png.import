@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://e26aibrrfilq"
-path="res://.godot/imported/divine_spark.png-ff719bb1f82f26e696916622ca474c6b.ctex"
+path="res://.godot/imported/divine_spark.png-27ad66a3e6b1c635c6327f8d267697f6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/divine_spark.png"
-dest_files=["res://.godot/imported/divine_spark.png-ff719bb1f82f26e696916622ca474c6b.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/divine_spark.png"
+dest_files=["res://.godot/imported/divine_spark.png-27ad66a3e6b1c635c6327f8d267697f6.ctex"]
 
 [params]
 

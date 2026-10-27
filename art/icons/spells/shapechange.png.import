@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpw2embm5nc8l"
-path="res://.godot/imported/shapechange.png-9a4cfee132273aa11d2c0bd360b72f44.ctex"
+path="res://.godot/imported/shapechange.png-f464874a5427d5657b5570119eae0289.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/shapechange.png"
-dest_files=["res://.godot/imported/shapechange.png-9a4cfee132273aa11d2c0bd360b72f44.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/shapechange.png"
+dest_files=["res://.godot/imported/shapechange.png-f464874a5427d5657b5570119eae0289.ctex"]
 
 [params]
 

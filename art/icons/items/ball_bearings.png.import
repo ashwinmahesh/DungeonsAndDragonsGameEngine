@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://r5wdny5gdjwi"
-path="res://.godot/imported/ball_bearings.png-b3ac69deb514bc7bcc8ea758b1926c36.ctex"
+path="res://.godot/imported/ball_bearings.png-21c2e251c989f50b57b5a9b8befedbe8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/ball_bearings.png"
-dest_files=["res://.godot/imported/ball_bearings.png-b3ac69deb514bc7bcc8ea758b1926c36.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/ball_bearings.png"
+dest_files=["res://.godot/imported/ball_bearings.png-21c2e251c989f50b57b5a9b8befedbe8.ctex"]
 
 [params]
 

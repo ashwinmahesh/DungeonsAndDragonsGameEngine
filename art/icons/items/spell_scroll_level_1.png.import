@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vfh6jcxcpm8c"
-path="res://.godot/imported/spell_scroll_level_1.png-56d6553a94f75f21adbf45188ede0f6f.ctex"
+path="res://.godot/imported/spell_scroll_level_1.png-b0284b29c6eaff2d862ef2dc0778d082.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/spell_scroll_level_1.png"
-dest_files=["res://.godot/imported/spell_scroll_level_1.png-56d6553a94f75f21adbf45188ede0f6f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/spell_scroll_level_1.png"
+dest_files=["res://.godot/imported/spell_scroll_level_1.png-b0284b29c6eaff2d862ef2dc0778d082.ctex"]
 
 [params]
 

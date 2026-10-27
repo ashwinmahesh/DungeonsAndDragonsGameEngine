@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://caad1qmafhi33"
-path="res://.godot/imported/prismatic_spray.png-d4d613b6903004029918f861d54242cc.ctex"
+path="res://.godot/imported/prismatic_spray.png-5568ed81c118a958bf7911a049f9f926.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/prismatic_spray.png"
-dest_files=["res://.godot/imported/prismatic_spray.png-d4d613b6903004029918f861d54242cc.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/prismatic_spray.png"
+dest_files=["res://.godot/imported/prismatic_spray.png-5568ed81c118a958bf7911a049f9f926.ctex"]
 
 [params]
 

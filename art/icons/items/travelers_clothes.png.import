@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b15mtngtjrrbw"
-path="res://.godot/imported/travelers_clothes.png-67534c6a97b3391bbe1c1ada2f45b0f2.ctex"
+path="res://.godot/imported/travelers_clothes.png-c7c76408741bc57cc6388a5bbe1de5ee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/travelers_clothes.png"
-dest_files=["res://.godot/imported/travelers_clothes.png-67534c6a97b3391bbe1c1ada2f45b0f2.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/travelers_clothes.png"
+dest_files=["res://.godot/imported/travelers_clothes.png-c7c76408741bc57cc6388a5bbe1de5ee.ctex"]
 
 [params]
 

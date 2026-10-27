@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f8ws4d6uv652"
-path="res://.godot/imported/planar_binding.png-dd56dfe5bbd8c264860c31e254ea42a7.ctex"
+path="res://.godot/imported/planar_binding.png-737527a4bdd4505b4c5df9828278fbd8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/planar_binding.png"
-dest_files=["res://.godot/imported/planar_binding.png-dd56dfe5bbd8c264860c31e254ea42a7.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/planar_binding.png"
+dest_files=["res://.godot/imported/planar_binding.png-737527a4bdd4505b4c5df9828278fbd8.ctex"]
 
 [params]
 

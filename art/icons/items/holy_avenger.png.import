@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcybhikfllmvi"
-path="res://.godot/imported/holy_avenger.png-125e5a0ca83198904b85c746d9fb352c.ctex"
+path="res://.godot/imported/holy_avenger.png-0595e912868112e06da7847d52310417.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/holy_avenger.png"
-dest_files=["res://.godot/imported/holy_avenger.png-125e5a0ca83198904b85c746d9fb352c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/holy_avenger.png"
+dest_files=["res://.godot/imported/holy_avenger.png-0595e912868112e06da7847d52310417.ctex"]
 
 [params]
 

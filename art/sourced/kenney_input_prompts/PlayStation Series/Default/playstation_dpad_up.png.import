@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dv0te233v48dm"
-path.bptc="res://.godot/imported/playstation_dpad_up.png-0a9fd348d803291ef0e27035337a450e.bptc.ctex"
+path.bptc="res://.godot/imported/playstation_dpad_up.png-9cfb788db3fbd6173f6d6428e14c3416.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_dpad_up.png"
-dest_files=["res://.godot/imported/playstation_dpad_up.png-0a9fd348d803291ef0e27035337a450e.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_dpad_up.png"
+dest_files=["res://.godot/imported/playstation_dpad_up.png-9cfb788db3fbd6173f6d6428e14c3416.bptc.ctex"]
 
 [params]
 

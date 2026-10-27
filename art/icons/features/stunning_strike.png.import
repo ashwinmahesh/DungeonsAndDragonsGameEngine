@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqdjuq82wr5iy"
-path="res://.godot/imported/stunning_strike.png-9dceeb3df0cdb64637543da8c6bd9bd7.ctex"
+path="res://.godot/imported/stunning_strike.png-ef87857df0fffec969cdb24b793f1a81.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/stunning_strike.png"
-dest_files=["res://.godot/imported/stunning_strike.png-9dceeb3df0cdb64637543da8c6bd9bd7.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/stunning_strike.png"
+dest_files=["res://.godot/imported/stunning_strike.png-ef87857df0fffec969cdb24b793f1a81.ctex"]
 
 [params]
 

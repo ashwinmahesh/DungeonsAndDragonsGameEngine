@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmfsbflat58ec"
-path="res://.godot/imported/disguise_kit.png-cce2d9aadf1386987e2a5422e73f582b.ctex"
+path="res://.godot/imported/disguise_kit.png-e4f5caad57130037ae81eb7deff22b64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/disguise_kit.png"
-dest_files=["res://.godot/imported/disguise_kit.png-cce2d9aadf1386987e2a5422e73f582b.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/disguise_kit.png"
+dest_files=["res://.godot/imported/disguise_kit.png-e4f5caad57130037ae81eb7deff22b64.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cbkfhjsl08uk0"
-path="res://.godot/imported/pike.png-7fbc573ccc20e3a6d6cd97edbde5c92f.ctex"
+path="res://.godot/imported/pike.png-6a4d9bb2b6f724bfbb4c2a3e0bdd5bfd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/pike.png"
-dest_files=["res://.godot/imported/pike.png-7fbc573ccc20e3a6d6cd97edbde5c92f.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/pike.png"
+dest_files=["res://.godot/imported/pike.png-6a4d9bb2b6f724bfbb4c2a3e0bdd5bfd.ctex"]
 
 [params]
 

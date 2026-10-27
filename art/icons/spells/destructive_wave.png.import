@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crfhurjorobi7"
-path="res://.godot/imported/destructive_wave.png-d9c662b4c368f5ef55082e93e2931162.ctex"
+path="res://.godot/imported/destructive_wave.png-180db87c18e55095ca098775a218ec74.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/destructive_wave.png"
-dest_files=["res://.godot/imported/destructive_wave.png-d9c662b4c368f5ef55082e93e2931162.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/destructive_wave.png"
+dest_files=["res://.godot/imported/destructive_wave.png-180db87c18e55095ca098775a218ec74.ctex"]
 
 [params]
 

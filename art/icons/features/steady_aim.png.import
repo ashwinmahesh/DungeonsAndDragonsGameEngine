@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://sj5bj27etsck"
-path="res://.godot/imported/steady_aim.png-6343e1f35e9b65a70a3ad71352d5b5b8.ctex"
+path="res://.godot/imported/steady_aim.png-ba55af9f5174aee9c9babc562f882da7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/steady_aim.png"
-dest_files=["res://.godot/imported/steady_aim.png-6343e1f35e9b65a70a3ad71352d5b5b8.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/steady_aim.png"
+dest_files=["res://.godot/imported/steady_aim.png-ba55af9f5174aee9c9babc562f882da7.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cx6whi6esyij6"
-path="res://.godot/imported/wand_of_orcus.png-079a89430ae67280f61722f95b1baf10.ctex"
+path="res://.godot/imported/wand_of_orcus.png-a05f0277814b2ab0474639b2ee7e61db.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/wand_of_orcus.png"
-dest_files=["res://.godot/imported/wand_of_orcus.png-079a89430ae67280f61722f95b1baf10.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/wand_of_orcus.png"
+dest_files=["res://.godot/imported/wand_of_orcus.png-a05f0277814b2ab0474639b2ee7e61db.ctex"]
 
 [params]
 

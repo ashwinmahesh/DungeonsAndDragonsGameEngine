@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://boijb7ejwa1dx"
-path="res://.godot/imported/wrathful_smite.png-262d2e6b21b7460a597bedf0c3ffed4f.ctex"
+path="res://.godot/imported/wrathful_smite.png-d53ee533893ac6201f916e6cc3c34537.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/wrathful_smite.png"
-dest_files=["res://.godot/imported/wrathful_smite.png-262d2e6b21b7460a597bedf0c3ffed4f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/wrathful_smite.png"
+dest_files=["res://.godot/imported/wrathful_smite.png-d53ee533893ac6201f916e6cc3c34537.ctex"]
 
 [params]
 

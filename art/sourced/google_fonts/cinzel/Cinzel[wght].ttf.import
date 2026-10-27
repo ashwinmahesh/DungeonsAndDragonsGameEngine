@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://b25l1lgiftnrk"
-path="res://.godot/imported/Cinzel[wght].ttf-15566a789a678fa27b4c71548ebe50f2.fontdata"
+path="res://.godot/imported/Cinzel[wght].ttf-85964ce93f8d1ae27ee2c3cc5768b198.fontdata"
 
 [deps]
 
-source_file="res://art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
-dest_files=["res://.godot/imported/Cinzel[wght].ttf-15566a789a678fa27b4c71548ebe50f2.fontdata"]
+source_file="res://addons/dnd_core/art/sourced/google_fonts/cinzel/Cinzel[wght].ttf"
+dest_files=["res://.godot/imported/Cinzel[wght].ttf-85964ce93f8d1ae27ee2c3cc5768b198.fontdata"]
 
 [params]
 

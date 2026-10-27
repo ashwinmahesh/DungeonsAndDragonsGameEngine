@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3daurnfa3v6w"
-path="res://.godot/imported/polymorph.png-a2a257ee79f0c295d47cec261c59bc58.ctex"
+path="res://.godot/imported/polymorph.png-ca9d33049f33052285b52f3c6a4fb050.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/polymorph.png"
-dest_files=["res://.godot/imported/polymorph.png-a2a257ee79f0c295d47cec261c59bc58.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/polymorph.png"
+dest_files=["res://.godot/imported/polymorph.png-ca9d33049f33052285b52f3c6a4fb050.ctex"]
 
 [params]
 

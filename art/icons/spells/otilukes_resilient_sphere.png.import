@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://hnxrobgmg00r"
-path="res://.godot/imported/otilukes_resilient_sphere.png-7b2fa42bdbccf87d1536b1365b77638d.ctex"
+path="res://.godot/imported/otilukes_resilient_sphere.png-8406433437ca9d1d8560bc7cc8f3ebf5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/otilukes_resilient_sphere.png"
-dest_files=["res://.godot/imported/otilukes_resilient_sphere.png-7b2fa42bdbccf87d1536b1365b77638d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/otilukes_resilient_sphere.png"
+dest_files=["res://.godot/imported/otilukes_resilient_sphere.png-8406433437ca9d1d8560bc7cc8f3ebf5.ctex"]
 
 [params]
 

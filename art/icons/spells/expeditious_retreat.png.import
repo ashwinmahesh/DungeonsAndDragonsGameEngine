@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6630djb62gvm"
-path="res://.godot/imported/expeditious_retreat.png-41eee82ffe24561b81b30a091a2de45f.ctex"
+path="res://.godot/imported/expeditious_retreat.png-168df5832e2c0b143b0491ce3795cd4d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/expeditious_retreat.png"
-dest_files=["res://.godot/imported/expeditious_retreat.png-41eee82ffe24561b81b30a091a2de45f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/expeditious_retreat.png"
+dest_files=["res://.godot/imported/expeditious_retreat.png-168df5832e2c0b143b0491ce3795cd4d.ctex"]
 
 [params]
 

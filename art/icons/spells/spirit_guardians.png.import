@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhqsak4v18g0d"
-path="res://.godot/imported/spirit_guardians.png-ff62ea8529a39c704652cd4312cddc0f.ctex"
+path="res://.godot/imported/spirit_guardians.png-be03014ef62e5ddcfd8b6d9b851d0e11.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/spirit_guardians.png"
-dest_files=["res://.godot/imported/spirit_guardians.png-ff62ea8529a39c704652cd4312cddc0f.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/spirit_guardians.png"
+dest_files=["res://.godot/imported/spirit_guardians.png-be03014ef62e5ddcfd8b6d9b851d0e11.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbx3s4fpu7lan"
-path="res://.godot/imported/blindness_deafness.png-0c8ec3cbb88a69af76469e72e4ed3cc4.ctex"
+path="res://.godot/imported/blindness_deafness.png-575b82ac50ee8b614044b4b0bdb33745.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/blindness_deafness.png"
-dest_files=["res://.godot/imported/blindness_deafness.png-0c8ec3cbb88a69af76469e72e4ed3cc4.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/blindness_deafness.png"
+dest_files=["res://.godot/imported/blindness_deafness.png-575b82ac50ee8b614044b4b0bdb33745.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cu4epimgmbpv7"
-path="res://.godot/imported/otilukes_freezing_sphere.png-f3dcf426f84f01b9f53d891cdf9a0b95.ctex"
+path="res://.godot/imported/otilukes_freezing_sphere.png-91cfbd944112e50ba1b79b82a78134cd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/otilukes_freezing_sphere.png"
-dest_files=["res://.godot/imported/otilukes_freezing_sphere.png-f3dcf426f84f01b9f53d891cdf9a0b95.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/otilukes_freezing_sphere.png"
+dest_files=["res://.godot/imported/otilukes_freezing_sphere.png-91cfbd944112e50ba1b79b82a78134cd.ctex"]
 
 [params]
 

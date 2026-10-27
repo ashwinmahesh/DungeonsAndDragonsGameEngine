@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://x0n55dke81qa"
-path="res://.godot/imported/dulcimer.png-a5c95e58d223c39fd78ebe31d1e83737.ctex"
+path="res://.godot/imported/dulcimer.png-f972663e7f14b5f8936a3a0d2a42c143.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dulcimer.png"
-dest_files=["res://.godot/imported/dulcimer.png-a5c95e58d223c39fd78ebe31d1e83737.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dulcimer.png"
+dest_files=["res://.godot/imported/dulcimer.png-f972663e7f14b5f8936a3a0d2a42c143.ctex"]
 
 [params]
 

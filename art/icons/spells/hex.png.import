@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5q3idhylwqn2"
-path="res://.godot/imported/hex.png-6fd7feab640bbb4c63504887368c7fa3.ctex"
+path="res://.godot/imported/hex.png-0ed4aa57860aa225319112fa7ae67dbf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/hex.png"
-dest_files=["res://.godot/imported/hex.png-6fd7feab640bbb4c63504887368c7fa3.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/hex.png"
+dest_files=["res://.godot/imported/hex.png-0ed4aa57860aa225319112fa7ae67dbf.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhdp5yuhoqv8e"
-path="res://.godot/imported/shining_smite.png-41d4efe5cb54e21f458eb961fd8c3c65.ctex"
+path="res://.godot/imported/shining_smite.png-45b4567398b8bffe86e1b68c256a7c77.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/shining_smite.png"
-dest_files=["res://.godot/imported/shining_smite.png-41d4efe5cb54e21f458eb961fd8c3c65.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/shining_smite.png"
+dest_files=["res://.godot/imported/shining_smite.png-45b4567398b8bffe86e1b68c256a7c77.ctex"]
 
 [params]
 

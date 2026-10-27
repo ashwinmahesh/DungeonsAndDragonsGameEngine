@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvatb4hw2b2c"
-path="res://.godot/imported/lance.png-9975f2d1a2c4ef4abda36b1ff9f9ce32.ctex"
+path="res://.godot/imported/lance.png-3df2cb4f21848bbf1c6dc5252a87016f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/lance.png"
-dest_files=["res://.godot/imported/lance.png-9975f2d1a2c4ef4abda36b1ff9f9ce32.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/lance.png"
+dest_files=["res://.godot/imported/lance.png-3df2cb4f21848bbf1c6dc5252a87016f.ctex"]
 
 [params]
 

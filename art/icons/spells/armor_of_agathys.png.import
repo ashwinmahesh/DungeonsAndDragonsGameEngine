@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ck4wer7msfxmt"
-path="res://.godot/imported/armor_of_agathys.png-fbc7ad57224353d21e451bb9c95c0254.ctex"
+path="res://.godot/imported/armor_of_agathys.png-1451e3e3a8b48f9e30eb8c9632f8ba34.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/armor_of_agathys.png"
-dest_files=["res://.godot/imported/armor_of_agathys.png-fbc7ad57224353d21e451bb9c95c0254.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/armor_of_agathys.png"
+dest_files=["res://.godot/imported/armor_of_agathys.png-1451e3e3a8b48f9e30eb8c9632f8ba34.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://l2bcqnf3b63s"
-path="res://.godot/imported/dice_set.png-9724f64d43b44b0afb3f2f808d03346c.ctex"
+path="res://.godot/imported/dice_set.png-216d8b4f3c590296293fc4940c4f0ba9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/dice_set.png"
-dest_files=["res://.godot/imported/dice_set.png-9724f64d43b44b0afb3f2f808d03346c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/dice_set.png"
+dest_files=["res://.godot/imported/dice_set.png-216d8b4f3c590296293fc4940c4f0ba9.ctex"]
 
 [params]
 

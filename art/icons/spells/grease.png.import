@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://usx0qtbbm1qb"
-path="res://.godot/imported/grease.png-c972beda93b0c95f017612d62fadfa8e.ctex"
+path="res://.godot/imported/grease.png-d8feb630032815f7fd61405f06085d92.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/grease.png"
-dest_files=["res://.godot/imported/grease.png-c972beda93b0c95f017612d62fadfa8e.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/grease.png"
+dest_files=["res://.godot/imported/grease.png-d8feb630032815f7fd61405f06085d92.ctex"]
 
 [params]
 

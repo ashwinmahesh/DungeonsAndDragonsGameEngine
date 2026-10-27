@@ -69,8 +69,8 @@ func _ids_from_args() -> Array[String]:
 				out.append(id)
 			return out
 	var all: Array[String] = []
-	for d in DirAccess.get_directories_at("res://art/sprites"):
-		if d != "villager_standin" and ResourceLoader.exists("res://art/sprites/%s/walk.tres" % d):
+	for d in ArtPaths.dirs("art/sprites"):
+		if d != "villager_standin" and ArtPaths.exists("art/sprites/%s/walk.tres" % d):
 			all.append(d)
 	return all
 

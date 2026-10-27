@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crkb234rcdwq1"
-path="res://.godot/imported/lay_on_hands.png-1157ab7d47aacc1bdef47a0be3c2a5aa.ctex"
+path="res://.godot/imported/lay_on_hands.png-3aaafa7d3a203aff4f2ee4f8ae819bd3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/lay_on_hands.png"
-dest_files=["res://.godot/imported/lay_on_hands.png-1157ab7d47aacc1bdef47a0be3c2a5aa.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/lay_on_hands.png"
+dest_files=["res://.godot/imported/lay_on_hands.png-3aaafa7d3a203aff4f2ee4f8ae819bd3.ctex"]
 
 [params]
 

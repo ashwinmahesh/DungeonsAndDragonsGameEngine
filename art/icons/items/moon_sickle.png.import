@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bv00v600i1dr2"
-path="res://.godot/imported/moon_sickle.png-c83f9989aeb373fe4fcc560dfcea1924.ctex"
+path="res://.godot/imported/moon_sickle.png-aa84f27f30798b3f7bf4de6222fec99f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/moon_sickle.png"
-dest_files=["res://.godot/imported/moon_sickle.png-c83f9989aeb373fe4fcc560dfcea1924.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/moon_sickle.png"
+dest_files=["res://.godot/imported/moon_sickle.png-aa84f27f30798b3f7bf4de6222fec99f.ctex"]
 
 [params]
 

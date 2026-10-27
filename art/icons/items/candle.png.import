@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1sw0i1tmtpql"
-path="res://.godot/imported/candle.png-4e57dbf54bfb97088c49c0e1f0bba358.ctex"
+path="res://.godot/imported/candle.png-72779cc386c8e1a959f3f3a01498c96e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/candle.png"
-dest_files=["res://.godot/imported/candle.png-4e57dbf54bfb97088c49c0e1f0bba358.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/candle.png"
+dest_files=["res://.godot/imported/candle.png-72779cc386c8e1a959f3f3a01498c96e.ctex"]
 
 [params]
 

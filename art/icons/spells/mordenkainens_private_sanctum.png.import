@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://x6yqel03j8nm"
-path="res://.godot/imported/mordenkainens_private_sanctum.png-34f4060c49826aab07f3409858b36ba3.ctex"
+path="res://.godot/imported/mordenkainens_private_sanctum.png-0c08a8f99c26b81e8a37c5a3a4ba7eaf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/mordenkainens_private_sanctum.png"
-dest_files=["res://.godot/imported/mordenkainens_private_sanctum.png-34f4060c49826aab07f3409858b36ba3.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/mordenkainens_private_sanctum.png"
+dest_files=["res://.godot/imported/mordenkainens_private_sanctum.png-0c08a8f99c26b81e8a37c5a3a4ba7eaf.ctex"]
 
 [params]
 

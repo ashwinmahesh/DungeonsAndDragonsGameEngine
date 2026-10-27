@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://boqlsrv8tjyds"
-path="res://.godot/imported/shortbow.png-2f0dd8a262f1d0774813a522fc33cfa9.ctex"
+path="res://.godot/imported/shortbow.png-1b824ecf5e5da632409a97bb69c7a73d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/shortbow.png"
-dest_files=["res://.godot/imported/shortbow.png-2f0dd8a262f1d0774813a522fc33cfa9.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/shortbow.png"
+dest_files=["res://.godot/imported/shortbow.png-1b824ecf5e5da632409a97bb69c7a73d.ctex"]
 
 [params]
 

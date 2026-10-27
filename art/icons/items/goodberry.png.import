@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ed1xaxfsuejc"
-path="res://.godot/imported/goodberry.png-d1f83fd4d2f3285b11972823bd148fb9.ctex"
+path="res://.godot/imported/goodberry.png-cb5624f37755d64a9aa67a08457650ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/goodberry.png"
-dest_files=["res://.godot/imported/goodberry.png-d1f83fd4d2f3285b11972823bd148fb9.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/goodberry.png"
+dest_files=["res://.godot/imported/goodberry.png-cb5624f37755d64a9aa67a08457650ca.ctex"]
 
 [params]
 

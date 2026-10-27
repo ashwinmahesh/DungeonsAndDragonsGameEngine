@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://cud0xkvoqg2jo"
-path="res://.godot/imported/switch_004.ogg-251767e292a2ad5d5405adf48b3f9886.oggvorbisstr"
+path="res://.godot/imported/switch_004.ogg-f06b83bc024a2e45497a03389753d3bf.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_interface_sounds/Audio/switch_004.ogg"
-dest_files=["res://.godot/imported/switch_004.ogg-251767e292a2ad5d5405adf48b3f9886.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_interface_sounds/Audio/switch_004.ogg"
+dest_files=["res://.godot/imported/switch_004.ogg-f06b83bc024a2e45497a03389753d3bf.oggvorbisstr"]
 
 [params]
 

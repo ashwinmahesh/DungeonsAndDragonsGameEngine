@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deyy0n0fapeab"
-path="res://.godot/imported/sphere.png-f74421d8617d403ef68eac8340dff25c.ctex"
+path="res://.godot/imported/sphere.png-0e46b4655a9e2e8a6571a46965096d95.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/sphere.png"
-dest_files=["res://.godot/imported/sphere.png-f74421d8617d403ef68eac8340dff25c.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/sphere.png"
+dest_files=["res://.godot/imported/sphere.png-0e46b4655a9e2e8a6571a46965096d95.ctex"]
 
 [params]
 

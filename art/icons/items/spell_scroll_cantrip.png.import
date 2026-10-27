@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://df5758s2gar6k"
-path="res://.godot/imported/spell_scroll_cantrip.png-c259ad44b8ddd17c664462940c1f4aa8.ctex"
+path="res://.godot/imported/spell_scroll_cantrip.png-0ad6522668d4845eeb393094860ff76b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/spell_scroll_cantrip.png"
-dest_files=["res://.godot/imported/spell_scroll_cantrip.png-c259ad44b8ddd17c664462940c1f4aa8.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/spell_scroll_cantrip.png"
+dest_files=["res://.godot/imported/spell_scroll_cantrip.png-0ad6522668d4845eeb393094860ff76b.ctex"]
 
 [params]
 

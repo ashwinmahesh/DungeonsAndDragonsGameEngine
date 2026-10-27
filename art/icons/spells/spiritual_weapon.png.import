@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2bpy83u34i8c"
-path="res://.godot/imported/spiritual_weapon.png-8fe0ef15c97e8b18abe51e6e96dbf7e4.ctex"
+path="res://.godot/imported/spiritual_weapon.png-8ed850b592baaa5170434189a10c2dae.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/spiritual_weapon.png"
-dest_files=["res://.godot/imported/spiritual_weapon.png-8fe0ef15c97e8b18abe51e6e96dbf7e4.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/spiritual_weapon.png"
+dest_files=["res://.godot/imported/spiritual_weapon.png-8ed850b592baaa5170434189a10c2dae.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0viqcjltf88e"
-path="res://.godot/imported/hammer_of_thunderbolts.png-d8f603308502fa99feeb0f48bcc68ad6.ctex"
+path="res://.godot/imported/hammer_of_thunderbolts.png-79ca1ec9947e9ee59aa1150d5982619e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/hammer_of_thunderbolts.png"
-dest_files=["res://.godot/imported/hammer_of_thunderbolts.png-d8f603308502fa99feeb0f48bcc68ad6.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/hammer_of_thunderbolts.png"
+dest_files=["res://.godot/imported/hammer_of_thunderbolts.png-79ca1ec9947e9ee59aa1150d5982619e.ctex"]
 
 [params]
 

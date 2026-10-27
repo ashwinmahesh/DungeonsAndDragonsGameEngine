@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://caivm6u5077ak"
-path="res://.godot/imported/item_coins_04.ogg-9087419c406150df948a2544cea1ac9a.oggvorbisstr"
+path="res://.godot/imported/item_coins_04.ogg-ce25746e45bc88b16a9100c13dd3fc2c.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_80_cc0_rpg_sfx/item_coins_04.ogg"
-dest_files=["res://.godot/imported/item_coins_04.ogg-9087419c406150df948a2544cea1ac9a.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_80_cc0_rpg_sfx/item_coins_04.ogg"
+dest_files=["res://.godot/imported/item_coins_04.ogg-ce25746e45bc88b16a9100c13dd3fc2c.oggvorbisstr"]
 
 [params]
 

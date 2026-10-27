@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dms8idc8mafy6"
-path="res://.godot/imported/entertainers_pack.png-b75b28096773ab8f7ddcbc6b6c220a05.ctex"
+path="res://.godot/imported/entertainers_pack.png-a0990b53bb7ded56b3acc24292f112c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/entertainers_pack.png"
-dest_files=["res://.godot/imported/entertainers_pack.png-b75b28096773ab8f7ddcbc6b6c220a05.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/entertainers_pack.png"
+dest_files=["res://.godot/imported/entertainers_pack.png-a0990b53bb7ded56b3acc24292f112c0.ctex"]
 
 [params]
 

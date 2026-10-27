@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cx2lqwu7ouo7"
-path="res://.godot/imported/vorpal_sword.png-966aa47089b9be948de26b95cf667c5d.ctex"
+path="res://.godot/imported/vorpal_sword.png-e72b95607c1a4d1bcad3215dab832007.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/vorpal_sword.png"
-dest_files=["res://.godot/imported/vorpal_sword.png-966aa47089b9be948de26b95cf667c5d.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/vorpal_sword.png"
+dest_files=["res://.godot/imported/vorpal_sword.png-e72b95607c1a4d1bcad3215dab832007.ctex"]
 
 [params]
 

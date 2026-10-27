@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dhy1ndaobyulb"
-path="res://.godot/imported/fireball.png-dc8eca3b7cf55a806975c52e5e0c9fbb.ctex"
+path="res://.godot/imported/fireball.png-8bf70a854c81df2c735e88ea926ab843.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/fireball.png"
-dest_files=["res://.godot/imported/fireball.png-dc8eca3b7cf55a806975c52e5e0c9fbb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/fireball.png"
+dest_files=["res://.godot/imported/fireball.png-8bf70a854c81df2c735e88ea926ab843.ctex"]
 
 [params]
 

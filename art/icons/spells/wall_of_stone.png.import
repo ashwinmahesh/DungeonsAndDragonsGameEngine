@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2lv057mqtfq2"
-path="res://.godot/imported/wall_of_stone.png-8f025d2e1d11346f647bf4928475d6a8.ctex"
+path="res://.godot/imported/wall_of_stone.png-c508f3c4897c9cfd2ca1c44417fc8437.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/wall_of_stone.png"
-dest_files=["res://.godot/imported/wall_of_stone.png-8f025d2e1d11346f647bf4928475d6a8.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/wall_of_stone.png"
+dest_files=["res://.godot/imported/wall_of_stone.png-c508f3c4897c9cfd2ca1c44417fc8437.ctex"]
 
 [params]
 

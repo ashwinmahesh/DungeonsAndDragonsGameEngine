@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpscrtmxemwpj"
-path="res://.godot/imported/grappling_hook.png-d8543bdfc8d1af8c5afa0d6fe3a07e7b.ctex"
+path="res://.godot/imported/grappling_hook.png-51a222ed0b2e122fffd17b53b0c9cb78.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/grappling_hook.png"
-dest_files=["res://.godot/imported/grappling_hook.png-d8543bdfc8d1af8c5afa0d6fe3a07e7b.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/grappling_hook.png"
+dest_files=["res://.godot/imported/grappling_hook.png-51a222ed0b2e122fffd17b53b0c9cb78.ctex"]
 
 [params]
 

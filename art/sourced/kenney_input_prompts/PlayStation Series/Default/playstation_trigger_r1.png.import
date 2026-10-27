@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnm7inh14hg1y"
-path.bptc="res://.godot/imported/playstation_trigger_r1.png-ef599c9be5024b4eba731eb1b2d7b479.bptc.ctex"
+path.bptc="res://.godot/imported/playstation_trigger_r1.png-32bbe7bcc4eaedfa947980cb45454982.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_trigger_r1.png"
-dest_files=["res://.godot/imported/playstation_trigger_r1.png-ef599c9be5024b4eba731eb1b2d7b479.bptc.ctex"]
+source_file="res://addons/dnd_core/art/sourced/kenney_input_prompts/PlayStation Series/Default/playstation_trigger_r1.png"
+dest_files=["res://.godot/imported/playstation_trigger_r1.png-32bbe7bcc4eaedfa947980cb45454982.bptc.ctex"]
 
 [params]
 

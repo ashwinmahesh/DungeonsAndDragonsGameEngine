@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dq2othn2an875"
-path="res://.godot/imported/spider_climb.png-4032eefb5da2a09fd437a320b4b59d99.ctex"
+path="res://.godot/imported/spider_climb.png-1712746c9596162f673fd2cefe8a1546.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/spider_climb.png"
-dest_files=["res://.godot/imported/spider_climb.png-4032eefb5da2a09fd437a320b4b59d99.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/spider_climb.png"
+dest_files=["res://.godot/imported/spider_climb.png-1712746c9596162f673fd2cefe8a1546.ctex"]
 
 [params]
 

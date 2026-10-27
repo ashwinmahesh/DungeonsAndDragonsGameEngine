@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2tbmlri21slu"
-path="res://.godot/imported/chain_lightning.png-5231a47ed3f2229db112f54dfa28c596.ctex"
+path="res://.godot/imported/chain_lightning.png-74b0f497cd50a9244a97bb708b4600d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/chain_lightning.png"
-dest_files=["res://.godot/imported/chain_lightning.png-5231a47ed3f2229db112f54dfa28c596.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/chain_lightning.png"
+dest_files=["res://.godot/imported/chain_lightning.png-74b0f497cd50a9244a97bb708b4600d3.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tamrkkao2dib"
-path="res://.godot/imported/crusaders_mantle.png-1ffbe81c1b39675b0ea37eb024a61856.ctex"
+path="res://.godot/imported/crusaders_mantle.png-e7ed4af683f65b8154675176eb75149c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/crusaders_mantle.png"
-dest_files=["res://.godot/imported/crusaders_mantle.png-1ffbe81c1b39675b0ea37eb024a61856.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/crusaders_mantle.png"
+dest_files=["res://.godot/imported/crusaders_mantle.png-e7ed4af683f65b8154675176eb75149c.ctex"]
 
 [params]
 

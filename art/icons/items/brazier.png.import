@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7rruqtrl7n77"
-path="res://.godot/imported/brazier.png-5d64fb01ac82bb83b4deae350de5a433.ctex"
+path="res://.godot/imported/brazier.png-13ca290db491271b30dfaabd0a892ffb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/brazier.png"
-dest_files=["res://.godot/imported/brazier.png-5d64fb01ac82bb83b4deae350de5a433.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/brazier.png"
+dest_files=["res://.godot/imported/brazier.png-13ca290db491271b30dfaabd0a892ffb.ctex"]
 
 [params]
 

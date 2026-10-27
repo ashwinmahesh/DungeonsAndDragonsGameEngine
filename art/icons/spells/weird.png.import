@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jgvo238ist83"
-path="res://.godot/imported/weird.png-c35d75a0d33ef959881538473287e7a0.ctex"
+path="res://.godot/imported/weird.png-424e30732ffc5ede623e48ecdf3ceeea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/weird.png"
-dest_files=["res://.godot/imported/weird.png-c35d75a0d33ef959881538473287e7a0.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/weird.png"
+dest_files=["res://.godot/imported/weird.png-424e30732ffc5ede623e48ecdf3ceeea.ctex"]
 
 [params]
 

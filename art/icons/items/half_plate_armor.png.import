@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2t4qhg6ljnbx"
-path="res://.godot/imported/half_plate_armor.png-48cd1c5e6892e82b8f4f9b3ef5d0a6c5.ctex"
+path="res://.godot/imported/half_plate_armor.png-37d31e1a6623773b252a8baa2af3ba64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/half_plate_armor.png"
-dest_files=["res://.godot/imported/half_plate_armor.png-48cd1c5e6892e82b8f4f9b3ef5d0a6c5.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/half_plate_armor.png"
+dest_files=["res://.godot/imported/half_plate_armor.png-37d31e1a6623773b252a8baa2af3ba64.ctex"]
 
 [params]
 

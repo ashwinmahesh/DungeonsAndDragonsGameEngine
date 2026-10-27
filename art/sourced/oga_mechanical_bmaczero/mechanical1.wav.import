@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://ra5o7hgto53e"
-path="res://.godot/imported/mechanical1.wav-b28d542e572b2ce7f3ff172d52124874.sample"
+path="res://.godot/imported/mechanical1.wav-ee6ec3a0351fa7af5a9826f714cf6880.sample"
 
 [deps]
 
-source_file="res://art/sourced/oga_mechanical_bmaczero/mechanical1.wav"
-dest_files=["res://.godot/imported/mechanical1.wav-b28d542e572b2ce7f3ff172d52124874.sample"]
+source_file="res://addons/dnd_core/art/sourced/oga_mechanical_bmaczero/mechanical1.wav"
+dest_files=["res://.godot/imported/mechanical1.wav-ee6ec3a0351fa7af5a9826f714cf6880.sample"]
 
 [params]
 

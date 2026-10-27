@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8oycccrf1loo"
-path="res://.godot/imported/doll.png-a21b26252995fb6aba25f9b3e2389839.ctex"
+path="res://.godot/imported/doll.png-992dce95ca1ac94d136e91d3127dda12.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/doll.png"
-dest_files=["res://.godot/imported/doll.png-a21b26252995fb6aba25f9b3e2389839.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/doll.png"
+dest_files=["res://.godot/imported/doll.png-992dce95ca1ac94d136e91d3127dda12.ctex"]
 
 [params]
 

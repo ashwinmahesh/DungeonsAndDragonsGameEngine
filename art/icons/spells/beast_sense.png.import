@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://can85bji2vx1q"
-path="res://.godot/imported/beast_sense.png-5bf241eb80bf57eddfb31fb5fb41b930.ctex"
+path="res://.godot/imported/beast_sense.png-486f399a63cd966f68a14de5d23e2454.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/beast_sense.png"
-dest_files=["res://.godot/imported/beast_sense.png-5bf241eb80bf57eddfb31fb5fb41b930.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/beast_sense.png"
+dest_files=["res://.godot/imported/beast_sense.png-486f399a63cd966f68a14de5d23e2454.ctex"]
 
 [params]
 

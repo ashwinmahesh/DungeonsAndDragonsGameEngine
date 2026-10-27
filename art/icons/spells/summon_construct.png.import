@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://i1bq1ue220m1"
-path="res://.godot/imported/summon_construct.png-f0c5e397565148c668b36256ac73f3ec.ctex"
+path="res://.godot/imported/summon_construct.png-2f2616e9a717cf9ae81f16c8a5f3eb82.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/summon_construct.png"
-dest_files=["res://.godot/imported/summon_construct.png-f0c5e397565148c668b36256ac73f3ec.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/summon_construct.png"
+dest_files=["res://.godot/imported/summon_construct.png-2f2616e9a717cf9ae81f16c8a5f3eb82.ctex"]
 
 [params]
 

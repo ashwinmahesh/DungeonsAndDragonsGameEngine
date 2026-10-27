@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmulqyooqqsty"
-path="res://.godot/imported/evards_black_tentacles.png-08adf1a0699c15740204102de181226d.ctex"
+path="res://.godot/imported/evards_black_tentacles.png-6a7f949433c08dbf6509f7105d94b2a6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/evards_black_tentacles.png"
-dest_files=["res://.godot/imported/evards_black_tentacles.png-08adf1a0699c15740204102de181226d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/evards_black_tentacles.png"
+dest_files=["res://.godot/imported/evards_black_tentacles.png-6a7f949433c08dbf6509f7105d94b2a6.ctex"]
 
 [params]
 

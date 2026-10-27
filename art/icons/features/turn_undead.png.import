@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clfrysljbv8ie"
-path="res://.godot/imported/turn_undead.png-17107cf32c7dcad4487949539a872d79.ctex"
+path="res://.godot/imported/turn_undead.png-88ac6a61029a3ea9eb45e9b7b419986a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/turn_undead.png"
-dest_files=["res://.godot/imported/turn_undead.png-17107cf32c7dcad4487949539a872d79.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/turn_undead.png"
+dest_files=["res://.godot/imported/turn_undead.png-88ac6a61029a3ea9eb45e9b7b419986a.ctex"]
 
 [params]
 

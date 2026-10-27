@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csdvfo6hp43rl"
-path="res://.godot/imported/charm_person.png-6691407aaa3d18f9957e826cc385da1a.ctex"
+path="res://.godot/imported/charm_person.png-57af1bb0b41bf8fd15faa22354faf2f1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/charm_person.png"
-dest_files=["res://.godot/imported/charm_person.png-6691407aaa3d18f9957e826cc385da1a.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/charm_person.png"
+dest_files=["res://.godot/imported/charm_person.png-57af1bb0b41bf8fd15faa22354faf2f1.ctex"]
 
 [params]
 

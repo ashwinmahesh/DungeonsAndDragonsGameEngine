@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwm5sx71m2r2k"
-path="res://.godot/imported/conjure_volley.png-2f8deceabff022f90f020cd4d7da3450.ctex"
+path="res://.godot/imported/conjure_volley.png-b26733239098e5f841fa389c58e50042.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/conjure_volley.png"
-dest_files=["res://.godot/imported/conjure_volley.png-2f8deceabff022f90f020cd4d7da3450.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/conjure_volley.png"
+dest_files=["res://.godot/imported/conjure_volley.png-b26733239098e5f841fa389c58e50042.ctex"]
 
 [params]
 

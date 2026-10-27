@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://dg3rwhitex72n"
-path="res://.godot/imported/doorOpen_1.ogg-714198d6c228fee09349b1162f9a65de.oggvorbisstr"
+path="res://.godot/imported/doorOpen_1.ogg-6adc8028863ddf9ffeaeb3850e532d15.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_rpg_audio/Audio/doorOpen_1.ogg"
-dest_files=["res://.godot/imported/doorOpen_1.ogg-714198d6c228fee09349b1162f9a65de.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_rpg_audio/Audio/doorOpen_1.ogg"
+dest_files=["res://.godot/imported/doorOpen_1.ogg-6adc8028863ddf9ffeaeb3850e532d15.oggvorbisstr"]
 
 [params]
 

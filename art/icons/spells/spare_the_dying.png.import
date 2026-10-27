@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1c6ivcbffglm"
-path="res://.godot/imported/spare_the_dying.png-1c6929d14b4aa7ea7e1ae54e5c03e03d.ctex"
+path="res://.godot/imported/spare_the_dying.png-196ef6d9cfcec8e0295ff44e81cb3102.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/spare_the_dying.png"
-dest_files=["res://.godot/imported/spare_the_dying.png-1c6929d14b4aa7ea7e1ae54e5c03e03d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/spare_the_dying.png"
+dest_files=["res://.godot/imported/spare_the_dying.png-196ef6d9cfcec8e0295ff44e81cb3102.ctex"]
 
 [params]
 

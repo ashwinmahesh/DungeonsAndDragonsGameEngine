@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://biecelmg67oyo"
-path="res://.godot/imported/levitate.png-d8ee13cce499335054309cdddf36f2be.ctex"
+path="res://.godot/imported/levitate.png-c5bc104521d4c89b89c6f763d98046d0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/levitate.png"
-dest_files=["res://.godot/imported/levitate.png-d8ee13cce499335054309cdddf36f2be.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/levitate.png"
+dest_files=["res://.godot/imported/levitate.png-c5bc104521d4c89b89c6f763d98046d0.ctex"]
 
 [params]
 

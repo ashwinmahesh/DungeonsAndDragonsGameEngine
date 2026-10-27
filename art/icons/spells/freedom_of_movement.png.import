@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd2cfh6xyhias"
-path="res://.godot/imported/freedom_of_movement.png-d541cdc1705e8d23a6e2dabc8590f0f6.ctex"
+path="res://.godot/imported/freedom_of_movement.png-908b37c61d1a40ab0a5c82e3006a65b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/freedom_of_movement.png"
-dest_files=["res://.godot/imported/freedom_of_movement.png-d541cdc1705e8d23a6e2dabc8590f0f6.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/freedom_of_movement.png"
+dest_files=["res://.godot/imported/freedom_of_movement.png-908b37c61d1a40ab0a5c82e3006a65b9.ctex"]
 
 [params]
 

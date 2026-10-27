@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://duauyen27a83h"
-path="res://.godot/imported/vicious_mockery.png-132525178d8faa244537d0bc51ef67d7.ctex"
+path="res://.godot/imported/vicious_mockery.png-4c29a7a98c37ec206d30c6dab1e477f9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/vicious_mockery.png"
-dest_files=["res://.godot/imported/vicious_mockery.png-132525178d8faa244537d0bc51ef67d7.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/vicious_mockery.png"
+dest_files=["res://.godot/imported/vicious_mockery.png-4c29a7a98c37ec206d30c6dab1e477f9.ctex"]
 
 [params]
 

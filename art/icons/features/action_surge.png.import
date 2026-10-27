@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://du1bmjw18nfxf"
-path="res://.godot/imported/action_surge.png-282a30f2b3b62a162da8b1fe6c6fe1b7.ctex"
+path="res://.godot/imported/action_surge.png-8cd7cf77d9653fc3c179d12d83019667.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/action_surge.png"
-dest_files=["res://.godot/imported/action_surge.png-282a30f2b3b62a162da8b1fe6c6fe1b7.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/action_surge.png"
+dest_files=["res://.godot/imported/action_surge.png-8cd7cf77d9653fc3c179d12d83019667.ctex"]
 
 [params]
 

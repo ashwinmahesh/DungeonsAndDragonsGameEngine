@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://7a6ncamyx2ty"
-path="res://.godot/imported/minor_illusion.png-ba81ae81c103c854d37edae1da5cd979.ctex"
+path="res://.godot/imported/minor_illusion.png-400398005cc51345c50dc1b71a7b6d99.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/minor_illusion.png"
-dest_files=["res://.godot/imported/minor_illusion.png-ba81ae81c103c854d37edae1da5cd979.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/minor_illusion.png"
+dest_files=["res://.godot/imported/minor_illusion.png-400398005cc51345c50dc1b71a7b6d99.ctex"]
 
 [params]
 

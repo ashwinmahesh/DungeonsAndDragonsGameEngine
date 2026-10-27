@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://4773ef7cacau"
-path="res://.godot/imported/impactPlate_heavy_003.ogg-0265315b2b6e63c736691ebe8e4b4c67.oggvorbisstr"
+path="res://.godot/imported/impactPlate_heavy_003.ogg-90a2dcdb97f6cf4b81e2c9a9ddc538ca.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/kenney_impact_sounds/Audio/impactPlate_heavy_003.ogg"
-dest_files=["res://.godot/imported/impactPlate_heavy_003.ogg-0265315b2b6e63c736691ebe8e4b4c67.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/kenney_impact_sounds/Audio/impactPlate_heavy_003.ogg"
+dest_files=["res://.godot/imported/impactPlate_heavy_003.ogg-90a2dcdb97f6cf4b81e2c9a9ddc538ca.oggvorbisstr"]
 
 [params]
 

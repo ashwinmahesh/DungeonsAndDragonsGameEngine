@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cstksn1gyusyb"
-path="res://.godot/imported/summon_dragon.png-087aee6613e3bce0cb54699f0be84552.ctex"
+path="res://.godot/imported/summon_dragon.png-7cc4dd1452a51088bf67b1e42e71d8a6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/summon_dragon.png"
-dest_files=["res://.godot/imported/summon_dragon.png-087aee6613e3bce0cb54699f0be84552.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/summon_dragon.png"
+dest_files=["res://.godot/imported/summon_dragon.png-7cc4dd1452a51088bf67b1e42e71d8a6.ctex"]
 
 [params]
 

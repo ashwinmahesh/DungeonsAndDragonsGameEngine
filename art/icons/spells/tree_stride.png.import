@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cq0txvq1wi2vi"
-path="res://.godot/imported/tree_stride.png-711f8c47bffeda35d8161d1c721cd2a9.ctex"
+path="res://.godot/imported/tree_stride.png-a1ec8c15e2584a69bb82654252f25cb5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/tree_stride.png"
-dest_files=["res://.godot/imported/tree_stride.png-711f8c47bffeda35d8161d1c721cd2a9.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/tree_stride.png"
+dest_files=["res://.godot/imported/tree_stride.png-a1ec8c15e2584a69bb82654252f25cb5.ctex"]
 
 [params]
 

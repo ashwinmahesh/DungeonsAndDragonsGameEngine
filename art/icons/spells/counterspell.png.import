@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dh225hbrp05or"
-path="res://.godot/imported/counterspell.png-b5b67d7a821f49beb35d3b114dbd980d.ctex"
+path="res://.godot/imported/counterspell.png-c3d6d130290da8c2136859e206e5f04f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/counterspell.png"
-dest_files=["res://.godot/imported/counterspell.png-b5b67d7a821f49beb35d3b114dbd980d.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/counterspell.png"
+dest_files=["res://.godot/imported/counterspell.png-c3d6d130290da8c2136859e206e5f04f.ctex"]
 
 [params]
 

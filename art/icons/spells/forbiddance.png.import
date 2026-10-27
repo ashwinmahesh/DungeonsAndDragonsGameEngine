@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ca841o6366ekc"
-path="res://.godot/imported/forbiddance.png-0adc26c6cb8bcd4ec4801a74745b8bd5.ctex"
+path="res://.godot/imported/forbiddance.png-832bde78631d355e3fb95e2d22689545.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/forbiddance.png"
-dest_files=["res://.godot/imported/forbiddance.png-0adc26c6cb8bcd4ec4801a74745b8bd5.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/forbiddance.png"
+dest_files=["res://.godot/imported/forbiddance.png-832bde78631d355e3fb95e2d22689545.ctex"]
 
 [params]
 

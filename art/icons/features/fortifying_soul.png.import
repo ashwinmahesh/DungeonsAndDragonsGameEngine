@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cd4baqdh42tko"
-path="res://.godot/imported/fortifying_soul.png-e4307aa4d266b05073e3172f7e614262.ctex"
+path="res://.godot/imported/fortifying_soul.png-49aa43b97e7db85fdb77c56c6cf9c2a8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/fortifying_soul.png"
-dest_files=["res://.godot/imported/fortifying_soul.png-e4307aa4d266b05073e3172f7e614262.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/fortifying_soul.png"
+dest_files=["res://.godot/imported/fortifying_soul.png-49aa43b97e7db85fdb77c56c6cf9c2a8.ctex"]
 
 [params]
 

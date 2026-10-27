@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfcrcaess71lo"
-path="res://.godot/imported/circlet.png-f3d92c6ce7c319fae0384b385dc4cfad.ctex"
+path="res://.godot/imported/circlet.png-b968ca0bef898d4a019790fc9227dc51.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/circlet.png"
-dest_files=["res://.godot/imported/circlet.png-f3d92c6ce7c319fae0384b385dc4cfad.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/circlet.png"
+dest_files=["res://.godot/imported/circlet.png-b968ca0bef898d4a019790fc9227dc51.ctex"]
 
 [params]
 

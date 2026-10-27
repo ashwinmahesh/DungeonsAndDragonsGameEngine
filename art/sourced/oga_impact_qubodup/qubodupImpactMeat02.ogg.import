@@ -3,12 +3,12 @@
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
 uid="uid://bqmmcnt1xmnk7"
-path="res://.godot/imported/qubodupImpactMeat02.ogg-26451dbcb493bd7f5b5d8ae7318f5c3a.oggvorbisstr"
+path="res://.godot/imported/qubodupImpactMeat02.ogg-f288092b85c263ae20af134cf01f25cd.oggvorbisstr"
 
 [deps]
 
-source_file="res://art/sourced/oga_impact_qubodup/qubodupImpactMeat02.ogg"
-dest_files=["res://.godot/imported/qubodupImpactMeat02.ogg-26451dbcb493bd7f5b5d8ae7318f5c3a.oggvorbisstr"]
+source_file="res://addons/dnd_core/art/sourced/oga_impact_qubodup/qubodupImpactMeat02.ogg"
+dest_files=["res://.godot/imported/qubodupImpactMeat02.ogg-f288092b85c263ae20af134cf01f25cd.oggvorbisstr"]
 
 [params]
 

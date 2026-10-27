@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dii68m8el8nx1"
-path="res://.godot/imported/dragons_breath.png-e12f6c795ed3e71d440173b43866044a.ctex"
+path="res://.godot/imported/dragons_breath.png-29133f654ae6e87e7f16a0352ab9213f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/dragons_breath.png"
-dest_files=["res://.godot/imported/dragons_breath.png-e12f6c795ed3e71d440173b43866044a.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/dragons_breath.png"
+dest_files=["res://.godot/imported/dragons_breath.png-29133f654ae6e87e7f16a0352ab9213f.ctex"]
 
 [params]
 

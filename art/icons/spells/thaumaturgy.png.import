@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byebdvkcfsql6"
-path="res://.godot/imported/thaumaturgy.png-91ae61ab761036dac7bb8cf12c6ca8bd.ctex"
+path="res://.godot/imported/thaumaturgy.png-ca633e7a3b3e9f4b56da9359b1bf4d57.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/thaumaturgy.png"
-dest_files=["res://.godot/imported/thaumaturgy.png-91ae61ab761036dac7bb8cf12c6ca8bd.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/thaumaturgy.png"
+dest_files=["res://.godot/imported/thaumaturgy.png-ca633e7a3b3e9f4b56da9359b1bf4d57.ctex"]
 
 [params]
 

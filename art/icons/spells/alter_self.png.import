@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cccl5mndqlt57"
-path="res://.godot/imported/alter_self.png-6403728a5084fed2ac83213c3a54b9fe.ctex"
+path="res://.godot/imported/alter_self.png-4ea6a4580120013d9af0ad6f78aef12b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/alter_self.png"
-dest_files=["res://.godot/imported/alter_self.png-6403728a5084fed2ac83213c3a54b9fe.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/alter_self.png"
+dest_files=["res://.godot/imported/alter_self.png-4ea6a4580120013d9af0ad6f78aef12b.ctex"]
 
 [params]
 

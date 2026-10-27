@@ -10,7 +10,7 @@ extends Node3D
 ## each one's family and flavour, and the flavour's palette colours tint it. The families are built from FxKit's parts
 ## in FxMissiles, FxAreas and FxBodies. Only shows things: the encounter decides everything.
 
-const DATA := "res://art/vfx/effects.json"
+const DATA := "art/vfx/effects.json"   # the core's, with the game's own picks merged over it (ArtPaths.json)
 ## Families that fly from the caster to each target, one per attack roll when the spell or action makes them.
 const MISSILES: Array[String] = ["bolt", "beam", "ray", "touch", "drain", "shot"]
 ## Every family with an effect.
@@ -39,7 +39,7 @@ var last_cue: Dictionary = {}
 
 static func data() -> Dictionary:
 	if _data.is_empty():
-		_data = JSON.parse_string(FileAccess.get_file_as_string(DATA)) as Dictionary
+		_data = ArtPaths.json(DATA)
 	return _data
 
 

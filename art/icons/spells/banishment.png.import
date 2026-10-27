@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4tyh6o14hx8m"
-path="res://.godot/imported/banishment.png-a114953675ae22ea81ba73f7175c44d4.ctex"
+path="res://.godot/imported/banishment.png-836a70df1b5da60846193351c7aef977.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/banishment.png"
-dest_files=["res://.godot/imported/banishment.png-a114953675ae22ea81ba73f7175c44d4.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/banishment.png"
+dest_files=["res://.godot/imported/banishment.png-836a70df1b5da60846193351c7aef977.ctex"]
 
 [params]
 

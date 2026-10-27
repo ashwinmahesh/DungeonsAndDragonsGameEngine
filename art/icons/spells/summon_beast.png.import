@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cptk4b4ahxgso"
-path="res://.godot/imported/summon_beast.png-debbde9a1e6c9b85c7a3868533a24beb.ctex"
+path="res://.godot/imported/summon_beast.png-3f884ed0480eba38b01b4263c255acf3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/spells/summon_beast.png"
-dest_files=["res://.godot/imported/summon_beast.png-debbde9a1e6c9b85c7a3868533a24beb.ctex"]
+source_file="res://addons/dnd_core/art/icons/spells/summon_beast.png"
+dest_files=["res://.godot/imported/summon_beast.png-3f884ed0480eba38b01b4263c255acf3.ctex"]
 
 [params]
 

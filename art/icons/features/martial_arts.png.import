@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://col0g7ibpp8yw"
-path="res://.godot/imported/martial_arts.png-ab69bd72ed44fafd1c00d1fddae322d4.ctex"
+path="res://.godot/imported/martial_arts.png-382a6b31c1a5e540dcde7bc95d7a5d70.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/features/martial_arts.png"
-dest_files=["res://.godot/imported/martial_arts.png-ab69bd72ed44fafd1c00d1fddae322d4.ctex"]
+source_file="res://addons/dnd_core/art/icons/features/martial_arts.png"
+dest_files=["res://.godot/imported/martial_arts.png-382a6b31c1a5e540dcde7bc95d7a5d70.ctex"]
 
 [params]
 

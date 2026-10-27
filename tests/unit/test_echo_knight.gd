@@ -384,7 +384,7 @@ func test_a_fight_with_an_echo_saves_and_loads() -> void:
 
 
 func test_every_echo_knight_effect_has_a_look() -> void:
-	var feats := (JSON.parse_string(FileAccess.get_file_as_string("res://art/vfx/effects.json")) as Dictionary)["features"] as Dictionary
+	var feats := SpellFx.data()["features"] as Dictionary
 	for key: String in ["manifest_echo", "echo_move", "echo_swap", "echo_dismiss", "unleash_incarnation", "echo_avatar",
 			"echo_avatar_end", "shadow_martyr", "reclaim_potential", "legion_of_one"]:
 		assert_true(feats.has(key), "art/vfx/effects.json features.%s" % key)

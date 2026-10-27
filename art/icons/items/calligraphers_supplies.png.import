@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b45t4iib0gkt5"
-path="res://.godot/imported/calligraphers_supplies.png-3e33be71f23b6ca2f1ceb0346524ae2e.ctex"
+path="res://.godot/imported/calligraphers_supplies.png-e6d50189215c3d6be40cf7892ecc142c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/calligraphers_supplies.png"
-dest_files=["res://.godot/imported/calligraphers_supplies.png-3e33be71f23b6ca2f1ceb0346524ae2e.ctex"]
+source_file="res://addons/dnd_core/art/icons/items/calligraphers_supplies.png"
+dest_files=["res://.godot/imported/calligraphers_supplies.png-e6d50189215c3d6be40cf7892ecc142c.ctex"]
 
 [params]
 
