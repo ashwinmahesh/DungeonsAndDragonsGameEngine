@@ -351,6 +351,9 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 		if md.has("art"):
 			data = data.duplicate()
 			data["art"] = str(md["art"])   # a named foe drawn as themselves (Vasilka, not any flesh golem)
+		if md.has("boss"):
+			data = data.duplicate()
+			data["boss"] = bool(md["boss"])   # false: on a boss's block, but not one of the game's bosses (Difficulty.boss_entry)
 		if md.has("states"):
 			data = with_states(data, md["states"] as Array)
 		var mon := Monster.from_data(data)

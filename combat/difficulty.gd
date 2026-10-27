@@ -195,11 +195,14 @@ static func boss_data() -> Dictionary:
 
 ## What makes `c` one of the game's bosses: {"title": ...} (the title may be ""), or {} for any other creature. Listed in
 ## bosses.json by monster id or by the name a fight gives it, or any foe with legendary actions; only foes count, so a
-## boss's helpers (a flesh golem, a wraith, spawn) aren't, unlike is_boss's wider net of Challenge Rating 5 and up.
+## boss's helpers (a flesh golem, a wraith, spawn) aren't, unlike is_boss's wider net of Challenge Rating 5 and up. A
+## fight's foe marked `boss: false` (LocationFights) never is, whatever its block: a lieutenant on a boss's stat block.
 static func boss_entry(c: Combatant) -> Dictionary:
 	if c.side != &"enemy" or not c.creature is Monster:
 		return {}
 	var m := c.creature as Monster
+	if not bool(m.data.get("boss", true)):
+		return {}
 	var spec := ((boss_data().get("bosses", {}) as Dictionary).get(str(m.data.get("id", "")), {}) as Dictionary)
 	if spec.has("names"):
 		var names := spec["names"] as Dictionary
