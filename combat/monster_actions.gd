@@ -620,7 +620,55 @@ func spells_now(c: Combatant) -> Array[Dictionary]:
 			continue
 		for sid3: Variant in prepared.get(lv, []):
 			out.append({"id": str(sid3), "left": free})
+	var cv := coven_casting(c)
+	var cv_slots := cv.get("slots", {}) as Dictionary
+	for lv2: String in cv_slots:
+		var cfree := int(cv_slots[lv2]) - _coven_used(c, lv2)
+		if cfree <= 0:
+			continue
+		for sid4: Variant in (cv.get("prepared", {}) as Dictionary).get(lv2, []):
+			if not out.any(func(o: Dictionary) -> bool: return str(o["id"]) == str(sid4)):
+				out.append({"id": str(sid4), "left": cfree, "coven": true})
 	return out
+
+
+## The shared spellcasting `c`'s coven lends it now: its block's `coven` {within_ft, others, spellcasting {ability, dc,
+## attack, slots, prepared}} once `others` allies with a coven of their own stand within `within_ft` of it (the 2014
+## Monster Manual's hag covens: the spells while all three are within 30 feet), else {}. The slots are the coven's,
+## shared by everyone on its side who has one (_coven_used).
+func coven_casting(c: Combatant) -> Dictionary:
+	var cv := data_of(c).get("coven", {}) as Dictionary
+	if cv.is_empty() or not c.creature is Monster:
+		return {}
+	var e := enc()
+	var near := 0
+	for o in e.allies_of(c):
+		if o.creature is Monster and not (data_of(o).get("coven", {}) as Dictionary).is_empty() \
+				and e.distance(c, o) <= int(cv.get("within_ft", 30)):
+			near += 1
+	return cv.get("spellcasting", {}) as Dictionary if near >= int(cv.get("others", 2)) else {}
+
+
+func _coven_used(c: Combatant, lv: String) -> int:
+	return int(enc().get_meta("coven_slots_used_%s_%s" % [c.side, lv], 0))
+
+
+## Where `c` casts `spell_id` from: {"sc": its own Spellcasting block} when that has it, else {"sc": the coven's,
+## "coven": true} while its coven lends it.
+func _casting_source(c: Combatant, spell_id: String) -> Dictionary:
+	var own := data_of(c).get("spellcasting", {}) as Dictionary
+	for sp in spells_now(c):
+		if str(sp["id"]) == spell_id and bool(sp.get("coven", false)):
+			return {"sc": coven_casting(c), "coven": true}
+	return {"sc": own}
+
+
+## Spends a coven slot of `spell_id`'s level for the whole of `c`'s coven.
+func _spend_coven(c: Combatant, cv: Dictionary, spell_id: String) -> void:
+	var lv := slot_level_of(cv, spell_id)
+	if lv != "":
+		var key := "coven_slots_used_%s_%s" % [c.side, lv]
+		enc().set_meta(key, int(enc().get_meta(key, 0)) + 1)
 
 
 ## The slot level `spell_id` is prepared at in `sc` (its `prepared` lists), "" when it isn't a slot spell.
@@ -670,7 +718,8 @@ func block_level(c: Combatant, spell_id: String) -> int:
 ## at level 4 for the Night Hag) or the spell's own level.
 func cast(c: Combatant, spell_id: String, targets: Array, point: Vector2 = Vector2.INF, slot: int = 0, opts: Dictionary = {}) -> CombatResult:
 	var e := enc()
-	var sc := data_of(c).get("spellcasting", {}) as Dictionary
+	var src := _casting_source(c, spell_id)
+	var sc := src["sc"] as Dictionary
 	var s := Compendium.shared().spell_data(spell_id)
 	if s.is_empty():
 		return CombatResult.fail("Unknown spell")
@@ -690,7 +739,10 @@ func cast(c: Combatant, spell_id: String, targets: Array, point: Vector2 = Vecto
 	# A per-day spell or a slot is used up once it's cast, not when the cast was refused (no target in range, no action
 	# left).
 	if r.ok:
-		_spend_casting(c, sc, spell_id)
+		if bool(src.get("coven", false)):
+			_spend_coven(c, sc, spell_id)
+		else:
+			_spend_casting(c, sc, spell_id)
 	return r
 
 
@@ -736,7 +788,11 @@ func spend_reaction_spell(c: Combatant, spell_id: String) -> int:
 	var src := reaction_spell_source(c, spell_id)
 	if src == "":
 		return 0
-	var sc := data_of(c).get("spellcasting", {}) as Dictionary
+	var from := _casting_source(c, spell_id)
+	var sc := from["sc"] as Dictionary
+	if src == "spellcasting" and bool(from.get("coven", false)):
+		_spend_coven(c, sc, spell_id)
+		return int(slot_level_of(sc, spell_id))
 	if src == "spellcasting":
 		_spend_casting(c, sc, spell_id)
 	else:

@@ -1007,7 +1007,7 @@
     },
     "states": {
       "type": "object",
-      "description": "Traits a fight can put this creature in, by id: an encounter's monster entry lists the ones it turns on in `states` (LocationFights.with_states; Sarkhaza chained or grave-salted). A state may cut the Multiattack (`multiattack`) and the legendary uses (`legendary_uses`).",
+      "description": "Traits a fight can put this creature in, by id: an encounter's monster entry lists the ones it turns on in `states` (LocationFights.with_states; Sarkhaza chained or grave-salted). A state may cut the Multiattack (`multiattack`) and the legendary uses (`legendary_uses`), or give a coven's shared spells (`coven`: {within_ft, others, spellcasting}, MonsterActions.coven_casting).",
       "additionalProperties": {
         "$ref": "common.schema.json#/$defs/feature"
       }

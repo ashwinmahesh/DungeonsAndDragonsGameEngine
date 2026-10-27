@@ -390,6 +390,8 @@ static func with_states(data: Dictionary, states: Array) -> Dictionary:
 		traits.append(st)
 		if st.has("multiattack"):
 			out["actions"] = _fewer_attacks(out.get("actions", []) as Array, int(st["multiattack"]))
+		if st.has("coven"):
+			out["coven"] = st["coven"]   # a coven's shared spells (MonsterActions.coven_casting)
 		if st.has("legendary_uses") and out.has("legendary_actions"):
 			var la := (out["legendary_actions"] as Dictionary).duplicate()
 			for k: String in ["per_round", "in_lair"]:

@@ -158,6 +158,52 @@
     },
     "attack": 6
   },
+  "states": {
+    "coven": {
+      "id": "coven",
+      "name": "Shared Spellcasting (Coven)",
+      "action": "passive",
+      "summary": "While two coven sisters stand within 30 ft., she casts from the coven's shared spells and slots (DC 15, +7).",
+      "text": "While two other hags of her coven are within 30 feet of her, the hag can cast the coven's shared spells, using slots the coven shares: 1st level (4 slots): Ray of Sickness; 2nd level (3 slots): Hold Person; 3rd level (3 slots): Bestow Curse, Counterspell, Lightning Bolt; 4th level (3 slots): Phantasmal Killer, Polymorph; 6th level (1 slot): Eyebite. She uses Intelligence (spell save DC 15, +7 to hit with spell attacks). From the 2014 Monster Manual's hag covens, for a fight that seats a whole coven; its divinations (Identify, Locate Object, Contact Other Plane, Scrying) and their slots are left out.",
+      "implemented": "engine",
+      "coven": {
+        "within_ft": 30,
+        "others": 2,
+        "spellcasting": {
+          "ability": "int",
+          "dc": 15,
+          "attack": 7,
+          "slots": {
+            "1": 4,
+            "2": 3,
+            "3": 3,
+            "4": 3,
+            "6": 1
+          },
+          "prepared": {
+            "1": [
+              "ray_of_sickness"
+            ],
+            "2": [
+              "hold_person"
+            ],
+            "3": [
+              "bestow_curse",
+              "counterspell",
+              "lightning_bolt"
+            ],
+            "4": [
+              "phantasmal_killer",
+              "polymorph"
+            ],
+            "6": [
+              "eyebite"
+            ]
+          }
+        }
+      }
+    }
+  },
   "forms": {
     "base": "true",
     "change": "bonus_action",
