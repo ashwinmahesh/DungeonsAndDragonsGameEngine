@@ -429,7 +429,7 @@ func refresh(location_name: String = "", sneaking: bool = false, solo: bool = fa
 	update_stealth(true)
 	# Turn-based exploring's panel takes the top of the screen: toasts drop below it.
 	_toast_panel.offset_top = 136 if planning else 70
-	var followed := _followed()
+	var followed := followed_quest()
 	_quest.text = str(followed["name"])
 	_quest.visible = _quest.text != ""
 	_goal.text = ("◆ " + str(followed["objective"])) if str(followed["objective"]) != "" else ""
@@ -658,7 +658,7 @@ func _pip_group(name_text: String, total: int, left: int, colour: String) -> Con
 
 ## The quest the HUD follows and its first objective (the journal's Track, else the newest open quest): {"name", "objective"},
 ## both "" when no open quest has an objective. The objective shows as "◆ Follow the hidden stair down" under the quest's name.
-func _followed() -> Dictionary:
+func followed_quest() -> Dictionary:
 	var name_ := ""
 	var objective := ""
 	for q in QuestLog.journal(st):

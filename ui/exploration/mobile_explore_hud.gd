@@ -115,7 +115,7 @@ func menu() -> void:
 	var target := UiFeel.touch.world_target()
 	var body := open_page(location if location != "" else "Explore", "menu")
 	body.add_child(MobileUi.text(state_text))
-	body.add_child(MobileUi.text(hud._objective(), "gilt_light"))
+	body.add_child(MobileUi.text(str(hud.followed_quest()["objective"]), "gilt_light"))
 	var view := hud.minimap.view
 	if is_instance_valid(view) and view.planning:
 		body.add_child(MobileUi.text("Exploration round %d" % view.plan_round, "gilt_light"))
@@ -174,7 +174,7 @@ func close() -> void:
 func information() -> void:
 	var body := open_page(location)
 	body.add_child(MobileUi.text(state_text))
-	body.add_child(MobileUi.text(hud._objective(), "gilt_light"))
+	body.add_child(MobileUi.text(str(hud.followed_quest()["objective"]), "gilt_light"))
 	body.add_child(MobileUi.button("Journal", func() -> void:
 		close()
 		hud.command.emit("journal")))
