@@ -51,7 +51,7 @@ func _read_icons(st: StoryState) -> void:
 	for a: String in Icons.ACTION_ICONS:
 		wanted["features/" + a] = true
 	for k: String in wanted:
-		var path := Icons.DIR + k + ".png"
+		var path := Icons.path(k.get_slice("/", 0), k.get_slice("/", 1))
 		if not ResourceLoader.exists(path):
 			continue
 		_icons.append([k.get_slice("/", 0), k.get_slice("/", 1)])

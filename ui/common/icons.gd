@@ -6,7 +6,9 @@ extends RefCounted
 ## else its base item's.
 ## The tiles carry their own colours, so they're drawn untinted (the theme tints plain button icons gilt).
 
-const DIR := "res://addons/dnd_core/art/icons/"
+## Where a tile is: the game's own (art/icons/, for its own items) or the core's (ArtPaths).
+static func path(kind: String, key: String) -> String:
+	return ArtPaths.of("art/icons/%s/%s.png" % [kind, key])
 
 static var _cache: Dictionary = {}
 
@@ -122,7 +124,7 @@ static func on_button(b: Button, tex: Texture2D, side: int = 32) -> void:
 
 
 static func _load(kind: String, key: String) -> Texture2D:
-	var path := DIR + "%s/%s.png" % [kind, key]
-	if not _cache.has(path):
-		_cache[path] = load(path) as Texture2D if ResourceLoader.exists(path) else null
-	return _cache[path] as Texture2D
+	var file := path(kind, key)
+	if not _cache.has(file):
+		_cache[file] = load(file) as Texture2D if ResourceLoader.exists(file) else null
+	return _cache[file] as Texture2D
