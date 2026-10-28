@@ -9,12 +9,7 @@ extends RefCounted
 ## only shows where it is, and the hiding place glows orange (FoundGlow) until the party uses it.
 ## A fight a check sets off is an encounter here whose trigger is `check:<check id>:success` or `:failure`.
 
-## The view's memory of the last failed check, for the aids still to spend on it: {check, spec, test, who}.
-const FAILED := "world_check_failed"
-
-
-## The menu's lines for `spec`'s open checks: `check:<id>` (greyed with the reason when nobody's left to try) and, after
-## a failure here, `check_aid:<aid>` for each aid the roller could still spend (Heroic Inspiration ...).
+## The menu's lines for `spec`'s open checks: `check:<id>`, greyed with the reason when nobody's left to try.
 static func actions_for(view: LocationView, spec: Dictionary) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for check in WorldChecks.open_checks(view.st, view.loc_id, spec):
@@ -32,11 +27,6 @@ static func actions_for(view: LocationView, spec: Dictionary) -> Array[Dictionar
 			edge = " with Disadvantage"
 		out.append({"id": "check:" + str(check["id"]), "label": "%s (%s: %s %s%s, %d%%)" % [check["label"], what,
 			who.name.get_slice(" ", 0), _signed(int(pv["bonus"])), edge, roundi(float(pv["chance"]) * 100.0)], "why": _why(pv)})
-	var failed := view.get_meta(FAILED, {}) as Dictionary
-	if not failed.is_empty() and failed["spec"] == spec:
-		var who := failed["who"] as Character
-		for aid in CheckAids.options(who, failed["test"] as D20Test):
-			out.append({"id": "check_aid:" + str(aid["id"]), "label": "%s: %s" % [who.name.get_slice(" ", 0), aid["label"]]})
 	return out
 
 
@@ -74,17 +64,12 @@ static func skills_offered(view: LocationView, spec: Dictionary) -> String:
 	return ", ".join(names)
 
 
-## A menu choice `check:<id>` or `check_aid:<aid>` on `thing` (the party has walked up to it).
+## A menu choice `check:<id>` on `thing` (the party has walked up to it).
 static func act(view: LocationView, thing: Dictionary, action_id: String) -> void:
 	var spec := thing["spec"] as Dictionary
-	if action_id.begins_with("check_aid:"):
-		_spend_aid(view, spec, action_id.substr(10))
-		return
 	var check := WorldChecks.find(spec, action_id.substr(6))
 	if check.is_empty() or not WorldChecks.open(view.st, view.loc_id, check):
 		return
-	if view.has_meta(FAILED):
-		view.remove_meta(FAILED)
 	var who := WorldChecks.roller(view.st, view.loc_id, check)
 	if who == null:
 		view.toast.emit("Everyone able has tried that")
@@ -103,37 +88,39 @@ static func _try(view: LocationView, spec: Dictionary, check: Dictionary, extra:
 	var who := res["who"] as Character
 	view.check_rolled.emit(t.describe())
 	view.big_roll.emit(t, who.name, WorldChecks.skill_name(check))
-	if not t.success and not CheckAids.options(who, t).is_empty():
-		view.set_meta(FAILED, {"check": check, "spec": spec, "test": t, "who": who})
-	_resolve(view, spec, check, who, t.success)
+	_settle(view, spec, check, who, t)
 
 
-## Spends an aid on the last failed check here; a success turns it round (its success happens, its failure stays done).
-static func _spend_aid(view: LocationView, spec: Dictionary, aid: String) -> void:
-	var failed := view.get_meta(FAILED, {}) as Dictionary
-	if failed.is_empty() or failed["spec"] != spec:
+## After a roll: a success, or a failure nothing can turn, happens at once. A failure an aid could turn (Heroic Inspiration,
+## Tactical Mind, Dark One's Own Luck: CheckAids) waits while the player is asked (CheckAidPrompt): letting it stand lets it
+## happen, and spending one rolls again, so a success never runs on top of the failure's line, damage or fight.
+static func _settle(view: LocationView, spec: Dictionary, check: Dictionary, who: Character, t: D20Test) -> void:
+	var options := CheckAids.options(who, t)
+	if t.success or options.is_empty() or not view.ask_aid({"who": who, "skill": WorldChecks.skill_name(check), "dc": int(check["dc"]),
+			"test": t, "options": options}, func(aid: String) -> void: _aided(view, spec, check, who, t, aid)):
+		_resolve(view, spec, check, who, t.success)
+
+
+## The answer to the question: "" lets the failure stand; an aid is spent on the roll, which then ends as it ends (a success
+## turns the failure round, its try stays done) or, still short, may be asked about again for another aid.
+static func _aided(view: LocationView, spec: Dictionary, check: Dictionary, who: Character, t: D20Test, aid: String) -> void:
+	if aid == "":
+		_resolve(view, spec, check, who, false)
 		return
-	view.remove_meta(FAILED)
-	var who := failed["who"] as Character
-	var check := failed["check"] as Dictionary
-	var t := CheckAids.apply(aid, who, failed["test"] as D20Test, view.dice)
+	CheckAids.apply(aid, who, t, view.dice)
 	view.check_rolled.emit(t.describe())
 	view.big_roll.emit(t, who.name, WorldChecks.skill_name(check))
-	if not t.success:
-		if not CheckAids.options(who, t).is_empty():
-			view.set_meta(FAILED, {"check": check, "spec": spec, "test": t, "who": who})
-		return
-	WorldChecks.record(view.st, view.loc_id, check, who, true)
-	_resolve(view, spec, check, who, true, false)
+	if t.success:
+		WorldChecks.record(view.st, view.loc_id, check, who, true)
+	_settle(view, spec, check, who, t)
 
 
 ## What happens after the roll: the Narrator's line, the outcome, the toast, and a fight it sets off.
-static func _resolve(view: LocationView, spec: Dictionary, check: Dictionary, who: Character, success: bool, say_failure: bool = true) -> void:
+static func _resolve(view: LocationView, _spec: Dictionary, check: Dictionary, who: Character, success: bool) -> void:
 	var result := "success" if success else "failure"
 	var outcome := check.get(result, {}) as Dictionary
-	if success or say_failure:
-		view._say("check:%s:%s:%s" % [check["skill"], check["id"], result], who, str(outcome.get("text", "")) if success else
-			str(outcome.get("text", "It doesn't give. Someone else might do better.")))
+	view._say("check:%s:%s:%s" % [check["skill"], check["id"], result], who, str(outcome.get("text", "")) if success else
+		str(outcome.get("text", "It doesn't give. Someone else might do better.")))
 	var res := WorldChecks.apply(view.st, outcome, who, view.dice, str(check.get("label", "")))
 	if not (res["lines"] as Array).is_empty():
 		view.check_rolled.emit(" · ".join(res["lines"] as Array))

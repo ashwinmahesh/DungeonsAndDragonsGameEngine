@@ -178,9 +178,6 @@ static func act(view: LocationView, cell: Vector2i, action_id: String) -> void:
 			then = func() -> void: LocationTraps._disarm(view, spec)
 		"pickpocket":
 			then = func() -> void: LocationCrime.pickpocket(view, str(spec["npc"]))
-	if action_id.begins_with("check_aid:"):
-		LocationChecks.act(view, thing, action_id)   # spent on the roll just made: no walking
-		return
 	if action_id.begins_with("check:"):
 		then = func() -> void: LocationChecks.act(view, thing, action_id)
 	if not then.is_valid():

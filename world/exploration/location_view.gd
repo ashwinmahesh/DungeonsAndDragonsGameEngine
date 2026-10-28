@@ -49,6 +49,9 @@ signal party_hurt(who: Combatant)
 ## Guidance before a skill check (ask_guidance): the game shows the prompt (GuidancePrompt) and calls `answered` with
 ## the caster picked (-1: nobody) and the casters' rule from now on.
 signal guidance_asked(offer: Dictionary, answered: Callable)
+## An aid (Heroic Inspiration ...) could still turn a failed check (ask_aid): the game shows the prompt (CheckAidPrompt) and calls
+## `answered` with the aid picked, or "" to let the failure stand.
+signal aid_asked(offer: Dictionary, answered: Callable)
 
 ## Seconds a square takes walking (owner 2026-10-07: tokens moved too fast between squares; about 30% slower than
 ## the earlier 0.18 and 0.32); then 25% faster (owner 2026-10-18, WalkPace.FASTER).
@@ -459,6 +462,15 @@ func ask_guidance(who: Creature, skill: StringName, dc: int, then: Callable, nea
 		guidance_asked.emit(offer, func(index: int, rule: String) -> void: then.call(GuidanceOffer.answer(offer, index, rule)))
 		return
 	then.call(GuidanceOffer.automatic(offer))
+
+
+## Asks which aid to spend on a failed check, if any (`offer`: who, skill, dc, test, options), and calls `then` with its id
+## or "". False, with nothing asked, when no game is listening (the failure then simply happens).
+func ask_aid(offer: Dictionary, then: Callable) -> bool:
+	if aid_asked.get_connections().is_empty():
+		return false
+	aid_asked.emit(offer, then)
+	return true
 
 
 func _show_trap(trap: Dictionary) -> void:
