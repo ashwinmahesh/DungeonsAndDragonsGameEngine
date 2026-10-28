@@ -3,7 +3,7 @@ extends Node3D
 ## An aura round a figure on the board (owner 2026-10-09), built by CombatToken for whoever has one, in fights and
 ## while exploring alike (both show creatures as CombatTokens):
 ##
-## - DARK: Strahd's. Smoke and shadow curl up round him with a crimson edge (shaders/fx/aura_halo.gdshader) and he
+## - DARK: a villain's (art ids named by "dark_aura" in art/creature_looks.json; Curse of Strahd's Strahd). Smoke and shadow curl up round him with a crimson edge (shaders/fx/aura_halo.gdshader) and he
 ##   stands in a pool of shadow whose edge creeps (aura_floor.gdshader). It surges when he acts: an attack, a spell,
 ##   a blow taken. A fire-like flicker was tried and the owner preferred this (2026-10-09: "I like the old auras better").
 ## - HOLY: a paladin's Aura of Protection (Paladin 6). In a fight the floor shows the area it really covers, a faint warm
@@ -19,8 +19,9 @@ const FLOOR_SHADER := preload("res://addons/dnd_core/shaders/fx/aura_floor.gdsha
 
 enum Style { DARK, HOLY }
 
-## Art ids that wear the dark aura (Strahd's own sprite; his mist form and his spawn don't).
-const DARK_ART: Array[String] = ["strahd"]
+## Art ids that wear the dark aura: the game's "dark_aura" list (art/creature_looks.json); the core has none.
+static func dark_art() -> Array:
+	return ArtPaths.json("art/creature_looks.json").get("dark_aura", []) as Array
 ## How the halo quad is sized against the figure's height: (width, height) per style. Strahd's torn cape is wide.
 const HALO_SIZE := {Style.DARK: Vector2(1.9, 1.38)}
 ## The shadow pool's radius under Strahd, in squares per square of his size.
@@ -48,7 +49,7 @@ static var _rng := RandomNumberGenerator.new()
 ## The aura `c` wears as `art` (its sprite id): DARK for Strahd's own sprite, HOLY for anyone with Aura of Protection,
 ## -1 for none.
 static func style_for(c: Combatant, art: String) -> int:
-	if art in DARK_ART:
+	if art in dark_art():
 		return Style.DARK
 	if c != null and c.creature is Character and ClassFeatures.has(c, "aura_of_protection"):
 		return Style.HOLY

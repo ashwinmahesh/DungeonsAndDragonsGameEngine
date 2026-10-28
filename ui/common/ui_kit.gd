@@ -6,8 +6,8 @@ extends RefCounted
 ## UI-only crimson and gilt); UI draws on CanvasLayers after the palette pass so state colours are never quantized away.
 
 ## Gemini silhouettes made white with alpha (make ui_art), tinted with palette colours where they're drawn.
-const CORNER := preload("res://art/ui/corner.png")
-const DIVIDER := preload("res://art/ui/divider.png")
+const CORNER := preload("res://addons/dnd_core/art/ui/corner.png")
+const DIVIDER := preload("res://addons/dnd_core/art/ui/divider.png")
 
 static var _display_font: Font
 static var _serif_font: Font
@@ -34,7 +34,7 @@ static func display_font() -> Font:
 
 
 static func icon(id: String) -> Texture2D:
-	var path := "res://art/ui/icons/%s.png" % id
+	var path := "res://addons/dnd_core/art/ui/icons/%s.png" % id
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
 

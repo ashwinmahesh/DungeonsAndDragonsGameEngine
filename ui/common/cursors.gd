@@ -26,7 +26,7 @@ static func install() -> void:
 		return
 	_installed = true
 	for name: String in SLOTS:
-		var path := "res://art/ui/cursors/%s.png" % name
+		var path := "res://addons/dnd_core/art/ui/cursors/%s.png" % name
 		if ResourceLoader.exists(path):
 			var slot := SLOTS[name] as Array
 			Input.set_custom_mouse_cursor(load(path) as Texture2D, int(slot[0]) as Input.CursorShape, slot[1] as Vector2)

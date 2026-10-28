@@ -5,7 +5,7 @@ extends Node
 ## Volumes are the player's, kept in their settings file (GameSettings.path: user://settings.cfg, or a test's or
 ## capture's own), not in a save.
 
-const MANIFEST := "res://art/audio.json"
+const MANIFEST := "art/audio.json"   # the core's sound effects, with the game's own file merged over them (ArtPaths.json)
 const FADE := 1.6
 ## How loud the music is (A2): calm while exploring, a fight's own level, and full while a boss stands on the field or
 ## someone in the party is Bloodied.
@@ -74,8 +74,7 @@ func _ready() -> void:
 		s.bus = &"SFX"
 		add_child(s)
 		_sfx.append(s)
-	if FileAccess.file_exists(MANIFEST):
-		_data = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST)) as Dictionary
+	_data = ArtPaths.json(MANIFEST)
 	_ambience = Timer.new()
 	_ambience.one_shot = true
 	_ambience.timeout.connect(_ambient)

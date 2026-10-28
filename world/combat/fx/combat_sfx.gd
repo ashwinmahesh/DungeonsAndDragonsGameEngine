@@ -17,9 +17,8 @@ static var _data: Dictionary = {}
 
 
 static func data() -> Dictionary:
-	if _data.is_empty() and FileAccess.file_exists(Audio.MANIFEST):
-		var all := JSON.parse_string(FileAccess.get_file_as_string(Audio.MANIFEST)) as Dictionary
-		_data = all.get("combat", {}) as Dictionary
+	if _data.is_empty():
+		_data = ArtPaths.json(Audio.MANIFEST).get("combat", {}) as Dictionary
 	return _data
 
 

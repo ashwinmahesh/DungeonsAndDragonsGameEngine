@@ -13,7 +13,7 @@ extends Node
 
 const NAME := "Camp"
 ## The mark over someone who wants a word: the talk icon (a speech bubble).
-const MARK_ICON := preload("res://art/ui/icons/talk.png")
+const MARK_ICON := preload("res://addons/dnd_core/art/ui/icons/talk.png")
 ## How big the camp's flame burns (a place's watch fire's), and how brightly its light glows against a watch fire's.
 const FLAME := 0.6
 const GLOW := 0.55
