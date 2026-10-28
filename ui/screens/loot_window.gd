@@ -106,11 +106,16 @@ func _redraw() -> void:
 		_list.add_child(UiParts.row(row, _item_tip(data)))
 
 
+## An item's hover card as a function that makes it. It is a method (TipCards.ITEM_CARD names it), so the hover layer knows
+## it is an item's and waits a little longer before opening it.
 static func _item_tip(data: Dictionary) -> Callable:
-	return func() -> Control:
-		var body := str(data.get("text", "")) if str(data.get("text", "")) != "" else str(data.get("summary", ""))
-		return UiParts.rules_tip(str(data.get("name", "")), str(data.get("category", "")).capitalize(), body,
-			[["Weight", "%s lb" % str(data.get("weight_lb", 0))], ["Value", "%s gp" % str(data.get("cost_gp", 0))]])
+	return LootWindow._item_card.bind(data)
+
+
+static func _item_card(data: Dictionary) -> Control:
+	var body := str(data.get("text", "")) if str(data.get("text", "")) != "" else str(data.get("summary", ""))
+	return UiParts.rules_tip(str(data.get("name", "")), str(data.get("category", "")).capitalize(), body,
+		[["Weight", "%s lb" % str(data.get("weight_lb", 0))], ["Value", "%s gp" % str(data.get("cost_gp", 0))]])
 
 
 func _target() -> Character:

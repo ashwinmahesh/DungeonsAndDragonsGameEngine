@@ -1333,15 +1333,19 @@ func _item_stat(ch: Character, item: Dictionary) -> String:
 	return ""
 
 
+## An item's hover card as a method (TipCards.ITEM_CARD), so the hover layer waits longer before opening it.
 func _item_tip(data: Dictionary) -> Callable:
-	return func() -> Control:
-		var sub := str(data.get("category", "")).capitalize()
-		var magic := data.get("magic", {}) as Dictionary
-		if not magic.is_empty():
-			sub = "%s magic item" % str(magic.get("rarity", "")).replace("_", " ").capitalize()
-		var body := str(data.get("text", "")) if str(data.get("text", "")) != "" else str(data.get("summary", ""))
-		return UiParts.rules_tip(str(data.get("name", "")), sub, body,
-			[["Weight", "%s lb" % str(data.get("weight_lb", 0))], ["Value", "%s gp" % str(data.get("cost_gp", 0))]])
+	return CharacterSheetScreen._item_card.bind(data)
+
+
+static func _item_card(data: Dictionary) -> Control:
+	var sub := str(data.get("category", "")).capitalize()
+	var magic := data.get("magic", {}) as Dictionary
+	if not magic.is_empty():
+		sub = "%s magic item" % str(magic.get("rarity", "")).replace("_", " ").capitalize()
+	var body := str(data.get("text", "")) if str(data.get("text", "")) != "" else str(data.get("summary", ""))
+	return UiParts.rules_tip(str(data.get("name", "")), sub, body,
+		[["Weight", "%s lb" % str(data.get("weight_lb", 0))], ["Value", "%s gp" % str(data.get("cost_gp", 0))]])
 
 
 # --- Effects --------------------------------------------------------------------------------------

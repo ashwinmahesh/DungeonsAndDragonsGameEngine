@@ -17,6 +17,11 @@ static var current: TipCards = null
 const OPEN_DELAY := 0.45
 const TERM_DELAY := 0.3
 const WARM_DELAY := 0.12
+## An item's card (a row, a tile or a chip showing an item: its tip is the `_item_card` function of LootWindow or the
+## character sheet) waits this much longer than any other (Ashwin, 2026-10-28: "hover previews on items should appear 0.75
+## seconds later than now"): sweeping down a pack no longer throws a card over each row.
+const ITEM_EXTRA_DELAY := 0.75
+const ITEM_CARD := &"_item_card"
 ## How long a settled card waits for the pointer to come back after it leaves (crossing the gap from a word to its
 ## card), how long one that hasn't settled waits, and how long the pointer rests on the source to settle it.
 const GRACE := 0.3
@@ -96,12 +101,22 @@ func _process(delta: float) -> void:
 		_pending = src
 		_pending_for = 0.0
 	_pending_for += delta
-	var need := TERM_DELAY if str(src.get("term", "")) != "" else OPEN_DELAY
-	if _warm > 0.0 and under == null:
-		need = WARM_DELAY
+	var need := open_delay(src, _warm > 0.0 and under == null)
 	if _pending_for >= need:
 		open_card(src, mouse)
 		_pending = {}
+
+
+## Seconds the pointer must rest on `src` (source_at) before its card opens: a gilded word's, a control's, or the next
+## control's while a card was just showing (`warm`), and an item's card that much later again (ITEM_EXTRA_DELAY).
+static func open_delay(src: Dictionary, warm: bool) -> float:
+	var need := TERM_DELAY if str(src.get("term", "")) != "" else OPEN_DELAY
+	if warm:
+		need = WARM_DELAY
+	var tip := src.get("tip", Callable()) as Callable
+	if tip.is_valid() and tip.get_method() == ITEM_CARD:
+		need += ITEM_EXTRA_DELAY
+	return need
 
 
 ## A middle-click on what a card was opened from pins that card (a click on the card itself is the card's own).
