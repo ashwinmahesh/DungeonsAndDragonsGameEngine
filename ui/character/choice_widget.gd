@@ -3,7 +3,8 @@ extends VBoxContainer
 ## One character-building choice (plan §5.6 "a new subclass or feat needs data, never new UI code"): a box titled
 ## with its count ("Skills · choose 2 of 9 · 2 of 2 ✓") and its options as toggles. Options that can't be picked stay
 ## visible, greyed, with the engine's reason; weak ones show ~ and the warning. Picking more than the count replaces
-## the oldest pick. Works for every Choice.kind; ability increases allow the same ability twice. Inside a swap chance
+## the oldest pick, except on a full list of spells, which takes no new pick until one is unpicked (the rest are greyed
+## and say so). Works for every Choice.kind; ability increases allow the same ability twice. Inside a swap chance
 ## (a Long Rest, a level up) a line says what may change, and picks that have to stay say why on hover.
 
 signal picks_changed(key: String, picks: Array)
@@ -14,6 +15,8 @@ var choice: Choice
 ## the one picked, else the first that can be taken.
 const SPLIT_KINDS: Array[String] = ["feat", "fighting_style"]
 const SPELL_KINDS: Array[String] = ["cantrip", "spell", "spellbook"]
+## What a full list of spells says under an option that has to wait (ChoiceOptions.full): "n of n".
+const FULL_NOTE := "Unpick one first: the list is full (%d of %d)"
 ## The list and the panel scroll on their own past this height, so the panel stays beside the list.
 const SPLIT_HEIGHT := 470.0
 var _detail: VBoxContainer
@@ -62,6 +65,7 @@ func _build() -> void:
 	var options: Array = SpellGroups.sorted(choice.options, func(o: ChoiceOption) -> String: return o.id) if spells else choice.options
 	var level_now := -1
 	var grids: Array[GridContainer] = [grid]
+	var full := ChoiceOptions.full(choice)
 	for ov: Variant in options:
 		var o := ov as ChoiceOption
 		if spells and SpellGroups.level_of(o.id) != level_now:
@@ -77,8 +81,11 @@ func _build() -> void:
 		var mark := "◆ " if picked else ("✕ " if not o.legal else ("~ " if o.warning != "" else "◇ "))
 		var tip := o.summary
 		var foot := ""
+		var waits := full and not picked and o.legal   # a full list: this one waits until a pick is let go
 		if not o.legal:
 			foot = "Can't pick: " + o.reason
+		elif waits:
+			foot = FULL_NOTE % [choice.picks.size(), choice.count]
 		elif o.locked:
 			foot = "Stays: " + o.reason
 		elif o.warning != "":
@@ -105,7 +112,7 @@ func _build() -> void:
 		# the tooltip has it in full.
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.disabled = not o.legal and not picked
+		b.disabled = (not o.legal and not picked) or waits
 		var pressed := UiKit.button_style("hover")
 		pressed.border_color = Look.color("gilt_light")
 		pressed.set_border_width_all(2)
@@ -327,6 +334,8 @@ func _mobile_rows() -> void:
 		_mobile_list.add_child(button)
 		if not option.legal and not picked:
 			_mobile_list.add_child(MobileUi.text(option.reason, "rose"))
+		elif ChoiceOptions.full(choice) and not picked:
+			_mobile_list.add_child(MobileUi.text(FULL_NOTE % [choice.picks.size(), choice.count], "rose"))
 	if _mobile_list.get_child_count() == 0:
 		_mobile_list.add_child(MobileUi.text("No choices match your search."))
 
@@ -368,11 +377,12 @@ func _mobile_inspect(id: String) -> void:
 		if _mobile_sheet == null:
 			return
 		var current := choice.option(id)
-		if current == null or current.locked or (not current.legal and not choice.picks.has(id)):
+		if current == null or current.locked or (not current.legal and not choice.picks.has(id)) \
+				or (ChoiceOptions.full(choice) and not choice.picks.has(id)):
 			return
 		_mobile_close()
 		_toggle(id, not choice.picks.has(id)))
-	confirm.disabled = option.locked or (not option.legal and not picked)
+	confirm.disabled = option.locked or (not option.legal and not picked) or (ChoiceOptions.full(choice) and not picked)
 	page.toolbar.add_child(confirm)
 
 

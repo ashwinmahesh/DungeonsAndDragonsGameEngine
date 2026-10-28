@@ -133,13 +133,27 @@ static func swapped_out(c: Choice) -> Array[String]:
 	return out
 
 
-## The picks after the player toggles `id`. Picking past the count drops the oldest pick; inside a limited swap chance it
-## drops only a pick made during the chance, so an earlier pick leaves only when the player unpicks it, and a locked pick
-## never does.
+## The lists of spells a full list takes no new pick for, until one is unpicked.
+const FULL_LISTS: Array[String] = ["cantrip", "spell", "spellbook"]
+
+
+## Whether `c` is a full list of spells (more than one): it takes no new pick until one is unpicked, and the screen greys
+## the rest and says so (the options stay legal: they are what the player may swap in).
+static func full(c: Choice) -> bool:
+	return c.count > 1 and c.kind in FULL_LISTS and c.picks.size() >= c.count
+
+
+## The picks after the player toggles `id`. Picking past the count drops the oldest pick (a single pick is swapped by
+## picking the new one); inside a limited swap chance it drops only a pick made during the chance, so an earlier pick leaves
+## only when the player unpicks it, and a locked pick never does. A full list of spells (FULL_LISTS, more than one) drops
+## nothing: it takes no new pick until the player unpicks one (Ashwin, 2026-10-28: "changing spells at the limit must not
+## randomly replace one").
 static func toggled(c: Choice, id: String, on: bool) -> Array:
 	var picks: Array = c.picks.duplicate()
 	if on and not id in picks:
 		picks.append(id)
+		if picks.size() > c.count and c.count > 1 and c.kind in FULL_LISTS:
+			return c.picks.duplicate()   # full: nothing is dropped to make room
 		while picks.size() > c.count:
 			var drop := 0
 			if swap_open(c):
