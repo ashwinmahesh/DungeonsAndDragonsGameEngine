@@ -59,6 +59,8 @@ var cutscene: CutsceneView = null
 var busts: DialogueBusts
 ## The big d20 at the top of the screen while a check's result is up (G11: the emerald die, DiceRoll).
 var d20: DiceRoll = null
+## An aid was just spent on the check shown: the big d20 goes on from the roll it holds (DiceRoll.roll `continuing`).
+var _aid_spent := false
 ## The Guidance prompt while it's asking (a `guidance` beat), else null.
 var guidance: GuidancePrompt = null
 ## Q13: who speaks for the party, shown while there's a choice to make; it (or Tab) cycles the living party.
@@ -423,7 +425,8 @@ func _show(beat: Dictionary) -> void:
 				_mobile_page.body.move_child(d20, 0)
 			else:
 				add_child(d20)
-		d20.roll(DiceRoll.from_beat(beat))
+		d20.roll(DiceRoll.from_beat(beat), _aid_spent)
+		_aid_spent = false
 	elif d20 != null and str(beat["kind"]) not in ["stage", "cutscene"]:
 		d20.queue_free()
 		d20 = null
@@ -467,6 +470,7 @@ func _show(beat: Dictionary) -> void:
 				var id := str(a["id"])
 				b.pressed.connect(func() -> void:
 					_clear_options()
+					_aid_spent = true   # the die goes on from the roll shown: a reroll throws again, an addition only changes the words
 					_show(runner.use_aid(id)))
 				_options.add_child(b)
 		"options":
