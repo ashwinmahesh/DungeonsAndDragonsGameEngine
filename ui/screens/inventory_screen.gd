@@ -17,7 +17,8 @@ extends CanvasLayer
 
 const FILTERS := ["All", "Weapons", "Armor", "Potions", "Scrolls", "Consumables", "Magic", "Gear", "Quest"]
 const SORTS := ["name", "weight", "value", "newest"]
-## Item categories each filter keeps. Magic is any magic item, whatever its category, and Quest any quest item (is_quest),
+## Item categories each filter keeps. Magic is any magic item, whatever its category, except potions and Spell Scrolls (their
+## own tabs), and Quest any quest item (is_quest),
 ## whatever it is otherwise; Gear is everything else that isn't a quest item. Potions and Scrolls (the Spell Scrolls,
 ## is_spell_scroll, of every level) are not Consumables.
 const FILTER_CATEGORIES := {"Weapons": ["weapon", "ammunition"], "Armor": ["armor", "shield", "clothing"],
@@ -1126,7 +1127,9 @@ static func in_filter(name_: String, data: Dictionary) -> bool:
 	var cat := str(data.get("category", ""))
 	match name_:
 		"Magic":
-			return not (data.get("magic", {}) as Dictionary).is_empty()
+			# Potions and Spell Scrolls have their tabs; the Magic tab is the rest of what is magic (Ashwin, 2026-10-28:
+			# "spell scrolls and potions must not appear under the inventory's Magic section").
+			return not (data.get("magic", {}) as Dictionary).is_empty() and cat != "potion" and not is_spell_scroll(data)
 		"Quest":
 			return is_quest(data)
 		"Scrolls":
