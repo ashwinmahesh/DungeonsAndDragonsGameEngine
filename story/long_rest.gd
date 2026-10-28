@@ -1,8 +1,8 @@
 class_name LongRest
 extends RefCounted
 ## A Long Rest's eight hours (plan §5.2), wherever it's taken: the rest screen, the camp (LocationCamp: wherever the
-## place's rest is risky) and the magic items that make a safe place to sleep (FieldItems). A risky place may interrupt it (a d6 shows 1, unless
-## a ward keeps the rest or Alarm wakes the party first) an hour in. A finished one takes eight hours off the clock and
+## place's rest is risky) and the magic items that make a safe place to sleep (FieldItems). A risky place may interrupt it (a d6 shows 1, or 1 or 2 in
+## Castle Ravenloft: RestRules.interrupt_on; unless a ward keeps the rest or Alarm wakes the party first) an hour in. A finished one takes eight hours off the clock and
 ## brings everything back (Creature.finish_long_rest), for the party and the guests travelling with it. Either way they
 ## slept, which ends Concentration (Creature.fall_asleep).
 ## Whatever comes at the party in the night comes before the rest's benefits (the owner, 2026-10-13): the night's
@@ -44,7 +44,7 @@ static func take(st: StoryState, rule: String, dice: DiceRoller) -> Dictionary:
 	var interrupted := false
 	var warned := ""
 	if rule == "risky" and Wards.keeps_rest(st) == "":
-		interrupted = dice.roll_one(6, "Long Rest interruption") == 1
+		interrupted = dice.roll_one(6, "Long Rest interruption") <= RestRules.interrupt_on(st)
 	# Alarm: whatever comes in the night finds you awake and ready, and slinks off; you sleep again.
 	if interrupted and Wards.alarmed(st):
 		interrupted = false

@@ -340,10 +340,14 @@ static func visitors() -> Dictionary:
 	return _visitors
 
 
-## The lie of the land for the night visitors of a camp in `region`, in `where` (setting()): a town's or indoors' own
-## (the file's `settings`), else the region's (forest, marsh, mountain, castle).
+## The lie of the land for the night visitors of a camp in `region`, in `where` (setting()): a region's own for that
+## setting (the file's `region_settings`: the castle's halls have the castle's bats, dead and vampires, not the rats and
+## shadows of any house), else a town's or indoors' own (`settings`), else the region's (forest, marsh, mountain, castle).
 static func land_of(region: String, where := WILD) -> String:
 	var d := visitors()
+	var here := ((d.get("region_settings", {}) as Dictionary).get(region, {}) as Dictionary).get(where, "") as String
+	if here != "":
+		return here
 	var own := str((d.get("settings", {}) as Dictionary).get(where, ""))
 	return own if own != "" else str((d["lands"] as Dictionary).get(region, d["default_land"]))
 

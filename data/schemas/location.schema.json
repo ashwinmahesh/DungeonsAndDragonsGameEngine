@@ -959,6 +959,10 @@
         "type": "string"
       }
     },
+    "floor": {
+      "type": "string",
+      "description": "The floor of a building or dungeon this map is on (Castle Ravenloft's: ground, court, tower, larders, catacombs). The enemies of a floor are the ones that keep a Long Rest from starting on it (RestRules.rest_maps); the building's other floors don't. A map without one is part of the whole building."
+    },
     "rest": {
       "type": "string",
       "enum": [

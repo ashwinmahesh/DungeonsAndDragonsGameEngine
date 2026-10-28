@@ -6,7 +6,8 @@ extends RefCounted
 ##   Dead penalty twice in a night;
 ## - not in a dungeon or any building while enemies remain in it, on any of its floors (docs/rules/deviations.md). A
 ##   building is its walled maps (indoors, and a dungeon's open-air ones such as Castle Ravenloft's roofs) joined by
-##   their exits. Enemies remain while one of its fights would still start on its own (entering an area, opening a door
+##   their exits. Where its maps are grouped into floors (a location's `floor`: Castle Ravenloft's), only the enemies on
+##   the party's own floor count (held ask, 2026-10-24: a Long Rest in the castle once the current floor is clear). Enemies remain while one of its fights would still start on its own (entering an area, opening a door
 ##   or a chest, examining something) or one was begun and not won; a fight only a conversation can start doesn't
 ##   count. Towns, inns, camps and the open road are unaffected, and so are the magic items that make a safe place to
 ##   sleep (the Rod of Security; Daern's Instant Fortress's floors are `safe` places, a building of their own), which still
@@ -44,7 +45,10 @@ static func long_rest_refusals(st: StoryState) -> Array[String]:
 	if LongRest.broken(st):
 		out.append(BROKEN_NIGHT)
 	if not waiting_fights(st, st.location).is_empty() and Wards.shelter(st) == "":
-		out.append("Enemies still prowl this place, on this floor or another. Clear them out, rest somewhere else, or ward the rest (Leomund's Tiny Hut, Guards and Wards).")
+		if floor_of(st.location) != "":
+			out.append("Enemies still prowl this floor. Clear them out, rest somewhere else, or ward the rest (Leomund's Tiny Hut, Guards and Wards).")
+		else:
+			out.append("Enemies still prowl this place, on this floor or another. Clear them out, rest somewhere else, or ward the rest (Leomund's Tiny Hut, Guards and Wards).")
 	var wait := minutes_until_long_rest(st)
 	if wait > 0:
 		out.append("The last Long Rest ended less than 16 hours ago: the next can start in %s." % duration(wait))
@@ -100,6 +104,13 @@ static func unfinished_fights(st: StoryState) -> Array[String]:
 static func item_rest_refusal(st: StoryState) -> String:
 	var wait := minutes_until_long_rest(st)
 	return "" if wait <= 0 else "The last Long Rest ended less than 16 hours ago: the next can start in %s." % duration(wait)
+
+
+## How many faces of the d6 break a Long Rest in a risky place here (1: only a 1): the region's, from the night
+## visitors' data (`interrupt_on`), else 1. Castle Ravenloft's is 2.
+static func interrupt_on(st: StoryState) -> int:
+	var region := str(Compendium.shared().get_entry("locations", st.location).get("region", ""))
+	return clampi(int((CampSite.visitors().get("interrupt_on", {}) as Dictionary).get(region, 1)), 1, 5)
 
 
 ## Minutes until the party may start another Long Rest (0 when it may now).
@@ -158,11 +169,27 @@ static func building_of(location_id: String) -> Array[String]:
 	return out
 
 
-## The fights still waiting in the building or dungeon `location_id` is part of: [{location, id}] for each whose
-## condition holds, that hasn't been won, and that starts on its own or was begun and not won.
+## The floor a map is on ("" for one that isn't grouped into floors): its `floor`, the same word on every map of the floor.
+static func floor_of(location_id: String) -> String:
+	return str(Compendium.shared().get_entry("locations", location_id).get("floor", ""))
+
+
+## The maps whose enemies stand between the party and a Long Rest at `location_id`: its building, or where its maps have
+## floors, the maps of the building on its own floor.
+static func rest_maps(location_id: String) -> Array[String]:
+	var floor_id := floor_of(location_id)
+	var out := building_of(location_id)
+	if floor_id == "":
+		return out
+	return out.filter(func(id: String) -> bool: return floor_of(id) == floor_id)
+
+
+## The fights still waiting in the building or dungeon `location_id` is part of (on its own floor, where the maps have
+## floors: rest_maps): [{location, id}] for each whose condition holds, that hasn't been won, and that starts on its own
+## or was begun and not won.
 static func waiting_fights(st: StoryState, location_id: String) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	for loc_id in building_of(location_id):
+	for loc_id in rest_maps(location_id):
 		var states := (st.location_states.get(loc_id, {}) as Dictionary).get("encounters", {}) as Dictionary
 		var loc := Compendium.shared().get_entry("locations", loc_id)
 		for en: Variant in loc.get("encounters", []):
