@@ -5,7 +5,7 @@ extends RefCounted
 ## framing over plaster, Vallaki's painted clapboard, and coursed stone for Krezk and the Abbey. A house's modules are
 ## merged into a few meshes, one surface per material, so a village costs a handful of draws per house.
 
-const MANIFEST_JSON := "res://art/models/kit/manifest.json"
+const MANIFEST_JSON := "art/models/kit/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 const PAINTED_WOOD := "kit/painted_wood"
 ## A module no bigger than this across (x and z) and high is bent whole (merge's `whole_modules`): a wall face or a corner.
 const WHOLE_ACROSS := 1.3
@@ -27,8 +27,8 @@ const KEPT_MESHES := 90
 
 ## Every module: id -> {file, part, size, materials, span, rise, paint}.
 static func manifest() -> Dictionary:
-	if _manifest.is_empty() and FileAccess.file_exists(MANIFEST_JSON):
-		var data := JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_JSON)) as Dictionary
+	if _manifest.is_empty():
+		var data := ArtPaths.json(MANIFEST_JSON)
 		_manifest = data.get("models", {}) as Dictionary
 		_constants = data.get("constants", {}) as Dictionary
 	return _manifest
@@ -41,7 +41,7 @@ static func constant(key: String) -> float:
 
 
 static func has(id: String) -> bool:
-	return manifest().has(id) and ResourceLoader.exists("res://" + str((manifest()[id] as Dictionary).get("file", "")))
+	return manifest().has(id) and ResourceLoader.exists(ArtPaths.of(str((manifest()[id] as Dictionary).get("file", ""))))
 
 
 ## The catalog's kit settings (art/sprites/props/catalog.json "building_kit").
@@ -88,7 +88,7 @@ static func mesh(id: String) -> Mesh:
 		return _meshes[id] as Mesh
 	var found: Mesh = null
 	if has(id):
-		var root := (load("res://" + str((manifest()[id] as Dictionary)["file"])) as PackedScene).instantiate()
+		var root := (load(ArtPaths.of(str((manifest()[id] as Dictionary)["file"]))) as PackedScene).instantiate()
 		for n in root.find_children("*", "MeshInstance3D", true, false):
 			found = (n as MeshInstance3D).mesh
 			break

@@ -8,7 +8,7 @@ extends RefCounted
 ## faces south; a wall piece stands on the wall face looking into the room. Its surfaces use the board's cel shading,
 ## so it takes the scene's lights and shadows, and the screen pass outlines it and snaps it to the palette.
 
-const MANIFEST_JSON := "res://art/models/manifest.json"
+const MANIFEST_JSON := "art/models/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 ## A cut-away interior wall's height (ArenaBoard's interior walls, and what the kit's copings are made for).
 const CUT_TOP := 1.15
 const SPRITE_SHADER := preload("res://addons/dnd_core/shaders/cel_sprite.gdshader")
@@ -24,8 +24,8 @@ static var _triangles: Dictionary = {}
 
 ## Every model: id -> {file, mount, size [w, h, d], stands_for, sockets ...} (art/models/manifest.json).
 static func manifest() -> Dictionary:
-	if _manifest.is_empty() and FileAccess.file_exists(MANIFEST_JSON):
-		_manifest = (JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_JSON)) as Dictionary).get("models", {}) as Dictionary
+	if _manifest.is_empty():
+		_manifest = (ArtPaths.json(MANIFEST_JSON)).get("models", {}) as Dictionary
 	return _manifest
 
 
@@ -35,7 +35,7 @@ static func settings() -> Dictionary:
 
 static func has_model(id: String) -> bool:
 	var info := manifest().get(id, {}) as Dictionary
-	return not info.is_empty() and ResourceLoader.exists("res://" + str(info.get("file", "")))
+	return not info.is_empty() and ResourceLoader.exists(ArtPaths.of(str(info.get("file", ""))))
 
 
 ## Does this board's place use the 3D pieces?
@@ -171,7 +171,7 @@ static func instance_bent(board: ArenaBoard, id: String, cell: Vector2i) -> Node
 ## Model `id`'s meshes as [mesh, transform under the model's root, the game's material per surface, node name].
 static func _read_parts(id: String) -> Array:
 	var info := manifest()[id] as Dictionary
-	var scene := (load("res://" + str(info["file"])) as PackedScene).instantiate() as Node3D
+	var scene := (load(ArtPaths.of(str(info["file"]))) as PackedScene).instantiate() as Node3D
 	var out: Array = []
 	for n in scene.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
@@ -209,7 +209,7 @@ static func material(name: String) -> Material:
 		# Painted with its own 2D art (a piece sculpted from its sprite).
 		var sm := ShaderMaterial.new()
 		sm.shader = SPRITE_SHADER
-		sm.set_shader_parameter("albedo_tex", load("res://" + str((SetDressing.manifest()[name.trim_prefix("spr_")] as Dictionary)["file"])) as Texture2D)
+		sm.set_shader_parameter("albedo_tex", load(ArtPaths.of(str((SetDressing.manifest()[name.trim_prefix("spr_")] as Dictionary)["file"]))) as Texture2D)
 		m = sm
 	if m == null:
 		m = Look.cel("pewter")
@@ -540,7 +540,7 @@ static func tree_mesh(id: String) -> Mesh:
 	if _tree_meshes.has(id):
 		return _tree_meshes[id] as Mesh
 	var src: Mesh = null
-	var root := (load("res://" + str((manifest()[id] as Dictionary)["file"])) as PackedScene).instantiate()
+	var root := (load(ArtPaths.of(str((manifest()[id] as Dictionary)["file"]))) as PackedScene).instantiate()
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		src = (n as MeshInstance3D).mesh
 		break
@@ -830,7 +830,7 @@ static func _extras(model: Node3D, info: Dictionary) -> void:
 			var x1 := float((part as Array)[1])
 			var sp := Sprite3D.new()
 			sp.name = "Decal_" + str(decal.get("socket", ""))
-			sp.texture = load("res://" + str((SetDressing.manifest()[art] as Dictionary)["file"])) as Texture2D
+			sp.texture = load(ArtPaths.of(str((SetDressing.manifest()[art] as Dictionary)["file"]))) as Texture2D
 			sp.region_enabled = true
 			sp.region_rect = Rect2(x0, float(r[1]), x1 - x0, float(r[3]))
 			sp.pixel_size = px

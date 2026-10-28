@@ -164,9 +164,9 @@ static func mesh(id: String) -> Mesh:
 	if _meshes.has(id):
 		return _meshes[id] as Mesh
 	var info := manifest().get(id, {}) as Dictionary
-	if info.is_empty() or not ResourceLoader.exists("res://" + str(info.get("file", ""))):
+	if info.is_empty() or not ResourceLoader.exists(ArtPaths.of(str(info.get("file", "")))):
 		return null
-	var root := (load("res://" + str(info["file"])) as PackedScene).instantiate()
+	var root := (load(ArtPaths.of(str(info["file"]))) as PackedScene).instantiate()
 	var src: Mesh = null
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		src = (n as MeshInstance3D).mesh

@@ -1,0 +1,8 @@
+# New art goes through Git LFS (owner decision 2026-10-28): the generic textures, prop sprites and 3D models. Files committed
+# before this stay ordinary git blobs by design (never git lfs migrate: it rewrites history). Add a pattern here for the next
+# kind of heavy asset.
+art/textures/**/*.png filter=lfs diff=lfs merge=lfs -text
+art/textures/**/*.webp filter=lfs diff=lfs merge=lfs -text
+art/sprites/props/**/*.png filter=lfs diff=lfs merge=lfs -text
+art/sprites/props/**/*.webp filter=lfs diff=lfs merge=lfs -text
+art/models/**/*.glb filter=lfs diff=lfs merge=lfs -text

@@ -10,7 +10,7 @@ extends RefCounted
 ## leaf the size of the opening. Only looks: the rules never read any of this.
 
 const CATALOG_JSON := "res://art/sprites/props/catalog.json"
-const MANIFEST_JSON := "res://art/sprites/props/manifest.json"
+const MANIFEST_JSON := "art/sprites/props/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 ## How far a wall piece sits in front of the wall face, and the widest it may be on one square's face.
 const WALL_GAP := 0.012
 const WALL_FACE := 0.96
@@ -38,14 +38,14 @@ static func catalog() -> Dictionary:
 
 ## Every prop sprite: id -> {file, pixel_size, world_height, world_width, mount ...}.
 static func manifest() -> Dictionary:
-	if _manifest.is_empty() and FileAccess.file_exists(MANIFEST_JSON):
-		_manifest = (JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_JSON)) as Dictionary).get("props", {}) as Dictionary
+	if _manifest.is_empty():
+		_manifest = (ArtPaths.json(MANIFEST_JSON)).get("props", {}) as Dictionary
 	return _manifest
 
 
 static func has_art(art: String) -> bool:
 	var info := manifest().get(art, {}) as Dictionary
-	return not info.is_empty() and ResourceLoader.exists("res://" + str(info.get("file", "")))
+	return not info.is_empty() and ResourceLoader.exists(ArtPaths.of(str(info.get("file", ""))))
 
 
 ## How a location prop or container is dressed: {art, mount, scale, on_wall} with art "" for an invisible spot,
@@ -538,7 +538,7 @@ static func exit_piece(board: ArenaBoard, spec: Dictionary) -> Node3D:
 ## "bile"); in Classic a bright billboard (unshaded, it gives light rather than taking it). Null without either.
 static func flame(size: float, tint: String = "") -> Node3D:
 	if Look.modern() and ModelPiece.manifest().has("flame") \
-			and ResourceLoader.exists("res://" + str((ModelPiece.manifest()["flame"] as Dictionary).get("file", ""))):
+			and ResourceLoader.exists(ArtPaths.of(str((ModelPiece.manifest()["flame"] as Dictionary).get("file", "")))):
 		return _flame_3d(size, tint)
 	if not has_art("flame"):
 		return null
@@ -651,7 +651,7 @@ static func wall_sprite(art: String) -> Sprite3D:
 static func _sprite(art: String) -> Sprite3D:
 	var info := manifest()[art] as Dictionary
 	var sp := Sprite3D.new()
-	sp.texture = load("res://" + str(info["file"])) as Texture2D
+	sp.texture = load(ArtPaths.of(str(info["file"]))) as Texture2D
 	sp.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sp.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	sp.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -719,8 +719,8 @@ static func stand_piece(board: ArenaBoard, parent: Node3D, art: String, cell: Ve
 		var faces := Vector3(-wall.x, 0, -wall.y) if wall != Vector2i.ZERO else Vector3(0, 0, 1)
 		if yaw != null:
 			faces = Vector3(sin(float(yaw)), 0, cos(float(yaw)))
-		piece = PropView.create(load("res://" + str(info["file"])) as Texture2D, float(info.get("pixel_size", 0.01)) * scale_,
-			load("res://" + str(binfo["file"])) as Texture2D, float(binfo.get("pixel_size", 0.01)) * scale_, faces)
+		piece = PropView.create(load(ArtPaths.of(str(info["file"]))) as Texture2D, float(info.get("pixel_size", 0.01)) * scale_,
+			load(ArtPaths.of(str(binfo["file"]))) as Texture2D, float(binfo.get("pixel_size", 0.01)) * scale_, faces)
 	else:
 		piece = _sprite(art)
 		piece.pixel_size *= scale_

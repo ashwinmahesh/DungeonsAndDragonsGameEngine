@@ -736,8 +736,8 @@ func _build_water() -> void:
 	water = ShaderMaterial.new()
 	water.shader = LIT_WATER_SHADER if Look.modern() else WATER_SHADER
 	var info := ((Look.textures().get("themes", {}) as Dictionary).get("wild", {}) as Dictionary).get("water", {}) as Dictionary
-	if not info.is_empty() and ResourceLoader.exists("res://" + str(info.get("file", ""))):
-		water.set_shader_parameter("albedo_tex", load("res://" + str(info["file"])) as Texture2D)
+	if not info.is_empty() and ResourceLoader.exists(ArtPaths.of(str(info.get("file", "")))):
+		water.set_shader_parameter("albedo_tex", load(ArtPaths.of(str(info["file"]))) as Texture2D)
 		water.set_shader_parameter("tile_units", float(info.get("tile_world_units", 3.0)))
 	water.set_shader_parameter("deep", Look.color(str(spec.get("deep", "night_deep"))))
 	water.set_shader_parameter("shallow", Look.color(str(spec.get("shallow", "moon_blue"))))

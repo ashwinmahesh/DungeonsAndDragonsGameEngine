@@ -67,7 +67,7 @@ static func build(board: ArenaBoard, set_id: String) -> Vista:
 	var c_at := Vector2(float((castle["at"] as Array)[0]), float((castle["at"] as Array)[1]))
 	var c_far := (here as Vector2).distance_to(c_at)
 	var taken: Array[float] = []
-	if c_far > 0.02 and c_far < float(castle.get("within", 0.5)) and ResourceLoader.exists("res://" + str(castle["art"])):
+	if c_far > 0.02 and c_far < float(castle.get("within", 0.5)) and ResourceLoader.exists(ArtPaths.of(str(castle["art"]))):
 		var way := on_skyline(c_at - (here as Vector2), taken)
 		v._card("CastleRavenloft", castle, Vector2.from_angle(way), c_far)
 		taken.append(way)
@@ -121,7 +121,7 @@ func _landmarks(all: Dictionary, here: Vector2, taken: Array[float], place: Stri
 			toward = Vector2(sin(turn), -cos(turn)) * float(spec.get("far", toward.length()))
 		var far := toward.length()
 		if far > float(spec.get("near", 0.02)) and far < float(spec.get("within", 0.3)) \
-				and ResourceLoader.exists("res://" + str(spec["art"])):
+				and ResourceLoader.exists(ArtPaths.of(str(spec["art"]))):
 			seen.append([far, id, toward, spec])
 	seen.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
 	var shown := 0
@@ -176,7 +176,7 @@ static func seen_from(spec: Dictionary, place: String) -> Dictionary:
 ## A painted landmark (Castle Ravenloft on its crag, a mountain, a town on its cliff), `toward` it on the skyline
 ## and `far` off on the travel art: smaller and deeper in the haze the farther it is, its foot sunk below the land's edge.
 func _card(node_name: String, castle: Dictionary, toward: Vector2, far: float) -> void:
-	var tex := load("res://" + str(castle["art"])) as Texture2D
+	var tex := load(ArtPaths.of(str(castle["art"]))) as Texture2D
 	var near := clampf(0.3 / maxf(far, 0.01), 0.45, 1.0)
 	var h := float(castle.get("height", 26.0)) * near
 	var quad := QuadMesh.new()

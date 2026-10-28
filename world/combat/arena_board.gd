@@ -60,7 +60,7 @@ func cell_center(cell: Vector2i, size_cells: int = 1) -> Vector3:
 const INTERIORS := ["manor", "tavern", "shop", "townhouse", "church", "attic", "inn", "house", "tent"]
 const WILD := ["svalich_road", "forest", "road", "camp", "tser_pool", "riverside", "wilderness"]   ## (camp: wagons too)
 const TOWNS := ["village", "vallaki", "town"]
-const PROPS_JSON := "res://art/sprites/props/manifest.json"
+const PROPS_JSON := "art/sprites/props/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 static var _props: Dictionary = {}
 
 ## Textured surfaces for this theme (art/textures, docs/art/textures.md); null where the theme has none.
@@ -905,10 +905,10 @@ func _town_wall(c: Vector2i) -> void:
 
 ## A billboard prop from art/sprites/props (manifest: pixel_size, height): standing on `at`, facing the camera.
 func prop_sprite(id: String, at: Vector3, scale_: float = 1.0) -> Sprite3D:
-	if _props.is_empty() and FileAccess.file_exists(PROPS_JSON):
-		_props = (JSON.parse_string(FileAccess.get_file_as_string(PROPS_JSON)) as Dictionary).get("props", {}) as Dictionary
+	if _props.is_empty():
+		_props = (ArtPaths.json(PROPS_JSON)).get("props", {}) as Dictionary
 	var info := _props.get(id, {}) as Dictionary
-	var path := "res://" + str(info.get("file", ""))
+	var path := ArtPaths.of(str(info.get("file", "")))
 	if info.is_empty() or not ResourceLoader.exists(path):
 		return null
 	var sp := Sprite3D.new()

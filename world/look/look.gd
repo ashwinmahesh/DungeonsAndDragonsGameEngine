@@ -113,7 +113,7 @@ static func tint_key(m: ShaderMaterial) -> String:
 
 
 const CEL_WORLD_SHADER := preload("res://addons/dnd_core/shaders/cel_world.gdshader")
-const TEXTURES_JSON := "res://art/textures/manifest.json"
+const TEXTURES_JSON := "art/textures/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 static var _textures: Dictionary = {}
 static var _textured: Dictionary = {}
 ## The place's own tint for some surfaces ("village/grass" -> Color), set by its mood (set_surface_tints).
@@ -146,8 +146,8 @@ static func surface_tint(surface: String) -> Color:
 
 ## The environment texture sets (art/textures/manifest.json, docs/art/textures.md).
 static func textures() -> Dictionary:
-	if _textures.is_empty() and FileAccess.file_exists(TEXTURES_JSON):
-		_textures = JSON.parse_string(FileAccess.get_file_as_string(TEXTURES_JSON)) as Dictionary
+	if _textures.is_empty():
+		_textures = ArtPaths.json(TEXTURES_JSON)
 	return _textures
 
 
@@ -168,12 +168,12 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 	if parts.size() != 2:
 		return null
 	var info := (((textures().get("themes", {}) as Dictionary).get(parts[0], {}) as Dictionary).get(parts[1], {})) as Dictionary
-	var path := "res://" + str(info.get("file", ""))
+	var path := ArtPaths.of(str(info.get("file", "")))
 	if info.is_empty() or not ResourceLoader.exists(path):
 		return null
 	# The Modern look's smooth tile of the same set, where it's been made (make textures HD=1).
-	if modern() and info.has("hd_file") and ResourceLoader.exists("res://" + str(info["hd_file"])):
-		path = "res://" + str(info["hd_file"])
+	if modern() and info.has("hd_file") and ResourceLoader.exists(ArtPaths.of(str(info["hd_file"]))):
+		path = ArtPaths.of(str(info["hd_file"]))
 	var m := ShaderMaterial.new()
 	m.shader = LIT_WORLD_SHADER if modern() and not Graphics.software_simulator() else CEL_WORLD_SHADER
 	m.set_shader_parameter("albedo_tex", load(path) as Texture2D)
@@ -189,15 +189,15 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 		var spec := material_for(surface)
 		var relief := MODERN_RELIEF * float(spec.get("relief", 1.0))
 		var nm: Texture2D = null
-		if info.has("normal_file") and ResourceLoader.exists("res://" + str(info["normal_file"])):
-			nm = load("res://" + str(info["normal_file"])) as Texture2D
+		if info.has("normal_file") and ResourceLoader.exists(ArtPaths.of(str(info["normal_file"]))):
+			nm = load(ArtPaths.of(str(info["normal_file"]))) as Texture2D
 		else:
 			nm = normal_map(path)
 		if nm != null:
 			m.set_shader_parameter("normal_tex", nm)
 			m.set_shader_parameter("normal_strength", relief)
-		if info.has("orm_file") and ResourceLoader.exists("res://" + str(info["orm_file"])):
-			m.set_shader_parameter("orm_tex", load("res://" + str(info["orm_file"])) as Texture2D)
+		if info.has("orm_file") and ResourceLoader.exists(ArtPaths.of(str(info["orm_file"]))):
+			m.set_shader_parameter("orm_tex", load(ArtPaths.of(str(info["orm_file"]))) as Texture2D)
 			m.set_shader_parameter("use_orm", true)
 		m.set_shader_parameter("roughness", float(spec.get("roughness", 0.8)))
 		m.set_shader_parameter("metallic", float(spec.get("metallic", 0.0)))
@@ -205,8 +205,8 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 		m.set_shader_parameter("roughness_cap", float(spec.get("gloss", 1.0)))   # a polished surface's cap, over its ORM map
 		_set_variants(m, info, path)
 		var macro := str(textures().get("macro_file", ""))
-		if macro != "" and ResourceLoader.exists("res://" + macro) and float(spec.get("macro", MACRO_STRENGTH)) > 0.0:
-			m.set_shader_parameter("macro_tex", load("res://" + macro) as Texture2D)
+		if macro != "" and ResourceLoader.exists(ArtPaths.of(macro)) and float(spec.get("macro", MACRO_STRENGTH)) > 0.0:
+			m.set_shader_parameter("macro_tex", load(ArtPaths.of(macro)) as Texture2D)
 			m.set_shader_parameter("macro_strength", float(spec.get("macro", MACRO_STRENGTH)))
 	_textured[key] = m
 	return m
@@ -232,16 +232,16 @@ static func _set_variants(m: ShaderMaterial, info: Dictionary, path: String) -> 
 	for v: Variant in variants:
 		layers.append(v as Dictionary)
 	for layer: Dictionary in layers:
-		var a := _layer_image("res://" + str(layer.get("file", "")))
+		var a := _layer_image(ArtPaths.of(str(layer.get("file", ""))))
 		if a == null or (not albedo.is_empty() and not _same_shape(a, albedo[0])):
 			continue
-		var n := _layer_image("res://" + str(layer.get("normal_file", "")))
+		var n := _layer_image(ArtPaths.of(str(layer.get("normal_file", ""))))
 		if n == null:
-			var made := normal_map("res://" + str(layer.get("file", "")))
+			var made := normal_map(ArtPaths.of(str(layer.get("file", ""))))
 			n = made.get_image() if made != null else null
 		if n == null or (not normal.is_empty() and not _same_shape(n, normal[0])):
 			continue
-		var o := _layer_image("res://" + str(layer.get("orm_file", "")))
+		var o := _layer_image(ArtPaths.of(str(layer.get("orm_file", ""))))
 		if o == null or (not orm.is_empty() and not _same_shape(o, orm[0])):
 			all_orm = false
 		albedo.append(a)

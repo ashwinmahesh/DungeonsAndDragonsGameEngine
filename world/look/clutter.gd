@@ -8,7 +8,7 @@ extends RefCounted
 ## art/sprites/props/catalog.json "clutter"; every placement is picked from the square, so a place looks the same
 ## every time it's built. Decals only show in the Modern look (Classic is frozen as it was).
 
-const MANIFEST_JSON := "res://art/textures/decals/manifest.json"
+const MANIFEST_JSON := "art/textures/decals/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 ## How deep a decal's box reaches through the surface it lies on (it fades at both ends).
 const DEPTH := 0.24
 
@@ -18,8 +18,8 @@ static var _textures: Dictionary = {}
 
 ## Every decal: id -> {file, normal_file, view (floor | wall), aspect, sheet}.
 static func manifest() -> Dictionary:
-	if _manifest.is_empty() and FileAccess.file_exists(MANIFEST_JSON):
-		_manifest = (JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_JSON)) as Dictionary).get("decals", {}) as Dictionary
+	if _manifest.is_empty():
+		_manifest = (ArtPaths.json(MANIFEST_JSON)).get("decals", {}) as Dictionary
 	return _manifest
 
 
@@ -349,7 +349,7 @@ static func _texture(path: String) -> Texture2D:
 	if path == "":
 		return null
 	if not _textures.has(path):
-		_textures[path] = load("res://" + path) as Texture2D if ResourceLoader.exists("res://" + path) else null
+		_textures[path] = load(ArtPaths.of(path)) as Texture2D if ResourceLoader.exists(ArtPaths.of(path)) else null
 	return _textures[path] as Texture2D
 
 

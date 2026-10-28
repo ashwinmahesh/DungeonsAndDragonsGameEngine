@@ -35,17 +35,20 @@ static func dirs(rel_dir: String) -> PackedStringArray:
 	return out
 
 
-## A JSON table that the core ships and a game may add to (art/vfx/effects.json, art/creature_looks.json): the core's file, then the
-## game's merged over it, section by section (a section both have is merged key by key, the game's key winning).
+## A JSON table that the core ships and a game may add to (art/vfx/effects.json, art/creature_looks.json, the texture, prop and model
+## manifests): the core's file, then the game's merged over it, key by key all the way down (a key both have that holds tables is
+## merged, anything else is the game's).
 static func json(rel: String) -> Dictionary:
-	var out := _read(CORE + rel)
-	var game := _read("res://" + rel)
-	for section: String in game:
-		if out.get(section) is Dictionary and game[section] is Dictionary:
-			(out[section] as Dictionary).merge(game[section] as Dictionary, true)
+	return _merge(_read(CORE + rel), _read("res://" + rel))
+
+
+static func _merge(base: Dictionary, over: Dictionary) -> Dictionary:
+	for key: Variant in over:
+		if base.get(key) is Dictionary and over[key] is Dictionary:
+			base[key] = _merge(base[key] as Dictionary, over[key] as Dictionary)
 		else:
-			out[section] = game[section]
-	return out
+			base[key] = over[key]
+	return base
 
 
 static func _read(path: String) -> Dictionary:
