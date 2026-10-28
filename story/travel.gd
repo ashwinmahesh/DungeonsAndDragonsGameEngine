@@ -142,6 +142,81 @@ static func route(from: String, to: String, st: StoryState) -> Array[Dictionary]
 	return out
 
 
+## How near a side of its place's map a way out must be to face that way (a gate in the wall, not a door inside).
+const EDGE_REACH := 2
+
+
+## Which way a way out of a place faces (Vector2.LEFT, RIGHT, UP, DOWN: north is up, as on the map of Barovia and on every
+## place's own map): the side of the map it is nearest, if it is within EDGE_REACH squares of it. Vector2.ZERO for one
+## inside the map (a door, a stair).
+static func exit_facing(loc: Dictionary, exit: Dictionary) -> Vector2:
+	var rows := (loc.get("map", {}) as Dictionary).get("rows", []) as Array
+	if rows.is_empty():
+		return Vector2.ZERO
+	var cell := exit["cell"] as Array
+	var x := int(cell[0])
+	var y := int(cell[1])
+	var gaps: Array[int] = [x, str(rows[0]).length() - 1 - x, y, rows.size() - 1 - y]
+	var sides: Array[Vector2] = [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]
+	var nearest := gaps.find(gaps.min())
+	return sides[nearest] if gaps[nearest] <= EDGE_REACH else Vector2.ZERO
+
+
+## The places one open road from `here`.
+static func neighbours(here: String, st: StoryState) -> Array[String]:
+	var out: Array[String] = []
+	for road in roads(st):
+		var there := ""
+		if str(road["from"]) == here:
+			there = str(road["to"])
+		elif str(road["to"]) == here:
+			there = str(road["from"])
+		if there != "" and not out.has(there):
+			out.append(there)
+	return out
+
+
+static func _pos(place_id: String) -> Vector2:
+	var at := place(place_id).get("pos", [0.0, 0.0]) as Array
+	return Vector2(float(at[0]), float(at[1]))
+
+
+## The places a road out of a place (an exit to "travel", in location `loc`) is the way to: every place one open road from
+## here goes with the way out that faces it best, judged by where it lies on the map of Barovia, so no place is left without
+## one (a way out that faces no side of the map, a door or a stair, is the way to none: it is a choice).
+static func exit_places(loc: Dictionary, exit: Dictionary, st: StoryState) -> Array[String]:
+	var found: Array[String] = []
+	var here := place_for_location(str(loc.get("id", "")))
+	var face := exit_facing(loc, exit)
+	if here == "" or face == Vector2.ZERO:
+		return found
+	var faces: Array[Vector2] = []
+	for ex: Variant in loc.get("exits", []):
+		var other := ex as Dictionary
+		if str(other["to"]) != "travel" or not StoryConditions.check(str(other.get("when", "")), st):
+			continue
+		var f := exit_facing(loc, other)
+		if f != Vector2.ZERO and not faces.has(f):
+			faces.append(f)
+	for there in neighbours(here, st):
+		var way := (_pos(there) - _pos(here)).normalized()
+		var best := -2.0
+		for f in faces:
+			best = maxf(best, way.dot(f))
+		if way.dot(face) >= best - 0.001:
+			found.append(there)
+	return found
+
+
+## Where a road out of a place leads, when it leads to one place only: the party goes straight there (Ashwin, 2026-10-28:
+## a road out that takes them to a new area goes there, instead of opening the map to choose on). "" when it is the way
+## to none or to several (the village's single road out, for the Gates, the crossroads and the quest places beside it): the
+## map opens, as before.
+static func exit_destination(loc: Dictionary, exit: Dictionary, st: StoryState) -> String:
+	var found := exit_places(loc, exit, st)
+	return found[0] if found.size() == 1 else ""
+
+
 static func hours(legs: Array[Dictionary]) -> float:
 	var h := 0.0
 	for l in legs:

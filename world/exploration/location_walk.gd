@@ -208,7 +208,7 @@ static func _check_cell_events(view: LocationView) -> bool:
 				return false
 			view._save_positions()
 			if str(exit["to"]) == "travel":
-				view.travel_requested.emit()
+				view.travel_requested.emit(Travel.exit_destination(view.loc, exit, view.st))
 				return true
 			_exit_moves_quest(view, exit)
 			view.st.advance_minutes(5)   # walking between places takes a few minutes; rests take the hours

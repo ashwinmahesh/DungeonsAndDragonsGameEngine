@@ -39,8 +39,9 @@ signal check_rolled(text: String)
 signal big_roll(test: D20Test, who: String, label: String)
 signal hover_changed(text: String)
 signal banter(lines: Array)
-## The party reached a road out of here (an exit to "travel"): the game opens the map.
-signal travel_requested
+## The party reached a road out of here (an exit to "travel"): the game sets out for `destination`, when the road leads to
+## just that one place (Travel.exit_destination), else ("") opens the map to choose on.
+signal travel_requested(destination: String)
 ## A party member down outside a fight was stabilized or healed from the right-click menu.
 signal party_tended
 ## A party member took damage outside a fight (a trap, a pit, a failed climb: LocationHurt) and it has been shown: the
