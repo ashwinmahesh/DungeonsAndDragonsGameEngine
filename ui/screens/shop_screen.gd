@@ -54,6 +54,9 @@ var _ware_ids: Array[String] = []
 
 ## The UiMotion.roll key the purse counts from (the services screen shares it).
 const PURSE_KEY := "party_purse"
+## The two lists' scroll containers, whose positions a purchase, a sale or a haggle keeps (_redraw_in_place).
+const WARES_SCROLL := "WaresScroll"
+const PACK_SCROLL := "PackScroll"
 const ATTITUDE_COLOURS := {"friendly": "bile", "indifferent": "moonlight", "hostile": "rose"}
 ## Words a merchant's name can start with that _who() keeps with the name after them.
 const TITLES := ["Father", "Sir", "Madam", "Lady", "Lord", "Mother", "Brother", "Sister", "Baron", "Baroness"]
@@ -170,6 +173,48 @@ func _draw() -> void:
 	cols.add_child(_sell_side(ch, pack, hidden))
 
 
+## Draws the shop again with both lists where they were scrolled to (Ashwin, 2026-10-28: "when buying or selling at a
+## merchant, the item list must keep its scroll position"). A purchase, a sale and a haggle change a row or a price, not
+## what is shown, so the lists stay put; a new tab or hero starts at the top as before. The positions are put back once
+## the new lists have been laid out, a frame on.
+func _redraw_in_place() -> void:
+	var keep := scroll_positions()
+	_draw()
+	_restore_scroll.call_deferred(keep)
+
+
+## Where the lists are scrolled to: {WaresScroll, PackScroll} on a desktop, {page} for a phone's one page.
+func scroll_positions() -> Dictionary:
+	var out := {}
+	if MobileDevice.enabled():
+		var page := _frame.get_parent().get_parent().get_parent() as MobilePage
+		if page != null:
+			out["page"] = page.scroll.scroll_vertical
+		return out
+	for n: String in [WARES_SCROLL, PACK_SCROLL]:
+		var sc := find_child(n, true, false) as ScrollContainer
+		if sc != null:
+			out[n] = sc.scroll_vertical
+	return out
+
+
+func _restore_scroll(keep: Dictionary) -> void:
+	if not is_inside_tree():
+		return
+	await get_tree().process_frame   # the lists have their size now
+	if not is_inside_tree():
+		return
+	if MobileDevice.enabled():
+		var page := _frame.get_parent().get_parent().get_parent() as MobilePage
+		if page != null and keep.has("page"):
+			page.scroll.scroll_vertical = int(keep["page"])
+		return
+	for n: String in keep:
+		var sc := find_child(n, true, false) as ScrollContainer
+		if sc != null:
+			sc.scroll_vertical = int(keep[n])
+
+
 ## The terms at this counter and the Haggle button: "Friendly · You pay ×0.9 · they pay ×1.1 ... Haggle (Persuasion
 ## DC 15, Kip +5)".
 func _terms_row() -> Control:
@@ -215,7 +260,7 @@ func _haggle(ch: Character, extra: Array) -> void:
 	var who := Compendium.shared().display_name("npcs", npc_id).get_slice(" ", 0)
 	_note = "%s haggles: %s. %s" % [ch.name.get_slice(" ", 0), test.describe(),
 		("%s gives you the good-customer price." % who) if test.success else ("%s won't budge." % who)]
-	_draw()
+	_redraw_in_place()
 	_note_colour = "bile"
 
 
@@ -289,7 +334,7 @@ static func _base_kind(w: Dictionary) -> String:
 ## A made-to-order ware's bases, open or closed (one open at a time).
 func toggle_bases(id: String) -> void:
 	_open_bases = "" if _open_bases == id else id
-	_draw()
+	_redraw_in_place()
 
 
 ## The wares side's tab a ware is under (WARE_CATEGORIES); an item made on a base goes by what it was made as (a Staff
@@ -375,7 +420,9 @@ func _wares_side(list: VBoxContainer, tabs: Array[String]) -> Control:
 		tabbed.add_child(strip)
 	var pane := UiParts.pane(10)
 	pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	pane.add_child(UiParts.fill_scroll(list))
+	var scroll := UiParts.fill_scroll(list)
+	scroll.name = WARES_SCROLL
+	pane.add_child(scroll)
 	tabbed.add_child(pane)
 	col.add_child(tabbed)
 	return col
@@ -400,7 +447,9 @@ func _sell_side(ch: Character, list: VBoxContainer, hidden: int) -> Control:
 	var inner := VBoxContainer.new()
 	inner.add_theme_constant_override("separation", 6)
 	inner.add_child(_buys_row(hidden))
-	inner.add_child(UiParts.fill_scroll(list))
+	var scroll := UiParts.fill_scroll(list)
+	scroll.name = PACK_SCROLL
+	inner.add_child(scroll)
 	pane.add_child(inner)
 	tabbed.add_child(pane)
 	col.add_child(tabbed)
@@ -501,7 +550,7 @@ func sell_all_junk() -> void:
 	if sold > 0:
 		Audio.sfx("coins")
 	_note = "Sold %d piece%s of junk for %s gp." % [sold, "" if sold == 1 else "s", _money(gained)] if sold > 0 else "Nothing to sell."
-	_draw()
+	_redraw_in_place()
 
 
 func _buy(item_id: String) -> void:
@@ -509,7 +558,7 @@ func _buy(item_id: String) -> void:
 	if why == "":
 		Audio.sfx("coins")
 	_note = why if why != "" else "%s buys %s." % [st.party[index].name.get_slice(" ", 0), Compendium.shared().display_name("items", item_id)]
-	_draw()
+	_redraw_in_place()
 
 
 func _sell(item_id: String) -> void:
@@ -518,7 +567,7 @@ func _sell(item_id: String) -> void:
 	if why == "":
 		Audio.sfx("coins")
 	_note = why if why != "" else "Sold %s." % name_
-	_draw()
+	_redraw_in_place()
 
 
 static func _money(v: float) -> String:
