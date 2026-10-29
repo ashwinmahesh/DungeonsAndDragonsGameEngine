@@ -61,6 +61,12 @@ The overview for a new game is [design/hd2d_look.md](../design/hd2d_look.md).
 The wireframes the owner approved for the four core flows (creation, level up, inventory, party) and the combat view
 are in [ui/wireframes/](ui/wireframes/), linked from those pages.
 
+## Voice
+
+[voice/narrator.md](voice/narrator.md): the Narrator's voice and style guide, with its rules, what each trigger gets
+and Barovia's sample lines. The reusable part, separated from Barovia's voice, is
+[design/narration.md](../design/narration.md).
+
 ## Rules
 
 [coverage](rules/coverage.md) (every 2024 PHB rule and its status) · [deviations](rules/deviations.md) (every

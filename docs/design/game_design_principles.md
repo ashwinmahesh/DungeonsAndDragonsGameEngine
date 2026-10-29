@@ -78,7 +78,9 @@ that breaks one is out.
 ### 1.3 Tone: dread, shown and not told
 
 - **The world is cruel; the Narrator is not.** The Narrator is an old gothic storyteller, fond of the party the way a
-  gravedigger is fond of the weather: "with interest, without illusions" (docs/voice/narrator.md). Rules every
+  gravedigger is fond of the weather: "with interest, without illusions"
+  ([reference/voice/narrator.md](../reference/voice/narrator.md)). The full craft, split into the reusable rules and
+  Barovia's own voice, with the trigger table and the drafting method, is [narration.md](narration.md). Rules every
   Narrator line follows:
   1. Second person, present tense ("You step inside").
   2. One or two sentences; the second is usually the turn (irony, dread, a dry joke).
@@ -130,6 +132,27 @@ Lessons for a new project:
 - Data `text` and `summary` fields are always our own words, never copied from the books (CLAUDE.md).
 - Some departures from the book are kept on purpose because they play better ("Kept as ours" lists in the dungeon
   plan). Name them, give the reason, and leave them alone.
+
+### 1.6 A natural world first, the grid laid over it (core, 2026-10-08 and 10-19)
+
+The owner: "We don't need to draw our real world maps as a battle grid. It can look like a real natural map that we just
+overlay a grid on top afterwards. That's the design principle we should be using" (2026-10-19), and on 2026-10-29: we
+don't build a flat 2D map with everything built around squares; we build a natural world with elevation and ordinary
+design elements, then overlay the grid on top of it.
+
+- **Design the place, not the squares.** Every map starts as a real place: the lie of its land (hills, hollows, banks,
+  ledges, cliffs), its water, its woods, its buildings and the big things to climb and stand on. Only then is it laid
+  into the 5 ft rules grid. Nothing in the world should look as if it was built to fit a square.
+- **The grid is for the rules, not for the eye.** The rules grid (squares, heights, walls, exits, fights) decides
+  movement, reach and areas, and never changes for looks; the drawing follows the land. The battle grid is a layer laid
+  over the drawn ground, shown while the player holds a key, never painted into it.
+- **Height is part of the world.** Ground rises and falls (gentle slopes, steep ones, cliffs), with platforms, stages,
+  outcrops and climbable trees to use, and height counts in a fight: high ground, climbing, jumping down, falling.
+- **Whatever gives the grid away is a bug**: a square pond, a wood planted in rows, a rectangular clearing, a mountain
+  of flat-topped pillars, a cliff as a slab down a grid line, mud in square tiles, a wall a whole square thick, chairs
+  set square to the grid.
+
+How to do it (the rules every map follows, what the engine draws, how to author and check a map): section 5.1.
 
 ---
 
@@ -439,22 +462,97 @@ Notes:
 
 ## 5. Exploration, maps and the look of places
 
-### 5.1 Draw the land, then lay the grid over it (2026-10-19, standing)
+### 5.1 Draw the land, then lay the grid over it (2026-10-08, 10-19, standing)
 
-The owner: "We don't need to draw our real world maps as a battle grid. It can look like a real natural map that we just
-overlay a grid on top afterwards. That's the design principle we should be using." And: "why are all of our mountain tops
-flat? ... Things should look natural."
+The core principle is section 1.6. The owner's words, 2026-10-19: "We don't need to draw our real world maps as a battle
+grid. It can look like a real natural map that we just overlay a grid on top afterwards. That's the design principle we
+should be using." "Why are all of our mountain tops flat? ... Things should look natural. This applies to everything not
+just mountain tops." "Audit EVERYTHING and make our maps look more natural (not just like a battle grid)." "We can do
+interiors too." It started earlier: the Exterior Audit (2026-10-08) asked every outdoor place to **not be flat**
+(natural slopes, banks, ledges and cliffs) and to have "larger things that change elevation and can be interacted with"
+(platforms, podiums, stages, walkways, rock outcrops, big climbable trees).
 
-1. **The rules grid never changes for looks.** Rows, heights, exits, spawns and fights stay; only the drawing changes.
-2. **Bend the side the party can't stand on.** A natural outline (a crag's foot, a wood's edge, a shore, a cliff's
-   lip) wanders into rock, wood, water or void squares, never into a walkable one. A walkable square keeps its middle
-   clear and its ground within a few centimetres of where a token stands.
-3. **No seam runs along a grid line outdoors** for more than a square, unless it's built (a wall, a kerb, a jetty).
-4. **Built things stay built.** Houses, castles, dungeons and interiors keep straight lines; ruins break.
-5. **Shapes come from noise seeded by the place**, never one shape stamped everywhere.
-6. **The battle grid is an overlay**, shown around the active creature in a fight, whole in the tactical view, hidden
-   outside fights (a setting: in fights, always, never). Never painted into the ground textures.
+**How it went.** Until 2026-10-19 every map was drawn from its battle grid one square at a time. The Natural Maps Plan
+shot all 122 places (56 outdoor, 66 indoor) and found twelve things that drew the grid: square tiles of ground, shores in
+square steps, woods in rows and clearings as rectangles, rock as square pillars, cliffs as slabs down grid lines, the
+land's edge over a drop in square steps, brambles and walls one box a square, a grid painted into every floor, walls a
+whole square thick, caves dug as square rooms, loose things set square on the grid, and square patches of indoor
+rubble. All twelve were redrawn, with no change to any map's rules.
+
+**The rules every map follows.**
+
+1. **The rules grid never changes for looks.** Rows, heights, walls, exits, spawns, fights and finds stay; only the
+   drawing changes. A token stands where it stood, and paths, rings, area outlines and picking still sit right.
+2. **Natural edges bend, but a square stays usable.** A natural outline (a crag's foot, a wood's edge, a shore, a cliff's
+   lip, a drop) wanders off the grid line into the rock, wood, water or void squares, and may reach a little way into a
+   square the party can stand on: about a quarter of a square at most, so the square's middle, a token there and its
+   ring stay clear, and the ground under a token stays within 0.05 of a unit (about 3 inches) of where it stands.
+   The plan first said "never into a walkable square"; the owner widened it the same day ("Natural edges can bend
+   into a square the party can stand on").
+3. **No seam runs along a grid line outdoors** for more than a square, unless it is built (a wall, a kerb, a jetty).
+4. **Built things stay built, but not ruler-straight.** Houses, castles and dungeons keep their lines; in the Modern
+   look a building is bent a little as a whole (turned a degree or two off the grid, walls leaning and bowing, the roof
+   sagging, the ridge bowed), stone less than timber; a wall moves a quarter of a square sideways at most (a timber
+   wall half, the owner's pick). Indoors the walls get thinner, not wavier. Ruins break; caves are
+   caves.
+5. **Shapes come from noise seeded by the place**, tuned per place where needed, never one shape stamped everywhere,
+   so a place comes out the same on every visit and no two places alike.
+6. **The battle grid is an overlay.** Thin lines draped on the drawn ground over the squares a creature can stand in
+   (not walls, trees, water or void), following slopes and steps. By default (Settings, Game, Battle grid: *Held*) they
+   show while the Show grid key is held (B; on a controller a trigger exploring and a wedge of the fight's radial menu),
+   round the creature whose turn it is (its movement plus two squares) or round the leader exploring, and over the whole
+   map in the tactical view. *In fights*, *Always* and *Never* are the other choices. The owner: "we don't need to show
+   the grid in combat it is unnecessary ... maybe it could be a button the player holds".
 7. **Small steps** wherever a 5 ft raised block would otherwise read as a cube to step onto.
+8. **A place is built on every arrival**, so the shaping is worked out once per board on flat arrays and kept for the
+   newest eight places; the plan's budget was a build time within 10% of before.
+
+**Height in the rules** (built 2026-10-07 to 10-09; [reference/rules/deviations.md](../reference/rules/deviations.md)).
+A map's `elevation` rows lay hills and hollows under its squares in 5 ft steps (`0`-`9` then `a`-`z`, up to 175 ft;
+[reference/contracts/locations.md](../reference/contracts/locations.md)). Between neighbouring squares 5 ft is a gentle
+slope (free), 10 ft a steep one (5 extra feet going up), 15 ft or more a cliff (climbed at 1 extra foot per foot, none
+with a Climb Speed); walks out of a fight go round cliffs where they can. Ranged attacks from 10 ft or more above get +2,
+from below -2. A creature can jump down a cliff or a ledge (5 ft of movement, then the fall), Long Jump with a run-up,
+and is pushed off an edge into a fall; an open drop takes it out of the fight. Raised built things (platforms, stages,
+daises) use the same heights, so every big thing in a place is something to fight over.
+
+**What the engine draws** (Modern look; [hd2d_look.md](hd2d_look.md) and
+[reference/art/](../reference/art/) for the detail):
+
+| What | How it looks | Code (`world/look/` unless noted) |
+|---|---|---|
+| Ground | one shaped skin with hollows and banks under woods, up to four surfaces blended with ragged edges (a mud or drift square keeps its middle 60% its own) | `ground_relief.gd`, `shaders/world/lit_world_blend.gdshader` |
+| Water | one smooth, noisy shore contour per place, a bank down and a shelf under the water, foam following it | `shores.gd` |
+| Woods | trees scattered by noise over the wood squares, varied in size, lean and kind, an edge that wanders, saplings and deadfall feathering into the open | `woods.gd`, `flora.gd` |
+| Rock | one shaped mountain over the rock squares (ragged faces, ridges, peaks, saddles), carrying on past the map's edge | `crags.gd` (place look `rock_shape: "crags"`) |
+| Cliffs and drops | a face whose line wanders, rounded corners, benches, a scree apron; the land's edge over a void reaches out and rounds | `cliff_face.gd` |
+| Difficult ground | clumps scattered across runs of squares, big in the middle and small at the rim | `ground_cover.gd` |
+| Yard walls, ruins | dry stone with an uneven coping and missing stones; ruined walls broken | `drystone.gd`, `ruin.gd` (place look `ruin`) |
+| Caves | one rounded, wandering rock contour round the floor, ragged tops, rubble at the foot | `caves.gd` (place look `cave: true` or `"hewn"`) |
+| Interior walls | a wall between two rooms about a foot and a half thick, not a whole square | `interior_walls.gd` |
+| Buildings | bent as a whole, by style and by place | `building_bend.gd` |
+| Loose things | chairs, barrels, crates and sacks a little off their square's middle and turned; things people line up keep their lines | `set_dressing.gd` (catalog `hand_placed`) |
+| The battle grid | the draped overlay of rule 6 | `world/combat/battle_grid.gd`, `shaders/fx/battle_grid.gdshader` |
+
+**Authoring a map for a new game.**
+
+1. Sketch the place as a place first: where the land rises, where water lies and how its shore runs, where the woods
+   and clearings are (round them, don't rule them), the buildings, the big things to climb.
+2. Lay it into the grid rows and the `elevation` rows. Give every outdoor place some height; a flat outdoor map needs a
+   reason.
+3. Pick the place's look keys: crags for rock country, `cave` for caves, `ruin` for fallen places, the bend of its
+   buildings.
+4. Keep fights, exits, spawns and walked paths off the squares a shape might crowd, and never move an existing walkable
+   square, spawn or exit later (the bots are path-sensitive): extend a map, don't redraw it.
+5. Check it from the play camera and from straight above, before and after: the game's `natural_audit.tscn`
+   capture (`NA_LOCS=a,b`) shoots every place whole, at play height and tilted to the horizon. A map is done when no
+   square corner of water, row of trees, flat-topped block or straight slab shows. The game's look tests
+   (`test_grid_overlay`, `test_ground_relief`, `test_shores`, `test_woods`, `test_crags`, `test_cliffs`, `test_caves`,
+   `test_building_bend`, `test_hand_placed`, `test_natural_small_things`) and the engine's `test_high_ground` and
+   `test_height_and_falls` guard it.
+
+*Not built:* open ground the party walks on never rises above its square's floor (the skin only dips), so a gently
+rolling meadow under the tokens is still open (the plan's N9, the owner's taste).
 
 ### 5.2 Every place its own look (standing)
 
@@ -626,7 +724,8 @@ The audit found sneaking bought nothing: stepping into a fight's area started it
 
 - **All new or rewritten dialogue is drafted by Gemini** through the owner's ai-bridge on his subscription (never an
   API key; never start the bridge). The lane reviews and edits the draft for length, canon and the dialogue format,
-  and keeps **the brief and the raw reply** beside the work (docs/plans/gemini_*/ with a README).
+  and keeps **the brief and the raw reply** beside the work (docs/plans/gemini_*/ with a README). What a brief holds
+  and what the edits usually fix: [narration.md](narration.md) section 5.
 - **Mechanical fixes** (typos, flags, speaker ids) don't need Gemini.
 - **New lines stay unvoiced** until a voice job is approved (Part 9).
 - **Add lines, don't edit voiced ones**: editing a voiced line throws away a paid clip.
@@ -734,7 +833,7 @@ can take focus from the owner's work.
 - **Accents**: locals speak with the setting's accent (Barovians, the Vistani and Strahd with a strong, clearly
   audible Romanian accent); outsiders keep their own. Each line carries a direction tag for its mood, plus the
   speaker's accent tag (2026-10-08: "capture the accent and the emotional tone of each line").
-- **The Narrator stays on the model of his original lines** without tags (2026-10-08: the other model's Narrator
+- **The Narrator stays on the model of its original lines** without tags (2026-10-08: the other model's Narrator
   lines were "horrible" next to the originals). Consistency of a long-running voice beats a newer model.
 - **Every voice is designed from a written voice bible** (age, timbre, accent, rhythm, temperament), one file per
   speaker. Nothing is cloned from a real person. Children use ready-made library voices.
@@ -943,7 +1042,8 @@ ending now keeps its own save, 10-24), and the iron knight's 300 HP (bosses figh
 1. **Pick the source and the rules.** One campaign or setting, delivered whole. Current official rules, checked
    against the text. Decide the licence position first (SRD-only and original lore is the clean path).
 2. **Write the pillars and the tone guide** before content: what the game leads with, the Narrator's rules, the
-   villain's voice, what is never allowed. Write one voice bible per main character.
+   villain's voice, what is never allowed. Write one voice bible per main character. Keep the Narrator's craft and
+   replace Barovia's persona, dial and samples ([narration.md](narration.md)).
 3. **Pick the look with target frames** before building any of it, and set a colour script so no two neighbouring
    regions share a signature.
 4. **Build the engine as pure, headless libraries** (rules, combat, story) with one dice roller, Breakdowns for every
@@ -952,8 +1052,8 @@ ending now keeps its own save, 10-24), and the iron knight's 300 HP (bosses figh
    the fight-spread test, the stuck-quest and failed-roll lints, portraits for every monster, 8 directions for every
    sprite.
 6. **Make content as region packages** that own their files, each with its travel file, flags, quests and dialogue.
-7. **Draw the land, then lay the grid.** Natural outlines on the side the party can't stand on; built things straight;
-   the grid an overlay.
+7. **Build a natural world, then lay the grid over it** (sections 1.6 and 5.1). Sketch each place as a place, with
+   height; natural edges bend off the grid; built things bend a little; the battle grid is an overlay held on a key.
 8. **Monsters at book HP; make them hit harder** when a fight is too easy; plan bosses (minions, lair actions, phases);
    aim for 2-3 round normal fights.
 9. **Write dialogue through one drafting pipeline**, keep the brief and the reply, keep every conversation's exit,
@@ -1007,7 +1107,8 @@ All dates 2026. "Asked" means decided by the owner and not yet built.
   dungeons extended with rooms that carry the book, never redrawn; the Amber Temple made beautiful; overworld stealth
   option A (slip past); the heroine as a non-combatant guest; the Tome cutscene in 3-4+ scenes; the ancient red dragon
   from the 2025 MM; dialogue drafted by Gemini through the ai-bridge; NPCs lead the party; guests can be talked to.
-- **10-19** Draw the land, then lay the grid; bosses +25% damage on Balanced and harder; Eldritch Blast reaction is one
+- **10-19** Draw the land, then lay the grid (every map redrawn natural, interiors too; buildings bend; the battle
+  grid an overlay shown while a key is held); bosses +25% damage on Balanced and harder; Eldritch Blast reaction is one
   beam; foes may share squares; known road legs 10% encounters; no re-tuning when a rule changes; fight outcomes don't
   hold a push; fewer lanes (area lanes).
 - **10-20** The Tome reading as a conversation in Strahd's voice, re-triggerable; work paused for quota.
@@ -1041,4 +1142,6 @@ All dates 2026. "Asked" means decided by the owner and not yet built.
   released as a full download with the engine cutover; two test expectations changed on the owner's yes by name;
   "just take action, stop asking me" for the wrap-up, except generating new external assets.
 - **10-29** 1.0.12 ordered: "Cut release 1.0.12 with the latest work then we can call this project complete"; the knowledge of the project
-  written into the engine's docs (this document, the handbook and the reference copies) on Opus 5.5 at extra-high.
+  written into the engine's docs (this document, the handbook and the reference copies) on Opus 5.5 at extra-high;
+  the natural world restated as a core principle: build the world with its height and ordinary design elements, then
+  lay the grid over it (section 1.6); the Narrator's craft written up apart from Barovia's voice (narration.md).

@@ -14,6 +14,8 @@ included), what to test and when, how assets and releases are made, and what wen
    contract, the Barovia leftovers still hard-wired, and the first steps of a new game.
 4. **[design/hd2d_look.md](design/hd2d_look.md)**: which parts of the look are in the engine, which are Barovia's, and
    the recipe for a new palette and a new vibe.
+   **[design/narration.md](design/narration.md)**: the Narrator's rules and the craft of every line, split from
+   Barovia's own voice, and how lines were drafted and edited.
 5. **[handbook/orchestration.md](handbook/orchestration.md)**: the coordinator, threads, lanes and the builder; the
    plan-first protocol; models and effort; hand-offs; approvals; pausing and resuming; QA; Codex pull requests.
 6. **[handbook/testing.md](handbook/testing.md)**: what to run while working, before a hand-off, per batch and before

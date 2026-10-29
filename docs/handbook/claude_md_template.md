@@ -83,6 +83,8 @@ commit the new submodule commit here (its path shows as the change).
   editing a voiced line silences it until it is voiced again.
 - New or rewritten dialogue is drafted by <model> through the owner's ai-bridge (read its skill file), never with an
   API key; don't start or restart the bridge. Keep the brief and the raw reply in docs/plans/.
+- Every Narrator line follows the Narrator's rules (second person, present tense, one or two sentences, no game terms,
+  no unearned facts; the engine's docs/design/narration.md) and the game's own voice guide for its persona.
 
 ## Keys and the owner's files
 - Never ask for, store or echo a key. Tools read keys from the owner's environment and send them as headers.

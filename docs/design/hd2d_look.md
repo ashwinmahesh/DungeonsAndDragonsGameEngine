@@ -162,8 +162,11 @@ Each of these came from the owner looking at a capture and saying something was 
   walls between the camera and the party dissolve. A tree that came back from fading once drew a black box behind it
   because its see-through edges were switched off; keep the alpha path on until the fade has finished.
 - **Every place its own look** (2026-10-12): two places in a row that look the same read as a bug to the owner.
-- **Draw the land, then lay the grid over it** (2026-10-19): natural outlines on the side the party can't stand on,
-  built things straight, the grid an overlay. Square-edged lakes and cliffs read as placeholder.
+- **Build a natural world, then lay the grid over it** (2026-10-19, the core of the look): design each place as a
+  place with height, let natural edges wander off the grid (up to about a quarter of a square into a walkable one, its
+  middle kept clear), bend buildings a little, and show the battle grid only as an overlay held on a key. Square-edged
+  lakes, rows of trees and cliffs as slabs read as placeholder. The rules, the builders and how to author and check a
+  map are in [game_design_principles.md](game_design_principles.md) sections 1.6 and 5.1.
 - **Exits obvious, hidden areas hidden** until found, on the board, the map and the minimap.
 - **Nothing overlapping**, floors and walls varied, real-world sizes. A prop at the wrong scale is the first thing
   the owner notices.
