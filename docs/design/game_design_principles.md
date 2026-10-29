@@ -3,7 +3,9 @@
 How the *Curse of Strahd* game was designed, written so that a new project can build a different game world on the
 same principles. Written 2026-10-24 from the project's memory, the plans and audits in the shared project folder, and
 the public repo (github.com/ashwinmahesh/CurseOfStrahd, main at `09c02b09`: CLAUDE.md, docs/adr/, docs/rules/,
-docs/plans/, docs/story/, docs/ui/, docs/voice/).
+docs/plans/, docs/story/, docs/ui/, docs/voice/). Updated 2026-10-29 with the owner's decisions of 10-24 to 10-29
+(game main `ef29e6278`). The engine handbook beside it ([../README.md](../README.md)) holds the process (orchestration,
+models and effort, testing, pipelines, gotchas) and the HD-2D look in more depth.
 
 ## How to use this document
 
@@ -15,7 +17,8 @@ docs/plans/, docs/story/, docs/ui/, docs/voice/).
   - **Undecided**: an open question. A new project should decide it early.
   - **Superseded**: an older rule that a later one replaced. Kept because the history is the lesson.
 - "The owner" is the person the game is for. "A lane" is one Claude working thread with its own git branch and
-  working copy. "The builder" is the one thread that merges, tests and pushes. See Part 14.
+  working copy. "The builder" is the one thread that merges, tests and pushes. See Part 14 and
+  [handbook/orchestration.md](../handbook/orchestration.md).
 - No secrets, keys or paid-account details are in this document. Where something costs money, the principle is how
   spending is approved, not what the account holds.
 
@@ -233,9 +236,12 @@ Examples of owner house rules (each a deviation row):
 - When a player-controlled creature could react, the fight **pauses** and asks (ADR 0007). Each reaction has a rule
   the player sets: Ask (default), Always or Never.
 - If a reaction has several ways to pay, it asks which: Hellish Rebuke and Backlash ask; Shield does not; **Absorb
-  Elements must ask too**, including when the save succeeds but still deals half damage (2026-10-23, 10-24).
+  Elements must ask too**, including when the save succeeds but still deals half damage (2026-10-23, 10-24; built
+  10-24).
 - **Counterspell is offered for every enemy spell** to any party member who can cast it (slot, reaction, range, line
-  of sight), whatever path the enemy's spell took (2026-10-24, after Strahd's Fireball got no prompt).
+  of sight), whatever path the enemy's spell took (2026-10-24, after Strahd's Fireball got no prompt; built 10-24).
+  Bosses use the same reactions against the party: Strahd answers spells with Counterspell three times a day, and four
+  boss casters answer with Counterspell or Shield (2026-10-26).
 - **Divine Smite asks every time.**
 - A bug report pattern to remember: "a reaction fired automatically" is always a bug under this rule.
 
@@ -244,17 +250,24 @@ Examples of owner house rules (each a deviation row):
 - Spells that choose targets let the player choose them (Slow; Steel Wind Strike up to five).
 - Polymorph works on enemies. Party summons count as allies.
 - Invisible foes can't be targeted except by areas. They stay in the initiative list and can't be clicked there to
-  reveal them; moving into their square gives no "an enemy is here" message (asked 2026-10-21).
+  reveal them; moving into their square gives no "an enemy is here" message (asked 2026-10-21; built 10-25 as a
+  dimmed card in the turn order that nobody can click or hover).
+- A readied spell takes no Concentration and can be let go (Unready), and a readied attack or spell answers an
+  Invisible foe right after its attack (a house rule, 2026-10-25, in deviations). Spiritual Weapon is not a
+  Concentration spell (2026-10-25). A fight ends the party's sneaking once its surprise is read (2026-10-25).
 - Creatures (heroes and foes) may share a square, within a size budget (heroes 2026-10-12, foes 2026-10-19).
 - Turn-order names are cut at 10 characters.
 
-### 3.4 Encounter design (standing, with the newest rules asked and not yet built)
+### 3.4 Encounter design (standing)
 
 - **Foes start spread out.** No 20 ft burst may catch every foe at the start, and with 3 or more foes they must not all
   fit inside one 20 ft fireball (2026-10-15; a unit test checks every fight). A rug room where one Fireball caught 7 of
   8 foes had to be redone.
-- **Fight length**: non-boss fights should average **2-3 rounds, 4 at most**; bosses may run longer (2026-10-24,
-  asked). Levers: book HP, fewer foes, higher to-hit and damage, focus fire. Never make the party weaker to get there.
+- **Fight length**: non-boss fights should average **2-3 rounds, 4 at most**; bosses may run longer (2026-10-24).
+  Levers: book HP, the book's line-ups, higher to-hit and damage, focus fire. Never make the party weaker to get there.
+- **The book's line-ups** (2026-10-25): "for pretty much all battles in the book, we can remove extra enemies we added
+  and just leave them how they are in the book", then "Yes for boss fights". The minions added during tuning went, and
+  the opening wolf packs went back to the book's size. Added foes are a design decision, not a tuning knob.
 - **Big monsters need big rooms.** The lich's and the dragon's lairs had to be made "a lot bigger" (2026-10-21,
   10-23). Size the arena for the fight, not the fight for the arena.
 - **Rewards make the fight easier, warnings make it harder.** A quest that earns the party an edge (the hounds called
@@ -275,7 +288,10 @@ This is the rule that changed most, and the history is the lesson.
 | 2026-10-19 | No re-tuning when a rule changes; the builder accepts new fight results | The 3-in-8 tuning was a one-time job |
 | 2026-10-21 | "The current battles are absolute jokes." Plan every boss: powerful minions placed intelligently, lair actions that change the battlefield, phases, real tactics (Counterspell, Shield). Stat blocks may be modified when the design needs it, recorded as deviations | Plan first, in docs/plans/, then build, one branch per boss |
 | 2026-10-21 | Tune against **the owner's actual party** (his save, read-only), not a generic party | Generic pregens out-damaged the book in ways his party didn't |
-| **2026-10-23/24** | **Difficulty comes from hitting harder, not from HP. Every monster (not just bosses) goes back to its Monster Manual HP.** Compensate with **+1 to +3 to hit and about +30% damage**, better abilities and lair actions | Asked, not built yet. Brother Anatol and his spawn at 315 HP each, and 200 HP rat swarms, were the examples |
+| **2026-10-23/24** | **Difficulty comes from hitting harder, not from HP. Every monster (not just bosses) goes back to its Monster Manual HP.** Compensate with **+1 to +3 to hit and about +30% damage**, better abilities and lair actions | Built: 687 non-boss fight entries lost their own HP on 10-24, 189 boss entries on 10-26. Brother Anatol and his spawn at 315 HP each, and 200 HP rat swarms, were the examples |
+| 2026-10-25 | The book's line-ups, boss fights included; bosses' to-hit and DCs grow with the party on Balanced (+1 to level 4, +2 at 5-8, +3 from 9); legendary actions only at the end of a hero's turn, provoking no opportunity attacks; Legendary Resistance only against conditions and big spells that do nothing on a success; nothing is re-measured unless the owner asks | Built the same days |
+| 2026-10-26 | The boss redesign plan: every boss harder through damage, abilities, lair actions and Counterspell/Shield tactics, never HP; stat blocks may change; one branch per boss, easiest first | Built in waves: lairs for the hut, the field and the beacon; bosses acting between the heroes' turns; a coven sharing its spells; the lich on the CR 23 block the owner chose |
+| 2026-10-27 | Who counts as a boss is explicit: a fight entry can mark a foe `boss: false` | The vampire brides fight on the vampire's stat block and are no longer bosses |
 
 Why the change: inflated HP made fights long and dull (the player chips at a sponge for ten rounds) and players read
 it as unfair. Damage and abilities make a fight dangerous **and** short.
@@ -288,14 +304,19 @@ Standing boss rules:
   phases, and counterplay for the party.
 - **Bosses use their whole kit**: foes cast Shield and Counterspell (the lich who never did was a bug); legendary
   actions are used, 3 per round when the block says 3; custom legendary bosses strike twice.
-- **Legendary Resistance** only against conditions or high-level all-or-nothing damage spells (2.2).
+- **Legendary Resistance** only against conditions or high-level all-or-nothing damage spells (2.2; built 10-25).
+  Legendary actions come only at the end of a hero's turn and provoke no opportunity attacks (2026-10-25), and each
+  legendary option costs one use (2026-10-26).
 - **Abilities target the right side**: the Huntsman's frightening horn affected his own hounds, a bug (2026-10-23).
 - **Some numbers are right as they are**: the ancient red dragon's breath (about 124 damage) stays; the owner
   withdrew his complaint after playing it (2026-10-23). Its fight gets better lair actions and a bigger lair, **no
   stronger minions**, and gold piles worth the name.
-- **Who counts as a boss** must be explicit. The code calls anything with legendary actions or CR 5+ a boss, which
-  wrongly gives plain CR 5 spawn the +25%. *Undecided: a narrower definition, such as an explicit boss flag.*
-- **The villain hits like the villain**: Strahd's unarmed strike and bite went from +9 to **+14** to hit (2026-10-24).
+- **Who counts as a boss** must be explicit. The code called anything with legendary actions or CR 5+ a boss, which
+  wrongly gave plain CR 5 spawn the +25%. Since 2026-10-27 a fight entry can mark a foe `boss: false`, and it is then
+  none of the game's bosses whatever its stat block; otherwise a boss is a foe on the game's bosses list or with
+  legendary actions. A new game should put an explicit boss flag in its fight data from the start.
+- **The villain hits like the villain**: Strahd's unarmed strike and bite went from +9 to **+14** to hit (2026-10-24,
+  built 10-26), and his road visits fight at his stat block's Hit Points.
 - **The final villain can't be killed by accident.** He is destroyed only in his coffin; at 0 HP elsewhere he turns
   to mist and flees there. His protective ward (while the Heart of Sorrow stands) must be **visible** in fights, with
   hints pointing to how to break it (asked 2026-10-24, after the owner thought Strahd was simply immune).
@@ -308,11 +329,13 @@ Standing boss rules:
 - **Every foe with spells uses them** when a spell is its best option (2026-10-13), weighing each spell's expected
   damage plus the turn a condition takes away against its weapon.
 - **Foes don't catch themselves or their allies** in their own areas: they move or place the area first (asked
-  2026-10-21 and again 10-24).
+  2026-10-21 and again 10-24; built 10-24).
 - **Melee when melee is better**: a foe whose melee hits harder or more often than its ranged option closes in when it
-  can (asked 2026-10-24).
+  can (2026-10-24; built).
 - **Don't walk away from a target in reach** if leaving would provoke an opportunity attack and the nearby target can
-  take the foe's best attack (asked 2026-10-24).
+  take the foe's best attack (2026-10-24; built).
+- **Bosses act between the heroes' turns** where their block allows (reactions, lair actions: Rahadin, Vladimir and
+  Kiril; Izek parries), and some fight in lairs that change the field each round (2026-10-26/27).
 - **Doors are no barrier** to foes with hands and Intelligence 3+.
 - **Legendary actions spread their targets.**
 - **Each monster rolls its own initiative** (todo 2026-10-20; the code still groups identical monsters, as the DMG
@@ -340,15 +363,19 @@ Notes:
 - The 2026-10-07 table also had enemy HP changing by mode (Story -25%, Tactician and Honour +20%, inside the Hit Dice
   range). Under the 2026-10-24 rule (HP stays at book value, difficulty from damage) a new project should vary
   **damage and to-hit** by mode instead of HP. *Status: the mode table is built; reconciling it with the HP rule is
-  part of the HP rollback, not yet done.*
+  part of the HP rollback. As of 2026-10-29 book HP is built for every fight on Balanced, and the other modes still
+  scale it (Story 25% fewer, Tactician and Honour 20% more), so the reconcile is still open.*
+- **Bosses' to-hit and DCs grow with the party on Balanced** (2026-10-25): +1 up to level 4, +2 at 5 to 8, +3 from 9,
+  on attack rolls, spell attacks and the DCs of spells and actions, shown in the Breakdowns. Tactician and Honour
+  keep their flat +2 for every foe.
 - **Milestones or XP** is a second choice at a new game (XP Mode Plan, 2026-10-14). XP comes from foes, quests,
   places, finds, checks, traps and lore, sized from the 2024 DMG's budgets; each foe gives 40% of its XP because the
   game fields more foes than the book. Two guardrails keep tuned fights tuned: a milestone always lifts the party to
   the milestone level, and the party can never be more than one level ahead (extra XP waits in a reserve). Validated
   with a simulator over 600 runs per player type before building. Lesson: **simulate a levelling system against the
   real fight data before shipping it.**
-- A settings option to turn off random road encounters, default on (asked 2026-10-23). New settings always default to
-  today's behaviour.
+- A settings option to turn off random road encounters, default on (asked 2026-10-23, built 10-25). New settings
+  always default to today's behaviour.
 
 ---
 
@@ -571,7 +598,10 @@ The audit found sneaking bought nothing: stepping into a fight's area started it
 - **Six companions** with their own art, voice, accent, personal quest, camp talks and approval; a custom hero can take
   a slot. Up to four travel at once; benched companions keep their level and bank the levels they missed.
 - **Allies are balanced against each other**: a recruitable ally should be about as strong as the others who join at
-  that point (Ismark brought up to Ezmerelda, asked 2026-10-21; numbers to be proposed by the lane).
+  that point (Ismark brought up to Ezmerelda, asked 2026-10-21; built 10-25 as his own CR 7 stat block).
+- **A guest who shouldn't fight stays out of fights** rather than being played by the AI (Gertruda while she travels
+  with the party, 2026-10-24/25).
+- **Art matches the character's data**: a man is drawn as a man (2026-10-23, after two mismatches).
 - **Monster stat blocks are the book's.** HP at book value (Part 3.5). Custom monsters are proposed and flagged as
   custom.
 
@@ -674,7 +704,8 @@ can take focus from the owner's work.
 - **3D models**: free CC models (a dragon skull, a skeleton, a walking hut) or code-built primitives. Blender runs only
   when the owner says the Mac is idle.
 - **Video for motion**: hero animations are cut from short image-to-video clips into sprite sheets (video as a source
-  of in-between frames, not as the playback format, which cost too much CPU). Quote clip counts and cost first; walk and
+  of in-between frames, not as the playback format, which cost too much CPU). The clips came from Veo until it was
+  withdrawn, then from Gemini Omni Flash (2026-10-24/25: "I really like the new walks"). Quote clip counts and cost first; walk and
   idle first.
 - **Stills never show hero faces** (6.5).
 - **Never fall back to plain boxes** for new content.
@@ -684,6 +715,14 @@ can take focus from the owner's work.
 ## 11. Data-driven design and engine architecture
 
 The engine is code; the game is data. Writers (Claude lanes) add content without touching code.
+
+- **The engine is its own repo** (split 2026-10-25, public 2026-10-26): rules, combat, the story engine core, the rules
+  data of the books, UI, world and look code, shaders, effects, icons, generic art and the test runner live in
+  DungeonsAndDragonsGameEngine, used by a game as the submodule `addons/dnd_core`. The owner's rule (2026-10-26):
+  anything not specific to one campaign that another D&D game could reuse belongs in the engine; a game brings its own
+  characters, voices, quests, maps, palette and moods. Campaign facts reach the engine through a campaign module and a
+  campaign look named in `data/campaign.json`, and a guard test fails when an engine file gains a campaign name. See
+  [handbook/new_game.md](../handbook/new_game.md).
 
 - **Rules data is JSON**, loaded once through one compendium, validated against schemas plus cross-file checks (every
   id a file names must exist) (ADR 0005). Agents edit and diff plain JSON; there is no generated layer.
@@ -713,6 +752,8 @@ The engine is code; the game is data. Writers (Claude lanes) add content without
 
 ## 12. Testing tiers and fight guards
 
+The full playbook (what to run when, every guard, reading a red run) is [handbook/testing.md](../handbook/testing.md).
+
 - **An in-house headless test runner** (no third-party addon). Any script error fails the run, so a script that fails
   to compile can't hide behind a green count. Tests run in parallel processes.
 - **Tiers by risk** (the builder runs them per batch):
@@ -738,8 +779,9 @@ The engine is code; the game is data. Writers (Claude lanes) add content without
 
 - **Any engine project-file change costs players a full download** (about 4 GB here). Batch those changes into one
   release.
-- **Releases need the owner's typed yes** in the release thread. Version numbers step by patch (1.0.10 live, next
-  1.0.11).
+- **Releases need the owner's typed yes** in the release thread. Version numbers step by patch: 1.0.11 went live on
+  2026-10-28 as a full download carrying the engine cutover, and 1.0.12 was being cut on 2026-10-29 to close the project.
+  The release workflow and site steps are in [handbook/pipelines.md](../handbook/pipelines.md).
 - **The public site keeps spoilers inside the wiki section only.** The wiki is regenerated from the game data after
   content lands (standing yes for wiki redeploys); hand-written prose outside the generated blocks is kept.
 - **Spoiler line for public writing**: the premise, region names, the reshuffle as a mechanic, the companions, the
@@ -748,11 +790,17 @@ The engine is code; the game is data. Writers (Claude lanes) add content without
 - **Intellectual property**: the game uses a commercial campaign and the full Player's Handbook under a personal-use
   decision. Content beyond the SRD is never distributed as data text. *Before any public download, decide: friends
   only, an SRD-only cut with renamed places, or permission from the rights holder* (Showcase Plan, 2026-10-08). A new
-  world built on SRD-only rules and original lore avoids this question entirely.
+  world built on SRD-only rules and original lore avoids this question entirely. *Where it stands (2026-10-29): the
+  game is downloadable from its public site with a fan-content notice; both repos are public, the engine's code under
+  MIT with the SRD 5.2.1 attribution and a fan-project notice for the rules data beyond the SRD, and the game's art and
+  dialogue under CC BY 4.0 with stated exclusions (2026-10-26).*
 
 ---
 
 ## 14. Workflow: lanes, the builder, batching and approvals
+
+The full process, with the builder's runbook, the hand-off format and the model history, is
+[handbook/orchestration.md](../handbook/orchestration.md). This part is the summary.
 
 ### 14.1 Plan with the strong model, build with the fast one
 
@@ -760,7 +808,9 @@ The engine is code; the game is data. Writers (Claude lanes) add content without
   packages one lane can each build, waves of at most three lanes on different files, costs, and the owner's
   **forks**, each with a recommended default). Then lanes build one package per hand-off.
 - Model policy (2026-10-21): plans and hard work on the stronger model when the owner asks; lanes on the faster model
-  at high effort; the builder on the smallest model. Pass the model and effort on every lane start.
+  at high effort; the builder on the smallest model. Pass the model and effort on every lane start. In practice: plans
+  on Opus 5.5, lanes on Sonnet 5.5 at extra effort (10-18), the builder and releases on Sonnet 5.5 at medium (10-14),
+  and Opus 5.5 at extra-high for the trailer and the knowledge audit (10-28/29).
 - When usage runs out, pause lanes and keep a **held-asks list** so nothing the owner asked for is lost; resume per
   area on his word, one batched message per lane.
 
@@ -811,22 +861,22 @@ The engine is code; the game is data. Writers (Claude lanes) add content without
 
 ## 15. Open decisions
 
-Decide these early in a new project; in this one they are still open (as of 2026-10-24).
+Decide these early in a new project; in this one they are still open (as of 2026-10-29). Answered since 10-24: who
+counts as a boss (an explicit flag on the fight entry, 10-27), the finished save writing over the player's (an
+ending now keeps its own save, 10-24), and the iron knight's 300 HP (bosses fight at their stat block's HP, 10-26).
 
 | Question | Where it stands |
 |---|---|
 | Villain tone: velvet knife (A), mask slips (B) or cat and mouse (C) | A recommended 2026-10-08 with one B-style slip; final pick not recorded in the sources |
-| Who counts as a boss for +25% damage | Code: legendary actions or CR 5+; the owner's rule is bosses only. A narrower definition (an explicit flag) is proposed |
-| HP rollback vs. the difficulty table's HP changes | Rule decided (book HP, hit harder); reconciling the mode table is pending |
+| HP rollback vs. the difficulty table's HP changes | Book HP is built for every fight on Balanced (10-24, 10-26); Story still takes 25% off and Tactician and Honour add 20%. Reconcile with the "hit harder, not more HP" rule |
 | Fleeing combat | Asked 2026-10-24; opportunity attacks, whole party or not, pursuit, which fights block it, the fight's aftermath all open |
-| A long rest inside the final dungeon | Asked 2026-10-24; floor-cleared rest with vampire interruptions, or a sanctuary/shrine/ally refuge; the lane proposes |
-| Post-ending play | Asked 2026-10-24; the world state after the villain dies, and the save-slot fix, are for a lane to design |
+| A long rest inside the final dungeon | Asked 2026-10-24; floor-cleared rest with vampire interruptions, or a sanctuary, shrine or ally's refuge. Being built in the last wave; the lane picks and tells the owner |
+| Post-ending play | Asked 2026-10-24, then postponed; the world after the villain dies is for a lane to design |
 | Monster initiative: shared per type (DMG option) or each its own | The deviation says shared; a 2026-10-20 todo asks for separate rolls |
 | Inspiration on statement checks | Only the best roller is offered it today; the lane must ask before changing |
 | The skeleton easter egg ("Withers") | His "No withers from Baldur's Gate" (2026-10-20) is ambiguous: ask before dropping nod 22 |
 | Talking skulls asking the same three questions | From the book by design; giving each skull its own questions was offered, no answer yet |
-| Iron knight at 300 HP | Flagged to him; falls under the HP rollback |
-| Public distribution | Friends only, SRD-only cut, or permission; undecided |
+| Public distribution | The game is public in practice (Part 13); for a new world on rules beyond the SRD, decide the licence position before anything ships |
 
 ---
 
@@ -856,6 +906,9 @@ Decide these early in a new project; in this one they are still open (as of 2026
     one author, the owner's saves untouched.
 13. **Write every departure down** (deviations), every decision with its date (this document's appendix), and keep a
     held-asks list and a todo file the owner can read.
+14. **Start from the engine handbook**: [handbook/new_game.md](../handbook/new_game.md) for the host contract and
+    first steps, [hd2d_look.md](hd2d_look.md) for retheming the look, and the
+    [CLAUDE.md template](../handbook/claude_md_template.md) for the new repo's agent rules.
 
 ---
 
@@ -911,3 +964,23 @@ All dates 2026. "Asked" means decided by the owner and not yet built.
   and no needless opportunity attacks for the AI; Counterspell for every enemy spell; fleeing combat (design open);
   post-ending play; finished saves never overwrite manual saves; a long rest in the castle; a current-location map;
   Gertruda as a non-combatant while she travels with the party.
+- **10-25** The book's line-ups for the book's fights, boss fights included (the added minions go); the opening wolf
+  packs at book size; bosses' to-hit and DCs grow with the party on Balanced (+1 to level 4, +2 at 5-8, +3 from 9);
+  legendary actions only at the end of a hero's turn and provoking no opportunity attacks; Legendary Resistance only
+  against conditions and all-or-nothing big spells; random fights can be switched off; nothing is re-measured unless
+  the owner asks; a readied spell takes no Concentration (house rule) and Spiritual Weapon isn't Concentration; the
+  engine split: the core extracted, the SRD flag dropped (the core takes all the books' rules data), then the game
+  switched to the core as a submodule; hero walks from Gemini Omni Flash clips now that Veo is gone.
+- **10-26** The core scope rule: anything not specific to the campaign that another D&D game could reuse belongs in the
+  engine (HUDs, screens, icons, effects, shaders, camera); the engine public as DungeonsAndDragonsGameEngine, code MIT
+  with the SRD attribution and a fan-project notice; the game's art and dialogue under CC BY 4.0; bosses at their
+  stat block's HP; every legendary option costs one use; Strahd counterspells three times a day; the boss redesign plan
+  (every boss, easiest first, never HP); the lich on the CR 23 block the owner chose.
+- **10-27** An explicit boss flag per fight entry; the vampire brides on the vampire's stat block and no longer bosses;
+  monster sprites and portraits move into the engine, and art is looked up in the game first, then the engine; covens
+  share their spells.
+- **10-28** New engine art (textures, prop sprites, models) goes through Git LFS, older files stay plain; 1.0.11
+  released as a full download with the engine cutover; two test expectations changed on the owner's yes by name;
+  "just take action, stop asking me" for the wrap-up, except generating new external assets.
+- **10-29** 1.0.12 ordered: "Cut release 1.0.12 with the latest work then we can call this project complete"; the knowledge of the project
+  written into the engine's docs (this document, the handbook and the reference copies) on Opus 5.5 at extra-high.

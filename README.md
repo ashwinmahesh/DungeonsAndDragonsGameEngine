@@ -18,4 +18,6 @@ keep their folders (`rules/`, `combat/`, `story/`, `data/`, `tests/`), so inside
 - Data holds rules content of the books only; a game keeps its own entries (its monsters, items) in its own `data/`.
 - Licence: the code is MIT (LICENSE). The data also holds mechanics from Wizards of the Coast books beyond the SRD, which
   the MIT license does not cover; see NOTICE.md for the SRD 5.2.1 attribution (CC BY 4.0) and the fan-project notice.
-- The design principles (`docs/design/game_design_principles.md`) are the reference for games built on the engine.
+- Start with `docs/README.md`: the design principles, how the game plays, the HD-2D look and how to retheme it, and the
+  handbook for a new game (the host contract, orchestration with models and effort, testing, pipelines, gotchas), plus
+  reference copies of the engine's decision records, contracts and guides. Agent rules for this repo: `CLAUDE.md`.
