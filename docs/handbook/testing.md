@@ -78,11 +78,29 @@ Choose by the riskiest branch in the batch.
 
 ## 5. Fight series and balance
 
-- **A fight series** plays one fight 8 times with fixed seeds and an autopilot party, and checks the wins against a
-  band. Timeouts count as losses. The series are deterministic: when a count moves, something real changed (AI,
-  flanking, weather, a rule).
+- **A fight series** (`FightSeriesCase` in the game's `tests/support/`) plays one fight on seeds 1 to 8 with the four
+  pregens on `PartyAutopilot` (core `tests/support/party_autopilot.gd`), and prints a line per fight: "X/8 won, the
+  average rounds, the party members dropped per fight". The series are deterministic: when a count moves, something
+  real changed (AI, flanking, weather, a rule).
+- **What a series asserts**, and these do hold a push: every fight finishes within 30 rounds (a "timeout" outcome
+  fails); every fight is won at least once in 8 (the "can be won" guard; a fight the owner accepted as winless for that
+  party sets `winless_ok` and says why); every creature's Hit Points stay in range. Fights a conversation starts set
+  `speakers_step_aside`, so the speakers move off the squares the fight needs, as the real conversation does.
+- **The autopilot's three levels**: plain, sharp (the default: smite, Spirit Guardians, Fireball on two) and full
+  ability (adds heals, Lay on Hands, Sacred Weapon, Bless, Hunter's Mark, Conjure Barrage and more). The fights in
+  `BOSS_FIGHTS` always play at full ability. For a run, `AUTOPILOT_SHARP=0` plays plain, `AUTOPILOT_FULL=1` plays
+  full ability everywhere, and `AUTOPILOT_OFF=radiance,cone,...` switches single parts of full play off to measure
+  what each adds. What each level does and why is in
+  [design/game_design_principles.md](../design/game_design_principles.md) section 3.7.
+- **Eight seeds are noisy**: one or two wins either way means nothing. Use 16 seeds before reporting a number that
+  decides anything.
+- **`test_fight_stalls`** keeps fights from stalling: a foe with no way to the party gives up after two turns (a
+  legendary one never does), hidden foes and heroes get searched for, and no foe plans around an area action a wall
+  blocks.
 - **Targets the owner set:** ordinary fights won about 5 times in 8 (10-13), last 2 to 3 rounds and 4 at most
-  (10-24); bosses were held at 3 in 8 (10-14) until difficulty moved to "hit harder, not more HP" (10-23/24).
+  (10-24); bosses were held at 3 in 8 (10-14) until difficulty moved to "hit harder, not more HP" (10-23/24). Both
+  rollbacks (Hit Points 10-24 and 10-26, line-ups 10-25) left the stored counts stale; nothing is re-measured unless
+  the owner asks (10-25).
 - **Fight outcomes don't hold a push** (10-19). When a rule change moves a win rate, the expectation follows the
   measured value and the change is reported. What does hold a push: a crash, a script error, or a fight that can't
   end.

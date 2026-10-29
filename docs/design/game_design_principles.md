@@ -164,13 +164,16 @@ Examples of owner house rules (each a deviation row):
 | Prepared spells change any time outside combat, no rest needed | 2026-10-14 | Resting only to swap spells is a chore |
 | Eldritch Blast as a War Caster reaction fires **one** beam | 2026-10-19 | A reaction is one attack, like the opportunity attack it replaces |
 | Legendary Resistance only against condition effects, or damaging spells of level 5+ that deal **no** damage on a save | 2026-10-21 | Bosses shouldn't burn resistances on half-damage blasts |
-| Legendary actions only after a **player character's** turn | 2026-10-24 | Asked, not built yet |
-| Readying a spell while concentrating keeps the concentration; a readied spell can be un-readied next round | 2026-10-21 | Asked, not built yet |
+| Legendary actions only after a **player character's** turn, and a legendary move provokes no opportunity attack, a Sentinel's included | 2026-10-24, 10-25 | Built 10-25. A boss acting after its own minions' turns felt like extra turns |
+| Readying a spell takes no Concentration (so a spell already held is kept), and a readied spell or attack can be let go (Unready) | 2026-10-21, 10-24 | Built 10-25. Readying cost the caster everything else they had running |
+| An opportunity attack uses what is in hand: the weapon sets never swap on their own | 2026-10-25 | A reaction shouldn't rearrange the hero's gear |
 | Traps are found only by an explicit check (Search, Find Traps), never passively | 2026-10-08 | Finding a trap should be a choice |
 | Raise Dead at the temple of every town; the ordeal is -4 for 10 days | 2026-10-07, 10-15 | A way back from death everywhere |
 | Merchants' prices follow attitude; one Persuasion haggle per merchant, a failure is final | 2026-10-08 | Failed social checks are spent |
 | Instant attunement (still three items), plus a setting to remove the limit entirely | early; setting asked 2026-10 | Attuning is a chore; the setting is player choice |
 | The heroine can be a non-combatant guest (`guest_fights: false`): no turn, can't be targeted | 2026-10-18 | A 9 HP noble made players leave her behind and lose her story |
+
+The full list, over a hundred rows, is [reference/rules/deviations.md](../reference/rules/deviations.md).
 
 ### 2.3 Every spell and item must be useful (standing)
 
@@ -282,14 +285,15 @@ This is the rule that changed most, and the history is the lesson.
 
 | Date | Rule | What happened |
 |---|---|---|
-| 2026-10-13 | Non-boss fights: the test party wins 5 in 8 on Balanced | Measured with an autopilot party over 8 seeds |
-| 2026-10-14 | Bosses: the full-ability test party wins 3 in 8 | Reached mostly by raising boss HP 2 to 4 times the book (Rahadin 795 HP, the Gilded Knight 710) |
+| 2026-10-13 (morning) | Bosses: 3 wins in 8 at levels 3-5, 2 in 8 from level 6, with 2-3 heroes down in a win | Reached by raising HP to the book's full value and adding minions |
+| 2026-10-13 18:05 | Every fight, bosses included: the test party playing **sharp** (as the owner plays: smites, Spirit Guardians, Fireball) wins **5 in 8** on Balanced, seeds 1-8; tests hold 4 to 6 | Line-ups grew to reach it (the "scale-up for 2024 heroes") |
+| 2026-10-14 | Bosses: the test party playing at **full ability** (heals, Lay on Hands, Sacred Weapon, Bless, Hunter's Mark, area spells) wins **3 in 8** | Reached mostly by raising boss HP 2 to 4 times the book (Rahadin 795 HP, the Gilded Knight 710, the Penitent 920) |
 | 2026-10-19 | Bosses deal +25% damage on Balanced and harder (not Story) | "Bosses only", never eased |
 | 2026-10-19 | No re-tuning when a rule changes; the builder accepts new fight results | The 3-in-8 tuning was a one-time job |
 | 2026-10-21 | "The current battles are absolute jokes." Plan every boss: powerful minions placed intelligently, lair actions that change the battlefield, phases, real tactics (Counterspell, Shield). Stat blocks may be modified when the design needs it, recorded as deviations | Plan first, in docs/plans/, then build, one branch per boss |
 | 2026-10-21 | Tune against **the owner's actual party** (his save, read-only), not a generic party | Generic pregens out-damaged the book in ways his party didn't |
-| **2026-10-23/24** | **Difficulty comes from hitting harder, not from HP. Every monster (not just bosses) goes back to its Monster Manual HP.** Compensate with **+1 to +3 to hit and about +30% damage**, better abilities and lair actions | Built: 687 non-boss fight entries lost their own HP on 10-24, 189 boss entries on 10-26. Brother Anatol and his spawn at 315 HP each, and 200 HP rat swarms, were the examples |
-| 2026-10-25 | The book's line-ups, boss fights included; bosses' to-hit and DCs grow with the party on Balanced (+1 to level 4, +2 at 5-8, +3 from 9); legendary actions only at the end of a hero's turn, provoking no opportunity attacks; Legendary Resistance only against conditions and big spells that do nothing on a success; nothing is re-measured unless the owner asks | Built the same days |
+| **2026-10-23/24** | **Difficulty comes from hitting harder, not from HP. Every monster (not just bosses) goes back to its Monster Manual HP.** Compensate with **+1 to +3 to hit and about +30% damage**, better abilities and lair actions | Built. Of 888 fight entries that set their own HP, the 687 non-boss ones went back to the stat block on 10-24 (their foes' HP fell 34% in all, 61,770 to 41,033); the 196 entries of 45 bosses on 10-26 (127 had been raised, 67 lowered). Rat swarms at 200 HP went to 14, Strahd's fights from up to 765 to 144. The compensation went to the bosses (+25% damage, the to-hit and DC steps) and to named foes one by one (Brother Anatol +1 to hit and DCs and 1d6 more necrotic a hit); ordinary foes fight at their book numbers |
+| 2026-10-25 | The book's line-ups, boss fights included (158 versions of 105 fights: 1,721 foes became 805; each fight's first version in git history, entered from the module before the scale-up, was taken as the book's count); bosses' to-hit and DCs grow with the party on Balanced (+1 to level 4, +2 at 5-8, +3 from 9); legendary actions only at the end of a hero's turn, provoking no opportunity attacks; Legendary Resistance only against conditions and big spells that do nothing on a success; nothing is re-measured unless the owner asks | Built the same days |
 | 2026-10-26 | The boss redesign plan: every boss harder through damage, abilities, lair actions and Counterspell/Shield tactics, never HP; stat blocks may change; one branch per boss, easiest first | Built in waves: lairs for the hut, the field and the beacon; bosses acting between the heroes' turns; a coven sharing its spells; the lich on the CR 23 block the owner chose |
 | 2026-10-27 | Who counts as a boss is explicit: a fight entry can mark a foe `boss: false` | The vampire brides fight on the vampire's stat block and are no longer bosses |
 
@@ -321,7 +325,7 @@ Standing boss rules:
   to mist and flees there. His protective ward (while the Heart of Sorrow stands) must be **visible** in fights, with
   hints pointing to how to break it (asked 2026-10-24, after the owner thought Strahd was simply immune).
 
-### 3.6 Enemy AI (standing, with 2026-10-24 asks)
+### 3.6 Enemy AI (standing)
 
 - AI scores every move by **expected damage**, with behaviour profiles per monster (brute, skirmisher, spellcaster,
   coward...), focus fire, retreats, and a bespoke brain for the main villain (mist, bat and wolf shapes, charm,
@@ -343,6 +347,47 @@ Standing boss rules:
 - **Fleeing**: the party should be able to flee by leaving the map. *Undecided: opportunity attacks, whether the whole
   party must leave, pursuit, which story fights block it, what happens to the fight afterwards* (asked 2026-10-24).
 
+### 3.7 How fights are measured, tuned and guarded (standing)
+
+The rules above say what a fight should feel like; this is how the project checked it. The test files and their exact
+commands are in [handbook/testing.md](../handbook/testing.md).
+
+- **A test party plays every fight.** The four pregenerated heroes on an autopilot, on the fight's own map, from where
+  walking in or talking leaves them, at the level the story gives the fight (and at the other levels its versions
+  are for). The autopilot plays three ways (owner, 2026-10-13 and 10-14):
+  - **plain**: sensible tactics (heal the fallen, Turn Undead on a crowd, Sleep on a pack, ranged attacks from range);
+  - **sharp**, the default: as the owner plays, so a fight tuned against it is as hard in his hands: the paladin
+    smites a sturdy foe or on a critical hit, the cleric opens with Spirit Guardians, a caster throws Fireball whenever
+    it catches two foes;
+  - **full ability**, for bosses and the story bot: also heals before a friend drops, Lay on Hands, Sacred Weapon,
+    Bless, Hunter's Mark, Conjure Barrage, Cone of Cold, the cleric's area channel. Haste was tried and left out: it
+    cost the party six wins over eight bosses (concentration breaks, the lost turn).
+- **Tune bosses against the owner's real party too** (2026-10-21): his current heroes with their real levels, gear and
+  spells, read from his save read-only.
+- **Eight seeds, read with care.** A series is 8 fights on seeds 1-8; one or two wins either way is noise, so 16 seeds
+  were used where a number mattered. When no step lands exactly on target, keep the harder side.
+- **Guards every series enforces** (these hold a push, unlike the win counts):
+  - **every fight finishes within 30 rounds**; a timeout is a loss and fails the test;
+  - **every fight can be won**: at least one win in eight, unless the owner accepted a fight as winless for that party
+    (the lich on the stat block he chose, the ancient red dragon as she is) and the test says so;
+  - every creature's Hit Points stay in range; the people whose conversation starts a fight step aside first, so their
+    squares don't block it; foes start spread out (no 20 ft burst catches them all).
+- **Fights can't stall.** A foe with no way to any enemy gives the fight up after two of its turns (a legendary
+  creature never does, its fight is the story's); the autopilot searches for hidden foes and foes search for hidden
+  heroes; a foe never plans around an area action a wall keeps off its target (one boss stood still for 30 rounds that
+  way).
+- **Roads the story bot walks stay winnable for its weaker party**, not only the sharp one: a road fight lost is the
+  whole walk lost. Random road fights are tuned at the level their region is travelled at.
+- **Every tuning branch reports a table**: for each fight changed, the HP and foes before and after, the wins, the
+  average rounds and how many heroes dropped per fight (the series print all three).
+- **When to stop measuring.** Fight outcomes don't hold a push (2026-10-19), and nothing is re-measured unless the owner
+  asks (2026-10-25): after the HP rollback and the line-up rollback, the stored win counts are known to be stale until a
+  combat-length pass measures rounds again.
+- **The lesson of the two rollbacks.** Chasing a win rate with more HP and more foes doubled the foes in the book's
+  fights and made bosses sponges, and both were undone within two weeks. A new game should start at the book's
+  line-ups and Hit Points, measure **rounds as well as wins**, and reach its targets through damage, to-hit, abilities,
+  lair actions and tactics.
+
 ---
 
 ## 4. Difficulty modes
@@ -353,10 +398,22 @@ Picked at a new game and kept in the save.
 | | Story | Balanced | Tactician | Honour |
 |---|---|---|---|---|
 | Party | +2 to attacks and saves; nobody dies (Unconscious and Stable instead) | book | book | book |
-| Enemies | gentler targeting | book | +2 to attacks and DCs, sharper targeting, drink potions, flee when broken | as Tactician, cruel foes strike the fallen |
-| Bosses | book damage | +25% damage | +25% | +25%, full stat block |
-| Long Rest interruptions | never | 1 in 6 | 1 in 6 | 1 in 6 |
+| Enemy Hit Points | 75% (inside the Hit Dice range) | the stat block | 120% (inside the range) | 120% |
+| Enemy to-hit and DCs | book | book | +2 | +2 |
+| Who enemies hit | kind: spread blows, no killing-blow bonus | standard | sharp: the hurt, healers, concentrating casters; move to flank | ruthless: sharp, and cruel foes strike heroes at 0 HP |
+| Enemy spellcasters | a few spells | the best spell of the list when it beats the weapon (2026-10-13) | as Balanced, plus a scroll of their strongest spell | as Tactician |
+| Enemy kit and morale | none | none | armed humanoids drink a Potion of Healing when Bloodied; a broken side flees (not the mindless, the fearless or bosses) | as Tactician |
+| Boss damage | book | +25% (2026-10-19) | +25% | +25% |
+| Boss to-hit and DCs | book | +1 to level 4, +2 at 5-8, +3 from 9 (2026-10-25) | the +2 every foe gets | the +2 every foe gets |
+| Bosses' lighter versions for an early party | kept | kept | kept | back to the stat block |
+| Long Rest interruptions in risky places | never | 1 in 6 | 1 in 6 | 1 in 6 |
 | Saving | anywhere | anywhere | anywhere | one save; a wipe carries on in Tactician |
+| Changing mode | any time in Settings | any time | any time | only at a new game; leaving it is for good |
+
+No mode touches the dice math beyond these: attack bonuses, AC, save DCs and damage dice stay the book's, and every
+change shows in a Breakdown under the mode's name ("Tactician +2", "Balanced +2", "Boss: +N damage"). Balanced is
+"the book as written" plus the boss rules; older saves play as Balanced. The rules live in one table
+(`combat/difficulty.gd`, [reference/plans/difficulty.md](../reference/plans/difficulty.md)).
 
 Notes:
 
@@ -370,7 +427,8 @@ Notes:
   keep their flat +2 for every foe.
 - **Milestones or XP** is a second choice at a new game (XP Mode Plan, 2026-10-14). XP comes from foes, quests,
   places, finds, checks, traps and lore, sized from the 2024 DMG's budgets; each foe gives 40% of its XP because the
-  game fields more foes than the book. Two guardrails keep tuned fights tuned: a milestone always lifts the party to
+  game fielded more foes than the book (set before the line-ups went back to the book's on 2026-10-25, so revisit it).
+  Two guardrails keep tuned fights tuned: a milestone always lifts the party to
   the milestone level, and the party can never be more than one level ahead (extra XP waits in a reserve). Validated
   with a simulator over 600 runs per player type before building. Lesson: **simulate a levelling system against the
   real fight data before shipping it.**

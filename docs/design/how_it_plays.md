@@ -63,6 +63,8 @@ him. The story reshuffles each playthrough and ends in one of several endings.
 | An ordinary fight's difficulty | won about 5 times in 8 by the autopilot party on Balanced | 2026-10-13 |
 | How to make a fight harder | monsters at their book Hit Points, hitting harder (+1 to +3 to hit, about +30% damage), never more HP | 2026-10-23/24 |
 | Bosses | planned one by one: minions, lair actions, phases; +25% damage on Balanced and harder; to-hit and save DCs grow with the party's level on Balanced (+1 to level 4, +2 at 5 to 8, +3 from 9); legendary actions only after a hero's turn; Legendary Resistance only against conditions and spells that do nothing on a success | 2026-10-19 to 10-25 |
+| Every fight | finishes within 30 rounds and can be won: the test party wins it at least once in 8 seeds, unless the owner accepted it as winless for that party | standing |
+| Ordinary foes | the book's line-ups at the book's Hit Points; bosses are tuned one by one (above) | 2026-10-24, 10-25 |
 | Fights start spread out | so one area spell can't end a fight | 2026-10-15 |
 | Movement in fights | half the earlier speed, so it looks natural | 2026-10-06 |
 | Damage numbers | stay about 2.5 seconds | 2026-10-06 |

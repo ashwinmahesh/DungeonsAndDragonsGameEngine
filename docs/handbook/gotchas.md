@@ -94,8 +94,14 @@ Dates are 2026.
 - **"Boss" needs a definition.** A boss damage bonus keyed to "legendary actions or CR 5+" caught minor vampires.
   An explicit flag on the fight entry is the fix.
 - **More HP is not more fun.** Raising monster HP to make fights harder made them long; the owner rolled every monster
-  back to its book HP and made them hit harder instead (2026-10-24). Added minions in book fights went the same way
-  (back to the book's line-ups, 2026-10-25).
+  back to its book HP and made them hit harder instead (2026-10-24): 687 ordinary fight entries went back to the book,
+  and the HP across the fights fell by a third. Added minions in book fights went the same way: the line-ups had grown
+  from 805 foes to 1,721 chasing a win rate, and went back to the book's (2026-10-25).
+- **Win rates alone mislead.** Tuning to "5 wins in 8" with more HP and more foes hit the number and made fights long;
+  measure rounds and heroes dropped alongside the wins. Eight seeds are noisy too: one or two wins either way is
+  chance, so use 16 seeds before a number decides anything.
+- **A fight can stall without anyone noticing** until the 30-round cap fails it: a foe with no path, a hidden hero
+  nobody searches for, a boss planning an area action a wall blocks. Keep the cap and the stall test.
 - **Write rulings down.** Flying without altitude, identical monsters sharing an initiative roll, the day being bright
   but not sunlight for vampires: each is a ruling a DM would make. Put every one in the deviations doc the day it is
   made.
