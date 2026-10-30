@@ -35,7 +35,7 @@ uniform float outline_width : hint_range(0.5, 4.0) = 1.5;
 // meet at an angle, and the lines' strength.
 uniform bool outline_creases = true;
 uniform float outline_strength : hint_range(0.0, 1.0) = 1.0;
-// The Toon finish's ink (Look.TOON_INK): the width is at 1080 lines and grows with the screen, eight neighbours are
+// The Toon finish's ink (Look.toon_settings ink_*): the width is at 1080 lines and grows with the screen, eight neighbours are
 // read instead of four, and a line fades in over its threshold instead of switching on, so it is smooth and as bold
 // at any size.
 uniform bool outline_ink = false;

@@ -499,11 +499,12 @@ const DAY_TONE := {"shade": "slate", "amount": 0.45, "pivot": 0.24, "shade_satur
 ## by `ambient_mix` and is `ambient` times as strong, and the moon key light `key` times.
 const INDOOR_TONE := {"shade": "night_deep", "ambient": 1.1, "ambient_tint": "moon_blue", "ambient_mix": 0.5,
 	"key": 1.4}
-## The Toon finish's grade (plan E27, the 1980s cel cartoon): a cartoon's shade keeps its colour (a painted cel's shadow
-## is a deeper hue of the same paint, not grey), its blacks stay off black (deep indigo ink, never pure black), and the
-## whole picture is a little more saturated. A mood's own "tone" still wins.
-const TOON_TONE := {"amount": 0.5, "shade_saturation": 1.05, "black": 0.0}
-const TOON_SATURATION := 1.15
+## The Toon finish's grade (plan E27; Look.toon_settings tone_amount, shade_saturation, black and saturation): a
+## cartoon's shade keeps its colour (a painted cel's shadow is a deeper hue of the same paint, not grey), its blacks
+## stay off black, and the whole picture is a little more saturated. A mood's own "tone" still wins.
+static func toon_tone() -> Dictionary:
+	var t := Look.toon_settings()
+	return {"amount": float(t["tone_amount"]), "shade_saturation": float(t["shade_saturation"]), "black": float(t["black"])}
 
 
 ## The Modern grade for a time of day: MODERN_TONE, a day's DAY_TONE or an indoor INDOOR_TONE, then the mood's own
@@ -515,7 +516,7 @@ func _tone(p: String) -> Dictionary:
 	elif p == "any":
 		t.merge(INDOOR_TONE, true)
 	if Look.toon():
-		t.merge(TOON_TONE, true)
+		t.merge(toon_tone(), true)
 	t.merge(mood.get("tone", {}) as Dictionary, true)
 	t.merge(((mood.get("times", {}) as Dictionary).get(p, {}) as Dictionary).get("tone", {}) as Dictionary, true)
 	return t
@@ -757,6 +758,8 @@ func _build_water() -> void:
 	var spec := mood.get("water", {}) as Dictionary
 	water = ShaderMaterial.new()
 	water.shader = LIT_WATER_SHADER if Look.modern() else WATER_SHADER
+	if Look.modern():
+		Look.toon_material(water)
 	var info := ((Look.textures().get("themes", {}) as Dictionary).get("wild", {}) as Dictionary).get("water", {}) as Dictionary
 	if not info.is_empty() and ResourceLoader.exists(ArtPaths.of(str(info.get("file", "")))):
 		water.set_shader_parameter("albedo_tex", load(ArtPaths.of(str(info["file"]))) as Texture2D)
@@ -1070,7 +1073,7 @@ func _target(p: String) -> Dictionary:
 		"mist_strength": float(t.get("mist_strength", 0.0)),
 		"clouds": float(t.get("clouds", 0.0)) * float((mood.get("clouds", {}) as Dictionary).get("strength", 0.0)),
 		"exposure": float(t.get("exposure", 1.0)),
-		"saturation": float(t.get("saturation", mood.get("saturation", 1.0))) * (TOON_SATURATION if Look.toon() else 1.0),
+		"saturation": float(t.get("saturation", mood.get("saturation", 1.0))) * (float(Look.toon_settings()["saturation"]) if Look.toon() else 1.0),
 		"grade_shadows": Look.color(str(grade.get("shadows", "pewter"))) if not grade.is_empty() else Color(0.5, 0.5, 0.5),
 		"grade_lights": Look.color(str(grade.get("lights", "pewter"))) if not grade.is_empty() else Color(0.5, 0.5, 0.5),
 		"grade_amount": float(grade.get("amount", 0.0)),

@@ -25,19 +25,16 @@ global uniform float world_wet;
 const float LIT_LIFT = 0.75;
 const float LAMP_GAIN = 1.35;
 const float SKY_SPECULAR = 0.5;
-// Toon: where the bands break (light reaching the face, shadow and falloff included), the mid band's brightness, how
-// soft a band's edge is, how glossy a surface must be to hold a highlight, and how bright that highlight is.
-const float TOON_LIT = 0.42;
-const float TOON_SHADE = 0.07;
-const float TOON_MID = 0.52;
-const float TOON_EDGE = 0.025;
-const float TOON_GLOSS = 0.62;
-const float TOON_SHINE = 0.55;
-// Toon fills: how far a texture flattens toward its own average colour, and how much more saturated it gets.
-const float TOON_FLAT = 0.72;
-const float TOON_VIVID = 1.3;
-// Toon: how much of a surface's relief (normal map) still shows; the bands would break up on every stone otherwise.
-const float TOON_RELIEF = 0.3;
+// The Toon finish's settings (Look.toon_settings: the engine's defaults under data/campaign.json's "toon", set on every
+// material Look makes). toon_light: where the bands break (light reaching the face, shadow and falloff included: lit,
+// shade), the mid band's brightness and how soft a band's edge is. toon_band_count: 3 lit, mid and dark; 2 lit and mid;
+// 0 keeps Modern's soft light (a painted background). toon_gloss: how glossy a surface must be to hold a highlight, and
+// how bright it is. toon_fills: how far a texture flattens toward its own average colour, how much more saturated it
+// gets, and how much of its relief (normal map) still shows.
+uniform vec4 toon_light = vec4(0.42, 0.07, 0.52, 0.025);
+uniform int toon_band_count = 3;
+uniform vec2 toon_gloss = vec2(0.62, 0.55);
+uniform vec3 toon_fills = vec3(0.72, 1.3, 0.3);
 
 bool toon() {
 	return look_soft > 1.5;
@@ -46,15 +43,16 @@ bool toon() {
 // A surface's colour in the Toon finish: its texture's detail pressed toward `mean` (the texture's average colour, a
 // high mip) and its colour pushed, so a wall reads as one flat painted colour with a hint of its stones.
 vec3 toon_fill(vec3 base, vec3 mean) {
-	vec3 flat_col = mix(base, mean, TOON_FLAT);
+	vec3 flat_col = mix(base, mean, toon_fills.x);
 	float l = dot(flat_col, vec3(0.299, 0.587, 0.114));
-	return max(mix(vec3(l), flat_col, TOON_VIVID), vec3(0.0));
+	return max(mix(vec3(l), flat_col, toon_fills.y), vec3(0.0));
 }
 
 float toon_band(float lit) {
-	float shade = smoothstep(TOON_SHADE - TOON_EDGE, TOON_SHADE + TOON_EDGE, lit);
-	float full = smoothstep(TOON_LIT - TOON_EDGE, TOON_LIT + TOON_EDGE, lit);
-	return mix(shade * TOON_MID, 1.0, full);
+	float edge = toon_light.w;
+	float shade = toon_band_count >= 3 ? smoothstep(toon_light.y - edge, toon_light.y + edge, lit) : 1.0;
+	float full = smoothstep(toon_light.x - edge, toon_light.x + edge, lit);
+	return mix(shade * toon_light.z, 1.0, full);
 }
 
 void light() {
@@ -62,13 +60,13 @@ void light() {
 	float lit = ndl * ATTENUATION;
 	float gain = LIGHT_IS_DIRECTIONAL ? 1.0 : LAMP_GAIN;
 	float sky = LIGHT_IS_DIRECTIONAL ? SKY_SPECULAR * (1.0 - world_wet * 0.85) : 1.0;
-	if (toon()) {
+	if (toon() && toon_band_count > 0) {
 		DIFFUSE_LIGHT += toon_band(lit) * LIGHT_COLOR / PI * gain;
 		// One hard highlight on glossy surfaces, where the light's reflection points at the eye.
 		vec3 th = normalize(VIEW + LIGHT);
-		float gloss = 1.0 - smoothstep(TOON_GLOSS - 0.15, TOON_GLOSS, ROUGHNESS);
-		float aim = smoothstep(0.955, 0.965, dot(NORMAL, th)) * step(TOON_LIT, lit);
-		SPECULAR_LIGHT += aim * gloss * TOON_SHINE * LIGHT_COLOR / PI * gain * SPECULAR_AMOUNT * sky;
+		float gloss = 1.0 - smoothstep(toon_gloss.x - 0.15, toon_gloss.x, ROUGHNESS);
+		float aim = smoothstep(0.955, 0.965, dot(NORMAL, th)) * step(toon_light.x, lit);
+		SPECULAR_LIGHT += aim * gloss * toon_gloss.y * LIGHT_COLOR / PI * gain * SPECULAR_AMOUNT * sky;
 	} else {
 		DIFFUSE_LIGHT += pow(lit, LIT_LIFT) * LIGHT_COLOR / PI * gain;
 		// Specular only on the lit side (a light can't glint off a face turned away from it).

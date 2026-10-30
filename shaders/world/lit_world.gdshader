@@ -73,7 +73,7 @@ void fragment() {
 	if (toon()) {
 		vec3 mean = (layered ? textureLod(albedo_layers, vec3(uv, layer), 12.0).rgb : textureLod(albedo_tex, uv, 12.0).rgb) * tint;
 		base = toon_fill(base, mean);
-		relief *= TOON_RELIEF;
+		relief *= toon_fills.z;
 	}
 	float macro = 0.5;
 	if (macro_strength > 0.0) {

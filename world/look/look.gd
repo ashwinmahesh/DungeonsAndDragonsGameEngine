@@ -56,6 +56,54 @@ static func style() -> String:
 	return _style
 
 
+## The Toon finish's settings (plan E27), each tunable by a game under data/campaign.json's "toon" (Campaign.config), so
+## one finish can be an inked cel world or a painted one with only the characters inked:
+##   bands: 3 (lit, mid, dark), 2 (lit, mid) or 0 (Modern's soft light, a painted background); band_lit and band_shade
+##   where the bands break (light reaching a face, 0 to 1); band_mid the mid band's brightness; band_edge how soft a
+##   band's edge is. gloss: how glossy a surface must be to hold a hard highlight; shine: how bright it is.
+##   flat: how far a texture flattens toward its own average colour (0 to 1); vivid: how much more saturated a fill is;
+##   relief: how much of a surface's relief still shows.
+##   ink_width (pixels at 1080 lines), ink_strength (0: no ink on the world, only the characters' own), ink_creases
+##   (lines where faces fold, not only round silhouettes), ink_depth and ink_normal (how big a step or fold draws a
+##   line), ink_colour (a palette name).
+##   tone_amount, shade_saturation and black: the grade's shade (Atmosphere.toon_tone); saturation: the whole picture's.
+const TOON := {
+	"bands": 3, "band_lit": 0.42, "band_shade": 0.07, "band_mid": 0.52, "band_edge": 0.025,
+	"gloss": 0.62, "shine": 0.55, "flat": 0.72, "vivid": 1.3, "relief": 0.3,
+	"ink_width": 2.2, "ink_strength": 1.0, "ink_creases": true, "ink_depth": 0.04, "ink_normal": 0.6, "ink_colour": "void",
+	"tone_amount": 0.5, "shade_saturation": 1.05, "black": 0.0, "saturation": 1.15,
+}
+static var _toon: Dictionary = {}
+
+
+## TOON under the game's own "toon" settings, worked out once (forget_toon_settings after a test changes them).
+static func toon_settings() -> Dictionary:
+	if _toon.is_empty():
+		_toon = TOON.duplicate()
+		var own: Variant = Campaign.config().get("toon", {})
+		if own is Dictionary:
+			for k: String in own as Dictionary:
+				if TOON.has(k):
+					_toon[k] = (own as Dictionary)[k]
+	return _toon
+
+
+static func forget_toon_settings() -> void:
+	_toon = {}
+
+
+## Hands a lit world material the Toon settings (the shaders' toon_* uniforms; they read them only in the Toon finish).
+static func toon_material(m: ShaderMaterial) -> void:
+	if m == null or not toon():
+		return
+	var t := toon_settings()
+	m.set_shader_parameter("toon_light", Vector4(float(t["band_lit"]), float(t["band_shade"]), float(t["band_mid"]),
+		float(t["band_edge"])))
+	m.set_shader_parameter("toon_band_count", int(t["bands"]))
+	m.set_shader_parameter("toon_gloss", Vector2(float(t["gloss"]), float(t["shine"])))
+	m.set_shader_parameter("toon_fills", Vector3(float(t["flat"]), float(t["vivid"]), float(t["relief"])))
+
+
 ## The lit, natural world: Modern, and Toon, which is drawn on it. Everything Classic leaves out (the shaped land,
 ## the haze, bloom, soft shadows, the horizon tilt) goes by this.
 static func modern() -> bool:
@@ -88,7 +136,7 @@ const LOOK_SOFT := {"classic": 0.0, "modern": 1.0, "toon": 2.0}
 ## A shader drawn with Godot's own lighting (the trees' leaves and bark) as the Toon finish wants it: the same code with
 ## Godot's toon diffuse and specular, made once; the shader itself in the other finishes.
 static func toon_shader(shader: Shader) -> Shader:
-	if not toon() or shader == null:
+	if not toon() or shader == null or int(toon_settings()["bands"]) <= 0:
 		return shader
 	if _toon_shaders.has(shader):
 		return _toon_shaders[shader] as Shader
@@ -138,6 +186,7 @@ static func cel(albedo_name: String) -> ShaderMaterial:
 		var spec := COLOUR_MATERIALS.get(albedo_name, {}) as Dictionary
 		m.set_shader_parameter("roughness", float(spec.get("roughness", 0.75)))
 		m.set_shader_parameter("metallic", float(spec.get("metallic", 0.0)))
+		toon_material(m)
 	return m
 
 
@@ -247,6 +296,8 @@ static func cel_textured(surface: String, grid: float = 0.0) -> ShaderMaterial:
 		m.set_shader_parameter("grid_strength", grid)
 		m.set_shader_parameter("grid_line", color("ink"))
 	m.set_meta("surface", surface)   # what the ground is, for footprints (Atmosphere)
+	if modern():
+		toon_material(m)
 	if _surface_tints.has(surface):
 		m.set_shader_parameter("tint", surface_tint(surface))
 	if modern() and not Graphics.software_simulator():
@@ -399,6 +450,7 @@ static func blend_ground(slots: Array[ShaderMaterial], control: Texture2D, size:
 		if i == 0 and src.get_shader_parameter("macro_tex") != null:
 			m.set_shader_parameter("macro_tex", src.get_shader_parameter("macro_tex"))
 	m.set_meta("blend_surfaces", surfaces)
+	toon_material(m)
 	_blends.append(m)
 	while _blends.size() > 16:
 		_blends.pop_front()
@@ -668,20 +720,16 @@ static func style_post(mat: ShaderMaterial) -> void:
 	mat.set_shader_parameter("quantize", not m)
 	mat.set_shader_parameter("soft_bands", m)
 	mat.set_shader_parameter("keep_hdr", m)
-	mat.set_shader_parameter("outlines", not m or t)
+	var ink := toon_settings() if t else {}
+	mat.set_shader_parameter("outlines", not m or (t and float(ink["ink_strength"]) > 0.0))
 	mat.set_shader_parameter("tone_split", m)
 	mat.set_shader_parameter("fast_noise", m)
 	if m:
 		mat.set_shader_parameter("noise_tex", noise_texture())
-	mat.set_shader_parameter("outline_width", TOON_INK["width"] if t else (1.2 if m else 1.5))
-	mat.set_shader_parameter("outline_creases", true)
+	mat.set_shader_parameter("outline_width", float(ink["ink_width"]) if t else (1.2 if m else 1.5))
+	mat.set_shader_parameter("outline_creases", bool(ink["ink_creases"]) if t else true)
 	mat.set_shader_parameter("outline_ink", t)
-	mat.set_shader_parameter("outline_strength", TOON_INK["strength"] if t else 1.0)
-	mat.set_shader_parameter("depth_threshold", TOON_INK["depth"] if t else 0.06)
-	mat.set_shader_parameter("normal_threshold", TOON_INK["normal"] if t else 0.55)
-	mat.set_shader_parameter("outline_color", color(TOON_INK["colour"]) if t else color("void"))
-
-
-## The Toon finish's ink on the world (the screen pass's depth and normal edges, at 1080 lines): bold, crisp, every
-## silhouette and every fold where faces meet, in the palette's darkest ink.
-const TOON_INK := {"width": 2.2, "strength": 1.0, "depth": 0.04, "normal": 0.6, "colour": "void"}
+	mat.set_shader_parameter("outline_strength", clampf(float(ink["ink_strength"]), 0.0, 1.0) if t else 1.0)
+	mat.set_shader_parameter("depth_threshold", float(ink["ink_depth"]) if t else 0.06)
+	mat.set_shader_parameter("normal_threshold", float(ink["ink_normal"]) if t else 0.55)
+	mat.set_shader_parameter("outline_color", color(str(ink["ink_colour"])) if t else color("void"))

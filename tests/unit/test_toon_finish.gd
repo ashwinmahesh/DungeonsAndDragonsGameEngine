@@ -11,6 +11,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	Campaign.use_config(null)
+	Look.forget_toon_settings()
 	Look.set_style(_was, false)
 
 
@@ -66,3 +67,30 @@ func test_settings_offers_the_games_finishes() -> void:
 	Campaign.use_config({"finishes": ["toon", "modern", "classic"]})
 	for f: String in Look.finishes():
 		assert_true(Look.STYLE_NAMES.has(f) and Look.STYLE_TIPS.has(f), "%s is named and explained" % f)
+
+
+func test_a_game_tunes_the_finish_in_its_data() -> void:
+	Campaign.use_config({"toon": {"bands": 2, "flat": 0.4, "ink_width": 3.0, "nonsense": 1}})
+	Look.forget_toon_settings()
+	var t := Look.toon_settings()
+	assert_eq(int(t["bands"]), 2, "its band count")
+	assert_eq(float(t["flat"]), 0.4, "its flatness")
+	assert_eq(float(t["vivid"]), float(Look.TOON["vivid"]), "the rest are the engine's")
+	assert_false(t.has("nonsense"), "unknown keys are left out")
+	Look.set_style("toon", false)
+	var m := Look.cel("bone")
+	assert_eq(int(m.get_shader_parameter("toon_band_count")), 2, "materials carry the bands")
+	assert_between((m.get_shader_parameter("toon_fills") as Vector3).x, 0.399, 0.401, "and the flatness")
+
+
+func test_a_painted_world_has_no_ink_and_soft_light() -> void:
+	Campaign.use_config({"toon": {"bands": 0, "ink_strength": 0.0}})
+	Look.forget_toon_settings()
+	Look.set_style("toon", false)
+	var post := Look.make_post_process()
+	var mat := (post.mesh as QuadMesh).material as ShaderMaterial
+	Look.style_post(mat)
+	assert_false(bool(mat.get_shader_parameter("outlines")), "no ink on the world: only the characters keep theirs")
+	var foliage := load("res://addons/dnd_core/shaders/atmosphere/foliage.gdshader") as Shader
+	assert_eq(Look.toon_shader(foliage), foliage, "soft light keeps Godot's own on the trees")
+	post.free()
