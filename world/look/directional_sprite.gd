@@ -69,6 +69,8 @@ var _push_v := 0.0
 var _last_pos := Vector3.INF
 var _face_x := 0.0
 var _was_moving := false
+## A struck figure's flash still to fade (GameFeel's `flash`, SpriteFeel): 1 as it is struck, 0 when done.
+var _flash := 0.0
 ## The figure's reflection (SpriteReflection), made with it.
 var reflection: SpriteReflection = null
 
@@ -450,6 +452,8 @@ func recoil() -> void:
 	if pose == "down":
 		return
 	var back := -signf(_face_x) if absf(_face_x) > 0.3 else (1.0 if _rng.randf() < 0.5 else -1.0)
+	_flash = 1.0
+	back *= GameFeel.num("knockback")
 	_push_v += back * 1.6 * _height
 	_squash_v += Vector2(0.9, -1.4)
 	_lean_v += back * 0.8
@@ -486,7 +490,8 @@ func _move_between_frames(delta: float, cam: Camera3D) -> void:
 	if not moving and _one_shot == "" and pose != "down" and sprite_frames.get_frame_count(animation) <= 1:
 		# Breathing, for figures whose standing pose is one drawn frame.
 		var b := sin(_time * TAU / BREATH_PERIOD + _breath_phase)
-		sq *= Vector2(1.0 - BREATH * 0.5 * b, 1.0 + BREATH * b)
+		var breath := BREATH * GameFeel.num("breath")
+		sq *= Vector2(1.0 - breath * 0.5 * b, 1.0 + breath * b)
 	elif moving and anim.begins_with("walk_") and int(sprite_frames.get_meta("anim_set", 1)) < 2:
 		# A bob in the walk, for sheets without one drawn: highest as the legs pass, on the ground at each step.
 		var n := maxf(1.0, float(sprite_frames.get_frame_count(animation)))
@@ -502,5 +507,7 @@ func _move_between_frames(delta: float, cam: Camera3D) -> void:
 	m.set_shader_parameter("lean", _lean)
 	m.set_shader_parameter("lift", lift_by)
 	m.set_shader_parameter("push", _push)
+	_flash = maxf(0.0, _flash - dt / maxf(GameFeel.num("flash_seconds"), 0.01))
+	SpriteFeel.apply(m, cam, _height, _breath_phase, _flash)
 	if reflection != null:
 		reflection.mirror(sq, _lean, lift_by, _push, face.normalized() if Look.modern() else Vector3.ZERO)

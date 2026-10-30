@@ -2257,7 +2257,7 @@ func _play_events() -> void:
 							fx.on_hit(acue, a, d, bool(ev.get("critical", false)))
 					if bool(ev["hit"]):
 						var struck: Array[CombatToken] = [d]
-						final_played = _impact_on(struck, events, ev_at, final_fall, bool(ev.get("critical", false))) or final_played
+						final_played = _impact_on(struck, events, ev_at, final_fall, bool(ev.get("critical", false)), a.global_position) or final_played
 					# A blow sounds by what struck and how hard it landed (CombatSfx); a spell's missile or a magic touch
 					# already sounded as its effect landed.
 					if not bool(ev["hit"]):
@@ -2354,7 +2354,8 @@ func _play_events() -> void:
 						await fx.cast(cue, caster, at, ev.get("cells", []) as Array, board, rolls)
 				_concentration_begins(caster, str(ev["spell"]))
 				var landed_on: Array[CombatToken] = []
-				final_played = _impact_on(landed_on, events, ev_at, final_fall, false) or final_played
+				final_played = _impact_on(landed_on, events, ev_at, final_fall, false,
+					caster.global_position if caster != null else Vector3.INF) or final_played
 				var cells := ev.get("cells", []) as Array
 				if not cells.is_empty():
 					overlay.show_outline(ev.get("outline", {}) as Dictionary, cells)
@@ -2381,7 +2382,8 @@ func _play_events() -> void:
 							await ab.wait_for_strike()
 					await fx.cast(acu, ab, on, ev.get("cells", []) as Array, board, false)
 				var touched: Array[CombatToken] = []
-				final_played = _impact_on(touched, events, ev_at, final_fall, false) or final_played
+				final_played = _impact_on(touched, events, ev_at, final_fall, false,
+					ab.global_position if ab != null else Vector3.INF) or final_played
 			"smite":
 				# A smite spell rides the hit that just landed (Divine Smite, Searing Smite...).
 				var sk := _tok(str(ev["caster"]))
@@ -2746,15 +2748,15 @@ func _spell_spot(ev: Dictionary, caster: CombatToken) -> Vector3:
 ## G2: the blow, spell or effect at `at` in `events` has landed on `struck` (for a spell or an effect, empty: its
 ## victims are whoever its damage that follows hits). CombatImpact gives the moment its weight: the last foe's fall
 ## in slow motion, else the hardest-hit creature's (a kill first, then the most damage) push-in or freeze. A kill
-## pushes in only on a single victim. True if it played the last foe's fall.
-func _impact_on(struck: Array[CombatToken], events: Array, at: int, final_fall: int, critical: bool) -> bool:
+## pushes in only on a single victim. True if it played the last foe's fall. `from`: where the blow came from.
+func _impact_on(struck: Array[CombatToken], events: Array, at: int, final_fall: int, critical: bool, from: Vector3 = Vector3.INF) -> bool:
 	if not CombatImpact.on():
 		return false
 	var end := CombatImpact.window_end(events, at)
 	if final_fall > at and final_fall < end:
 		var last := _tok(str((events[final_fall] as Dictionary)["id"]))
 		if last != null:
-			impact.hit(last, 0, 1, critical, true, true)
+			impact.hit(last, 0, 1, critical, true, true, from)
 			return true
 	if struck.is_empty():
 		for i in range(at + 1, end):
@@ -2772,7 +2774,7 @@ func _impact_on(struck: Array[CombatToken], events: Array, at: int, final_fall: 
 	if best != null:
 		var id := best.combatant.id
 		impact.hit(best, _damage_after(events, at, id), best.combatant.creature.max_hp(), critical,
-			struck.size() == 1 and CombatImpact.fells(events, at, id), false)
+			struck.size() == 1 and CombatImpact.fells(events, at, id), false, from)
 	return false
 
 

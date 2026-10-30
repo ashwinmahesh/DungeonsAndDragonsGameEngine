@@ -59,10 +59,13 @@ static func on() -> bool:
 
 
 ## A blow landed on `target` (an attack's hit, or the spell or effect that just hit it): `amount` damage of its
-## `max_hp`, a critical hit or not, whether it fells it, and whether it fells the fight's last foe.
-func hit(target: Node3D, amount: int, max_hp: int, critical: bool, fells: bool, last: bool) -> void:
+## `max_hp`, a critical hit or not, whether it fells it, and whether it fells the fight's last foe. `from` is where
+## the blow came from (the attacker or caster), for the way a game's camera kick goes (GameFeel).
+func hit(target: Node3D, amount: int, max_hp: int, critical: bool, fells: bool, last: bool, from: Vector3 = Vector3.INF) -> void:
 	if not on() or rig == null or target == null:
 		return
+	var w := GameFeel.weight(amount, max_hp, critical, fells or last)
+	_feel(target, from, w)
 	if last:
 		_slow_motion()
 		_push(target.global_position, LAST)
@@ -73,7 +76,10 @@ func hit(target: Node3D, amount: int, max_hp: int, critical: bool, fells: bool, 
 		# The picture streaks toward it for a beat (Visual Polish Plan 3).
 		ScreenPulse.play(self, "kill" if fells else "crit", target.global_position)
 	var heavy := CombatSfx.heavy(amount, max_hp)
-	if heavy:
+	if GameFeel.stops():
+		# The game's own hit-stop by weight, and a slow beat after a critical hit or a kill.
+		_freeze(GameFeel.stop_seconds(w), GameFeel.table("dip") if critical or fells else {})
+	elif heavy:
 		_freeze()
 	if heavy or critical:
 		var jolt := HEAVY_SHAKE
@@ -168,13 +174,42 @@ static func last_fall(e: Encounter, events: Array) -> int:
 
 # --- Time and the shot --------------------------------------------------------------------------------------------
 
-func _freeze() -> void:
+## The fight holds at FREEZE_SCALE for `seconds` (real time), then, when `dip` names one, runs at its `scale` for its
+## `seconds` and eases back.
+func _freeze(seconds: float = FREEZE, dip: Dictionary = {}) -> void:
 	if _time_tw != null and _time_tw.is_valid() and Engine.time_scale < _base:
 		return   # already slowed (the last foe's fall): the freeze would cut it short
+	if seconds <= 0.0 and dip.is_empty():
+		return
+	var pace := GameSettings.combat_pace()
 	var tw := _time()
-	Engine.time_scale = _base * FREEZE_SCALE
-	tw.tween_interval(FREEZE * GameSettings.combat_pace())
+	if seconds > 0.0:
+		Engine.time_scale = _base * FREEZE_SCALE
+		tw.tween_interval(seconds * pace)
+	if not dip.is_empty():
+		var low := clampf(float(dip.get("scale", 0.35)), 0.05, 1.0)
+		tw.tween_callback(func() -> void: Engine.time_scale = _base * low)
+		tw.tween_interval(float(dip.get("seconds", 0.22)) * pace)
+		tw.tween_method(func(k: float) -> void: Engine.time_scale = lerpf(_base * low, _base, k), 0.0, 1.0, 0.12 * pace)
 	tw.tween_callback(_time_back)
+
+
+## A game's feel for a blow of weight `w` on `target` from `from` (GameFeel): the camera knocked the way it travels,
+## and an ink-and-paper frame on a critical hit or a kill.
+func _feel(target: Node3D, from: Vector3, w: String) -> void:
+	var kick := GameFeel.num("kick")
+	if kick > 0.0 and rig.camera != null:
+		var dir := GameFeel.screen_dir(rig.camera, from, target.global_position)
+		if dir == Vector2.ZERO:
+			dir = Vector2(0.0, -1.0)   # no way to tell: a jolt down, as a weight landing
+		rig.impulse(dir, kick * GameFeel.strength(w))
+	if w == "kill" and target.get_parent() is Node3D:
+		# A game's drawn ink splash over the fallen (FxShapes).
+		FxShapes.play(target.get_parent() as Node3D, "splash", target.global_position + Vector3(0, 0.8, 0),
+			{"core": Look.color("vampire_red"), "glow": Look.color("blood")}, 1.6, 0.0, GameSettings.combat_pace())
+	var frames := int(GameFeel.num("impact_frame"))
+	if frames > 0 and w in ["crit", "kill"]:
+		ImpactFrame.play(self, frames, target.global_position)
 
 
 func _slow_motion() -> void:

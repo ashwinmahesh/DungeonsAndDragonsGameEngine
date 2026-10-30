@@ -64,6 +64,12 @@ var shot_pitch := 0.0
 var shot_focus := Vector3.ZERO
 var shot_weight := 0.0
 var shake := 0.0
+## A kick (GameFeel, Visual Polish Plan E39): the picture knocked one way on the screen, on the same offsets as the
+## shake, springing back with a little overshoot. impulse() adds to it.
+var kick := Vector2.ZERO
+var _kick_v := Vector2.ZERO
+const KICK_SPRING := 220.0
+const KICK_DAMP := 18.0
 ## Whether the tactical view is on, and how far the camera has eased into it.
 var tactical := false
 var tactical_shown := 0.0
@@ -251,15 +257,38 @@ func _look(delta: float) -> void:
 func _shake(delta: float) -> void:
 	if MobileNative.reduced_motion():
 		shake = 0.0
+		kick = Vector2.ZERO
+		_kick_v = Vector2.ZERO
+	var kicked := _kick(delta)
 	if shake <= 0.0:
-		if camera.h_offset != 0.0 or camera.v_offset != 0.0:
-			camera.h_offset = 0.0
-			camera.v_offset = 0.0
+		if camera.h_offset != kicked.x or camera.v_offset != kicked.y:
+			camera.h_offset = kicked.x
+			camera.v_offset = kicked.y
 		return
 	shake = maxf(shake - delta * SHAKE_FADE, 0.0)
 	var reach := shake * shake * SHAKE_MAX
-	camera.h_offset = _shake_rng.randf_range(-reach, reach)
-	camera.v_offset = _shake_rng.randf_range(-reach, reach)
+	camera.h_offset = _shake_rng.randf_range(-reach, reach) + kicked.x
+	camera.v_offset = _shake_rng.randf_range(-reach, reach) + kicked.y
+
+
+## Knocks the picture `amount` world units toward `picture_dir` on the screen (x right, y up); it springs back.
+func impulse(picture_dir: Vector2, amount: float) -> void:
+	if MobileNative.reduced_motion() or picture_dir == Vector2.ZERO:
+		return
+	kick -= picture_dir.normalized() * amount
+
+
+## The kick's spring this frame: the camera's offset from it.
+func _kick(delta: float) -> Vector2:
+	if kick == Vector2.ZERO and _kick_v == Vector2.ZERO:
+		return Vector2.ZERO
+	var dt := clampf(delta, 0.0, 0.05)
+	_kick_v += (-KICK_SPRING * kick - KICK_DAMP * _kick_v) * dt
+	kick += _kick_v * dt
+	if kick.length() < 0.0005 and _kick_v.length() < 0.01:
+		kick = Vector2.ZERO
+		_kick_v = Vector2.ZERO
+	return kick
 
 
 func _apply() -> void:

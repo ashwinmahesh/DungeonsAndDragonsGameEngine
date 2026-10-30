@@ -21,6 +21,8 @@ const FLOOR_PRIORITY := 5
 const BRIGHT := 0.5
 ## Real lights (flashes) are scaled the same way.
 const LIGHT := 0.55
+## The flashes bright enough to throw shadows where a game asks for spell shadows (an impact, a blast, a smite).
+const SHADOW_FLASH := 4.0
 
 ## Particle shapes (fx_particle.gdshader).
 enum Shape { GLOW, PUFF, STREAK, GLINT, RING }
@@ -226,14 +228,15 @@ static func fire(p: GPUParticles3D, extra: float = 0.2) -> void:
 static func flash(parent: Node3D, at: Vector3, colour: Color, energy: float, radius: float, rise: float = 0.06, fall: float = 0.5) -> OmniLight3D:
 	var l := OmniLight3D.new()
 	l.light_color = colour
-	l.omni_range = radius
+	l.omni_range = radius * GameFeel.num("spell_reach")
 	l.omni_attenuation = 1.2
 	l.light_energy = 0.0
-	l.shadow_enabled = false
+	# A game's spells may throw shadows from their big flashes (GameFeel, Visual Polish Plan E41).
+	l.shadow_enabled = GameFeel.flag("spell_shadows") and energy >= SHADOW_FLASH
 	parent.add_child(l)
 	l.global_position = at
 	var tw := l.create_tween()
-	tw.tween_property(l, "light_energy", energy * LIGHT, rise)
+	tw.tween_property(l, "light_energy", energy * LIGHT * GameFeel.num("spell_light"), rise)
 	tw.tween_property(l, "light_energy", 0.0, fall).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	tw.tween_callback(l.queue_free)
 	return l

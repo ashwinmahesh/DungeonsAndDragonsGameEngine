@@ -52,8 +52,8 @@ static func burst(fx: SpellFx, cue: Dictionary, caster: CombatToken, cells: Arra
 	tail.emitting = true
 	var bl := OmniLight3D.new()
 	bl.light_color = cols["light"]
-	bl.light_energy = 2.0
-	bl.omni_range = 3.0
+	bl.light_energy = 2.0 * GameFeel.num("spell_light")
+	bl.omni_range = 3.0 * GameFeel.num("spell_reach")
 	bead.add_child(bl)
 	var dist := from.distance_to(centre)
 	var time := clampf(dist / 16.0, 0.22, 0.6) * fx.pace()
@@ -86,6 +86,7 @@ static func explode(fx: SpellFx, cue: Dictionary, centre: Vector3, floor_y: floa
 	grow.tween_property(ball, "scale", Vector3(1.0, 0.75, 1.0) * radius * 0.55, 0.45 * fx.pace())
 	FxKit.tween_param(ball, "progress", 0.0, 1.0, 1.25 * fx.pace(), Tween.EASE_IN_OUT, Tween.TRANS_SINE).finished.connect(ball.queue_free)
 	FxKit.flash(fx, centre + Vector3(0, 0.8, 0), cols["light"], 6.0, radius * 2.4, 0.04, 1.0)
+	FxShapes.play(fx, "burst", centre + Vector3(0, 0.6, 0), cols, radius * 1.6, fx.rng.randf() * TAU, fx.pace())
 	var ground := Vector3(centre.x, floor_y, centre.z)
 	shockwave(fx, cue, ground, radius * 2.6, 0.5)
 	var scorch := FxKit.ring(fx, ground, radius * 2.0, cols, 0.0, 1.2)

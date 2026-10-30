@@ -59,9 +59,12 @@ uniform float depth_nudge = 0.0;
 // From the fragment to each light: the edge's outward direction (view space) and how close the pixel is to it.
 varying vec3 rim_n;
 
+#include "res://addons/dnd_core/shaders/world/sprite_feel.gdshaderinc"
+
 void vertex() {
 	// No early return here: Godot's own vertex code runs after this block.
 	VERTEX = vec3(VERTEX.x * squash.x + lean * VERTEX.y + push, VERTEX.y * squash.y + lift, VERTEX.z);
+	VERTEX = feel_vertex(VERTEX, TIME);
 	if (billboard) {
 		vec3 z = length(face) > 0.5 ? normalize(vec3(face.x, 0.0, face.z))
 				: normalize(cross(INV_VIEW_MATRIX[0].xyz, vec3(0.0, 1.0, 0.0)));
@@ -142,6 +145,8 @@ void fragment() {
 		ALBEDO = vec3(0.0);
 		EMISSION = col * COLOR.rgb;
 	}
+	ALBEDO *= 1.0 - feel_flash;
+	EMISSION = feel_emission(EMISSION);
 }
 
 void light() {

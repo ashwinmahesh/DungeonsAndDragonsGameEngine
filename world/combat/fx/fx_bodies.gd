@@ -277,5 +277,10 @@ static func slash(fx: SpellFx, cue: Dictionary, attacker: CombatToken, target: C
 		"speed": Vector2(1.5, 4.0), "damping": Vector2(2.0, 4.0), "gravity": Vector3(0, -5.0, 0), "size": Vector2(0.03, 0.18), "align": true,
 		"colours": [cols["core"], cols["glow"]], "material": FxKit.glow_material(FxKit.Shape.STREAK, cols["core"], 3.0, false)})
 	fx.emit(sparks, at)
+	# A game's drawn crescent across the blow, and speed lines round a critical hit (FxShapes).
+	var cam := fx.get_viewport().get_camera_3d()
+	var across := GameFeel.screen_dir(cam, from, at)
+	FxShapes.play(fx, "slash", at, cols, 1.1 * (1.3 if critical else 1.0), atan2(across.y, across.x) if across != Vector2.ZERO else 0.0, fx.pace())
 	if critical:
+		FxShapes.play(fx, "speed", at, cols, 2.4, 0.0, fx.pace())
 		FxKit.flash(fx, at, cols["light"], 3.0, 2.6, 0.03, 0.4)

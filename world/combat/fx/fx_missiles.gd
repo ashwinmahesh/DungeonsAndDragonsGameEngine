@@ -59,8 +59,8 @@ static func bolt(fx: SpellFx, cue: Dictionary, from: Vector3, to: Vector3, hit: 
 		parts.append(sparks)
 		var light := OmniLight3D.new()
 		light.light_color = cols["light"]
-		light.light_energy = 2.2
-		light.omni_range = 2.8
+		light.light_energy = 2.2 * GameFeel.num("spell_light")
+		light.omni_range = 2.8 * GameFeel.num("spell_reach")
 		light.shadow_enabled = false
 		root.add_child(light)
 	for p in parts:
@@ -224,6 +224,7 @@ static func impact(fx: SpellFx, cue: Dictionary, at: Vector3, size: float) -> vo
 		"colours": [Color(cols["smoke"], 0.6), Color(cols["smoke"], 0.3)], "material": FxKit.smoke_material(0.6)})
 	for p: GPUParticles3D in [smoke, puff, sparks, glint]:
 		fx.emit(p, at)
+	FxShapes.play(fx, "burst", at, cols, 1.2 * size, fx.rng.randf() * TAU, fx.pace())   # a game's drawn star
 
 
 ## A missile that missed fades out where it ends.

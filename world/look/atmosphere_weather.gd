@@ -38,6 +38,7 @@ static func build(parent: Node, board: ArenaBoard, mood: Dictionary, outdoors: b
 	w._board = board
 	var wind := (mood.get("mist", {}) as Dictionary).get("wind", [0.3, 0.1]) as Array
 	w._wind = Vector2(float(wind[0]), float(wind[1]))
+	SpriteFeel.set_place(mood, outdoors)   # the figures' sway (GameFeel), still air indoors
 	for k: Variant in mood.get("weather", []):
 		var spec := {"kind": str(k)} if not (k is Dictionary) else (k as Dictionary)
 		if not outdoors and not bool(spec.get("indoors", false)):
