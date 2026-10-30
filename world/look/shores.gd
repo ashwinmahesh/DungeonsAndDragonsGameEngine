@@ -86,9 +86,15 @@ var _level := PackedFloat32Array()
 var _sloped := false
 ## The water squares the field covers.
 var _wet: Dictionary = {}
+## The waterfalls (falls), and the flow map made from the levels (flow_map).
+var _falls: Array[Dictionary] = []
+var _flow_tex: ImageTexture = null
 ## How many times the squares' levels are smoothed (a 3 x 3 average each time): the stream's slope spreads over about
 ## this many squares either side of a step.
 const LEVEL_BLUR := 2
+## A drop between neighbouring water squares of this many units (10 ft) or more is a waterfall: the levels either side
+## aren't smoothed into each other, and a sheet of falling water pours over the lip (Waterfall).
+const FALL_STEP := 2.0
 
 
 ## Whether the Modern look draws natural shores (not Classic, and not for a QA shot of the places as they were).
@@ -132,6 +138,8 @@ static func build(board_: ArenaBoard, skin: Dictionary, flat: Dictionary) -> Sho
 		again._level = k._level
 		again._sloped = k._sloped
 		again._wet = k._wet
+		again._falls = k._falls
+		again._flow_tex = k._flow_tex
 		return again
 	var s := Shores.new()
 	s.board = board_
@@ -197,6 +205,7 @@ func _levels() -> void:
 	_level.resize(_cw * _cd)
 	if not _sloped:
 		return   # (all zero: the board's own level, as before)
+	_find_falls()
 	var soft := _lev.duplicate()
 	for _pass in LEVEL_BLUR:
 		var out := soft.duplicate()
@@ -204,11 +213,12 @@ func _levels() -> void:
 			for sx in _sw:
 				var sum := 0.0
 				var n := 0
+				var own := _lev[sz * _sw + sx]
 				for dz in range(-1, 2):
 					for dx in range(-1, 2):
 						var nx := sx + dx
 						var nz := sz + dz
-						if nx >= 0 and nz >= 0 and nx < _sw and nz < _sd:
+						if nx >= 0 and nz >= 0 and nx < _sw and nz < _sd and absf(_lev[nz * _sw + nx] - own) < FALL_STEP:
 							sum += soft[nz * _sw + nx]
 							n += 1
 				out[sz * _sw + sx] = sum / n
@@ -244,6 +254,67 @@ func water_y(p: Vector2) -> float:
 ## Whether any of the place's water lies off the board's own level (a creek down a hillside).
 func sloped() -> bool:
 	return _sloped
+
+
+## Which way and how fast the water runs at each third of a square of the map, for the water shader (lit_water's
+## flow_map): red and green the way downhill (0.5 is none), blue the speed (a pool barely moves, a steep run races),
+## alpha the white water (steep runs and the foot of a fall). Null where the water is level: the mood's own `flow` drifts it.
+func flow_map(width: int, depth: int) -> ImageTexture:
+	if not _sloped:
+		return null
+	if _flow_tex != null:
+		return _flow_tex
+	var mw := width * RES
+	var md := depth * RES
+	var img := Image.create(mw, md, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.5, 0.5, 0.0, 0.0))
+	for j in _cd:
+		for i in _cw:
+			var gi := _x0 * RES + i
+			var gj := _z0 * RES + j
+			if gi >= mw or gj >= md:
+				continue
+			var at := flow_at(Vector2(_x0 + (i + 0.5) / RES, _z0 + (j + 0.5) / RES))
+			var dir := at[0] as Vector2
+			img.set_pixel(gi, gj, Color(dir.x * 0.5 + 0.5, dir.y * 0.5 + 0.5, float(at[1]), float(at[2])))
+	_flow_tex = ImageTexture.create_from_image(img)
+	return _flow_tex
+
+
+## The water's run at a point: [the way downhill (unit, or zero on level water), speed 0 to 1, white water 0 to 1].
+func flow_at(p: Vector2) -> Array:
+	var e := 1.0 / RES
+	var g := Vector2(_sample(_level, p + Vector2(e, 0), 0.0) - _sample(_level, p - Vector2(e, 0), 0.0),
+		_sample(_level, p + Vector2(0, e), 0.0) - _sample(_level, p - Vector2(0, e), 0.0)) / (2.0 * e)
+	var slope := g.length()
+	var dir := -g / slope if slope > 0.02 else Vector2.ZERO
+	var speed := clampf(0.2 + slope * 0.9, 0.0, 1.0) if slope > 0.02 else 0.08
+	var white := smoothstep(0.45, 1.1, slope)
+	for f: Dictionary in _falls:
+		var foot := f["foot"] as Vector2
+		white = maxf(white, 1.0 - smoothstep(0.2, 0.9, p.distance_to(foot)))
+	return [dir, speed, white]
+
+
+## Where the water drops FALL_STEP or more between neighbouring water squares: {"lip": Vector2 (the edge's middle),
+## "facing": Vector2i (downhill), "top": float, "drop": float, "foot": Vector2}.
+func falls() -> Array[Dictionary]:
+	return _falls
+
+
+func _find_falls() -> void:
+	_falls.clear()
+	for c: Vector2i in _wet:
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+			var n := c + d
+			if not _wet.has(n):
+				continue
+			var drop := _lev_of(c) - _lev_of(n)
+			if drop < FALL_STEP:
+				continue
+			var lip := Vector2(c.x + 0.5, c.y + 0.5) + Vector2(d) * 0.5
+			_falls.append({"lip": lip, "facing": d, "top": WATER_Y + _lev_of(c), "drop": drop,
+				"foot": lip + Vector2(d) * 0.35})
 
 
 ## The water squares land may reach over (any beside a square the ground draws) and the drawn walkable squares water may
@@ -643,6 +714,22 @@ func _dress_stream(parent: Node3D, water: Material, on: ArenaBoard) -> void:
 	mi.material_override = water
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
+	if water is ShaderMaterial and (water as ShaderMaterial).shader == Atmosphere.LIT_WATER_SHADER:
+		(water as ShaderMaterial).set_shader_parameter("flow_map", flow_map(on.grid.width, on.grid.depth))
+		(water as ShaderMaterial).set_shader_parameter("use_flow_map", true)
+	var colours := {}
+	if water is ShaderMaterial:
+		for k: String in ["deep", "foam"]:
+			colours[k] = (water as ShaderMaterial).get_shader_parameter(k)
+	for f: Dictionary in _falls:
+		var facing := f["facing"] as Vector2i
+		var lip := f["lip"] as Vector2
+		var sheet := Waterfall.build({"at": [lip.x, lip.y], "height": float(f["top"]), "width": 0.95,
+			"drop": float(f["drop"]), "facing": Waterfall.facing_of(facing), "lean": 0.25, "speed": 2.2}, {})
+		if colours.get("deep") is Color:
+			(sheet.material_override as ShaderMaterial).set_shader_parameter("deep", colours["deep"])
+			(sheet.material_override as ShaderMaterial).set_shader_parameter("foam", colours["foam"])
+		parent.add_child(sheet)
 	for n: Node in on.get_children():
 		if n.has_meta(&"water_cell"):
 			(n as Node3D).visible = false

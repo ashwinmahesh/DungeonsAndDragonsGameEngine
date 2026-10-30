@@ -238,8 +238,8 @@ func _build() -> void:
 		return
 	if Look.modern():
 		_flat_floors_cast_no_shadow()
-	if mood.has("water"):
-		_build_water()
+	if mood.has("water") or (Look.modern() and _raised_water()):
+		_build_water()   # (a creek on raised ground runs in the lit water even where the mood names no water)
 	var lines := (mood.get("lines", []) as Array) if outdoors else []
 	for i in lines.size():
 		# Washing hung out between two posts (a lived-in village): WashingLine.
@@ -754,6 +754,16 @@ func _apply_sky(v: Dictionary) -> void:
 
 
 ## The board's water squares get the moving water (one material for the whole place, the land's lakes included).
+## Whether any of the board's water lies on raised ground (a creek down a hillside: Shores runs it downhill).
+func _raised_water() -> bool:
+	for z in board.grid.depth:
+		for x in board.grid.width:
+			var c := Vector2i(x, z)
+			if board.grid.has_flag(c, CombatGrid.WATER) and board.grid.height(c) > 0:
+				return true
+	return false
+
+
 func _build_water() -> void:
 	var spec := mood.get("water", {}) as Dictionary
 	water = ShaderMaterial.new()
@@ -769,6 +779,8 @@ func _build_water() -> void:
 	water.set_shader_parameter("foam", Look.color(str(spec.get("foam", "frost"))))
 	water.set_shader_parameter("glint", Look.color(str(spec.get("glint", "moonlight"))))
 	water.set_shader_parameter("flow", _vec2(spec.get("flow", [0.12, 0.05])))
+	water.set_shader_parameter("current", float(spec.get("current", 1.2)))   # running water's speed (Shores.flow_map)
+	water.set_shader_parameter("white_water", float(spec.get("white_water", 1.0)))
 	# A still, dark water (Tser Pool, "black and perfectly still"): no ripples, little of the texture's colour, and a
 	# dimmer sky in it. Unset, the shaders' own defaults.
 	if spec.has("ripples"):

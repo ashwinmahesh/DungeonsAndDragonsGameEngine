@@ -8,6 +8,14 @@ extends RefCounted
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/waterfall.gdshader")
 const DIRS := {"north": Vector2(0, -1), "south": Vector2(0, 1), "east": Vector2(1, 0), "west": Vector2(-1, 0)}
+## The facing name for a way on the grid (Shores' falls on a creek's steps).
+static func facing_of(d: Vector2i) -> String:
+	for name: String in DIRS:
+		if Vector2i(DIRS[name] as Vector2) == d:
+			return name
+	return "south"
+
+
 ## Rows down the fall and columns across it.
 const ROWS := 14
 const COLS := 6

@@ -3,6 +3,8 @@
 // deepens smoothly from the shore out; small ripples move with the current and bend the light, so the moon and the
 // lamps leave a glittering path on it and the screen-space reflections (Graphics presets) waver; the sky's light lies
 // on it more at a glancing angle; and soft, broken foam laps along the shore. Rain rings it in wet weather (W12).
+// Water on raised ground runs (Shores.flow_map): each point drifts downhill along its own course, faster where it is
+// steep, with white water streaming on steep runs and at the foot of a fall. In the Toon finish the foam is hard-edged.
 shader_type spatial;
 #include "res://addons/dnd_core/shaders/world/lit_light.gdshaderinc"
 
@@ -24,6 +26,12 @@ uniform bool use_mask = false;
 // How choppy the ripples are, and how big (world units across).
 uniform float ripple_strength : hint_range(0.0, 1.0) = 0.35;
 uniform float ripple_size = 0.6;
+// The running water's way, speed and white water over the map (Shores.flow_map, map_rect), how fast a full-speed run
+// moves (world units a second: the mood's water `current`) and how much white water shows (`white_water`).
+uniform sampler2D flow_map : filter_linear, repeat_disable;
+uniform bool use_flow_map = false;
+uniform float current = 1.2;
+uniform float white_water : hint_range(0.0, 2.0) = 1.0;
 // Rain on the water (W12): rings spreading where drops land, as wet as the place's weather (world_wet, Atmosphere).
 
 varying vec3 world_pos;
@@ -45,6 +53,16 @@ float vnoise(vec2 p) {
 float ripple(vec2 p) {
 	vec2 q = p / ripple_size;
 	return vnoise(q + flow * atmo_time * 2.0) * 0.6 + vnoise(q * 2.3 - flow.yx * atmo_time * 3.1 + 7.3) * 0.4;
+}
+
+// Running water (use_flow_map): the ripples carried along `v` (world units a second), read at two phases half a cycle
+// apart and blended, so the pattern streams on without stretching (the usual flow-map trick).
+float ripple_run(vec2 p, vec2 v, float ph0, float ph1, float w) {
+	vec2 q = p / ripple_size;
+	vec2 a = v * 1.6 / ripple_size;
+	float r0 = vnoise(q - a * ph0) * 0.6 + vnoise(q * 2.3 - a * 2.3 * ph0 + 7.3) * 0.4;
+	float r1 = vnoise(q - a * ph1 + 3.7) * 0.6 + vnoise(q * 2.3 - a * 2.3 * ph1 + 11.1) * 0.4;
+	return mix(r0, r1, w);
 }
 
 // Rings spreading from drops landing on a grid of cells, each cell's drop at its own moment.
@@ -84,9 +102,26 @@ float depth_at(vec2 p) {
 
 void fragment() {
 	vec2 p = world_pos.xz;
-	vec3 t1 = texture(albedo_tex, p / tile_units + flow * atmo_time / tile_units).rgb;
-	vec3 t2 = texture(albedo_tex, p / (tile_units * 1.7) - flow.yx * atmo_time / tile_units + 0.37).rgb;
-	vec3 tex = (t1 + t2) * 0.5;
+	vec2 v = vec2(0.0);
+	float white = 0.0;
+	float ph0 = fract(atmo_time * 0.6);
+	float ph1 = fract(atmo_time * 0.6 + 0.5);
+	float pw = abs(ph0 * 2.0 - 1.0);
+	if (use_flow_map) {
+		vec4 fm = texture(flow_map, (p - map_rect.xy) / (map_rect.zw - map_rect.xy));
+		v = (fm.rg * 2.0 - 1.0) * fm.b * current;
+		white = fm.a * white_water;
+	}
+	vec3 tex;
+	if (use_flow_map) {
+		vec3 a0 = texture(albedo_tex, (p - v * ph0 * 1.6) / tile_units).rgb;
+		vec3 a1 = texture(albedo_tex, (p - v * ph1 * 1.6) / tile_units + 0.37).rgb;
+		tex = mix(a0, a1, pw);
+	} else {
+		vec3 t1 = texture(albedo_tex, p / tile_units + flow * atmo_time / tile_units).rgb;
+		vec3 t2 = texture(albedo_tex, p / (tile_units * 1.7) - flow.yx * atmo_time / tile_units + 0.37).rgb;
+		tex = (t1 + t2) * 0.5;
+	}
 	float d = depth_at(p);
 	float wob = vnoise(p * 1.3 + atmo_time * 0.4) - 0.5;
 	float dd = clamp(d + wob * 0.06, 0.0, 1.0);
@@ -95,8 +130,15 @@ void fragment() {
 	base = mix(base, base * tex * 2.2, tex_amount);
 	// Ripples: the slope of the ripple height bends the surface.
 	float e = 0.05;
-	float h0 = ripple(p);
-	vec2 slope = vec2(ripple(p + vec2(e, 0.0)) - h0, ripple(p + vec2(0.0, e)) - h0) / e;
+	vec2 slope;
+	if (use_flow_map) {
+		float h0 = ripple_run(p, v, ph0, ph1, pw);
+		slope = vec2(ripple_run(p + vec2(e, 0.0), v, ph0, ph1, pw) - h0, ripple_run(p + vec2(0.0, e), v, ph0, ph1, pw) - h0) / e;
+		slope *= 1.0 + length(v) * 0.8;   // a fast run is choppier
+	} else {
+		float h0 = ripple(p);
+		slope = vec2(ripple(p + vec2(e, 0.0)) - h0, ripple(p + vec2(0.0, e)) - h0) / e;
+	}
 	if (world_wet > 0.0) {
 		float r0 = rain_rings(p);
 		slope += vec2(rain_rings(p + vec2(e, 0.0)) - r0, rain_rings(p + vec2(0.0, e)) - r0) / e * 0.08 * world_wet;
@@ -107,6 +149,18 @@ void fragment() {
 	float lap = 0.2 + 0.035 * sin(atmo_time * 1.4 + (p.x + p.y) * 0.9);
 	float broken = vnoise(p * 3.0 + atmo_time * 0.3);
 	float froth = use_mask ? (1.0 - smoothstep(lap - 0.08, lap + 0.02, dd)) * smoothstep(0.25, 0.6, broken + 0.25) : 0.0;
+	if (white > 0.0) {
+		// White water: streaks drawn out along the run, racing downstream.
+		vec2 along = length(v) > 0.001 ? normalize(v) : vec2(0.0, 1.0);
+		vec2 q = vec2(dot(p, vec2(-along.y, along.x)) * 5.0, dot(p, along) * 1.4);
+		float s0 = vnoise(q - vec2(0.0, length(v) * 4.0 * ph0));
+		float s1 = vnoise(q - vec2(0.0, length(v) * 4.0 * ph1) + 5.1);
+		float streak = mix(s0, s1, pw);
+		froth = max(froth, white * smoothstep(0.55 - white * 0.25, 0.8, streak));
+	}
+	if (toon()) {
+		froth = smoothstep(0.42, 0.5, froth);   // the Toon finish: cel foam, hard-edged
+	}
 	base = mix(base, foam, froth * 0.75);
 	ALBEDO = base;
 	// The sky's light on the surface, more of it at a glancing angle (and never black at night).
