@@ -229,6 +229,28 @@ func test_the_hooks_a_book_leans_on() -> void:
 	GameFeatures.use(null)
 
 
+func test_a_stat_block_creatures_attack_action_and_multiattack_can_be_wasted() -> void:
+	GameFeatures.use(Hooks)
+	var e := TestCombat.open_field(5)
+	var hero := e.add(TestChars.custom("fighter", "human", 3), &"party", Vector2i(1, 1))
+	var bandit := TestCombat.foe(e, "bandit", Vector2i(2, 1))
+	var bear := TestCombat.foe(e, "brown_bear", Vector2i(1, 2))
+	TestCombat.start_with(e, bandit)
+	(e.game as Hooks).wasted = true
+	var hp := hero.creature.hp
+	var r := e.monster_attack(bandit, hero, "scimitar")
+	assert_false(r.hit, "the Attack action is wasted")
+	assert_false(bandit.action_available, "and spent")
+	assert_eq(hero.creature.hp, hp)
+	e.end_turn()
+	while e.current() != bear:
+		e.end_turn()
+	assert_true(e.begin_multiattack(bear).is_empty(), "a wasted Multiattack queues no attacks")
+	assert_false(bear.action_available, "and spends the action")
+	assert_eq(bear.attacks_left, 0)
+	GameFeatures.use(null)
+
+
 func test_a_hero_of_an_undead_or_construct_species_can_be_revived_and_put_to_sleep() -> void:
 	var e := TestCombat.open_field()
 	var ch := TestChars.custom("fighter", "human", 3)

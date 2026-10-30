@@ -979,6 +979,9 @@ func monster_attack(c: Combatant, target: Combatant, action_id: String) -> Comba
 	if c.attacks_left > 0:
 		c.attacks_left -= 1
 	elif c.action_available:
+		if e.game.wastes_action(c, "attack"):
+			e.spend_action(c)
+			return CombatResult.new()
 		e.spend_action(c)
 		c.took_attack_action = true
 	return _resolve_attack(c, target, option, {})
@@ -1016,6 +1019,9 @@ func begin_multiattack(c: Combatant) -> Array[Dictionary]:
 	var m := c.creature as Monster
 	var multi := m.action("multiattack")
 	if multi.is_empty() or e.turns.action_start_block(c) != "":
+		return out
+	if e.game.wastes_action(c, "attack"):
+		e.spend_action(c)
 		return out
 	e.spend_action(c)
 	c.took_attack_action = true
