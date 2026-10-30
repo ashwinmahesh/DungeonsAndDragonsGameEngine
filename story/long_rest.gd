@@ -23,22 +23,24 @@ const HOURS := 8
 const MORNING_MINUTES := 60
 ## st.flags: the Long Rest something in the night broke into, until the party sleeps on or gives up (an underscore
 ## key: bookkeeping, not story): {start: the minute it began, left: minutes still to sleep (an hour more for each
-## fight), at: the minute it broke, strahd: true when Strahd's visit broke it, night: whether the rest ran through the
-## night (his visit's trigger)}.
+## fight), at: the minute it broke, visit: true when the campaign's night visit broke it (saves before 2026-10-30 call it
+## `strahd`), night: whether the rest ran through the night (the visit's trigger)}.
 const BROKEN := "_long_rest_broken"
 ## What a night's result says happened (`how`): it was slept through (the benefits are in); something came out of the
-## dark (the d6), or Strahd's visit is coming (the benefits wait for the fight); nobody sleeps again (a Short Rest's
-## benefits).
+## dark (the d6), or the campaign's villain is visiting (CampaignModule.visit_may_fight: the benefits wait for the fight);
+## nobody sleeps again (a Short Rest's benefits).
 const SLEPT := "slept"
 const DARK := "dark"
-const STRAHD := "strahd"
+const VISIT := "visit"
 const RESTLESS := "restless"
+## The first game's name for VISIT, kept so its code still reads.
+const STRAHD := VISIT
 
 
 ## Takes the rest in a place whose rule is `rule` ("safe" or "risky": the place's, after the difficulty's safe rests).
 ## Returns {how, interrupted: how isn't SLEPT, minutes: how long since it began, text: how the night went, lines: what
 ## the inn and the spells cast as it ends add}. DARK: the caller brings what came (the camp's visitors) or, with
-## nothing to fight, ends the night (restless). STRAHD: the caller lets his visit play (game root `visit_after_rest`).
+## nothing to fight, ends the night (restless). VISIT: the caller lets the visit play (game root `visit_after_rest`).
 static func take(st: StoryState, rule: String, dice: DiceRoller) -> Dictionary:
 	var start := st.total_minutes()
 	var interrupted := false
@@ -68,9 +70,18 @@ static func broken(st: StoryState) -> bool:
 	return st.flags.get(BROKEN, null) is Dictionary
 
 
-## Whether the broken rest waits on Strahd's visit (it came, or is coming, before the rest's benefits).
+## Whether the broken rest waits on the campaign's night visit (it came, or is coming, before the rest's benefits).
+static func waits_on_visit(st: StoryState) -> bool:
+	return broken(st) and _by_visit(st.flags[BROKEN] as Dictionary)
+
+
+## The first game's name for waits_on_visit, kept so its code still reads.
 static func waits_on_strahd(st: StoryState) -> bool:
-	return broken(st) and bool((st.flags[BROKEN] as Dictionary).get("strahd", false))
+	return waits_on_visit(st)
+
+
+static func _by_visit(b: Dictionary) -> bool:
+	return bool(b.get("visit", b.get("strahd", false)))
 
 
 ## The broken rest's bookkeeping (BROKEN), or {}.
@@ -97,7 +108,7 @@ static func resume(st: StoryState, dice: DiceRoller) -> Dictionary:
 		return restless(st, "Enemies still prowl this place, and nobody sleeps again. (A Short Rest's benefits only.)")
 	st.flags.erase(BROKEN)
 	var again := "The night's trouble dealt with, the party lies down again and sleeps until it's done. "
-	var res := _sleep_on(st, dice, int(b["start"]), int(b["left"]), not bool(b.get("strahd", false)))
+	var res := _sleep_on(st, dice, int(b["start"]), int(b["left"]), not _by_visit(b))
 	if str(res["how"]) == SLEPT:
 		res["text"] = again + str(res["text"])
 	return res
@@ -118,23 +129,23 @@ static func restless(st: StoryState, text: String = "") -> Dictionary:
 	return _result(st, RESTLESS, start, text)
 
 
-## Sleeps `left` minutes of the rest begun at `start`, then (unless `ask_strahd` is false) asks whether Strahd's visit
-## tonight may come to blows: if so the rest breaks there, before its benefits; else they come (finish's).
-static func _sleep_on(st: StoryState, dice: DiceRoller, start: int, left: int, ask_strahd: bool, warned: String = "") -> Dictionary:
+## Sleeps `left` minutes of the rest begun at `start`, then (unless `ask_visit` is false) asks whether the campaign's
+## visit tonight may come to blows: if so the rest breaks there, before its benefits; else they come (finish's).
+static func _sleep_on(st: StoryState, dice: DiceRoller, start: int, left: int, ask_visit: bool, warned: String = "") -> Dictionary:
 	st.advance_minutes(left)
 	var night := Campaign.module().night_between(start, st.total_minutes())
-	if ask_strahd and Campaign.module().visit_may_fight(st, "rest", {"night": night}):
+	if ask_visit and Campaign.module().visit_may_fight(st, "rest", {"night": night}):
 		_break(st, start, 0, true)
 		(st.flags[BROKEN] as Dictionary)["night"] = night
-		return _result(st, STRAHD, start, "Before dawn, the one on watch shakes everyone awake: something is out there.")
+		return _result(st, VISIT, start, "Before dawn, the one on watch shakes everyone awake: something is out there.")
 	var res := _result(st, SLEPT, start, "Eight hours pass. Everyone wakes rested, if not refreshed." + warned)
 	res["lines"] = _benefits(st, dice)
 	return res
 
 
 ## Notes the rest as broken (BROKEN): they'd slept before it came, which ends Concentration.
-static func _break(st: StoryState, start: int, left: int, strahd: bool) -> void:
-	st.flags[BROKEN] = {"start": start, "left": left, "at": st.total_minutes(), "strahd": strahd}
+static func _break(st: StoryState, start: int, left: int, visit: bool) -> void:
+	st.flags[BROKEN] = {"start": start, "left": left, "at": st.total_minutes(), "visit": visit}
 	for ch in st.party:
 		if not ch.dead:
 			ch.fall_asleep()

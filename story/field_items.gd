@@ -392,7 +392,7 @@ static func _custom(st: StoryState, ch: Character, c: Combatant, e: Encounter, p
 			# The same Long Rest as anywhere else (LongRest.take_safe): the guests, the miles walked, the spells cast on
 			# waking, and Strahd's visit that may come to blows before them (`held`: the rest goes on once he's gone).
 			var res := LongRest.take_safe(st, dice)
-			if str(res["how"]) == LongRest.STRAHD:
+			if str(res["how"]) == LongRest.VISIT:
 				return {"ok": true, "effect": "long_rest", "held": true, "minutes": int(res["minutes"]),
 					"text": "%s: the party beds down in safety. %s" % [label, res["text"]]}
 			var said := "%s: the party rests in perfect safety and wakes refreshed." % label

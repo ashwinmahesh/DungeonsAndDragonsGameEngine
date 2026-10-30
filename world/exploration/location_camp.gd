@@ -377,7 +377,7 @@ func night(res: Dictionary) -> void:
 				_queue.append(str(LongRest.restless(view.st)["text"]))
 			_refresh_root()
 			return
-		LongRest.STRAHD:
+		LongRest.VISIT:
 			_refresh_root()
 			view.narration.emit(str(res["text"]))
 			_visit_after(int(res["minutes"]))

@@ -476,7 +476,7 @@ func _long_rest(rule: String) -> void:
 		var long_line := PrepareScreen.available_line(st, "long_rest")
 		if long_line != "":
 			_log.text += "\n" + long_line
-	if str(res["how"]) in [LongRest.SLEPT, LongRest.STRAHD] and root.has_method("visit_after_rest"):
+	if str(res["how"]) in [LongRest.SLEPT, LongRest.VISIT] and root.has_method("visit_after_rest"):
 		# Strahd may come in the night (ADR 0014): after this screen and any talk started from it. A visit that may
 		# come to blows broke the rest before its benefits; it goes on once he's gone (game root).
 		root.call_deferred("visit_after_rest", int(res["minutes"]))
