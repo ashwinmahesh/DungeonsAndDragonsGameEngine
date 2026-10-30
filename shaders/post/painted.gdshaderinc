@@ -153,7 +153,10 @@ vec3 painted_values(vec3 col, vec3 wpos, vec3 wn) {
 	float chroma = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
 	float warm = smoothstep(0.03, 0.12, col.r - col.b) * smoothstep(0.12, 0.3, l0);
 	float keep = max(smoothstep(0.18, 0.4, chroma), warm) * paint_keep_light;
-	float v = paint_step(clamp(l0 + b * 0.12, 0.0, 1.0), paint_steps, paint_step_edge);
+	// Stepped in a square-root space, close to the eye's, so a dark night keeps its steps of shade instead of all of
+	// it rounding down to black.
+	float v = paint_step(sqrt(clamp(l0 + b * 0.12, 0.0, 1.0)), paint_steps, paint_step_edge);
+	v *= v;
 	vec3 ramp = texture(paint_ramp, vec2(clamp(v, 0.01, 0.99), 0.5)).rgb;
 	// The ramp gives the colour; the stepped value gives the brightness, so a ramp of darker colours doesn't darken
 	// the picture.
