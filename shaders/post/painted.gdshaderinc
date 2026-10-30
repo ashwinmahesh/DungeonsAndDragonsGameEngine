@@ -200,6 +200,11 @@ vec3 moon_on_water(vec3 col, vec3 wpos, vec3 cam, vec3 wn) {
 	float disc = 1.0 - smoothstep(0.92, 1.0, lq);
 	float bite = moon_water_bite > 0.01 ? 1.0 - smoothstep(0.9, 1.0, length(q - vec2(moon_water_bite * 0.85, 0.3))) : 0.0;
 	float halo = exp(-lq * lq * 0.35) * 0.35;
+	if (sky_moon_has_face) {
+		// The game's own moon picture, broken up by the same ripples.
+		vec4 face = moon_face_at(r, m, moon_water_size);
+		return col + to_srgb(moon_water_colour) * halo * moon_water + face.rgb * face.a * min(moon_water, 1.0);
+	}
 	return col + to_srgb(moon_water_colour) * (disc * (1.0 - bite) + halo) * moon_water * step(0.0, dot(r, m));
 }
 

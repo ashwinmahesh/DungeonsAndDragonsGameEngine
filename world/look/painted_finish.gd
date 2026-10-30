@@ -36,6 +36,11 @@ static func apply(post: ShaderMaterial, s: Dictionary) -> void:
 		post.set_shader_parameter("branch_scale", float(s["bough_scale"]))
 		post.set_shader_parameter("branch_sway", float(s["bough_sway"]))
 		post.set_shader_parameter("use_branch_mask", bool(s["boughs_by_trees"]))
+	var face := str(s["moon_face"])
+	var tex := load(face) as Texture2D if on and face != "" and ResourceLoader.exists(face) else null
+	post.set_shader_parameter("sky_moon_has_face", tex != null)
+	post.set_shader_parameter("sky_moon_face", tex)
+	post.set_shader_parameter("sky_moon_face_size", float(s["moon_face_size"]))
 	post.set_shader_parameter("moon_water", 0.0)   # (aim_moon sets it each frame, at night)
 	post.set_shader_parameter("moon_water_size", float(s["moon_water_size"]))
 	post.set_shader_parameter("moon_water_bite", float(s["moon_water_bite"]))

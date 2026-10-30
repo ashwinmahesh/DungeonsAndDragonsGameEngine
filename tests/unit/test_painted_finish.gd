@@ -2,6 +2,9 @@ extends TestCase
 ## A game's painted finish (Look.PAINTED, PaintedFinish): gouache strokes and values, the boughs' shadows, the moon in
 ## the water, and strings of lantern bulbs (LightString). Off by default, so a game that names none looks as before.
 
+## Any picture will do for the moon's face.
+const FACE := "res://addons/dnd_core/art/ui/corner.png"
+
 var _was := ""
 var _preset := ""
 
@@ -111,3 +114,17 @@ func test_a_string_of_bulbs_lights_a_few_lamps() -> void:
 		assert_true(bool(l.get_meta("no_shadow")), "kept out of the lamp shadows")
 	assert_eq(s.find_children("*", "Decal", true, false).size(), bulbs, "a pool of light under every bulb")
 	parent.free()
+
+
+func test_a_game_paints_its_own_moon() -> void:
+	var mat := _post()
+	PaintedFinish.apply(mat, Look.painted_settings())
+	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "the plain disc by default")
+	Campaign.use_config({"painted": {"moon_face": FACE, "moon_face_size": 0.2}})
+	PaintedFinish.apply(mat, Look.painted_settings())
+	assert_true(bool(mat.get_shader_parameter("sky_moon_has_face")), "its own moon")
+	assert_true(mat.get_shader_parameter("sky_moon_face") is Texture2D, "from its picture")
+	assert_eq(_f(mat, "sky_moon_face_size"), 0.2, "at its size")
+	Campaign.use_config({"painted": {"moon_face": "res://nowhere/moon.png"}})
+	PaintedFinish.apply(mat, Look.painted_settings())
+	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "a missing picture keeps the disc")

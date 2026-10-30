@@ -131,6 +131,11 @@ uniform vec3 sky_moon_dir = vec3(0.3, 0.6, -0.7);
 uniform vec3 sky_moon_colour : source_color = vec3(0.85, 0.9, 0.95);
 uniform float sky_moon = 1.0;
 uniform float sky_moon_size = 1.0;   // the disc's size, 1 the plain moon (Calendar.moon)
+// A game's own moon (Look.PAINTED moon_face): a picture of it in place of the plain disc, `sky_moon_face_size` its
+// angular radius; its alpha is its shape. The moon in the water shows it too (painted.gdshaderinc).
+uniform sampler2D sky_moon_face : source_color, filter_linear_mipmap, repeat_disable;
+uniform bool sky_moon_has_face = false;
+uniform float sky_moon_face_size = 0.12;
 uniform float sky_cover : hint_range(0.0, 1.0) = 0.7;
 uniform vec2 sky_wind = vec2(0.6, 0.25);
 // The screen's edges sink towards this colour.
@@ -270,6 +275,18 @@ float mist_density(vec3 p) {
 }
 
 // The sky along a view direction (sRGB, before the grade): see sky_on.
+// The game's moon picture seen along `d`, the moon towards `md` with angular radius `size` (alpha 0 off it).
+vec4 moon_face_at(vec3 d, vec3 md, float size) {
+	vec3 right = normalize(cross(md, vec3(0.0, 1.0, 0.0)));
+	vec3 up2 = cross(right, md);
+	vec2 q = vec2(dot(d, right), dot(d, up2)) / size;
+	if (dot(d, md) <= 0.0 || max(abs(q.x), abs(q.y)) >= 1.0) {
+		return vec4(0.0);
+	}
+	vec4 f = texture(sky_moon_face, q * vec2(0.5, -0.5) + 0.5);
+	return vec4(f.rgb, f.a);
+}
+
 vec3 sky_colour(vec3 d) {
 	float up = clamp(d.y, 0.0, 1.0);
 	vec3 col = mix(to_srgb(land_color), to_srgb(sky_zenith), pow(smoothstep(0.0, 0.6, up), 0.7));
@@ -286,6 +303,12 @@ vec3 sky_colour(vec3 d) {
 	float lit = smoothstep(0.35, 0.8, n) * 0.5 + towards * 0.5 * halo * 4.0;
 	vec3 cloud = mix(to_srgb(sky_cloud_shade), to_srgb(sky_cloud_lit), clamp(lit, 0.0, 1.0));
 	// The moon shows through thin cloud; thick cloud hides it.
+	if (sky_moon_has_face) {
+		// The game's own moon, painted, in place of the disc.
+		vec4 face = moon_face_at(d, md, sky_moon_face_size);
+		col = mix(col, face.rgb, face.a * sky_moon * (1.0 - density * 0.85));
+		disc = 0.0;
+	}
 	col = mix(col + to_srgb(sky_moon_colour) * disc * (1.0 - density * 0.85), cloud, density * smoothstep(0.0, 0.15, d.y));
 	return col;
 }
