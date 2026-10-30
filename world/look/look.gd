@@ -16,24 +16,55 @@ static var _colours: Dictionary = {}
 ## The world's finish (docs/plans/ui_polish.md, docs/art/style_bible.md), the player's choice (GameSettings,
 ## user://settings.cfg): "classic" is the 1990s cartoon pass (every pixel snapped to the palette, light in hard bands,
 ## frozen as it was on 2026-10-07); "modern" is the HD-2D look: the same art, the characters inked, the world lit like
-## painted 3D without ink lines, with filmic tone, bloom on flames and lanterns, soft shadows and haze. Places built
+## painted 3D without ink lines, with filmic tone, bloom on flames and lanterns, soft shadows and haze; "toon" is the
+## 1980s cel cartoon (plan E27): Modern's world, haze and bloom, with the light in two or three hard bands, a hard
+## highlight, flatter and more vivid fills and bold ink lines on the world as well as the characters. Places built
 ## after a change use it.
-const STYLES: Array[String] = ["modern", "classic"]
+const STYLES: Array[String] = ["modern", "classic", "toon"]
 ## The owner picked Modern as the default (2026-10-07); Classic stays in Settings.
 const DEFAULT_STYLE := "modern"
+## What each finish is called in Settings, and its one-line tip.
+const STYLE_NAMES := {"modern": "Modern", "classic": "Classic", "toon": "Toon"}
+const STYLE_TIPS := {
+	"modern": "Modern: smooth light, relief and glow.",
+	"classic": "Classic: the 1990s cartoon, every colour from the palette.",
+	"toon": "Toon: a cel cartoon, hard light and shade with bold ink lines.",
+}
 static var _style := ""
+
+
+## The finishes this game offers, its default first: data/campaign.json's "finishes" (Campaign.config), else Modern
+## and Classic, so a game that says nothing never shows Toon.
+static func finishes() -> Array[String]:
+	var out: Array[String] = []
+	var named: Variant = Campaign.config().get("finishes", [])
+	if named is Array:
+		for f: Variant in named as Array:
+			if str(f) in STYLES and not str(f) in out:
+				out.append(str(f))
+	if out.is_empty():
+		out = [DEFAULT_STYLE, "classic"]
+	return out
 
 
 static func style() -> String:
 	if _style == "":
-		var saved := str(GameSettings.value("look", DEFAULT_STYLE))
-		_style = saved if saved in STYLES else DEFAULT_STYLE
+		var offered := finishes()
+		var saved := str(GameSettings.value("look", offered[0]))
+		_style = saved if saved in offered else offered[0]
 		_publish()
 	return _style
 
 
+## The lit, natural world: Modern, and Toon, which is drawn on it. Everything Classic leaves out (the shaped land,
+## the haze, bloom, soft shadows, the horizon tilt) goes by this.
 static func modern() -> bool:
-	return style() == "modern"
+	return style() == "modern" or _style == "toon"
+
+
+## The Toon finish (plan E27): the world in hard cel bands with ink lines.
+static func toon() -> bool:
+	return style() == "toon"
 
 
 static func set_style(s: String, save: bool = true) -> void:
@@ -45,9 +76,42 @@ static func set_style(s: String, save: bool = true) -> void:
 		GameSettings.set_value("look", s)
 
 
-## The cel shaders read the style through a global uniform (look_soft, project.godot [shader_globals]).
+## The cel shaders read the style through a global uniform (look_soft, project.godot [shader_globals]): 0 Classic's
+## hard bands, 1 Modern's soft light, 2 Toon (shaders/world/lit_light.gdshaderinc).
 static func _publish() -> void:
-	RenderingServer.global_shader_parameter_set(&"look_soft", 1.0 if _style == "modern" else 0.0)
+	RenderingServer.global_shader_parameter_set(&"look_soft", LOOK_SOFT.get(_style, 0.0))
+
+
+const LOOK_SOFT := {"classic": 0.0, "modern": 1.0, "toon": 2.0}
+
+
+## A shader drawn with Godot's own lighting (the trees' leaves and bark) as the Toon finish wants it: the same code with
+## Godot's toon diffuse and specular, made once; the shader itself in the other finishes.
+static func toon_shader(shader: Shader) -> Shader:
+	if not toon() or shader == null:
+		return shader
+	if _toon_shaders.has(shader):
+		return _toon_shaders[shader] as Shader
+	var code := shader.code
+	var re := RegEx.create_from_string("render_mode([^;]*);")
+	var found := re.search(code)
+	var modes := found.get_string(1) if found != null else ""
+	for drop: String in ["diffuse_burley", "diffuse_lambert_wrap", "diffuse_lambert", "specular_schlick_ggx", "specular_disabled"]:
+		modes = modes.replace(drop, "")
+	var parts: Array[String] = []
+	for m: String in modes.split(","):
+		if m.strip_edges() != "":
+			parts.append(m.strip_edges())
+	parts.append_array(["diffuse_toon", "specular_toon"])
+	var line := "render_mode %s;" % ", ".join(parts)
+	code = re.sub(code, line) if found != null else code.replace("shader_type spatial;", "shader_type spatial;\n" + line)
+	var out := Shader.new()
+	out.code = code
+	_toon_shaders[shader] = out
+	return out
+
+
+static var _toon_shaders: Dictionary = {}
 
 
 static func color(name: String) -> Color:
@@ -600,12 +664,24 @@ static func make_post_process() -> MeshInstance3D:
 ## silhouettes only (`outline_creases` off, `outline_strength` under 1) should the world want a little line back.
 static func style_post(mat: ShaderMaterial) -> void:
 	var m := modern()
+	var t := toon()
 	mat.set_shader_parameter("quantize", not m)
 	mat.set_shader_parameter("soft_bands", m)
 	mat.set_shader_parameter("keep_hdr", m)
-	mat.set_shader_parameter("outlines", not m)
+	mat.set_shader_parameter("outlines", not m or t)
 	mat.set_shader_parameter("tone_split", m)
 	mat.set_shader_parameter("fast_noise", m)
 	if m:
 		mat.set_shader_parameter("noise_tex", noise_texture())
-	mat.set_shader_parameter("outline_width", 1.2 if m else 1.5)
+	mat.set_shader_parameter("outline_width", TOON_INK["width"] if t else (1.2 if m else 1.5))
+	mat.set_shader_parameter("outline_creases", true)
+	mat.set_shader_parameter("outline_ink", t)
+	mat.set_shader_parameter("outline_strength", TOON_INK["strength"] if t else 1.0)
+	mat.set_shader_parameter("depth_threshold", TOON_INK["depth"] if t else 0.06)
+	mat.set_shader_parameter("normal_threshold", TOON_INK["normal"] if t else 0.55)
+	mat.set_shader_parameter("outline_color", color(TOON_INK["colour"]) if t else color("void"))
+
+
+## The Toon finish's ink on the world (the screen pass's depth and normal edges, at 1080 lines): bold, crisp, every
+## silhouette and every fold where faces meet, in the palette's darkest ink.
+const TOON_INK := {"width": 2.2, "strength": 1.0, "depth": 0.04, "normal": 0.6, "colour": "void"}

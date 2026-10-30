@@ -51,6 +51,9 @@ void fragment() {
 		r = mix(r, 0.65, snow);
 		m = mix(m, 0.0, snow);
 	}
+	if (toon()) {
+		base = toon_fill(base, base);   // (a flat colour: only the push in colour)
+	}
 	ALBEDO = base;
 	EMISSION = emission;
 	// Never below 0.1: the screen pass reads near-zero roughness as water (screen_pass.gdshader).

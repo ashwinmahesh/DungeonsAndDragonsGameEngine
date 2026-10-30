@@ -11,7 +11,12 @@
 // and wide against the shade. The sun and moon leave half the highlight a lamp would: a broad sky light glancing off a
 // whole street reads as a grey haze over it, while a lamp's glints on the stones near it make a street look wet.
 //
+// The Toon finish (look_soft 2, Look.toon; plan E27, the 1980s anime cel look) takes the same lights in hard cel bands:
+// lit, a mid tone and shade, a lamp's pool of light ending in a ring rather than fading, and a hard, bright highlight
+// where the surface is glossy enough to hold one. Its fills are flatter and more vivid (toon_fill).
+//
 // Godot multiplies DIFFUSE_LIGHT by the albedo afterwards; LIGHT_COLOR already holds the light's energy times PI.
+global uniform float look_soft;
 uniform float specular : hint_range(0.0, 1.0) = 0.5;
 // How wet the place is (W12; Atmosphere): under rain clouds the sun and moon leave almost no highlight, so wet stone
 // glistens in the lamps' light rather than going grey with the sky's.
@@ -20,23 +25,64 @@ global uniform float world_wet;
 const float LIT_LIFT = 0.75;
 const float LAMP_GAIN = 1.35;
 const float SKY_SPECULAR = 0.5;
+// Toon: where the bands break (light reaching the face, shadow and falloff included), the mid band's brightness, how
+// soft a band's edge is, how glossy a surface must be to hold a highlight, and how bright that highlight is.
+const float TOON_LIT = 0.42;
+const float TOON_SHADE = 0.07;
+const float TOON_MID = 0.52;
+const float TOON_EDGE = 0.025;
+const float TOON_GLOSS = 0.62;
+const float TOON_SHINE = 0.55;
+// Toon fills: how far a texture flattens toward its own average colour, and how much more saturated it gets.
+const float TOON_FLAT = 0.72;
+const float TOON_VIVID = 1.3;
+// Toon: how much of a surface's relief (normal map) still shows; the bands would break up on every stone otherwise.
+const float TOON_RELIEF = 0.3;
+
+bool toon() {
+	return look_soft > 1.5;
+}
+
+// A surface's colour in the Toon finish: its texture's detail pressed toward `mean` (the texture's average colour, a
+// high mip) and its colour pushed, so a wall reads as one flat painted colour with a hint of its stones.
+vec3 toon_fill(vec3 base, vec3 mean) {
+	vec3 flat_col = mix(base, mean, TOON_FLAT);
+	float l = dot(flat_col, vec3(0.299, 0.587, 0.114));
+	return max(mix(vec3(l), flat_col, TOON_VIVID), vec3(0.0));
+}
+
+float toon_band(float lit) {
+	float shade = smoothstep(TOON_SHADE - TOON_EDGE, TOON_SHADE + TOON_EDGE, lit);
+	float full = smoothstep(TOON_LIT - TOON_EDGE, TOON_LIT + TOON_EDGE, lit);
+	return mix(shade * TOON_MID, 1.0, full);
+}
 
 void light() {
 	float ndl = clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
 	float lit = ndl * ATTENUATION;
-	DIFFUSE_LIGHT += pow(lit, LIT_LIFT) * LIGHT_COLOR / PI * (LIGHT_IS_DIRECTIONAL ? 1.0 : LAMP_GAIN);
-	// Specular only on the lit side (a light can't glint off a face turned away from it).
-	vec3 h = normalize(VIEW + LIGHT);
-	float ndh = clamp(dot(NORMAL, h), 0.0, 1.0);
-	float ndv = clamp(dot(NORMAL, VIEW), 1e-4, 1.0);
-	float ldh = clamp(dot(LIGHT, h), 0.0, 1.0);
-	float a = max(ROUGHNESS * ROUGHNESS, 0.002);
-	float a2 = a * a;
-	float dd = ndh * ndh * (a2 - 1.0) + 1.0;
-	float d = a2 / (PI * dd * dd);
-	float vis = 0.5 / (ndl * sqrt(ndv * ndv * (1.0 - a2) + a2) + ndv * sqrt(ndl * ndl * (1.0 - a2) + a2));
-	vec3 f0 = mix(vec3(0.16 * specular * specular), ALBEDO, METALLIC);
-	vec3 f = f0 + (1.0 - f0) * pow(1.0 - ldh, 5.0);
+	float gain = LIGHT_IS_DIRECTIONAL ? 1.0 : LAMP_GAIN;
 	float sky = LIGHT_IS_DIRECTIONAL ? SKY_SPECULAR * (1.0 - world_wet * 0.85) : 1.0;
-	SPECULAR_LIGHT += ndl * d * vis * f * LIGHT_COLOR * ATTENUATION * SPECULAR_AMOUNT * sky * step(1e-4, ndl);
+	if (toon()) {
+		DIFFUSE_LIGHT += toon_band(lit) * LIGHT_COLOR / PI * gain;
+		// One hard highlight on glossy surfaces, where the light's reflection points at the eye.
+		vec3 th = normalize(VIEW + LIGHT);
+		float gloss = 1.0 - smoothstep(TOON_GLOSS - 0.15, TOON_GLOSS, ROUGHNESS);
+		float aim = smoothstep(0.955, 0.965, dot(NORMAL, th)) * step(TOON_LIT, lit);
+		SPECULAR_LIGHT += aim * gloss * TOON_SHINE * LIGHT_COLOR / PI * gain * SPECULAR_AMOUNT * sky;
+	} else {
+		DIFFUSE_LIGHT += pow(lit, LIT_LIFT) * LIGHT_COLOR / PI * gain;
+		// Specular only on the lit side (a light can't glint off a face turned away from it).
+		vec3 h = normalize(VIEW + LIGHT);
+		float ndh = clamp(dot(NORMAL, h), 0.0, 1.0);
+		float ndv = clamp(dot(NORMAL, VIEW), 1e-4, 1.0);
+		float ldh = clamp(dot(LIGHT, h), 0.0, 1.0);
+		float a = max(ROUGHNESS * ROUGHNESS, 0.002);
+		float a2 = a * a;
+		float dd = ndh * ndh * (a2 - 1.0) + 1.0;
+		float d = a2 / (PI * dd * dd);
+		float vis = 0.5 / (ndl * sqrt(ndv * ndv * (1.0 - a2) + a2) + ndv * sqrt(ndl * ndl * (1.0 - a2) + a2));
+		vec3 f0 = mix(vec3(0.16 * specular * specular), ALBEDO, METALLIC);
+		vec3 f = f0 + (1.0 - f0) * pow(1.0 - ldh, 5.0);
+		SPECULAR_LIGHT += ndl * d * vis * f * LIGHT_COLOR * ATTENUATION * SPECULAR_AMOUNT * sky * step(1e-4, ndl);
+	}
 }

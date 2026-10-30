@@ -141,21 +141,22 @@ static func _all_material_keys() -> Array[String]:
 
 
 static func _material(key: String) -> ShaderMaterial:
-	if _materials.has(key):
-		return _materials[key] as ShaderMaterial
+	var kept := key + "|" + Look.style()   # a change of look gets fresh materials (the Toon finish's toon light)
+	if _materials.has(kept):
+		return _materials[kept] as ShaderMaterial
 	var m := ShaderMaterial.new()
 	var kind := key.get_slice("|", 1)
 	var sway := SWAY.get(kind, [0.01, 0.03]) as Array
 	if key.begins_with("leaf"):
-		m.shader = FOLIAGE_SHADER
+		m.shader = Look.toon_shader(FOLIAGE_SHADER)
 		m.set_shader_parameter("cards", CARDS)
 		# Ground plants are lit more evenly than a tree's crown, which shades its own inside.
 		m.set_shader_parameter("shade_floor", 0.4 if kind in TREES else 0.6)
 	else:
-		m.shader = BARK_SHADER
+		m.shader = Look.toon_shader(BARK_SHADER)
 	m.set_shader_parameter("stiffness", float(sway[0]))
 	m.set_shader_parameter("flutter_amount", float(sway[1]))
-	_materials[key] = m
+	_materials[kept] = m
 	return m
 
 

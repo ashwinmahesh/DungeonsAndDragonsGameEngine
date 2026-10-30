@@ -75,13 +75,18 @@ static func create(loc_id: String, loc_: Dictionary, board_: ArenaBoard) -> Atmo
 ## The place's mood dressed for the world's weather (lane 4's Weather, F12): outdoors its own rain and snow give way to
 ## the weather's and fog thickens its mist; indoors it is the mood as it stands. In the Modern finish a mood's `modern`
 ## block goes on top first: each region's own light, mist, air and ground (the vault's Region Variety Plan), which the
-## frozen Classic look leaves out.
+## frozen Classic look leaves out. In the Toon finish a mood's `toon` block goes on top of that (a region's cel night:
+## its own sky, shade and ink colours).
 func _dressed() -> Dictionary:
 	var base := resolve(mood_id)
 	var own := base.get("modern", {}) as Dictionary
+	var cel := base.get("toon", {}) as Dictionary
 	base.erase("modern")
+	base.erase("toon")
 	if Look.modern():
 		_merge(base, own)
+	if Look.toon():
+		_merge(base, cel)
 	if GameState.story == null:
 		return base
 	return Weather.dress_mood(GameState.story, loc_id, base, outdoors)
@@ -494,6 +499,11 @@ const DAY_TONE := {"shade": "slate", "amount": 0.45, "pivot": 0.24, "shade_satur
 ## by `ambient_mix` and is `ambient` times as strong, and the moon key light `key` times.
 const INDOOR_TONE := {"shade": "night_deep", "ambient": 1.1, "ambient_tint": "moon_blue", "ambient_mix": 0.5,
 	"key": 1.4}
+## The Toon finish's grade (plan E27, the 1980s cel cartoon): a cartoon's shade keeps its colour (a painted cel's shadow
+## is a deeper hue of the same paint, not grey), its blacks stay off black (deep indigo ink, never pure black), and the
+## whole picture is a little more saturated. A mood's own "tone" still wins.
+const TOON_TONE := {"amount": 0.5, "shade_saturation": 1.05, "black": 0.0}
+const TOON_SATURATION := 1.15
 
 
 ## The Modern grade for a time of day: MODERN_TONE, a day's DAY_TONE or an indoor INDOOR_TONE, then the mood's own
@@ -504,6 +514,8 @@ func _tone(p: String) -> Dictionary:
 		t.merge(DAY_TONE, true)
 	elif p == "any":
 		t.merge(INDOOR_TONE, true)
+	if Look.toon():
+		t.merge(TOON_TONE, true)
 	t.merge(mood.get("tone", {}) as Dictionary, true)
 	t.merge(((mood.get("times", {}) as Dictionary).get(p, {}) as Dictionary).get("tone", {}) as Dictionary, true)
 	return t
@@ -1058,7 +1070,7 @@ func _target(p: String) -> Dictionary:
 		"mist_strength": float(t.get("mist_strength", 0.0)),
 		"clouds": float(t.get("clouds", 0.0)) * float((mood.get("clouds", {}) as Dictionary).get("strength", 0.0)),
 		"exposure": float(t.get("exposure", 1.0)),
-		"saturation": float(t.get("saturation", mood.get("saturation", 1.0))),
+		"saturation": float(t.get("saturation", mood.get("saturation", 1.0))) * (TOON_SATURATION if Look.toon() else 1.0),
 		"grade_shadows": Look.color(str(grade.get("shadows", "pewter"))) if not grade.is_empty() else Color(0.5, 0.5, 0.5),
 		"grade_lights": Look.color(str(grade.get("lights", "pewter"))) if not grade.is_empty() else Color(0.5, 0.5, 0.5),
 		"grade_amount": float(grade.get("amount", 0.0)),

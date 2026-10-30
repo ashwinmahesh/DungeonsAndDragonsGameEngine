@@ -577,9 +577,14 @@ func _set_difficulty(to: String) -> void:
 ## Display: the world's look and how hard the renderer works, the window, depth blur, and the interface and text sizes.
 func _display_rows() -> void:
 	var y := ROW_Y
-	_choice_row(y, "Look", ["Modern", "Classic"], 0 if Look.modern() else 1, func(i: int) -> void:
-		_set_look("modern" if i == 0 else "classic"),
-		"Modern: smooth light, relief and glow. Classic: the 1990s cartoon, every colour from the palette.")
+	var looks := Look.finishes()
+	var look_names: Array[String] = []
+	var look_tips: Array[String] = []
+	for f: String in looks:
+		look_names.append(str(Look.STYLE_NAMES[f]))
+		look_tips.append(str(Look.STYLE_TIPS[f]))
+	_choice_row(y, "Look", look_names, maxi(0, looks.find(Look.style())), func(i: int) -> void:
+		_set_look(looks[i]), " ".join(look_tips))
 	y += ROW_PITCH
 	var presets := Graphics.PRESETS
 	_choice_row(y, "Graphics", ["Low", "Medium", "High"], presets.find(Graphics.preset()), func(i: int) -> void:

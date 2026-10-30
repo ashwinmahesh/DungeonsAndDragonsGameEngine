@@ -123,10 +123,15 @@ Layer layer_of(sampler2DArray albedo, sampler2DArray nrm,
 	vec3 at = vec3(uv, float(pick_layer(uv, count)));
 	Layer l;
 	l.base = textureGrad(albedo, at, dx, dy).rgb * tint;
+	float rel = relief;
+	if (toon()) {
+		l.base = toon_fill(l.base, textureLod(albedo, at, 12.0).rgb * tint);
+		rel *= TOON_RELIEF;
+	}
 	l.base *= mix(1.0, 0.72 + 0.56 * macro, macro_k);
 	l.normal = wn;
-	if (relief > 0.0) {
-		l.normal = world_relief(wn, textureGrad(nrm, at, dx, dy).rgb, relief);
+	if (rel > 0.0) {
+		l.normal = world_relief(wn, textureGrad(nrm, at, dx, dy).rgb, rel);
 	}
 	float r = light.x + (0.45 - dot(l.base, vec3(0.299, 0.587, 0.114))) * light.z;
 	float m = light.y;

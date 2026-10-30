@@ -559,7 +559,7 @@ func _tree_multimesh(kind: String, items: Array) -> void:
 	quad.size = Vector2(float(info.get("width_px", 256)) * px, float(info.get("height_px", 256)) * px)
 	quad.center_offset = Vector3(0, quad.size.y / 2.0, 0)
 	var mat := ShaderMaterial.new()
-	mat.shader = TREE_SHADER
+	mat.shader = Look.toon_shader(TREE_SHADER)
 	mat.set_shader_parameter("tex", load(ArtPaths.of(str(info["file"]))) as Texture2D)
 	quad.material = mat
 	var mm := MultiMesh.new()

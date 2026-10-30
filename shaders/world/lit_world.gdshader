@@ -69,15 +69,21 @@ void fragment() {
 	bool layered = layer_count > 0;
 	bool top = world_top(world_normal);
 	vec3 base = (layered ? texture(albedo_layers, vec3(uv, layer)).rgb : texture(albedo_tex, uv).rgb) * tint;
+	float relief = normal_strength;
+	if (toon()) {
+		vec3 mean = (layered ? textureLod(albedo_layers, vec3(uv, layer), 12.0).rgb : textureLod(albedo_tex, uv, 12.0).rgb) * tint;
+		base = toon_fill(base, mean);
+		relief *= TOON_RELIEF;
+	}
 	float macro = 0.5;
 	if (macro_strength > 0.0) {
 		macro = texture(macro_tex, world_axes(world_pos, world_normal) / macro_units).r;
 		base *= mix(1.0, 0.72 + 0.56 * macro, macro_strength);
 	}
 	vec3 wn = normalize(world_normal);
-	if (normal_strength > 0.0) {
+	if (relief > 0.0) {
 		vec3 map = layered ? texture(normal_layers, vec3(uv, layer)).rgb : texture(normal_tex, uv).rgb;
-		wn = world_relief(world_normal, map, normal_strength);
+		wn = world_relief(world_normal, map, relief);
 	}
 	float r = roughness + (0.45 - dot(base, vec3(0.299, 0.587, 0.114))) * roughness_spread;
 	float m = metallic;

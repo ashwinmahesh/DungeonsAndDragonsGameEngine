@@ -35,6 +35,10 @@ uniform float outline_width : hint_range(0.5, 4.0) = 1.5;
 // meet at an angle, and the lines' strength.
 uniform bool outline_creases = true;
 uniform float outline_strength : hint_range(0.0, 1.0) = 1.0;
+// The Toon finish's ink (Look.TOON_INK): the width is at 1080 lines and grows with the screen, eight neighbours are
+// read instead of four, and a line fades in over its threshold instead of switching on, so it is smooth and as bold
+// at any size.
+uniform bool outline_ink = false;
 uniform float depth_threshold = 0.06;
 uniform float normal_threshold = 0.55;
 uniform vec3 outline_color : source_color = vec3(0.051, 0.039, 0.071);
@@ -309,7 +313,25 @@ void fragment() {
 	float raw_depth = texture(depth_tex, uv).r;
 	bool empty = raw_depth <= 0.0;
 
-	if (outlines) {
+	if (outlines && outline_ink) {
+		vec2 o = outline_width * max(vp.y / 1080.0, 1.0) / vp;
+		float d0 = linear_depth(uv, INV_PROJECTION_MATRIX);
+		vec3 n0 = normal_at(uv);
+		float edge = 0.0;
+		for (int i = 0; i < 8; i++) {
+			float a = float(i) * 0.785398;
+			vec2 at = uv + vec2(cos(a), sin(a)) * o;
+			float d = linear_depth(at, INV_PROJECTION_MATRIX);
+			edge = max(edge, smoothstep(0.6, 1.3, (d - d0) / max(d0, 0.001) / depth_threshold));
+#if CURRENT_RENDERER == RENDERER_FORWARD_PLUS
+			if (outline_creases && d0 < 60.0) {
+				float bend = 1.0 - dot(n0, normal_at(at));
+				edge = max(edge, 0.9 * smoothstep(0.85, 1.2, bend / (1.0 - normal_threshold)));
+			}
+#endif
+		}
+		col = mix(col, to_srgb(outline_color), edge * outline_strength);
+	} else if (outlines) {
 		vec2 o = outline_width * pixel_size / vp;
 		float d0 = linear_depth(uv, INV_PROJECTION_MATRIX);
 		vec3 n0 = normal_at(uv);
