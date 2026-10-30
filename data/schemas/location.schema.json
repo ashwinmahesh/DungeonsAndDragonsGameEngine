@@ -913,6 +913,303 @@
             "type": "boolean",
             "description": "Lair actions on initiative count 20 for a monster that has them."
           },
+          "round_events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "kind": {
+                  "enum": [
+                    "save",
+                    "summon",
+                    "text"
+                  ]
+                },
+                "affects": {
+                  "enum": [
+                    "party",
+                    "enemies",
+                    "all"
+                  ]
+                },
+                "area": {
+                  "type": "object",
+                  "description": "cells [[x, y]...], rect [x0, y0, x1, y1] (inclusive), or around [x, y] with radius (feet); none is the whole field."
+                },
+                "save": {
+                  "type": "object",
+                  "required": [
+                    "ability"
+                  ],
+                  "properties": {
+                    "ability": {
+                      "type": "string"
+                    },
+                    "dc": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "dc_from": {
+                  "type": "object",
+                  "required": [
+                    "flag"
+                  ],
+                  "properties": {
+                    "flag": {
+                      "type": "string"
+                    },
+                    "base": {
+                      "type": "integer"
+                    },
+                    "step": {
+                      "type": "integer"
+                    }
+                  },
+                  "description": "The save's DC from the story: base + step x the flag's value, set as the fight starts."
+                },
+                "dc_step": {
+                  "type": "integer",
+                  "description": "Added to the DC for each time the event has acted before."
+                },
+                "half": {
+                  "type": "boolean"
+                },
+                "damage": {
+                  "type": "object",
+                  "required": [
+                    "dice",
+                    "type"
+                  ],
+                  "properties": {
+                    "dice": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "exhaustion": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "condition": {
+                  "type": "string"
+                },
+                "until": {
+                  "enum": [
+                    "target_turn_end",
+                    "minute",
+                    "permanent"
+                  ]
+                },
+                "skip_if_resists": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "monster": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "side": {
+                  "type": "string"
+                },
+                "cells": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "say": {
+                  "type": "string",
+                  "description": "A Narrator key the view says as it acts."
+                },
+                "at": {
+                  "type": "integer",
+                  "description": "Initiative count, losing ties (default 20)."
+                },
+                "every": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "from_round": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "until_round": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "times": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "pick": {
+                  "enum": [
+                    "random",
+                    "cycle"
+                  ]
+                },
+                "table": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "enum": [
+                          "save",
+                          "summon",
+                          "text"
+                        ]
+                      },
+                      "affects": {
+                        "enum": [
+                          "party",
+                          "enemies",
+                          "all"
+                        ]
+                      },
+                      "area": {
+                        "type": "object",
+                        "description": "cells [[x, y]...], rect [x0, y0, x1, y1] (inclusive), or around [x, y] with radius (feet); none is the whole field."
+                      },
+                      "save": {
+                        "type": "object",
+                        "required": [
+                          "ability"
+                        ],
+                        "properties": {
+                          "ability": {
+                            "type": "string"
+                          },
+                          "dc": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "dc_from": {
+                        "type": "object",
+                        "required": [
+                          "flag"
+                        ],
+                        "properties": {
+                          "flag": {
+                            "type": "string"
+                          },
+                          "base": {
+                            "type": "integer"
+                          },
+                          "step": {
+                            "type": "integer"
+                          }
+                        },
+                        "description": "The save's DC from the story: base + step x the flag's value, set as the fight starts."
+                      },
+                      "dc_step": {
+                        "type": "integer",
+                        "description": "Added to the DC for each time the event has acted before."
+                      },
+                      "half": {
+                        "type": "boolean"
+                      },
+                      "damage": {
+                        "type": "object",
+                        "required": [
+                          "dice",
+                          "type"
+                        ],
+                        "properties": {
+                          "dice": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "exhaustion": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "condition": {
+                        "type": "string"
+                      },
+                      "until": {
+                        "enum": [
+                          "target_turn_end",
+                          "minute",
+                          "permanent"
+                        ]
+                      },
+                      "skip_if_resists": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "monster": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "side": {
+                        "type": "string"
+                      },
+                      "cells": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "say": {
+                        "type": "string",
+                        "description": "A Narrator key the view says as it acts."
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "Round events (combat/round_events.gd): something that happens on initiative count `at` with no creature behind it, in the rounds it says; as itself, or one entry of `table` each time."
+            }
+          },
           "withdraw": {
             "type": "object",
             "additionalProperties": false,

@@ -46,6 +46,31 @@ static func from_data(entry: Dictionary, dice: DiceRoller = null, compendium_: C
 	return m
 
 
+## Puts `entry` in place of the stat block mid-fight (a boss's phase, BossPhases): its traits' modifiers, resistances,
+## immunities, speeds and senses follow; Hit Points stay as they are.
+func set_block(entry: Dictionary) -> void:
+	data = entry
+	base_speed = (entry.get("speed", {"walk": 30}) as Dictionary).duplicate()
+	base_senses = (entry.get("senses", {}) as Dictionary).duplicate()
+	base_resistances.clear()
+	base_vulnerabilities.clear()
+	base_immunities.clear()
+	base_condition_immunities.clear()
+	for v: Variant in entry.get("resistances", []):
+		base_resistances.append(str(v))
+	for v: Variant in entry.get("vulnerabilities", []):
+		base_vulnerabilities.append(str(v))
+	for v: Variant in entry.get("immunities", []):
+		base_immunities.append(str(v))
+	for v: Variant in entry.get("condition_immunities", []):
+		base_condition_immunities.append(str(v))
+	_trait_modifiers.clear()
+	for t: Variant in entry.get("traits", []):
+		var tr := t as Dictionary
+		for md: Variant in tr.get("modifiers", []):
+			_trait_modifiers.append(Modifier.make(md as Dictionary, str(tr.get("name", "")), &"monster", id))
+
+
 func proficiency_bonus() -> int:
 	if data.has("proficiency_bonus"):
 		return int(data["proficiency_bonus"])

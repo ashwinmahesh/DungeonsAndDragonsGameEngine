@@ -29,10 +29,15 @@ var lair_round: int = 0
 var last_lair: String = ""
 ## Creatures called by Children of the Night still on their way: [{round, monster, count, summoner}].
 var incoming: Array[Dictionary] = []
+## Boss phases (combat/boss_phases.gd) and the fight's round events (combat/round_events.gd).
+var phases: BossPhases
+var round_events: RoundEvents
 
 
 func _init(encounter: Encounter) -> void:
 	_enc = weakref(encounter)
+	phases = BossPhases.new(self)
+	round_events = RoundEvents.new(self)
 
 
 func enc() -> Encounter:
@@ -45,6 +50,31 @@ static func data_of(c: Combatant) -> Dictionary:
 
 func _log(kind: String, text: String, who: Combatant, details: Array = []) -> void:
 	enc().log.add(kind, text, who.id if who != null else "", details)
+
+
+## Sets the encounter's round events from location data (combat/round_events.gd).
+func set_round_events(list: Array) -> void:
+	round_events.set_events(list)
+
+
+## Takes `c` out of the fight with its master (a boss's minions when it falls, BossPhases.fell): no turns, no space,
+## no loot, no death of its own.
+func vanish(c: Combatant, narration: String = "") -> void:
+	var e := enc()
+	if departed.has(c.id):
+		return
+	departed[c.id] = "vanish"
+	c.set_meta("left_fight", "vanish")
+	if c.creature.concentration != null:
+		c.creature.concentration.end("left the fight")
+	e._release_grapples_by(c)
+	if e.grapples.has(c.id):
+		e.grapples.erase(c.id)
+		c.creature.remove_condition(&"grappled")
+	c.creature.dead = true
+	_log("info", "%s fades away" % c.name(), c)
+	e.events.append({"type": "vanish", "id": c.id, "left": "vanish", "narration": narration, "say": "", "speaker": ""})
+	e._check_over()
 
 
 ## Sets the encounter's withdraw block(s) from location data (one object, or a list).
@@ -64,6 +94,7 @@ func combat_started() -> void:
 	for c in enc().combatants:
 		if per_round(c) > 0:
 			c.set_meta("legendary_left", per_round(c))
+	phases.fight_started()
 
 
 ## The start of `c`'s turn (before anything else starts there): legendary actions come back, a foe whose time is up
@@ -79,6 +110,7 @@ func turn_start(c: Combatant) -> void:
 		leave(c, "withdraw")
 		return
 	_regenerate(c)
+	phases.turn_start(c)
 
 
 ## After damage lands on `target` (was_up: it had Hit Points before): a `stopped_by` damage type pauses Regeneration;
@@ -87,6 +119,9 @@ func turn_start(c: Combatant) -> void:
 func after_damage(target: Combatant, parts: Array, dr: DamageResult, was_up: bool) -> bool:
 	if not target.creature is Monster or departed.has(target.id):
 		return false
+	# A phase that begins at 0 Hit Points is a second life: the creature stays, and nothing below happens.
+	if phases.after_damage(target, was_up):
+		return true
 	var rg := data_of(target).get("regenerates", {}) as Dictionary
 	if not rg.is_empty() and dr.final > 0:
 		for p: Variant in parts:
@@ -103,7 +138,11 @@ func after_damage(target: Combatant, parts: Array, dr: DamageResult, was_up: boo
 		leave(target, "withdraw")
 		return true
 	if down:
-		return _misty_escape(target)
+		if _misty_escape(target):
+			return true
+		if target.creature.dead:
+			phases.fell(target)
+			phases.someone_fell()
 	return false
 
 
@@ -181,8 +220,8 @@ func round_started() -> void:
 ## The round is over and the lair hasn't acted (everyone rolled 20 or higher): its turn comes now.
 func round_ending() -> void:
 	var e := enc()
-	if e.lair and lair_round < e.round_no and lair_master() != null:
-		lair_turn(false)
+	if (e.lair and lair_round < e.round_no and lair_master() != null) or not round_events.left_this_round().is_empty():
+		lair_turn(false, -1000)
 
 
 # --- Leaving the fight ------------------------------------------------------------------------------------------
@@ -821,10 +860,16 @@ func lair_master(need_act: bool = true) -> Combatant:
 ## Whether the lair acts before the current creature's turn begins (initiative count 20, losing ties).
 func lair_due() -> bool:
 	var e := enc()
-	if not e.lair or lair_round >= e.round_no:
-		return false
 	var cur := e.current()
-	return cur != null and cur.initiative < LAIR_COUNT and lair_master() != null
+	if cur == null:
+		return false
+	return _lair_actions_due(cur.initiative) or not round_events.due(cur.initiative).is_empty()
+
+
+## Whether the lair's own action comes before a creature on initiative count `below` this round.
+func _lair_actions_due(below: int) -> bool:
+	var e := enc()
+	return e.lair and lair_round < e.round_no and below < LAIR_COUNT and lair_master() != null
 
 
 ## For the initiative tracker: where the lair's turn sits in `order` (before that index), or -1 without a lair.
@@ -841,7 +886,20 @@ func lair_slot() -> int:
 ## The lair's turn: the last lair action's effects end, then the master's AI picks one (never the last one again). A
 ## save it calls for stops for the choices after its roll (F6), so the turn can come back paused; with `pausable` false
 ## (the round's end, which can't wait) the choices follow their rules.
-func lair_turn(pausable: bool = true) -> CombatResult:
+func lair_turn(pausable: bool = true, below: int = -1000) -> CombatResult:
+	var e := enc()
+	if below == -1000 and e.current() != null and e.state == Encounter.State.ACTIVE and pausable:
+		below = e.current().initiative
+	var lair_now := _lair_actions_due(below) or (not pausable and e.lair and lair_round < e.round_no and lair_master() != null)
+	var first := _lair_actions(pausable) if lair_now else CombatResult.new()
+	return e.then(first, func() -> CombatResult:
+		if e.state != Encounter.State.ACTIVE:
+			return CombatResult.new()
+		return round_events.run_due(below, pausable))
+
+
+## The lair's own action (initiative count 20).
+func _lair_actions(pausable: bool = true) -> CombatResult:
 	var e := enc()
 	lair_round = e.round_no
 	for c in e.combatants:
@@ -1126,7 +1184,8 @@ static func meets(c: Combatant, t: Combatant, need: String) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"withdraws": withdraws.duplicate(true), "story_flags": story_flags.duplicate(), "story_quests": story_quests.duplicate(),
-		"departed": departed.duplicate(), "lair_round": lair_round, "last_lair": last_lair, "incoming": incoming.duplicate(true)}
+		"departed": departed.duplicate(), "lair_round": lair_round, "last_lair": last_lair, "incoming": incoming.duplicate(true),
+		"phases": phases.to_dict(), "round_events": round_events.to_dict()}
 
 
 func from_dict(d: Dictionary) -> void:
@@ -1141,10 +1200,13 @@ func from_dict(d: Dictionary) -> void:
 	incoming.clear()
 	for inc: Variant in d.get("incoming", []):
 		incoming.append((inc as Dictionary).duplicate())
+	phases.from_dict(d.get("phases", {}) as Dictionary)
+	round_events.from_dict(d.get("round_events", {}) as Dictionary)
 
 
 ## After a fight is loaded: shapes get their size and speeds back (the shape's effect is saved with the creature).
 func after_restore() -> void:
+	phases.after_restore()
 	for c in enc().combatants:
 		if c.creature is Monster and not forms_of(c).is_empty() and c.has_meta("form"):
 			_apply_body(c)

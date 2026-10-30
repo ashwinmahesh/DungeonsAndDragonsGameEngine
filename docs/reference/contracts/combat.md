@@ -314,6 +314,39 @@ The Tarokka (story/tarokka.gd): the card `mists` (room `castle_ravenloft`, `Taro
 (a reading saved before the pick finds the same room from the seed). `Tarokka.final_room(st)` and the condition
 `final_room:<room>` give the room he waits in.
 
+### Boss phases (combat/boss_phases.gd)
+
+A stat block's `phases` change the creature mid-fight, once each, in the block's order (`$defs/phase` in the monster
+schema). `when` is one trigger: `bloodied: true`, `hp_below: N`, `at_zero: true` (a second life: instead of dying it
+stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down), `round: N` (from that round's turn
+on), or `flag` (one this fight set: a game module's set piece, another phase). What begins with it: `hp` ("full",
+"half" or a number) or `heal`; `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
+actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
+`summon: {monster, count}`; `say` (a Narrator key or sting for the view); `traits_add`/`_remove`, `actions_add`/
+`_remove` (and bonus actions, reactions), `legendary_actions` and `lair_actions` replaced, and `art`, `ai_profile`, `ac`,
+`speed`, defences and `legendary_resistance_max`. An action or trait marked `"phase": "<id>"` is held back until that
+phase begins (a Multiattack gained when Bloodied). The block is rebuilt from its data at the fight's start plus the
+phases begun (`Monster.set_block`; the shared compendium entry is never changed), and `Legendary.to_dict` keeps both, so
+a loaded round comes back the same. Each phase sends `{type: "phase", id, phase, name, say}`. A game module or the
+story can begin one with `e.legendary.phases.enter(c, id)`.
+
+`minions: {when_it_falls: "vanish", narration}`: when the creature dies, everything on its side it brought into the
+fight (its summons, `summoner` meta) or that names it as `minion_of` (block field or meta) leaves with it
+(`Legendary.vanish`: `departed` "vanish", no loot, no death of its own).
+
+### Round events (combat/round_events.gd)
+
+An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
+storm's gusts, a breach letting the mist in, reinforcements. Each acts on `at` (default 20, losing ties, like a lair),
+in the rounds `from_round`, `every`, `until_round` and `times` allow, as itself or as one entry of its `table` (`pick`:
+"cycle" in turn, else at random, never the one used last). An outcome is a `save` (whoever it reaches, `affects` party,
+enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
+for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and
+`condition` until `until`), a `summon` (`monster` x `count` at `cells`, joining the order on the event's count), or
+`text`. `dc_from: {flag, base, step}` sets the DC from the story as the fight starts (LocationFights.round_events_for).
+Legendary runs them with the lair's turn (`lair_due`, `lair_turn`, `round_ending`), so an event below every creature's
+count acts as the round ends; each sends `{type: "round_event", event, outcome, name, say, targets}`.
+
 ### The `strahd` AI profile (combat/ai/boss_brain.gd)
 
 Strikes the weakest foe or the one carrying the Sunsword, the Holy Symbol of Ravenkind or the Tome of Strahd; bites

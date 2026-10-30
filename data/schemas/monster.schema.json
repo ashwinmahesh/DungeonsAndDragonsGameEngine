@@ -226,22 +226,8 @@
           "description": "Shape-Shift forms in which the action can be used."
         },
         "do": {
-          "type": "string",
-          "enum": [
-            "dash_or_disengage",
-            "hide_in_dim",
-            "shape_shift",
-            "cast",
-            "swoop",
-            "trample",
-            "rampage",
-            "consume_life",
-            "vanish",
-            "cast_control",
-            "vow",
-            "bonus_save"
-          ],
-          "description": "What a special bonus action does."
+          "$ref": "common.schema.json#/$defs/id",
+          "description": "What a special action or bonus action does: one the engine runs (MonsterActions.ENGINE_DOS: dash_or_disengage, hide_in_dim, shape_shift, cast, cast_control, fey_step, swoop, consume_life, vow, trample, bonus_save, rampage, vanish), or the game's own, which its features module runs (tools/data/check_implemented.py finds the literal in a combat/ script)."
         },
         "cast": {
           "type": "array",
@@ -391,6 +377,10 @@
         "magical": {
           "type": "boolean",
           "description": "A magical ability: enables defenses against magical effects on its save and damage."
+        },
+        "phase": {
+          "$ref": "common.schema.json#/$defs/id",
+          "description": "Held back until this phase of the creature's `phases` begins (combat/boss_phases.gd): the Multiattack a boss gains when Bloodied."
         }
       }
     },
@@ -403,20 +393,8 @@
       "description": "A machine-readable rider (combat/monster_actions.gd).",
       "properties": {
         "do": {
-          "type": "string",
-          "enum": [
-            "condition",
-            "grapple",
-            "pull",
-            "push",
-            "drain_max_hp",
-            "heal_self",
-            "ability_drain",
-            "curse",
-            "engulf",
-            "burning",
-            "possess"
-          ]
+          "$ref": "common.schema.json#/$defs/id",
+          "description": "condition, grapple, pull, push, drain_max_hp, heal_self, ability_drain, curse, engulf, burning, possess (the engine's), or the game's own, which its features module runs (`rider`)."
         },
         "condition": {
           "$ref": "common.schema.json#/$defs/condition"
@@ -589,6 +567,10 @@
             }
           },
           "description": "grapple: damage to the held creature at the start of each of its own turns."
+        },
+        "params": {
+          "type": "object",
+          "description": "The settings of a game's own rider (`do` not the engine's): whatever its features module reads."
         }
       }
     },
@@ -780,6 +762,217 @@
               "minimum": 1
             }
           }
+        }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "summary",
+        "when"
+      ],
+      "description": "A phase (combat/boss_phases.gd, docs/contracts/combat.md \"Boss phases\"): once, when `when` is met, in the block's order.",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string"
+        },
+        "when": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "description": "bloodied: true (half its Hit Points or fewer); hp_below: N; at_zero: true (a second life: it stays at the phase's `hp`); allies_down: [stat block ids], all down; round: N (from that round's turn on); flag: a flag this fight set.",
+          "properties": {
+            "bloodied": {
+              "type": "boolean"
+            },
+            "hp_below": {
+              "type": "integer"
+            },
+            "at_zero": {
+              "type": "boolean"
+            },
+            "allies_down": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "round": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "flag": {
+              "type": "string"
+            }
+          }
+        },
+        "hp": {
+          "description": "Its Hit Points as the phase begins: \"full\", \"half\" or a number.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "enum": [
+                "full",
+                "half"
+              ]
+            }
+          ]
+        },
+        "heal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "legendary_resistance": {
+          "description": "\"refill\": its spent uses come back; a number: that many uses left.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "enum": [
+                "refill"
+              ]
+            }
+          ]
+        },
+        "legendary_refill": {
+          "type": "boolean",
+          "description": "Its legendary actions come back at once."
+        },
+        "end_conditions": {
+          "type": "boolean",
+          "description": "Conditions others put on it end, and it gets free of grapples."
+        },
+        "lair": {
+          "type": "boolean",
+          "description": "The fight becomes a lair fight from now on."
+        },
+        "flag": {
+          "type": "string",
+          "description": "Told to the story when the fight ends (Legendary.story_flags)."
+        },
+        "summon": {
+          "type": "object",
+          "required": [
+            "monster"
+          ],
+          "properties": {
+            "monster": {
+              "type": "string"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "dice": {
+              "type": "string"
+            }
+          }
+        },
+        "say": {
+          "type": "string",
+          "description": "A Narrator key or cutscene sting the view plays as it begins."
+        },
+        "traits_add": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/feature"
+          }
+        },
+        "traits_remove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions_add": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "actions_remove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bonus_actions_add": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "bonus_actions_remove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reactions_add": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "reactions_remove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "legendary_actions": {
+          "$ref": "#/properties/legendary_actions"
+        },
+        "lair_actions": {
+          "$ref": "#/properties/lair_actions"
+        },
+        "art": {
+          "type": "string"
+        },
+        "art_height": {
+          "type": "number"
+        },
+        "ai_profile": {
+          "type": "string"
+        },
+        "ac": {
+          "type": "integer"
+        },
+        "speed": {
+          "type": "object"
+        },
+        "resistances": {
+          "type": "array"
+        },
+        "immunities": {
+          "type": "array"
+        },
+        "vulnerabilities": {
+          "type": "array"
+        },
+        "condition_immunities": {
+          "type": "array"
+        },
+        "legendary_resistance_max": {
+          "type": "integer"
         }
       }
     }
@@ -1127,6 +1320,10 @@
                   "dice",
                   "type"
                 ]
+              },
+              "do": {
+                "$ref": "common.schema.json#/$defs/id",
+                "description": "A legendary action the game's features module runs (`special_action`, with the option as the action)."
               }
             }
           }
@@ -1403,6 +1600,32 @@
       "items": {
         "$ref": "#/$defs/action"
       }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      },
+      "description": "Boss phases (combat/boss_phases.gd)."
+    },
+    "minions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "when_it_falls": {
+          "enum": [
+            "vanish"
+          ]
+        },
+        "narration": {
+          "type": "string"
+        }
+      },
+      "description": "What its minions (its summons, and creatures with `minion_of` naming it) do when it falls."
+    },
+    "minion_of": {
+      "type": "string",
+      "description": "The stat block id of the boss this creature serves (BossPhases.fell)."
     }
   }
 }

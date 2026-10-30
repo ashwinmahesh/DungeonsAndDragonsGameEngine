@@ -138,6 +138,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		e.weather_id = Weather.now(view.st, view.loc_id)
 		e.weather = Weather.kind(e.weather_id)
 	e.legendary.set_withdraw(spec.get("withdraw", {}))
+	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
 	var party_cbs: Array[Combatant] = []
@@ -372,6 +373,21 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 			numbered[str(md["monster"])] = int(numbered.get(str(md["monster"]), 0)) + 1
 			mon.name = "%s %d" % [mon.name, numbered[str(md["monster"])]]
 		out.append({"creature": mon, "side": StringName(str(md.get("side", "enemy"))), "cell": LocationView._cell(md["cell"])})
+	return out
+
+
+## The fight's round events (combat/round_events.gd) with their story numbers filled in: a save's `dc_from`
+## {flag, step, base} sets its DC to base + step x the flag's value (the Tender's fumes grow with each haint destroyed).
+static func round_events_for(st: StoryState, spec: Dictionary) -> Array:
+	var out: Array = []
+	for ev: Variant in spec.get("round_events", []):
+		var d := (ev as Dictionary).duplicate(true)
+		for o: Variant in [d] + (d.get("table", []) as Array):
+			var od := o as Dictionary
+			if od.has("dc_from") and od.has("save"):
+				var df := od["dc_from"] as Dictionary
+				(od["save"] as Dictionary)["dc"] = int(df.get("base", 0)) + int(df.get("step", 1)) * (int(st.get_flag(str(df["flag"]), 0)) if st != null else 0)
+		out.append(d)
 	return out
 
 
