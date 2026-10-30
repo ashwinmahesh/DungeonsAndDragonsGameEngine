@@ -159,6 +159,11 @@ func _build() -> void:
 			stone = _floor_tex
 		if _mud_tex != null:
 			mud = _mud_tex
+		elif _floor_tex != null and theme in WILD:
+			# A game with no difficult-ground texture for the place: its own ground, so the squares roll with the land
+			# under the skin and blend (GroundRelief) instead of standing out as brown checkered plates; the thickets
+			# planted on them (GroundCover) show where the going is hard.
+			mud = _floor_tex
 	else:
 		# The shrine yard (the arena, and open-air yards such as the Abbey's garden): grass and flagstones, a mud
 		# patch, stone walls and pillars.
