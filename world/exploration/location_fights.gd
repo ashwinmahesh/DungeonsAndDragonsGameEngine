@@ -115,6 +115,8 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	view._on_arrive = Callable()
 	LocationCare.stand_up(view, true)   # nobody starts a fight lying where a trap threw them: outside one, standing is free
 	view.in_combat = true
+	if UiMotion.on() and view.rig != null:
+		view.rig.sweep(CameraRig.fight_sweep())   # the game's opening sweep round the board (E50), if it has one
 	view.fight_id = encounter_id   # (the sanctum's braziers flare for Vosk's: AmberGlow)
 	ModeController.force(ModeController.Mode.COMBAT)
 	LocationNpcs.clear_for_fight(view)   # the house's people keep out of it (`steps_aside`)

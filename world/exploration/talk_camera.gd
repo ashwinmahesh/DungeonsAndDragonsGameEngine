@@ -52,6 +52,7 @@ static func open(view: LocationView, npc_id: String, prop_id: String = "") -> vo
 	tw.tween_property(rig, "shot_zoom", ZOOM, IN)
 	tw.tween_property(rig, "shot_pitch", PITCH, IN)
 	tw.tween_property(rig, "shot_weight", LEAN, IN)
+	_bars(view, true)
 
 
 ## The conversation ended: the camera eases back to the play view, or is back at once (`at_once`) when a fight
@@ -59,6 +60,7 @@ static func open(view: LocationView, npc_id: String, prop_id: String = "") -> vo
 static func close(view: LocationView, at_once: bool = false) -> void:
 	if view == null or view.rig == null or not view.is_inside_tree():
 		return
+	_bars(view, false, at_once)
 	var rig := view.rig
 	if not rig.has_meta(OPEN):
 		return   # it never moved for this conversation (a fight's, say): the shot isn't its to put back
@@ -73,6 +75,44 @@ static func close(view: LocationView, at_once: bool = false) -> void:
 	tw.tween_property(rig, "shot_zoom", 1.0, OUT)
 	tw.tween_property(rig, "shot_pitch", 0.0, OUT)
 	tw.tween_property(rig, "shot_weight", 0.0, OUT)
+
+
+## Letterbox bars over the top and bottom of the screen while a conversation is on, for a game that asks
+## (CameraRig.letterbox): they slide in with the camera and out with it, under the conversation box.
+const BAR := 0.09
+const BARS := &"LetterboxBars"
+
+
+static func _bars(view: LocationView, show: bool, at_once := false) -> void:
+	if not CameraRig.letterbox():
+		return
+	var layer := view.get_node_or_null(NodePath(BARS)) as CanvasLayer
+	if layer == null:
+		if not show:
+			return
+		layer = CanvasLayer.new()
+		layer.name = BARS
+		layer.layer = 1
+		for top: bool in [true, false]:
+			var r := ColorRect.new()
+			r.name = "Top" if top else "Bottom"
+			r.color = Look.color("ui_black")
+			r.anchor_right = 1.0
+			r.anchor_top = 0.0 if top else 1.0
+			r.anchor_bottom = 0.0 if top else 1.0
+			r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			layer.add_child(r)
+		view.add_child(layer)
+	var h := view.get_viewport().get_visible_rect().size.y * BAR if show else 0.0
+	for r: ColorRect in [layer.get_node(^"Top") as ColorRect, layer.get_node(^"Bottom") as ColorRect]:
+		var top := r.name == "Top"
+		var prop := "offset_bottom" if top else "offset_top"
+		var goal := h if top else -h
+		if at_once or not on():
+			r.set(prop, goal)
+			continue
+		UiMotion.tween_for(r).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE) \
+			.tween_property(r, prop, goal, IN if show else OUT)
 
 
 ## A new tween for the rig's shot, replacing the one still running; it runs while the game is paused (a conversation

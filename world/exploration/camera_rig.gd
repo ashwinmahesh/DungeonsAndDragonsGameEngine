@@ -70,6 +70,14 @@ var kick := Vector2.ZERO
 var _kick_v := Vector2.ZERO
 const KICK_SPRING := 220.0
 const KICK_DAMP := 18.0
+## The camera's life of its own (a game's "camera" "drift", Visual Polish Plan E50): once the party has stood still a
+## few seconds the view breathes, turning and easing in and out a little; any move settles it. `sweep_deg` is a turn
+## still to unwind (a fight's opening sweep round the board), eased away by sweep().
+var drift := 0.0
+var sweep_deg := 0.0
+var _still := 0.0
+var _drift_t := 0.0
+var _last_follow := Vector3.INF
 ## Whether the tactical view is on, and how far the camera has eased into it.
 var tactical := false
 var tactical_shown := 0.0
@@ -90,6 +98,7 @@ func _init() -> void:
 	pitch_deg = play_pitch()
 	free_turn = turns_freely()
 	tilt_range = tilt_limits()
+	drift = clampf(float(_camera_setting("drift", 0.0)), 0.0, 1.0)
 	camera = Camera3D.new()
 	camera.fov = 32.0
 	camera.near = 0.3
@@ -124,6 +133,31 @@ static func tilt_limits() -> Vector2:
 	var lo := clampf(absf(float((t as Array)[0])), PITCH_RANGE.x, PITCH_RANGE.y)
 	var hi := clampf(absf(float((t as Array)[1])), PITCH_RANGE.x, PITCH_RANGE.y)
 	return Vector2(minf(lo, hi), maxf(lo, hi))
+
+
+static func _camera_setting(key: String, default: Variant) -> Variant:
+	var cam: Variant = Campaign.config().get("camera", {})
+	return (cam as Dictionary).get(key, default) if cam is Dictionary else default
+
+
+## How far a fight's opening sweep turns the camera round the board (data/campaign.json "camera" "fight_sweep",
+## degrees; 0 none).
+static func fight_sweep() -> float:
+	return float(_camera_setting("fight_sweep", 0.0))
+
+
+## Whether conversations frame the screen in letterbox bars (data/campaign.json "camera" "letterbox").
+static func letterbox() -> bool:
+	return bool(_camera_setting("letterbox", false))
+
+
+## Starts the view `degrees` off its heading and eases it round onto it over `seconds` (a fight's opening sweep).
+func sweep(degrees: float, seconds := 1.6) -> void:
+	if is_zero_approx(degrees) or MobileNative.reduced_motion():
+		return
+	sweep_deg = degrees
+	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(self, "sweep_deg", 0.0, seconds)
 
 
 ## Tilts the camera `degrees` further down (negative: flatter), within tilt_range; nothing without one.
@@ -231,9 +265,26 @@ func _process(delta: float) -> void:
 	var goal := _goal_yaw()
 	_yaw = lerp_angle(_yaw, goal, clampf(delta * 9.0, 0.0, 1.0))
 	horizon_shown = move_toward(horizon_shown, horizon, delta * 1.6)
+	_breathe(delta)
 	tactical_shown = move_toward(tactical_shown, 1.0 if tactical else 0.0, delta * 3.0)
 	_shake(delta)
 	_apply()
+
+
+## The idle drift: the party still for a few seconds lets the view breathe; it settles as soon as anyone moves.
+func _breathe(delta: float) -> void:
+	if drift <= 0.0:
+		return
+	var at := follow.global_position if follow != null else global_position
+	var moved := _last_follow != Vector3.INF and at.distance_to(_last_follow) > delta * 0.05
+	_last_follow = at
+	_still = 0.0 if moved else _still + delta
+	_drift_t += delta
+
+
+## How much of the drift shows now (0 moving, 1 after standing still a while).
+func drift_shown() -> float:
+	return drift * smoothstep(2.5, 6.0, _still) if not MobileNative.reduced_motion() else 0.0
 
 
 ## The right stick (pad_look): a flick turns a quarter, up and down zoom within the play range.
@@ -292,13 +343,15 @@ func _kick(delta: float) -> Vector2:
 
 
 func _apply() -> void:
-	rotation = Vector3(0, _yaw, 0)
+	var breathe := drift_shown()
+	rotation = Vector3(0, _yaw + deg_to_rad(sweep_deg + sin(_drift_t * 0.11) * 2.5 * breathe), 0)
 	var k := smoothstep(0.0, 1.0, horizon_shown)
 	var kt := smoothstep(0.0, 1.0, tactical_shown)
 	var reduce := MobileNative.reduced_motion()
 	var pitch := lerpf(pitch_deg, TACTICAL_PITCH_DEG, kt) + (0.0 if reduce else shot_pitch)
 	var play := deg_to_rad(pitch)
-	var d := distance * (1.0 if reduce else shot_zoom) * lerpf(1.0, TACTICAL_ZOOM, kt)
+	var d := distance * (1.0 if reduce else shot_zoom) * lerpf(1.0, TACTICAL_ZOOM, kt) \
+		* (1.0 + sin(_drift_t * 0.07 + 1.3) * 0.035 * breathe)
 	var at := Vector3(0, -sin(play) * d, cos(play) * d) + Vector3(0, 0.6, 0)
 	if shot_weight > 0.0 and not reduce:
 		at += Basis(Vector3.UP, -_yaw) * ((shot_focus - global_position) * shot_weight)
