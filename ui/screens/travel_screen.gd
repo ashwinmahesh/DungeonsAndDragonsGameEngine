@@ -34,7 +34,9 @@ const AREA_SETTING := "map_area"
 ## The map's two views, in the toggle's order: the land (named by the campaign's `land_name`), and the place the party is
 ## in (AreaMap).
 var views: Array[String] = [Campaign.path("land_name"), "Local area"]
-var _map_art: Texture2D = null
+## The campaign's painting of its land (data/campaign.json `travel_map`, a 3:2 picture), loaded with the class.
+static var MAP_ART: Texture2D = load(Campaign.path("travel_map")) as Texture2D \
+	if ResourceLoader.exists(Campaign.path("travel_map")) else null
 var st: StoryState
 ## The location the party is in, set before open_map: with it the map offers the local area view.
 var area_view: LocationView = null
@@ -102,13 +104,6 @@ class TouchMap extends Control:
 
 	func touch_surface_cancel() -> void:
 		gestures.cancel()
-
-
-## The campaign's painting of its land (data/campaign.json `travel_map`, a 3:2 picture), loaded once.
-func map_art() -> Texture2D:
-	if _map_art == null:
-		_map_art = load(Campaign.path("travel_map")) as Texture2D
-	return _map_art
 
 
 func _init() -> void:
@@ -365,7 +360,7 @@ func road_points(road: Dictionary, a: Vector2, b: Vector2) -> PackedVector2Array
 # --- Drawing ---------------------------------------------------------------------------------------
 
 func _draw_art() -> void:
-	_map.draw_texture_rect(map_art(), Rect2(pan, MAP_SIZE * zoom), false)
+	_map.draw_texture_rect(MAP_ART, Rect2(pan, MAP_SIZE * zoom), false)
 	if st.is_night():
 		_map.draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color(Look.color("night_deep"), 0.18))
 
