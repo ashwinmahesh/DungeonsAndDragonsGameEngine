@@ -229,3 +229,14 @@ func test_a_place_comes_in_through_ink_only_when_asked() -> void:
 	assert_true(bool(mat.get_shader_parameter("ink")), "blots of ink when the game asks")
 	PlaceDissolve.headless_too = false
 	game.free()
+
+
+func test_a_broken_bit_flies_and_lands_where_it_lies() -> void:
+	var view := ObjectView.new()
+	add_child(view)
+	var bit := Node3D.new()
+	view.add_child(bit)
+	view._fly(bit, Vector3(0, 0.5, 0), Vector3(0.6, 0, 0.3))
+	await get_tree().create_timer(0.8).timeout
+	assert_true(bit.position.distance_to(Vector3(0.6, 0, 0.3)) < 0.01, "lands where it lies (%s)" % bit.position)
+	view.free()

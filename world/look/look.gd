@@ -149,6 +149,7 @@ static func hd2d_settings() -> Dictionary:
 ##   marks: how many marks a fight leaves on the ground at once (GroundMarks: blood, scorch, frost...; 0 none), each
 ##   fading over marks_fade seconds (0: until the place closes).
 ##   ink_wipe: a new place comes in as blots of ink (the colour `ink`) shrinking away from the middle (PlaceDissolve).
+##   debris: what breaks in a fight bursts, its pieces thrown up and tumbling to where they lie (ObjectView).
 const PAINTED := {
 	"strokes": 0.0, "stroke_radius": 4.0, "stroke_sharpness": 600.0,
 	"ramp": [], "ramp_amount": 0.0, "steps": 5, "step_edge": 0.18, "keep_hue": 0.3, "keep_light": 1.0,
@@ -158,7 +159,7 @@ const PAINTED := {
 	"moon_water": 0.0, "moon_water_size": 0.07, "moon_water_bite": 0.6, "moon_water_ripple": 0.35,
 	"moon_face": "", "moon_face_size": 0.12, "lightning_cutout": 0.0,
 	"wakes": 0.0, "plants_part": 0.0, "window_frames": 0.0, "bats": 0,
-	"marks": 0, "marks_fade": 120.0, "ink_wipe": false,
+	"marks": 0, "marks_fade": 120.0, "ink_wipe": false, "debris": false,
 }
 
 

@@ -195,9 +195,28 @@ func _wreckage(cell: Vector2i, substance: String, animate: bool) -> void:
 		var bit := board.add_box("Wreckage_%d_%d_%d" % [cell.x, cell.y, i], size, at, Look.cel(str(colours[i % colours.size()])))
 		bit.rotation.y = _rng.randf_range(0.0, TAU)
 		bit.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if animate:
+		if animate and bool(Look.painted_settings()["debris"]) and Look.modern():
+			_fly(bit, board.cell_center(cell) + Vector3(0, 0.55, 0), at)
+		elif animate:
 			bit.scale = Vector3(0.1, 0.1, 0.1)
 			bit.create_tween().tween_property(bit, "scale", Vector3.ONE, 0.18).set_trans(Tween.TRANS_BACK)
+
+
+## A broken bit bursting out of what broke (a game's painted `debris`, Visual Polish Plan E48): thrown up from `from`,
+## tumbling, and landing where it lies at `to`, with a little bounce.
+func _fly(bit: Node3D, from: Vector3, to: Vector3) -> void:
+	var spin := Vector3(_rng.randf_range(-9.0, 9.0), _rng.randf_range(-6.0, 6.0), _rng.randf_range(-9.0, 9.0))
+	var rest := bit.rotation
+	var up := _rng.randf_range(0.5, 1.0)
+	var secs := _rng.randf_range(0.35, 0.55)
+	bit.position = from
+	var arc := func(t: float) -> void:
+		bit.position = from.lerp(to, t) + Vector3(0, up * 4.0 * t * (1.0 - t), 0)
+		bit.rotation = rest + spin * (1.0 - t) * 0.3
+	var tw := bit.create_tween()
+	tw.tween_method(arc, 0.0, 1.0, secs)
+	tw.tween_property(bit, "position:y", to.y + 0.06, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(bit, "position:y", to.y, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
 ## The art standing for `o` on `cell`: the board's pieces there and the location prop that dresses it.
