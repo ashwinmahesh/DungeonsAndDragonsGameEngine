@@ -1,19 +1,22 @@
 class_name CombatArena
 extends Node3D
-## Phase 2 exit scene (plan §9): the arena fight of the four level 3 pregens against Barovian wolves and zombies,
-## on the grid, with the combat HUD (docs/ui/combat_view.md). Builds the board, tokens and camera from
-## data/encounters/arena_wolves_and_zombies.json and hands the fight to a CombatView. Built in code; the .tscn is a
+## The arena scene: the four level 3 pregens in the campaign's arena fight (data/campaign.json `arena_encounter`), on the
+## grid, with the combat HUD (docs/ui/combat_view.md). Builds the board, tokens and camera from that encounter and hands
+## the fight to a CombatView. Built in code; the .tscn is a
 ## thin root.
 ## It also plays Skirmish fights (N1): with `skirmish` set, the fight is that setup's, on its map dressed as the place
 ## (SkirmishField), and it ends on the results (SkirmishResults: fight again, change the setup, or the title).
 
-const ENCOUNTER_ID := "arena_wolves_and_zombies"
 const SKIRMISH_SCENE := "res://scenes/skirmish.tscn"
 const TITLE_SCENE := "res://scenes/main_menu.tscn"
 
 ## The Skirmish fight to play next, handed over by the Skirmish screen (the scene takes it and clears it); null plays
 ## the Phase 2 arena.
 static var skirmish: SkirmishSetup = null
+
+## The arena's fight: the campaign's `arena_encounter` (an id in data/encounters), else the first game's.
+static func encounter_id() -> String:
+	return Campaign.path("arena_encounter")
 
 var e: Encounter
 var board: ArenaBoard
@@ -74,11 +77,11 @@ func _ready() -> void:
 	else:
 		build_environment(self)
 		if recovery == null:
-			e = EncounterSetup.load_id(ENCOUNTER_ID, Dice.roller, errors)
+			e = EncounterSetup.load_id(encounter_id(), Dice.roller, errors)
 		assert(e != null, str(errors))
 		board = ArenaBoard.build(e.grid)
 		add_child(board)
-		surprised = EncounterSetup.surprised_ids(Compendium.shared().get_entry("encounters", ENCOUNTER_ID), e)
+		surprised = EncounterSetup.surprised_ids(Compendium.shared().get_entry("encounters", encounter_id()), e)
 	for c in e.combatants:
 		var t := CombatToken.create(c)
 		t.position = board.cell_center(c.cell, c.size_cells)
