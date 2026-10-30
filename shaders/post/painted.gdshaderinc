@@ -155,6 +155,9 @@ vec3 painted_values(vec3 col, vec3 wpos, vec3 wn) {
 	float keep = max(smoothstep(0.18, 0.4, chroma), warm) * paint_keep_light;
 	float v = paint_step(clamp(l0 + b * 0.12, 0.0, 1.0), paint_steps, paint_step_edge);
 	vec3 ramp = texture(paint_ramp, vec2(clamp(v, 0.01, 0.99), 0.5)).rgb;
+	// The ramp gives the colour; the stepped value gives the brightness, so a ramp of darker colours doesn't darken
+	// the picture.
+	ramp *= clamp(v / max(luma(ramp), 0.02), 0.0, 4.0);
 	vec3 own = col * (luma(ramp) / max(l0, 0.02));
 	vec3 pc = mix(ramp, own, paint_keep_hue) * (1.0 + b * 0.25);
 	col = mix(col, pc, paint_ramp_amount * (1.0 - keep));

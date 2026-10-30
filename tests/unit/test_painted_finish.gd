@@ -197,3 +197,20 @@ func test_bats_flit_low_over_a_place() -> void:
 	assert_true(bool((b.multimesh.mesh.surface_get_material(0) as ShaderMaterial).get_shader_parameter("bat")), "bat-winged")
 	assert_true(b in w.follow, "they follow the camera")
 	parent.free()
+
+
+func test_marks_stay_on_the_ground_up_to_the_cap() -> void:
+	var parent := Node3D.new()
+	add_child(parent)
+	Campaign.use_config({"module": "res://nowhere.gd"})
+	GroundMarks.leave(parent, Vector3.ZERO, "blood")
+	assert_eq(parent.get_child_count(), 0, "none unless the game asks")
+	Campaign.use_config({"painted": {"marks": 3, "marks_fade": 0}})
+	for i in 5:
+		GroundMarks.leave(parent, Vector3(i, 0, 0), "scorch")
+	GroundMarks.leave(parent, Vector3.ZERO, "glitter")
+	await get_tree().process_frame
+	assert_eq(GroundMarks.count(), 3, "the oldest go at the cap; an unknown kind leaves nothing")
+	var d := parent.get_child(parent.get_child_count() - 1) as Decal
+	assert_true(d.texture_albedo != null and d.emission_energy > 0.0, "scorch smoulders a little")
+	parent.free()
