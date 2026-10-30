@@ -34,6 +34,12 @@ uniform float current = 1.2;
 uniform float white_water : hint_range(0.0, 2.0) = 1.0;
 // Rain on the water (W12): rings spreading where drops land, as wet as the place's weather (world_wet, Atmosphere).
 
+// Figures standing in the water (FigureWake, a game's painted `wakes`): up to eight feet (xyz; w 1 while walking), each
+// sending rings out across the surface and foam round its legs, `figure_wake` strong (0 none).
+uniform vec4 figures[8];
+uniform int figure_count = 0;
+uniform float figure_wake = 0.0;
+
 varying vec3 world_pos;
 
 float hash(vec2 p) {
@@ -82,6 +88,32 @@ float rain_rings(vec2 p) {
 		}
 	}
 	return h;
+}
+
+// The rings round the figures standing in the water: faster and stronger while they walk.
+float figure_rings(vec2 p) {
+	float h = 0.0;
+	for (int i = 0; i < 8; i++) {
+		if (i >= figure_count) {
+			break;
+		}
+		float d = length(p - figures[i].xz);
+		float pace = mix(0.35, 0.8, figures[i].w);
+		h += sin((d - atmo_time * pace) * 18.0) * exp(-d * 2.2) * smoothstep(0.08, 0.2, d) * mix(0.5, 1.0, figures[i].w);
+	}
+	return h;
+}
+
+// Foam round the figures' legs.
+float figure_foam(vec2 p) {
+	float f = 0.0;
+	for (int i = 0; i < 8; i++) {
+		if (i >= figure_count) {
+			break;
+		}
+		f = max(f, 1.0 - smoothstep(0.12, 0.28, length(p - figures[i].xz)));
+	}
+	return f;
 }
 
 void vertex() {
@@ -143,6 +175,10 @@ void fragment() {
 		float r0 = rain_rings(p);
 		slope += vec2(rain_rings(p + vec2(e, 0.0)) - r0, rain_rings(p + vec2(0.0, e)) - r0) / e * 0.08 * world_wet;
 	}
+	if (figure_wake > 0.0 && figure_count > 0) {
+		float f0 = figure_rings(p);
+		slope += vec2(figure_rings(p + vec2(e, 0.0)) - f0, figure_rings(p + vec2(0.0, e)) - f0) / e * 0.12 * figure_wake;
+	}
 	vec3 wn = normalize(vec3(-slope.x * ripple_strength * 0.25, 1.0, -slope.y * ripple_strength * 0.25));
 	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
 	// Foam along the shore: a soft band broken up by noise, lapping in and out.
@@ -157,6 +193,9 @@ void fragment() {
 		float s1 = vnoise(q - vec2(0.0, length(v) * 4.0 * ph1) + 5.1);
 		float streak = mix(s0, s1, pw);
 		froth = max(froth, white * smoothstep(0.55 - white * 0.25, 0.8, streak));
+	}
+	if (figure_wake > 0.0 && figure_count > 0) {
+		froth = max(froth, figure_foam(p) * smoothstep(0.3, 0.6, broken + 0.2) * min(figure_wake, 1.0));
 	}
 	if (toon()) {
 		froth = smoothstep(0.42, 0.5, froth);   // the Toon finish: cel foam, hard-edged

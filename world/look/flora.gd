@@ -140,6 +140,16 @@ static func _all_material_keys() -> Array[String]:
 	return out
 
 
+## The plants' shared materials in the current look (FigureWake hands them the figures walking among the plants).
+static func materials() -> Array[ShaderMaterial]:
+	var out: Array[ShaderMaterial] = []
+	var look := "|" + Look.style()
+	for k: String in _materials:
+		if k.ends_with(look):
+			out.append(_materials[k] as ShaderMaterial)
+	return out
+
+
 static func _material(key: String) -> ShaderMaterial:
 	var kept := key + "|" + Look.style()   # a change of look gets fresh materials (the Toon finish's toon light)
 	if _materials.has(kept):

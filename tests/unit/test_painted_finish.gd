@@ -142,3 +142,32 @@ func test_a_close_strike_flashes_a_cut_out() -> void:
 	a._flash_cutout()
 	assert_eq(_f(mat, "flash_silhouette"), 0.0, "gone as the flash fades")
 	a.free()
+
+
+func test_the_nearest_figures_are_handed_on_walking_or_standing() -> void:
+	var figures: Array[Node3D] = []
+	for i in 10:
+		var n := Node3D.new()
+		add_child(n)
+		n.global_position = Vector3(float(i), 0.0, 0.0)
+		figures.append(n)
+	var last := {}
+	var feet := FigureWake.feet_of(figures, last, 0.1, Vector3.ZERO)
+	assert_eq(feet.size(), FigureWake.MAX, "at most eight")
+	assert_eq(feet[0].x, 0.0, "the nearest first")
+	assert_eq(feet[0].w, 0.0, "standing at first sight")
+	figures[0].global_position = Vector3(0.0, 0.0, 0.2)
+	feet = FigureWake.feet_of(figures, last, 0.1, Vector3.ZERO)
+	assert_eq(feet[0].w, 1.0, "walking once it moves")
+	assert_eq(feet[1].w, 0.0, "the rest still standing")
+	for n in figures:
+		n.free()
+
+
+func test_wakes_and_parting_plants_only_when_the_game_asks() -> void:
+	var a := Atmosphere.new()
+	add_child(a)
+	assert_true(FigureWake.build(a, Look.painted_settings()) == null, "none by default")
+	var w := FigureWake.build(a, Look.painted_settings({"wakes": 1.0}))
+	assert_true(w != null and w.get_parent() == a, "rings in the water when asked")
+	a.free()

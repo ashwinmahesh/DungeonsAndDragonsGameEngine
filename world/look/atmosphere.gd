@@ -881,6 +881,10 @@ func attach(rig: CameraRig, post: MeshInstance3D) -> void:
 	_focus_blur()
 	_apply_static()
 	PaintedFinish.apply(_post, painted)
+	var old_wake := get_node_or_null(^"FigureWake")
+	if old_wake != null:
+		old_wake.free()
+	FigureWake.build(self, painted)   # rings in the water and plants parting round the figures (E42, E43)
 	weather = AtmosphereWeather.build(self, board, mood, outdoors, get_parent())
 	_show_night_pieces()
 	_set_weather_on_surfaces()

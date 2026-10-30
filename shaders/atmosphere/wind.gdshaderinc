@@ -10,6 +10,33 @@ uniform float wind_strength : hint_range(0.0, 1.0) = 0.3;
 uniform float stiffness = 0.012;
 uniform float flutter_amount = 0.035;
 
+// Figures among the plants (FigureWake, a game's painted `plants_part`): up to eight feet (xyz), and how far a plant
+// low enough to touch leans away from one standing in it (world units at a plant's top; 0 none).
+uniform vec4 figures[8];
+uniform int figure_count = 0;
+uniform float figure_part = 0.0;
+
+// How a vertex leans away from the figures near it: only what stands below a figure's hips, more toward its top.
+vec3 figure_push(vec3 root, vec3 local) {
+	vec3 off = vec3(0.0);
+	if (figure_part <= 0.0) {
+		return off;
+	}
+	vec3 at = root + local;
+	float h = clamp(local.y, 0.0, 1.0);
+	for (int i = 0; i < 8; i++) {
+		if (i >= figure_count) {
+			break;
+		}
+		vec2 away = at.xz - figures[i].xz;
+		float d = length(away);
+		float k = (1.0 - smoothstep(0.12, 0.65, d)) * (1.0 - smoothstep(0.7, 1.3, at.y - figures[i].y));
+		off.xz += away / max(d, 0.01) * k * figure_part * h;
+		off.y -= k * figure_part * 0.35 * h;
+	}
+	return off;
+}
+
 // Where a vertex goes in the wind: `root` is the plant's foot in the world, `local` the vertex above it (world units,
 // already scaled and turned), `free`/`phase` its UV2.
 vec3 wind_offset(vec3 root, vec3 local, float free, float phase, float t) {
@@ -27,5 +54,5 @@ vec3 wind_offset(vec3 root, vec3 local, float free, float phase, float t) {
 	float f = free * flutter_amount * (0.3 + wind_strength) * gust;
 	float w = t * (5.0 + seed * 2.0) + phase * 6.283;
 	off += vec3(sin(w) * 0.6 + d.x * 0.4, cos(w * 1.3) * 0.5, cos(w * 0.9) * 0.6 + d.y * 0.4) * f;
-	return off;
+	return off + figure_push(root, local);
 }
