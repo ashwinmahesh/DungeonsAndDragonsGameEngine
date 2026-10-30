@@ -600,6 +600,7 @@ func rider_options(c: Combatant) -> Array[Dictionary]:
 			out.append({"id": "skip:" + mastery, "label": "Hold back %s" % mastery.capitalize(), "sub": "don't use the mastery this turn", "why": ""})
 	out.append_array(enc().class_features.rider_options(c))
 	out.append_array(enc().echo_knight.rider_options(c))
+	out.append_array(enc().game.rider_options(c))
 	return out
 
 
@@ -669,6 +670,7 @@ func hit_damage_dice(c: Combatant, target: Combatant, option: Dictionary, st: Di
 	out.append_array(e.class_features.hit_dice(c, target, option, st))
 	out.append_array(e.ravenloft.hit_dice(c, target, option, st))
 	out.append_array(e.faerun.hit_dice(c, target, option))
+	out.append_array(e.game.hit_dice(c, target, option, st))
 	if not c.creature is Character:
 		return out
 	var ch := c.creature as Character
@@ -981,6 +983,7 @@ func after_hit(c: Combatant, target: Combatant, option: Dictionary, dr: DamageRe
 	e.class_features.after_hit(c, target, option, st, r)
 	e.ravenloft.after_hit(c, target, option, st, r)
 	e.faerun.after_hit(c, target, critical, st)
+	e.game.after_hit(c, target, option, st, r)
 	# Battle Master maneuvers.
 	if st.has("maneuver"):
 		var id := str(st["maneuver"])

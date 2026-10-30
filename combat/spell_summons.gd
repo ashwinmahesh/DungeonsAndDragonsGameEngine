@@ -56,6 +56,7 @@ func _summon(ctx: Dictionary, cell: Vector2i, r: CombatResult) -> void:
 	m.name = str(block["name"])
 	e.feature_recipes.after_summon(ctx, m)
 	e.faerun.after_summon(ctx, m)
+	e.game.after_summon(ctx, m)
 	# A new Otherworldly Steed replaces the old one, and stays with its caster after the fight (Character.steed).
 	if bool(block.get("steed", false)):
 		for old_id: Variant in spells.summoned.get(c.id, []):

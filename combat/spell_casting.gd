@@ -314,6 +314,7 @@ func _cast_after_counter(cx: Dictionary) -> CombatResult:
 		spells.options._overchannel_cost(c, level)
 	ctx["targets"] = tgt
 	e.faerun.before_resolve(ctx)
+	e.game.before_resolve(ctx)
 	return spells._before_attack_rolls(ctx, tgt, r, func() -> CombatResult:
 		return e.then(_resolve(ctx, tgt, cells, r, true), func() -> CombatResult:
 			spells.check_tethers()
@@ -337,6 +338,7 @@ func _after_cast_features(ctx: Dictionary, free: bool) -> void:
 		enc().feature_recipes.after_cast(c, s, slot)
 	enc().ravenloft.after_cast(c, s, slot)
 	enc().faerun.after_cast(c, s, slot, free, ctx)
+	enc().game.after_cast(c, s, slot, free, ctx)
 	enc().triggered_features.after_cast(ctx)
 	if str(s["id"]) == "hunters_mark" and CombatFeatures.has_feature(c, "hunters_rime"):
 		var amount := enc().dice.roll_one(10, "Hunter’s Rime") + spells.caster_char(c).class_level_of("ranger")
@@ -542,6 +544,8 @@ func _resolve(ctx: Dictionary, tgt: Array[Combatant], cells: Array[Vector2i], r:
 	if spells.specials.resolve(ctx, tgt, cells, r, pausable):
 		return r
 	if enc().faerun.resolve_spell(ctx, tgt, cells, r):
+		return r
+	if enc().game.resolve_spell(ctx, tgt, cells, r):
 		return r
 	match str(s["id"]):
 		"magic_missile":

@@ -396,6 +396,7 @@ func _repeat_settled(c: Combatant, fx: Effect, test: D20Test) -> CombatResult:
 		e.log.add("info", "%s shakes off %s" % [c.name(), fx.name], c.id, [test.describe()])
 		e.events.append({"type": "condition", "id": c.id})
 		e.faerun.after_save_ended(c, fx)
+		e.game.after_save_ended(c, fx)
 	elif then_kind == "sleep_unconscious":
 		c.creature.remove_effect(fx)
 		var deep := Effect.new("Sleep", &"spell", "sleep").with_condition(&"unconscious")

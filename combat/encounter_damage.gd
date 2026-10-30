@@ -353,6 +353,7 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		e.log.add("info", "%s loses Concentration" % target.name(), target.id, [dr.concentration_save.describe()])
 	if was_up and target.is_down():
 		e.class_features.on_drop(source, target)
+		e.game.on_drop(source, target)
 		if e.rider_of(target) != null:
 			e.dismount(e.rider_of(target), true, false)
 		# A rider who drops falls off, Prone, into a free space beside the mount (2024 PHB, Mounted Combat; QA FN-21:
@@ -368,13 +369,14 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		e.events.append({"type": "death", "id": target.id})
 		e.ravenloft.on_death(source, target)
 		e.faerun.on_death(source, target)
+		e.game.on_death(source, target)
 		e.echo_knight.on_death(source, target)
 		e.spells.summons.on_death(target)   # a fallen Otherworldly Steed, or a steed's dead caster
 		if target.has_meta("vanishes"):
 			e.events.append({"type": "vanish", "id": target.id})
 	elif dr.dropped_to_zero and not target.creature.dead and e.monster_actions.lycanthrope(target):
 		pass
-	elif dr.dropped_to_zero and not target.creature.dead and (e.feature_actions.on_zero(target) or e.ravenloft.on_zero(target, dr.final)):
+	elif dr.dropped_to_zero and not target.creature.dead and (e.feature_actions.on_zero(target) or e.ravenloft.on_zero(target, dr.final) or e.game.on_zero(target, dr.final)):
 		e.events.append({"type": "heal", "id": target.id, "amount": 1})
 	elif dr.dropped_to_zero and not target.creature.dead:
 		e.log.add("death", "%s falls unconscious" % target.name(), target.id)
@@ -410,6 +412,7 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 	if dr.final > 0 and source != null and source != target and target.is_alive():
 		e.reaction_flow._queue_damage_reactions(source, target)
 	e.faerun.after_damage(source, target, dr.final, parts)
+	e.game.after_damage(source, target, dr.final, parts, dr)
 	e.echo_knight.after_damage(source, target)
 	e.spells.zones.prune()
 	e._check_over()

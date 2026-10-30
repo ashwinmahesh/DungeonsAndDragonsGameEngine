@@ -203,6 +203,17 @@ func begin_turn(c: Combatant) -> CombatResult:
 			var fled: Variant = tactics.flee_turn(c)
 			if fled != null:
 				return fled as CombatResult
+	# The game's own turn for this creature (GameFeatures.monster_turn), then its own actions the engine can't run.
+	var gt: Variant = e.game.monster_turn(c)
+	if gt != null:
+		return gt as CombatResult
+	if c.creature is Monster:
+		for raw: Variant in MonsterActions.data_of(c).get("actions", []):
+			var sa := raw as Dictionary
+			if MonsterActions.game_action(sa) and e.monster_actions.why_not(c, sa) == "" and c.action_available:
+				var sr: Variant = e.game.special_action(c, sa, null, Vector2i(-1, -1))
+				if sr != null:
+					return sr as CombatResult
 	if str(c.ai_profile) == "strahd":
 		var bt: Variant = boss.play_turn(c)
 		if bt != null:
@@ -849,6 +860,16 @@ func _attack_cells(c: Combatant, t: Combatant, o: Dictionary, reach: Dictionary)
 
 ## Expected value of attacking `t` with `o` from `cell` after a move costing `cost` feet.
 func _score(c: Combatant, t: Combatant, o: Dictionary, cell: Vector2i, cost: int, reach: Dictionary,
+		prof: Dictionary, threats: Array[Dictionary]) -> float:
+	# The game's weight for this target (GameFeatures.target_weight): a multiplier on a good score, a divisor on a bad one.
+	var s := _score_base(c, t, o, cell, cost, reach, prof, threats)
+	var w := enc().game.target_weight(c, t)
+	if w == 1.0 or s <= -1e8:
+		return s
+	return s * w if s > 0.0 else s / maxf(w, 0.01)
+
+
+func _score_base(c: Combatant, t: Combatant, o: Dictionary, cell: Vector2i, cost: int, reach: Dictionary,
 		prof: Dictionary, threats: Array[Dictionary]) -> float:
 	var e := enc()
 	var p := o["profile"] as WeaponProfile

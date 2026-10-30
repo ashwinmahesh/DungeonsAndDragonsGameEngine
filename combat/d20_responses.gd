@@ -130,6 +130,7 @@ func offers_for(c: Combatant, t: D20Test, keys: Array[String]) -> Array:
 	e.class_features.d20_offers(c, t, out)
 	e.ravenloft.d20_offers(c, t, keys, out)
 	e.faerun.d20_offers(c, t, keys, out)
+	e.game.d20_offers(c, t, keys, out)
 	e.items.d20_offers(c, t, keys, out)
 	e.legendary.d20_offers(c, t, keys, out)
 	if c.creature is Character:

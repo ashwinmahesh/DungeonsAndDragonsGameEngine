@@ -453,6 +453,22 @@ Song of Defense (Bladesinger) is the user.
 
 ### Book modules
 
+A game's own book (one the engine doesn't ship) keeps its option code in the game: `GameFeatures`
+(`combat/game_features.gd`) is a base whose hooks do nothing, and the script `data/campaign.json` names under `features`
+extends it (`GameFeatures.make`; tests put one in place with `GameFeatures.use(script)`). The encounter holds it as
+`e.game` and calls each hook next to the Ravenloft and Faerûn ones, for every combatant, monsters included: the hotbar
+(`list`/`perform`, actions `feat:gm:<id>`; `rider_options`), attacks (`attack_situation`, `hit_dice`, `after_hit`,
+`after_hit_target`, `against_damage`), damage (`adjust_incoming`, `after_damage` with the `DamageResult`, queued
+Reactions of kinds `gm_*` through `queue_damage_reactions`/`queued_ok`/`fire_queued`/`queued_text`, `on_drop`,
+`on_zero`, `on_death`, `blocks_forced_move`, `object_broken`), turns (`fight_started`, `round_started`,
+`initiative_advantage`, `initiative_rolled`, `turn_start` as a pausable step after the monster's own, `turn_end`,
+`before_d20`, `d20_offers`, `before_action`/`after_action`), spells (`before_resolve`, `resolve_spell`, `after_cast`,
+`spell_damage_bonus`, `spell_healing`, a sustained action `"do": "game"` through `sustained_why`/`sustained`,
+`zone_failed_save`, `after_save_ended`, `effect_added`, `after_summon`) and monsters (`monster_turn` ahead of the AI's own
+turn, `bonus_action`, `special_action` and `rider` for a `do` the engine doesn't run (`MonsterActions.game_action`),
+`entered_cell`, and `barrier_cells` and `target_weight`, which must be pure: path searches and target scores run on a
+worker thread).
+
 `RavenloftFeatures` (`e.ravenloft`, actions `feat:rh:<id>`) and `FaerunFeatures` (`e.faerun`, actions `feat:fr:<id>`)
 hold the book options that need their own code. Each FaerunFeatures hook sits beside the matching Ravenloft one:
 `list`/`perform`, `before_initiative`/`initiative_advantage`/`initiative_rolled`, `after_cast`, `spell_damage_bonus`,

@@ -84,6 +84,7 @@ func _roll_spell_damage(ctx: Dictionary, t: Combatant, critical: bool) -> Dictio
 	var total := int(rolled["total"]) + bonus.total()
 	total += enc().ravenloft.spell_damage_bonus(ctx, bonus)
 	total += enc().faerun.spell_damage_bonus(ctx, bonus)
+	total += enc().game.spell_damage_bonus(ctx, bonus)
 	# Elemental Affinity (Draconic 6), Radiant Soul (Celestial 6): Charisma to one damage roll of the type.
 	var cc := ctx["c"] as Combatant
 	var dty := _damage_type_safe(ctx)
@@ -211,6 +212,7 @@ func _heal(ctx: Dictionary, t: Combatant, r: CombatResult) -> void:
 		total = int(pmax["count"]) * int(pmax["sides"]) + int(pmax["modifier"])
 	total = e.ravenloft.spell_healing(ctx, t, dice, total)
 	total += e.faerun.spell_healing(ctx, t)
+	total += e.game.spell_healing(ctx, t)
 	var amount := total + bonus.total() + int((s.get("heal", {}) as Dictionary).get("flat", 0)) \
 		+ int((s.get("upcast", {}) as Dictionary).get("heal_flat", 0)) * maxi(0, int(ctx["slot"]) - int(s.get("level", 0)))
 	# Moon Sickle: healing spells cast while holding it heal 1d4 more.

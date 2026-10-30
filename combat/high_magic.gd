@@ -115,6 +115,7 @@ func _kill(t: Combatant, why: String, by: Combatant = null) -> void:
 	e.log.add("death", "%s dies (%s)" % [t.name(), why], t.id)
 	e.events.append({"type": "death", "id": t.id})
 	e.class_features.on_drop(by, t)
+	e.game.on_drop(by, t)
 
 
 func _timed(ctx: Dictionary, t: Combatant, name: String, until: String) -> Effect:

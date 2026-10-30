@@ -209,6 +209,9 @@ func _occupancy_for(c: Combatant) -> Dictionary:
 	# Wall of Force and Wall of Stone: no one walks through.
 	for wcell: Vector2i in e.spells.specials.mid.blocked_cells():
 		blocked[wcell] = true
+	# The game's own barriers (GameFeatures.barrier_cells; pure: path searches run on a worker thread).
+	for gcell: Vector2i in e.game.barrier_cells(c):
+		blocked[gcell] = true
 	return {"blocked": blocked, "slowed": slowed, "occupied": occupied}
 
 
@@ -766,6 +769,7 @@ func _after_step(c: Combatant, from: Vector2i) -> void:
 	e.items.specials.fr.after_step(c, from)
 	e.spells.specials.mid.shell_moved(c)
 	e.monster_actions.entered_space(c)
+	e.game.entered_cell(c, c.cell)
 	e.spells.on_enter_cell(c, from)
 	e.objects.on_moved(c, from)
 	e.traps.stepped(c)   # a trap under it goes off (EncounterTraps)
@@ -1036,7 +1040,7 @@ func drop_prone(c: Combatant) -> CombatResult:
 func forced_move(target: Combatant, origin: Vector2, feet: int, toward: bool = false) -> int:
 	var e := enc()
 	# Stand as One (Tyro of the Gauntlet): an ally beside it spends a Reaction and it doesn't budge.
-	if feet > 0 and e.faerun.blocks_forced_move(target):
+	if feet > 0 and (e.faerun.blocks_forced_move(target) or e.game.blocks_forced_move(target)):
 		return 0
 	# Dwarven Plate: a Reaction cuts a shove across the ground by up to 10 ft.
 	feet = e.items.forced_move_feet(target, feet)

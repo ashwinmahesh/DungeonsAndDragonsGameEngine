@@ -885,7 +885,8 @@
               "repeat",
               "bigby",
               "teleport",
-              "faerun"
+              "faerun",
+              "game"
             ]
           },
           "cost": {
@@ -956,11 +957,11 @@
           },
           "mode": {
             "type": "string",
-            "description": "Which of a `faerun` spell's sustained actions this is (Spirit Lantern's harm, mend or veil)."
+            "description": "Which of a `faerun` or `game` spell's sustained actions this is (Spirit Lantern's harm, mend or veil)."
           },
           "targeting": {
             "type": "string",
-            "description": "What a `faerun` sustained action targets on the hotbar: enemy, creature, ally, point."
+            "description": "What a `faerun` or `game` sustained action targets on the hotbar: enemy, creature, ally, point."
           },
           "ends_spell": {
             "type": "boolean",

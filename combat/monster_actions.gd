@@ -161,7 +161,7 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 	var e := enc()
 	match str(rd["do"]):
 		"condition":
-			_timed_condition(src, t, str(rd["condition"]), str(rd.get("until", "permanent")), act_name, rd.get("modifiers", []) as Array, rd)
+			_timed_condition(src, t, str(rd.get("condition", "")), str(rd.get("until", "permanent")), act_name, rd.get("modifiers", []) as Array, rd)
 		"grapple":
 			grapple(src, t, int(rd.get("escape_dc", 10)), int(rd.get("limit", 1)), act_name, bool(rd.get("restrain", false)))
 			if e.grapples.has(t.id) and rd.has("hold_damage"):
@@ -196,6 +196,8 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 			e.log.add("condition", "%s is cursed with %s" % [t.name(), rd["curse"]], t.id)
 		"engulf":
 			engulf(src, t, rd, act_name)
+		_:
+			e.game.rider(src, t, rd, by_type, act_name)   # a rider of the game's own (GameFeatures.rider)
 	e.events.append({"type": "condition", "id": t.id})
 
 
@@ -1304,7 +1306,23 @@ func bonus_action(c: Combatant, plan: String = "") -> CombatResult:
 					c.creature.add_effect(fx)
 					e.log.add("info", "%s winks out of sight" % c.name(), c.id)
 					return CombatResult.new()
+			_:
+				if game_action(act):
+					var g: Variant = e.game.bonus_action(c, act, plan)
+					if g != null:
+						return g as CombatResult
 	return CombatResult.new()
+
+
+## The `do`s of monsters' actions and Bonus Actions this engine runs itself; any other `do` is the game's
+## (GameFeatures.bonus_action and special_action).
+const ENGINE_DOS: Array[String] = ["dash_or_disengage", "hide_in_dim", "shape_shift", "cast", "cast_control", "fey_step",
+	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish"]
+
+
+## Whether `act` is one of the game's own (a `do` the engine doesn't run).
+static func game_action(act: Dictionary) -> bool:
+	return act.has("do") and not str(act["do"]) in ENGINE_DOS
 
 
 func _divine_aid(c: Combatant, act: Dictionary) -> CombatResult:

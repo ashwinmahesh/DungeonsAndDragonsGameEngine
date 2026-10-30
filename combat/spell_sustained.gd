@@ -361,6 +361,10 @@ func use_sustained(c: Combatant, action_id: String, targets: Array = [], point: 
 			var fr := e.faerun.sustained(c, a, d, ctx, targets, point, direction, r)
 			if not fr.ok:
 				return fr
+		"game":
+			var gr := e.game.sustained(c, a, d, ctx, targets, point, direction, r)
+			if not gr.ok:
+				return gr
 	# A last act that spends the spell (Alustriel's Mooncloak's healing).
 	if bool(d.get("ends_spell", false)) and caster != null:
 		_end_spell_of(caster, str(a["spell_id"]), "its power is spent")
@@ -375,6 +379,8 @@ func _sustained_check(c: Combatant, a: Dictionary, d: Dictionary, t: Combatant, 
 	var reach := int(d.get("reach", 5))
 	if str(a["do"]) == "faerun":
 		return e.faerun.sustained_why(c, a, d, t, point)
+	if str(a["do"]) == "game":
+		return e.game.sustained_why(c, a, d, t, point)
 	match str(a["do"]):
 		"attack":
 			if t == null:

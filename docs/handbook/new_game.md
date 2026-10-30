@@ -80,6 +80,7 @@ palette and mood.
   {
     "module": "res://story/<your>_campaign.gd",
     "look": "res://world/look/<your>_look.gd",
+    "features": "res://combat/<your>_features.gd",
     "bug_reports": {"vault": "Documents/<your vault folder>", "env": "<YOUR>_BUG_REPORTS"}
   }
   ```
@@ -90,7 +91,10 @@ palette and mood.
   `CampaignModule` (`story/campaign_module.gd`) is the story engine's hook: the reshuffle reading (`reading draw|read|give`
   dialogue statements), the villain's attention and visits, field oracles, endings, the parley before a final battle,
   treasure spots, fight barks, scouting spells, achievements. Its base class does nothing, so a game that overrides
-  nothing still runs. `CampaignLook` (`world/look/campaign_look.gd`) is the world builder's hook for set pieces a
+  nothing still runs. `features` (optional) names the game's own fight code for the options, monsters and items of a
+  book the engine doesn't ship: a `GameFeatures` subclass (`combat/game_features.gd`), made with every encounter as
+  `Encounter.game`, whose hooks the fight calls beside the Ravenloft and Faerûn modules' (docs/reference/contracts/combat.md,
+  "Book modules"). `CampaignLook` (`world/look/campaign_look.gd`) is the world builder's hook for set pieces a
   campaign owns (Strahd's castle walls, the Amber Temple's amber, the faceless god); its base builds none.
 - **Tests.** The core's runner runs the game's `tests/unit` and `tests/integration` and the core's own `tests/unit`.
   The runner needs the host's autoloads, so the core's tests only run inside a game.
@@ -105,7 +109,7 @@ Paths are `res://` in the game. **Hard** means the core preloads it, so the game
 | `art/palette/palette.json`, `art/palette/ui_palette.json` | read at start | Every world colour by name, and the menu-only colours. `Look.color(name)` asserts the name exists. |
 | `art/plants/cards.png` | hard | The plant card atlas (`Flora`). Also `art/plants/cards.json`, `flora.json`, `manifest.json`. |
 | the travel map's painting | yes | `travel_map` in `data/campaign.json` (default `art/ui/map/barovia.png`, the first game's). |
-| `data/campaign.json` | yes | Module, look, bug report folder; optional settings read through `Campaign.config()`: `camera.pitch` (degrees down, default 40), `camera.free_turn` (any heading, default quarter turns), `finishes` (default Modern and Classic), `toon` (the Toon finish's settings), `ground_roll` (rolling open ground, default none). |
+| `data/campaign.json` | yes | Module, look, the game's own features module (`features`), bug report folder; optional settings read through `Campaign.config()`: `camera.pitch` (degrees down, default 40), `camera.free_turn` (any heading, default quarter turns), `finishes` (default Modern and Classic), `toon` (the Toon finish's settings), `ground_roll` (rolling open ground, default none). |
 | `data/campaign.json`: the story's settings | no | The level cap, calendar, reading, travel map, land name, weather file, arena fight and title ([../reference/contracts/campaign.md](../reference/contracts/campaign.md)); each defaults to the first game's. |
 | `art/atmosphere/moods.json` | yes | Every place's mood: light by time of day, mist, grade, water, weather, ground tints ([../reference/art/atmosphere.md](../reference/art/atmosphere.md)). |
 | `art/vistas/vistas.json` | yes | What shows past the map edge when the camera tilts up. |

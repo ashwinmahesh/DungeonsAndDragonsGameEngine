@@ -2,7 +2,7 @@
   "$id": "background.schema.json",
   "title": "Background (2024 origin)",
   "type": "object",
-  "required": ["id", "name", "source", "ability_scores", "feat", "skills", "tool", "equipment", "summary"],
+  "required": ["id", "name", "source", "ability_scores", "feat", "skills", "equipment", "summary"],
   "additionalProperties": false,
   "properties": {
     "playable": {"type": "boolean", "description": "False until every rule of the entry works in the game: it is then left out of character creation, level-up and spell choices and random treasure (Compendium.playable). Absent means playable."},
@@ -10,11 +10,14 @@
     "name": {"type": "string"},
     "source": {"$ref": "common.schema.json#/$defs/source"},
     "summary": {"type": "string"},
-    "ability_scores": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "common.schema.json#/$defs/ability"}, "description": "The three abilities this background can raise (+2/+1 or +1/+1/+1)."},
+    "ability_scores": {"type": "array", "minItems": 3, "maxItems": 6, "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/ability"}, "description": "The abilities this background can raise (+2/+1 or +1/+1/+1): three in the 2024 PHB; a book that lets any ability rise lists all six."},
     "feat": {"$ref": "common.schema.json#/$defs/id"},
     "feat_params": {"type": "object", "description": "Fixed parameters for the feat, e.g. Magic Initiate {\"list\": \"cleric\"}."},
-    "skills": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "common.schema.json#/$defs/skill"}},
-    "tool": {"type": "object", "required": ["id"], "additionalProperties": false, "properties": {"id": {"$ref": "common.schema.json#/$defs/id"}, "choice": {"type": "string", "enum": ["artisan", "gaming_set", "musical_instrument"], "description": "Set when the player picks one tool of this kind; id is then the default."}}},
+    "feat_choice": {"type": "object", "additionalProperties": false, "properties": {"filter": {"type": "object"}}, "description": "The player may pick another feat in place of `feat` (the default): a feat choice with this filter, e.g. {\"filter\": {\"category\": \"origin\"}} for any origin feat."},
+    "languages": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/id"}, "description": "Languages the background teaches, beside the two every character picks."},
+    "features": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/feature"}, "description": "More the background gives, walked like species traits: a skill, language or tool pick (`choice`), or a sub-pick whose options grant proficiencies (a cult's patron, a home province)."},
+    "skills": {"type": "array", "minItems": 0, "maxItems": 2, "items": {"$ref": "common.schema.json#/$defs/skill"}},
+    "tool": {"type": "object", "description": "The tool proficiency; a background whose tool comes from a pick in `features`, or none, leaves it out.", "required": ["id"], "additionalProperties": false, "properties": {"id": {"$ref": "common.schema.json#/$defs/id"}, "choice": {"type": "string", "enum": ["artisan", "gaming_set", "musical_instrument"], "description": "Set when the player picks one tool of this kind; id is then the default."}}},
     "equipment": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "common.schema.json#/$defs/equipment_option"}}
   }
 }

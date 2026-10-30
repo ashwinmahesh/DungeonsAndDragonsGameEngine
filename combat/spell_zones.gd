@@ -453,6 +453,7 @@ func _affected(o: FieldObject, t: Combatant, trigger: String, r: CombatResult, s
 	# Blessing of Moonlight (College of the Moon): a failed save against a blessed Moonbeam heals someone.
 	if failed and has_save:
 		enc().faerun.zone_failed_save(o, t)
+		enc().game.zone_failed_save(o, t)
 	if t.is_alive():
 		spells().apply_effect_entries(ctx, t, effects, "fail" if failed else "success", r)
 	return r

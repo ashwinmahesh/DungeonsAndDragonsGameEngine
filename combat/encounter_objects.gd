@@ -119,6 +119,7 @@ func smash(o: BattleObject, how: String) -> void:
 	clear_squares(o)
 	o.destroyed = true
 	o.hp = 0
+	enc().game.object_broken(o, null)
 	if o.burning:
 		o.burning = false
 		_fires_dirty = true
@@ -238,6 +239,7 @@ func damage(o: BattleObject, parts: Array, by: Combatant, label: String, details
 	e.events.append({"type": "object_damage", "id": o.id, "amount": total})
 	if o.hp <= 0:
 		_break(o)
+		e.game.object_broken(o, by)
 	return total
 
 

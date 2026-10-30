@@ -101,6 +101,7 @@ func list(c: Combatant) -> Array[Dictionary]:
 	e.class_features.list(c, out, aw, bw)
 	e.ravenloft.list(c, out, aw, bw)
 	e.faerun.list(c, out, aw, bw)
+	e.game.list(c, out, aw, bw)
 	e.echo_knight.list(c, out, aw, bw)
 	e.feature_recipes.list(c, out)
 	# Battle Master: Bonus Action maneuvers and Commander's Strike.
@@ -287,6 +288,10 @@ func _creature_actions(c: Combatant, out: Array[Dictionary], aw: String, bw: Str
 			var kind := str(act.get("do", act.get("kind", "")))
 			if act.has("teleport"):
 				kind = "teleport"
+			if MonsterActions.game_action(act):
+				out.append(_entry("creature:" + str(act["id"]), str(act["name"]), str(act.get("sub", "")), cost, why,
+					str(act.get("targeting", "enemy")), str(act.get("summary", "")), int(act.get("range", (act.get("targets", {}) as Dictionary).get("range", 5)))))
+				continue
 			var tg := act.get("targets", {}) as Dictionary
 			match kind:
 				"save":
@@ -328,6 +333,10 @@ func _perform_creature(c: Combatant, act_id: String, t: Combatant, cell: Vector2
 	if act.is_empty():
 		return CombatResult.fail("Not available")
 	var r := CombatResult.new()
+	# The game's own (GameFeatures.special_action): it spends what the action costs itself.
+	if MonsterActions.game_action(act):
+		var g: Variant = e.game.special_action(c, act, t, cell)
+		return g as CombatResult if g != null else CombatResult.fail("Not available")
 	if str(act.get("do", "")) == "shape_shift":
 		ma.shift(c, animal)
 	elif act.has("teleport"):
@@ -414,6 +423,10 @@ func perform(c: Combatant, id: String, t: Combatant, point: Vector2, choice: Str
 			e.faerun.targets_in = targets
 			e.faerun.choice_in = choice
 			return e.faerun.perform(c, id.substr(3), t, cell, point)
+		"gm":
+			e.game.targets_in = targets
+			e.game.choice_in = choice
+			return e.game.perform(c, id.substr(3), t, cell, point)
 		"ek":
 			return e.echo_knight.perform(c, id.substr(3), t, cell, choice)
 		"fast_hands_kit":
@@ -960,6 +973,10 @@ func before_d20(cr: Creature, kind: D20Test.Kind, keys: Array[String], _target: 
 	for side: String in ["advantage", "disadvantage"]:
 		if fr.has(side):
 			out[side] = (out.get(side, []) as Array) + (fr[side] as Array)
+	var gm := e.game.before_d20(c, kind, keys)
+	for side: String in ["advantage", "disadvantage"]:
+		if gm.has(side):
+			out[side] = (out.get(side, []) as Array) + (gm[side] as Array)
 	return out
 
 
@@ -1077,3 +1094,4 @@ func adjust_incoming(source: Combatant, target: Combatant, parts: Array) -> void
 					part["ignore_source"] = m.source_name
 	enc().ravenloft.adjust_incoming(source, target, parts)
 	enc().faerun.adjust_incoming(source, target, parts)
+	enc().game.adjust_incoming(source, target, parts)

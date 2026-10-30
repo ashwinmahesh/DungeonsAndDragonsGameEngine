@@ -39,6 +39,7 @@ func start(surprised_ids: Array = []) -> void:
 		var bonus := c.creature.initiative_bonus()
 		var init_adv := e.items.initiative_advantage(c)
 		init_adv.append_array(e.faerun.initiative_advantage(c))
+		init_adv.append_array(e.game.initiative_advantage(c))
 		var t := c.creature.roll_d20(e.dice, D20Test.Kind.ABILITY_CHECK, bonus, 0, c.creature.initiative_keys(), init_adv, dis,
 			"Initiative (%s)" % c.name())
 		# Ambush (Battle Master): a Superiority Die on Initiative.
@@ -57,6 +58,7 @@ func start(surprised_ids: Array = []) -> void:
 	e.class_features.initiative_rolled()
 	e.ravenloft.initiative_rolled()
 	e.faerun.initiative_rolled()
+	e.game.initiative_rolled()
 	e.echo_knight.initiative_rolled()
 	_order_by_initiative()
 	# Portent (Diviner): the two (Greater Portent: three) foreseen d20s for this fight.
@@ -75,6 +77,7 @@ func start(surprised_ids: Array = []) -> void:
 	e.log.add("turn", "Round 1", "")
 	e.events.append({"type": "round", "round": 1})
 	e.legendary.combat_started()
+	e.game.fight_started()
 	e.turn_index = 0
 	# Choices once Initiative is rolled (Tandem Footwork): asked before the first turn, which then begins with the order
 	# they settle. A prompt here leaves `pending` set for the view, as any other does.
@@ -154,6 +157,7 @@ func _begin_turn() -> CombatResult:
 			e.echo_knight.turn_start(c)
 			return none,
 		func() -> CombatResult: return e.monster_actions.turn_start(c),
+		func() -> CombatResult: return e.game.turn_start(c),
 		func() -> CombatResult:
 			e.items.turn_start(c)
 			e.triggered_features.turn_start(c)
@@ -220,6 +224,7 @@ func _turn_end_rest(c: Combatant) -> CombatResult:
 	e.faerun.turn_end(c)
 	e.echo_knight.turn_end(c)
 	e.monster_actions.turn_end(c)
+	e.game.turn_end(c)
 	e.items.turn_end(c)
 	e.triggered_features.turn_end(c)
 	return e.then(e.spells.turn_end(c), func() -> CombatResult:
@@ -435,6 +440,7 @@ func _advance_index() -> void:
 			e.log.add("turn", "Round %d" % e.round_no, "")
 			e.events.append({"type": "round", "round": e.round_no})
 			e.legendary.round_started()
+			e.game.round_started(e.round_no)
 			e.objects.round_started()
 		if e.current().is_alive() and not e.current().has_meta("left_fight"):
 			break

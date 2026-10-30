@@ -267,6 +267,7 @@ func attack_situation(c: Combatant, target: Combatant, option: Dictionary) -> Di
 	if duel != "":
 		dis.append(duel)
 	e.class_features.attack_situation(c, target, option, adv, dis)
+	e.game.attack_situation(c, target, option, adv, dis)
 	for m in target.creature.modifiers_for(&"attacked_with"):
 		if m.source_name == "Dodging" and (not e.can_see(target, c) or target.speed() <= 0):
 			continue

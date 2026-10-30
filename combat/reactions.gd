@@ -410,6 +410,7 @@ func after_hit_target(st: Dictionary, miss: Callable) -> Array:
 	e.class_features.after_hit_target(st, miss, out)
 	e.ravenloft.after_hit_target(st, miss, out)
 	e.faerun.after_hit_target(st, miss, out)
+	e.game.after_hit_target(st, miss, out)
 	for sid in e.spells.incoming_roll_responses(target):
 		var spell_id := sid
 		var name := str(Compendium.shared().spell_data(sid)["name"])
@@ -526,6 +527,7 @@ func against_damage(st: Dictionary, parts: Dictionary, notes: Array[String]) -> 
 		return out
 	e.class_features.against_damage(st, total, cut, out)
 	e.ravenloft.against_damage(st, total, cut, out)
+	e.game.against_damage(st, total, cut, out)
 	e.items.against_damage(st, total, cut, out)
 	if target.creature.has_flag("uncanny_dodge") and _react_ok(target) and e.can_see(target, c):
 		out.append({"kind": "uncanny_dodge", "reactor": target, "trigger": c.id, "title": "Reaction: Uncanny Dodge?",

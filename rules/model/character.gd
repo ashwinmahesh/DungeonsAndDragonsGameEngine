@@ -705,12 +705,21 @@ func _walk_background() -> void:
 			_prof("tools", tp[0], src["label"])
 	elif tool.has("id"):
 		_prof("tools", str(tool["id"]), src["label"])
+	for lang: Variant in bg.get("languages", []):
+		_prof("languages", str(lang), src["label"])
+	# More the background gives: skill, language and tool picks, a sub-pick that grants proficiencies.
+	for f: Variant in bg.get("features", []):
+		var bf := f as Dictionary
+		_walk_feature(bf, "background.%s" % bf["id"], src, {})
 	if bg.has("feat"):
 		# Any origin feat can be swapped for a Ravenloft Dark Gift (Ravenloft: The Horrors Within); the background's
-		# own feat stays picked until the player changes it, so older builds need no new pick.
+		# own feat stays picked until the player changes it, so older builds need no new pick. A background with
+		# `feat_choice` offers its filter's feats instead (any origin feat).
 		var own := str(bg["feat"])
-		var fp := _register_choice({"kind": "feat", "count": 1, "from": [own], "filter": {"category": "dark_gift"},
-			"default": own, "walk": false}, "background.feat_choice", src, "Origin Feat or Ravenloft Dark Gift")
+		var fc := bg.get("feat_choice", {}) as Dictionary
+		var ffilter := (fc.get("filter", {}) as Dictionary) if not fc.is_empty() else {"category": "dark_gift"}
+		var fp := _register_choice({"kind": "feat", "count": 1, "from": [own], "filter": ffilter,
+			"default": own, "walk": false}, "background.feat_choice", src, "Origin Feat" if not fc.is_empty() else "Origin Feat or Ravenloft Dark Gift")
 		var pick := fp[0] if not fp.is_empty() else own
 		_walk_feat(pick, "background.feat", src, bg.get("feat_params", {}) as Dictionary if pick == own else {})
 

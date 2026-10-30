@@ -49,7 +49,7 @@ func _magic_missile(ctx: Dictionary, tgt: Array[Combatant], r: CombatResult) -> 
 		var rolled := e._roll_damage_dice("1d4+1", false, 0, "Magic Missile dart")
 		var bonus := spells.damage._damage_bonus(ctx)
 		# One damage roll's bonuses ride the first dart (Empowered Evocation; Evocation Adept, Arcane Overload).
-		var first := bonus.total() + e.faerun.spell_damage_bonus(ctx, bonus) if i == 0 else 0
+		var first := bonus.total() + e.faerun.spell_damage_bonus(ctx, bonus) + e.game.spell_damage_bonus(ctx, bonus) if i == 0 else 0
 		spells.deal_spell_damage(ctx, t, [{"amount": int(rolled["total"]) + first, "type": "force"}], false, "Magic Missile",
 			["Dart %d: %s" % [i + 1, rolled["text"]]])
 

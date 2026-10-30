@@ -76,6 +76,8 @@ var triggered_features: TriggeredFeatures
 var ravenloft: RavenloftFeatures
 ## Heroes of Faerûn and Arcana Unleashed options that need their own code (combat/faerun_features.gd).
 var faerun: FaerunFeatures
+## The game's own options that need code (GameFeatures: the script data/campaign.json names, or a module that does nothing).
+var game: GameFeatures
 ## The Echo Knight's echoes, and attacks from their spaces (combat/echo_knight.gd).
 var echo_knight: EchoKnight
 ## The attack whose damage is being dealt right now: {attacker, target, melee} (Zhentarim Tactics answers a melee hit).
@@ -160,6 +162,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	class_features = ClassFeatures.new(self)
 	ravenloft = RavenloftFeatures.new(self)
 	faerun = FaerunFeatures.new(self)
+	game = GameFeatures.make(self)
 	echo_knight = EchoKnight.new(self)
 	triggered_features = TriggeredFeatures.new(self)
 	items = CombatItems.new(self)
@@ -211,6 +214,7 @@ func _condition_blocked(cr: Creature, condition: StringName, from: String, tried
 
 func _effect_added(cr: Creature, fx: Effect) -> void:
 	faerun.effect_added(cr, fx)
+	game.effect_added(cr, fx)
 	echo_knight.effect_added(cr, fx)
 	movement.effect_added(cr, fx)
 	ground.effect_added(cr, fx)

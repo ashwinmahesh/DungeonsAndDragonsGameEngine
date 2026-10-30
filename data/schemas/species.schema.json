@@ -10,7 +10,7 @@
     "name": {"type": "string"},
     "source": {"$ref": "common.schema.json#/$defs/source"},
     "summary": {"type": "string"},
-    "creature_type": {"type": "string", "enum": ["humanoid", "fey"], "description": "Fey: the Hexblood (Ravenloft: The Horrors Within)."},
+    "creature_type": {"type": "string", "enum": ["aberration", "beast", "celestial", "construct", "dragon", "elemental", "fey", "fiend", "giant", "humanoid", "monstrosity", "ooze", "plant", "undead"], "description": "The species' creature type (Fey: the Hexblood). Spells and features that care about type read it (Hold Person misses a hero who isn't Humanoid)."},
     "sizes": {"type": "array", "minItems": 1, "items": {"$ref": "common.schema.json#/$defs/size"}, "description": "More than one = the player chooses."},
     "speed": {"type": "integer", "minimum": 0},
     "darkvision": {"type": "integer", "minimum": 0},

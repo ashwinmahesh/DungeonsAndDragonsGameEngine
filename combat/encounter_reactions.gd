@@ -107,6 +107,7 @@ func _queue_damage_reactions(source: Combatant, target: Combatant) -> void:
 	var e := enc()
 	e.ravenloft.queue_damage_reactions(source, target)
 	e.faerun.queue_damage_reactions(source, target)
+	e.game.queue_damage_reactions(source, target)
 	# Berserk Lashing (Clay Construct Spirit): a Slam at a random creature within 5 ft whenever it takes damage.
 	if target.creature is Monster and e.monster_actions.has_trait(target, "berserk_lashing") and e.spells.can_react(target) and target.creature.hp > 0:
 		e.reaction_queue.append({"kind": "berserk_lashing", "reactor": target.id, "trigger": source.id})
@@ -216,6 +217,8 @@ func _queued_ok(q: Dictionary, reactor: Combatant) -> bool:
 		return e.ravenloft.queued_ok(q, reactor)
 	if str(q["kind"]).begins_with("fr_"):
 		return e.faerun.queued_ok(q, reactor)
+	if str(q["kind"]).begins_with("gm_"):
+		return e.game.queued_ok(q, reactor)
 	match str(q["kind"]):
 		"hellish_rebuke":
 			return e.spells.can_cast_reaction(reactor, "hellish_rebuke")
@@ -247,6 +250,8 @@ func _fire_queued(q: Dictionary, reactor: Combatant, trigger: Combatant) -> Comb
 		return e.ravenloft.fire_queued(q, reactor, trigger)
 	if str(q["kind"]).begins_with("fr_"):
 		return e.faerun.fire_queued(q, reactor, trigger)
+	if str(q["kind"]).begins_with("gm_"):
+		return e.game.fire_queued(q, reactor, trigger)
 	match str(q["kind"]):
 		"hellish_rebuke":
 			return e.spells.cast_reaction_spell(reactor, "hellish_rebuke", trigger, int(q.get("slot", 0)))
@@ -304,7 +309,7 @@ func _queued_request(q: Dictionary, reactor: Combatant, trigger: Combatant) -> R
 	var e := enc()
 	var kind := str(q["kind"])
 	var words: Array = _readied_words(q, reactor) if kind == "readied_attack" else (e.ravenloft.queued_text(kind) if kind.begins_with("rh_") \
-		else (e.faerun.queued_text(kind) if kind.begins_with("fr_") else _QUEUED_TEXT[kind] as Array))
+		else (e.faerun.queued_text(kind) if kind.begins_with("fr_") else (e.game.queued_text(kind) if kind.begins_with("gm_") else _QUEUED_TEXT[kind] as Array)))
 	var req := ReactionRequest.new(kind, reactor.id, trigger.id)
 	req.title = str(words[0])
 	req.text = str(words[1]) % [trigger.name(), reactor.name()]
