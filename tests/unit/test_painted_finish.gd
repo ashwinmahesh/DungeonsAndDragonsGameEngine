@@ -214,3 +214,18 @@ func test_marks_stay_on_the_ground_up_to_the_cap() -> void:
 	var d := parent.get_child(parent.get_child_count() - 1) as Decal
 	assert_true(d.texture_albedo != null and d.emission_energy > 0.0, "scorch smoulders a little")
 	parent.free()
+
+
+func test_a_place_comes_in_through_ink_only_when_asked() -> void:
+	PlaceDissolve.headless_too = true
+	Campaign.use_config({"module": "res://nowhere.gd"})
+	var game := Node.new()
+	add_child(game)
+	var d := PlaceDissolve.play(game, 0.0)
+	var mat := (d.get_node("Blur") as ColorRect).material as ShaderMaterial
+	assert_false(bool(mat.get_shader_parameter("ink")), "a plain dissolve by default")
+	Campaign.use_config({"painted": {"ink_wipe": true}})
+	PlaceDissolve.play(game, 0.0)
+	assert_true(bool(mat.get_shader_parameter("ink")), "blots of ink when the game asks")
+	PlaceDissolve.headless_too = false
+	game.free()

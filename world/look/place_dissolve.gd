@@ -54,6 +54,9 @@ func _play(delay: float) -> void:
 	if _tw != null and _tw.is_valid():
 		_tw.kill()
 	_mat.set_shader_parameter("lines", get_viewport().get_visible_rect().size.y)
+	var s := Look.painted_settings()
+	_mat.set_shader_parameter("ink", bool(s["ink_wipe"]) and Look.modern())
+	_mat.set_shader_parameter("ink_colour", Look.color(str(s["ink"])))
 	set_amount(1.0)
 	visible = true
 	# Paused game or not, like the fade from black it goes with (an arrival picture pauses the game as it opens).
