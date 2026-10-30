@@ -263,16 +263,21 @@ func cast(cue: Dictionary, caster: CombatToken, targets: Array[CombatToken], cel
 		"burst":
 			# A spell with no area of its own that bursts round its target (Detonate) blows up where the targets stand.
 			await FxAreas.burst(self, cue, caster, cells if not cells.is_empty() else _cells_at(others), board)
+			SpellMarks.area(self, cue, cells if not cells.is_empty() else _cells_at(others), board)
 		"cone":
 			await FxAreas.cone(self, cue, caster, cells if not cells.is_empty() else _cells_at(others), board)
+			SpellMarks.area(self, cue, cells if not cells.is_empty() else _cells_at(others), board)
 		"line":
 			await FxAreas.line(self, cue, caster, cells if not cells.is_empty() else _cells_at(others), board)
+			SpellMarks.area(self, cue, cells if not cells.is_empty() else _cells_at(others), board)
 		"nova":
 			await FxAreas.nova(self, cue, caster, cells, board)
+			SpellMarks.area(self, cue, cells, board)
 		"aura":
 			await FxAreas.aura(self, cue, caster, cells, board)
 		"strike":
 			await FxAreas.strike(self, cue, caster, others, cells, board)
+			SpellMarks.area(self, cue, cells if not cells.is_empty() else _cells_at(others), board)
 		"cloud":
 			await FxAreas.cloud(self, cue, caster, cells, board)
 		"pattern":
@@ -367,6 +372,9 @@ func _missiles(family: String, cue: Dictionary, caster: CombatToken, others: Arr
 		else:
 			await wait(0.09)
 	await until(last)
+	for shot: Variant in shots:
+		if is_instance_valid(shot):
+			SpellMarks.spot(self, cue, (shot as CombatToken).global_position)
 
 
 func _spread(count: int) -> Vector3:
@@ -402,6 +410,8 @@ func missile(cue: Dictionary, attacker: CombatToken, target: CombatToken, hit: b
 	missiles_flown += 1
 	var to := SpellFx.chest(target)
 	await FxMissiles.fly(self, str(cue["family"]), cue, SpellFx.hand(attacker, to), to, hit)
+	if hit and is_instance_valid(target):
+		SpellMarks.spot(self, cue, target.global_position)
 
 
 ## The volley is over (the caster's turn or next action began).
@@ -425,6 +435,7 @@ func on_hit(cue: Dictionary, attacker: CombatToken, target: CombatToken, critica
 		FxBodies.slash(self, cue, attacker, target, critical)
 	else:
 		FxMissiles.impact(self, cue, SpellFx.chest(target), 0.7)
+	SpellMarks.spot(self, cue, target.global_position, 0.8)
 
 
 ## A creature appeared (summoned, conjured, called): a circle opens under it in the last cast's colours.

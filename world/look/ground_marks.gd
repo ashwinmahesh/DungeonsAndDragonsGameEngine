@@ -26,7 +26,7 @@ static func leave(parent: Node3D, at: Vector3, kind: String, radius: float = 0.6
 	var cap := int(s["marks"])
 	if cap <= 0 or not KINDS.has(kind) or parent == null or not Look.modern():
 		return
-	_left = _left.filter(func(d: Decal) -> bool: return is_instance_valid(d))
+	_left = _live()
 	while _left.size() >= cap:
 		var old := _left.pop_front() as Decal
 		old.queue_free()
@@ -57,7 +57,17 @@ static func leave(parent: Node3D, at: Vector3, kind: String, radius: float = 0.6
 
 ## How many marks are on the ground now (tests).
 static func count() -> int:
-	return _left.filter(func(d: Decal) -> bool: return is_instance_valid(d)).size()
+	return _live().size()
+
+
+## The marks still on the ground: a place or fight that closed freed its own, and a freed one can't even be passed to a
+## typed check, so each is looked at untyped.
+static func _live() -> Array[Decal]:
+	var out: Array[Decal] = []
+	for d: Variant in _left:
+		if is_instance_valid(d):
+			out.append(d as Decal)
+	return out
 
 
 ## A splat: a blot with a ragged edge and a few drops round it (white on clear; the decal tints it). Four kept.

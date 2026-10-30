@@ -6,6 +6,7 @@ extends TestCase
 
 func after_each() -> void:
 	GameFeel.use(null)
+	Campaign.use_config(null)
 	CombatImpact.headless_too = false
 	Engine.time_scale = 1.0
 
@@ -141,3 +142,30 @@ func test_shapes_are_drawn_and_play_on_twos() -> void:
 	var mi := FxShapes.play(root, "burst", Vector3.ZERO, {"core": Color.WHITE, "glow": Color.ORANGE})
 	assert_true(mi != null, "on when the game asks")
 	root.free()
+
+
+func test_spells_and_falls_mark_the_ground_through_ground_marks() -> void:
+	assert_eq(SpellMarks.kind_for({"flavour": "fire"}), "scorch", "fire scorches")
+	assert_eq(SpellMarks.kind_for({"flavour": "cold"}), "frost", "cold frosts")
+	assert_eq(SpellMarks.kind_for({"flavour": "steel"}), "", "a plain blade leaves nothing")
+	Campaign.use_config({"painted": {"marks": 6, "marks_fade": 0}})
+	# A fight that closed freed the marks it left; the next fight still leaves its own.
+	var gone := Node3D.new()
+	add_child(gone)
+	SpellMarks.spot(gone, {"flavour": "fire"}, Vector3.ZERO)
+	gone.free()
+	var parent := Node3D.new()
+	add_child(parent)
+	var before := GroundMarks.count()
+	SpellMarks.spot(parent, {"flavour": "steel"}, Vector3.ZERO)
+	SpellMarks.spot(parent, {"flavour": "cold"}, Vector3.ZERO)
+	var body := Creature.new()
+	body.creature_type = &"undead"
+	var ghoul := Combatant.new(body, &"enemy", Vector2i.ZERO)
+	SpellMarks.fall(parent, ghoul, Vector3(1, 0, 0))
+	await get_tree().process_frame
+	if Look.modern():
+		assert_eq(GroundMarks.count() - before, 2, "frost and ichor, nothing for the blade")
+		var last := parent.get_child(parent.get_child_count() - 1) as Decal
+		assert_true(last.modulate.is_equal_approx(Look.color("bog")), "the undead leave ichor")
+	parent.free()

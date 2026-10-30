@@ -2299,6 +2299,9 @@ func _play_events() -> void:
 					tc.set_unseen(e.sight.hidden_from_party(tc.combatant, viewer))   # an Invisibility cast or broken
 					if kind in ["down", "death"]:
 						_concentration_kept(tc.combatant)
+						if not tc.has_meta(&"fell_mark"):
+							tc.set_meta(&"fell_mark", true)   # once, though it drops and then dies
+							SpellMarks.fall(self, tc.combatant, tc.global_position)   # a game's blood or ichor (GroundMarks)
 					if ev_at == final_fall and not final_played:
 						# The last foe fell to something that wasn't a blow played above (an aura, a turn's damage).
 						final_played = true
