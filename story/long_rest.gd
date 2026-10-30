@@ -137,7 +137,7 @@ static func _sleep_on(st: StoryState, dice: DiceRoller, start: int, left: int, a
 	if ask_visit and Campaign.module().visit_may_fight(st, "rest", {"night": night}):
 		_break(st, start, 0, true)
 		(st.flags[BROKEN] as Dictionary)["night"] = night
-		return _result(st, VISIT, start, "Before dawn, the one on watch shakes everyone awake: something is out there.")
+		return _result(st, VISIT, start, "Before %s, the one on watch shakes everyone awake: something is out there." % Calendar.word("dawn"))
 	var res := _result(st, SLEPT, start, "Eight hours pass. Everyone wakes rested, if not refreshed." + warned)
 	res["lines"] = _benefits(st, dice)
 	return res

@@ -130,6 +130,7 @@ uniform vec3 sky_cloud_shade : source_color = vec3(0.15, 0.14, 0.2);
 uniform vec3 sky_moon_dir = vec3(0.3, 0.6, -0.7);
 uniform vec3 sky_moon_colour : source_color = vec3(0.85, 0.9, 0.95);
 uniform float sky_moon = 1.0;
+uniform float sky_moon_size = 1.0;   // the disc's size, 1 the plain moon (Calendar.moon)
 uniform float sky_cover : hint_range(0.0, 1.0) = 0.7;
 uniform vec2 sky_wind = vec2(0.6, 0.25);
 // The screen's edges sink towards this colour.
@@ -266,7 +267,7 @@ vec3 sky_colour(vec3 d) {
 	vec3 col = mix(to_srgb(land_color), to_srgb(sky_zenith), pow(smoothstep(0.0, 0.6, up), 0.7));
 	vec3 md = normalize(sky_moon_dir);
 	float c = dot(d, md);
-	float disc = smoothstep(0.9993, 0.9997, c) * sky_moon;
+	float disc = smoothstep(1.0 - 0.0007 * sky_moon_size * sky_moon_size, 1.0 - 0.0003 * sky_moon_size * sky_moon_size, c) * sky_moon;
 	float halo = pow(max(c, 0.0), 40.0) * 0.35 * mix(0.4, 1.0, sky_moon);
 	col += to_srgb(sky_moon_colour) * halo;
 	// The cloud ceiling: the ray's point on a flat layer overhead, so the cloud shrinks into the distance.

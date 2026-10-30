@@ -61,7 +61,7 @@ func advance_minutes(minutes: int) -> void:
 
 ## The same night as StoryState.is_night(), the one the story reads (Wiki finding 72).
 func is_night() -> bool:
-	return minute_of_day < 6 * 60 or minute_of_day >= 19 * 60
+	return Calendar.is_night(minute_of_day)
 
 
 func to_dict() -> Dictionary:

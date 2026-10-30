@@ -95,7 +95,7 @@ func reflow() -> void:
 func refresh(where: String, sneaking: bool, solo: bool, planning: bool) -> void:
 	if where != "":
 		location = where
-	state_text = "Day %d · %02d:%02d · %d gp%s%s%s" % [hud.st.day, hud.st.minute_of_day / 60, hud.st.minute_of_day % 60, hud.st.gold,
+	state_text = "Day %d · %s · %d gp%s%s%s" % [hud.st.day, Calendar.clock(hud.st.minute_of_day), hud.st.gold,
 		" · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else ""]
 
 

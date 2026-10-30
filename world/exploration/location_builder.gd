@@ -35,16 +35,10 @@ static func update_daylight(view: LocationView) -> void:
 	view.lantern.visible = phase == "night" or light == "dark" or view.st.spell_active("light")
 
 
-## "day" (7:00-17:59), "dusk" (18:00-18:59), "night" (19:00-5:59) or "dawn" (6:00-6:59).
+## "day", "dusk", "night" or "dawn" (Calendar.phase: by default day 7:00-17:59, dusk 18:00-18:59, night 19:00-5:59,
+## dawn 6:00-6:59).
 static func time_phase(view: LocationView) -> String:
-	var h := view.st.minute_of_day / 60
-	if h >= 7 and h < 18:
-		return "day"
-	if h == 18:
-		return "dusk"
-	if h == 6:
-		return "dawn"
-	return "night"
+	return Calendar.phase(view.st.minute_of_day)
 
 
 static func _build_doors(view: LocationView) -> void:

@@ -101,12 +101,15 @@ static func last_time(e: Dictionary, from: int, to: int) -> int:
 	return -1
 
 
-## Whether an NPC entry's `hours` ([from, to], to may pass midnight) take in the hour now. No `hours`: always.
+## Whether an NPC entry's `hours` ([from, to], to may pass midnight) take in the time now. Each end is an hour (8, 17.5),
+## "HH:MM", or one of the campaign's named hours (Calendar: from the start of that hour). No `hours`: always.
 static func in_hours(spec: Dictionary, st: StoryState) -> bool:
 	var h := spec.get("hours", []) as Array
 	if h.size() != 2:
 		return true
-	var now := st.minute_of_day / 60.0
-	var a := float(h[0])
-	var b := float(h[1])
+	var now := st.minute_of_day
+	var a := Calendar.minutes_of(h[0])
+	var b := Calendar.minutes_of(h[1])
+	if b == 0:
+		b = Calendar.DAY   # until midnight
 	return (now >= a and now < b) if a <= b else (now >= a or now < b)

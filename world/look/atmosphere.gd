@@ -720,6 +720,16 @@ static func _footprint_textures() -> Array[Texture2D]:
 ## How plainly the moon (or the low sun) shows in the sky by the time of day: a disc glowing through the cloud at
 ## night, a paler glow at dusk and dawn, only a brighter patch in the cloud by day.
 const MOON_SHOWS := {"night": 1.0, "dusk": 0.45, "dawn": 0.45, "day": 0.12}
+## The campaign's moon tonight (Calendar.moon: its disc's size and brightness by the night), {} for the plain moon.
+func _moon_tonight() -> Dictionary:
+	return Calendar.moon(GameState.story.day) if GameState.story != null else {}
+
+
+## How bright the moon's key light and disc are at phase `p`: the night's moon outdoors at night, else 1.
+func moon_brightness(p: String) -> float:
+	return float(_moon_tonight().get("brightness", 1.0)) if outdoors and p == "night" else 1.0
+
+
 ## The moon hangs low enough to be seen when the camera looks out to the horizon (degrees above it), on the bearing
 ## the key light comes from.
 const MOON_HEIGHT := 14.0
@@ -742,6 +752,7 @@ func _apply_sky(v: Dictionary) -> void:
 	_post.set_shader_parameter("sky_cloud_shade", sky.lerp(Look.color("void"), 0.45))
 	_post.set_shader_parameter("sky_moon_colour", key.lightened(0.2))
 	_post.set_shader_parameter("sky_moon", float(v["moon"]))
+	_post.set_shader_parameter("sky_moon_size", float(v.get("moon_size", 1.0)))
 	# Towards the light, brought down to where a camera looking out can see it.
 	var towards := sun.global_transform.basis.z if sun.is_inside_tree() else Vector3(0.3, 0.6, -0.7)
 	var flat := Vector2(towards.x, towards.z).normalized()
@@ -1078,7 +1089,7 @@ func _target(p: String) -> Dictionary:
 		"ambient": Look.color(str(t.get("ambient", "bruise"))),
 		"ambient_energy": float(t.get("ambient_energy", 0.8)) * level,
 		"key": Look.color(str(t.get("key", "moonlight"))),
-		"key_energy": float(t.get("key_energy", 0.6)) * (level if not outdoors else 1.0),
+		"key_energy": float(t.get("key_energy", 0.6)) * (level if not outdoors else moon_brightness(p)),
 		"key_angle": Vector3(angle.x, angle.y, 0.0),
 		"mist": Look.color(str(t.get("mist", "lilac"))),
 		"mists": Look.color(str(t.get("mists", "pewter"))),
@@ -1098,7 +1109,8 @@ func _target(p: String) -> Dictionary:
 		"tone_tint": Look.color(str(tone.get("ambient_tint", "void"))),
 		"tone_tint_mix": float(tone.get("ambient_mix", 0.0)),
 		"tone_key": float(tone.get("key", 1.0)),
-		"moon": float(MOON_SHOWS.get(p, 0.0)),
+		"moon": float(MOON_SHOWS.get(p, 0.0)) * moon_brightness(p),
+		"moon_size": float(_moon_tonight().get("size", 1.0)),
 	}
 
 

@@ -763,7 +763,7 @@ func _show_info() -> void:
 	where.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	where.custom_minimum_size = Vector2(290, 0)
 	_info.add_child(where)
-	_info.add_child(UiKit.label("Day %d · %02d:%02d · %s" % [st.day, st.minute_of_day / 60, st.minute_of_day % 60,
+	_info.add_child(UiKit.label("Day %d · %s · %s" % [st.day, Calendar.clock(st.minute_of_day),
 		"night" if st.is_night() else "day"], 15, "vellum"))
 	_info.add_child(UiKit.divider(280))
 	if talk_places.has(_at) and (_target == "" or _target == _at):
@@ -789,14 +789,14 @@ func _show_info() -> void:
 		else:
 			var h := Travel.hours(legs)
 			var arrive := (st.minute_of_day + roundi(h * 60.0)) % (24 * 60)
-			var night := arrive < 6 * 60 or arrive >= 19 * 60
+			var night := Calendar.is_night(arrive)
 			var names: Array[String] = []
 			for l in legs:
 				var rn := str((l["road"] as Dictionary).get("name", "a road"))
 				if names.is_empty() or names.back() != rn:
 					names.append(rn)
 			_info.add_child(UiKit.label(route_line(names), 14, "parchment", 290))
-			_info.add_child(UiKit.label("%s hours on the road, arriving about %02d:%02d" % [_hours_text(h), arrive / 60, arrive % 60],
+			_info.add_child(UiKit.label("%s hours on the road, arriving about %s" % [_hours_text(h), Calendar.clock(arrive)],
 				16, "gilt_light", 290))
 			if night:
 				_info.add_child(UiKit.label("After dark: the roads are worse at night.", 14, "rose", 290))
@@ -840,7 +840,7 @@ func _show_area_info() -> void:
 	where.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	where.custom_minimum_size = Vector2(290, 0)
 	_info.add_child(where)
-	_info.add_child(UiKit.label("Day %d · %02d:%02d · %s" % [st.day, st.minute_of_day / 60, st.minute_of_day % 60,
+	_info.add_child(UiKit.label("Day %d · %s · %s" % [st.day, Calendar.clock(st.minute_of_day),
 		"night" if st.is_night() else "day"], 15, "vellum"))
 	_info.add_child(UiKit.divider(280))
 	_info.add_child(UiKit.label("Ways out", 15, "gilt"))

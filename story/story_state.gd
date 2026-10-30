@@ -36,7 +36,7 @@ var xp: int = 0
 var xp_reserve: int = 0
 var start_level: int = 1
 var day: int = 1
-var minute_of_day: int = 18 * 60           ## the party arrives at dusk
+var minute_of_day: int = Calendar.start_minute()   ## the party arrives at the calendar's start (dusk by default)
 var location: String = ""
 var positions: Array[Vector2i] = []        ## grid cells of party members in the current location
 var location_states: Dictionary = {}      ## location id -> {doors: {id: "open"|"unlocked"}, looted: {}, traps: {id: state}, encounters: {}, props: {}}
@@ -560,11 +560,11 @@ func _item_time(start: int, minutes: int) -> void:
 	var dice := DiceRoller.new(hash("%d:%d:items" % [playthrough_seed, start]))
 	for t in range(start + 1, start + minutes + 1):
 		var m := t % (24 * 60)
-		if m == 6 * 60:
+		if m == Calendar.dawn_minute():
 			for ch in party:
 				for line in ch.on_dawn(dice):
 					item_news.append(line)
-		elif m == 18 * 60:
+		if m == Calendar.dusk_minute():   # (a campaign with no dawn brings both back at dusk)
 			for ch in party:
 				ch.on_dusk(dice)
 	for ch in party:
@@ -581,7 +581,7 @@ func spell_active(spell_id: String) -> bool:
 
 
 func is_night() -> bool:
-	return minute_of_day < 6 * 60 or minute_of_day >= 19 * 60
+	return Calendar.is_night(minute_of_day)
 
 
 # --- Locations ------------------------------------------------------------------------------------
@@ -967,7 +967,7 @@ static func from_dict(d: Dictionary) -> StoryState:
 	st.xp_reserve = int(d.get("xp_reserve", 0))
 	st.start_level = int(d.get("start_level", 1))
 	st.day = int(d.get("day", 1))
-	st.minute_of_day = int(d.get("minute_of_day", 18 * 60))
+	st.minute_of_day = int(d.get("minute_of_day", Calendar.start_minute()))
 	st.location = str(d.get("location", ""))
 	for p: Variant in d.get("positions", []):
 		var a := p as Array

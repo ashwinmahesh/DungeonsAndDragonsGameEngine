@@ -434,8 +434,7 @@ func refresh(location_name: String = "", sneaking: bool = false, solo: bool = fa
 	_quest.visible = _quest.text != ""
 	_goal.text = ("◆ " + str(followed["objective"])) if str(followed["objective"]) != "" else ""
 	_goal.visible = _goal.text != ""
-	var hours := st.minute_of_day / 60
-	_mode.text = "Day %d · %02d:%02d%s%s%s%s · %d gp" % [st.day, hours, st.minute_of_day % 60, _weather(),
+	_mode.text = "Day %d · %s%s%s%s%s · %d gp" % [st.day, Calendar.clock(st.minute_of_day), _weather(),
 		" · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else "", int(st.gold)]
 
 

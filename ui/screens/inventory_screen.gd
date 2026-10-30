@@ -1866,7 +1866,7 @@ func _magic_card(ch: Character, data: Dictionary) -> void:
 		var spec := MagicItems.charges(data)
 		var regain := str(spec.get("regain", ""))
 		_card.add_child(UiKit.label("Charges: %d of %d%s" % [int(e.get("charges", 0)), MagicItems.max_charges(data, e),
-			(" · regains %s at %s" % [regain, spec.get("when", "dawn")]) if regain != "" else ""], 14, "moonlight", 420))
+			(" · regains %s at %s" % [regain, Calendar.word(str(spec.get("when", "dawn")))]) if regain != "" else ""], 14, "moonlight", 420))
 	if MagicItems.worn_slot(data) != "":
 		_card.add_child(UiKit.label("Worn: %s%s" % [MagicItems.SLOT_NAMES.get(MagicItems.worn_slot(data), ""),
 			" (working)" if ch.item_active(e) else ""], 13, "parchment", 420))

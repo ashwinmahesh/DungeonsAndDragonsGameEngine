@@ -102,8 +102,7 @@ static func why_not(root_: Node, state: StoryState) -> String:
 static func clock_after(state: StoryState, h: int) -> String:
 	var m := state.total_minutes() + h * 60
 	var of_day := m % (24 * 60)
-	var night := of_day < 6 * 60 or of_day >= 19 * 60
-	return "Day %d · %02d:%02d (%s)" % [floori(m / (24.0 * 60.0)) + 1, floori(of_day / 60.0), of_day % 60, "night" if night else "day"]
+	return "Day %d · %s (%s)" % [floori(m / (24.0 * 60.0)) + 1, Calendar.clock(of_day), "night" if Calendar.is_night(of_day) else "day"]
 
 
 func set_hours(h: int) -> void:
