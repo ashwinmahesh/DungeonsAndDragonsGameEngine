@@ -300,11 +300,14 @@ float caustic_light(vec2 p, float t) {
 	return smoothstep(0.2, 0.85, a * 0.7 + b * 0.7 + a * b * 1.5);
 }
 
+#include "res://addons/dnd_core/shaders/post/painted.gdshaderinc"
+
 void fragment() {
 	vec2 vp = VIEWPORT_SIZE;
 	vec2 cell = floor(FRAGCOORD.xy / pixel_size);
 	vec2 uv = (cell + 0.5) * pixel_size / vp;
 	vec3 lin_in = texture(screen_tex, uv).rgb;
+	lin_in = painted_strokes(lin_in, uv, vp);
 	if (edge_blur > 0.0 || focus_blur > 0.0 || tilt_shift > 0.0) {
 		float w = smoothstep(edge_blur_start, 1.4142, length(uv * 2.0 - 1.0)) * edge_blur;
 		if (tilt_shift > 0.0) {
@@ -433,6 +436,10 @@ void fragment() {
 			: step(1.0 - cloud_cover, c) * 0.6 + step(1.0 - cloud_cover + 0.08, c) * 0.4;
 		col *= 1.0 - cloud_strength * shade;
 	}
+	if (!empty && own_colour < 0.5) {
+		// Boughs' shadows overhead (painted.gdshaderinc).
+		col = bough_shadows(col, wpos);
+	}
 
 	col *= exposure;
 	col = (col - 0.5) * contrast + 0.5;
@@ -463,6 +470,19 @@ void fragment() {
 		col = mix(col, duo, grade_amount * (1.0 - smoothstep(0.2, 0.45, chroma) * 0.6) * (1.0 - own_colour * 0.8));
 	}
 
+	if (!empty && (paint_ramp_amount > 0.0 || paint_edges > 0.0 || paint_lines > 0.0 || moon_water > 0.0)) {
+		// The painted finish and the moon on the water (painted.gdshaderinc).
+		vec3 wn_p = (INV_VIEW_MATRIX * vec4(normal_at(uv), 0.0)).xyz;
+		if (own_colour < 0.5) {
+			col = painted_values(col, wpos, wn_p);
+		}
+		col = painted_edges(col, uv, wpos, wn_p, linear_depth(uv, INV_PROJECTION_MATRIX));
+#if CURRENT_RENDERER == RENDERER_FORWARD_PLUS
+		if (own_colour > 0.5) {
+			col = moon_on_water(col, wpos, cam, wn_p);
+		}
+#endif
+	}
 	if (land_rect.z > land_rect.x) {
 		// How far outside the map this point lies (0 on it), wavy so the edge of what can be seen isn't a ruler line.
 		vec2 o = max(max(land_rect.xy - wpos.xz, wpos.xz - land_rect.zw), vec2(0.0));
@@ -528,6 +548,7 @@ void fragment() {
 		}
 	}
 
+	col = flash_cutout(col, empty);
 	if (vignette > 0.0) {
 		vec2 q = (uv - 0.5) * vec2(vp.x / vp.y, 1.0);
 		float v = smoothstep(0.45, 1.05, length(q) * 1.15);
