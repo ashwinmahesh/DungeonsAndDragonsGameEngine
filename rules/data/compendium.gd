@@ -67,25 +67,30 @@ static func data_files(folder: String) -> Array[String]:
 func load_all(data_dirs: Array[String]) -> void:
 	roots = data_dirs
 	for folder in FOLDERS:
-		var table := {}
-		for r in data_dirs:
-			var dir := DirAccess.open(r.path_join(folder))
-			if dir == null:
-				continue
-			var files := dir.get_files()
-			files.sort()
-			for f in files:
-				if not f.ends_with(".json"):
-					continue
-				var text := FileAccess.get_file_as_string(r.path_join(folder).path_join(f))
-				var parsed: Variant = JSON.parse_string(text)
-				if parsed is Dictionary:
-					var entry := parsed as Dictionary
-					table[str(entry.get("id", f.get_basename()))] = entry
-				else:
-					push_error("Compendium: %s/%s is not a JSON object" % [folder, f])
-		tables[folder] = table
+		_load_folder(folder)
 	_register_item_recipes()
+
+
+## Reads data/<folder>/*.json of every root into tables[folder].
+func _load_folder(folder: String) -> void:
+	var table := {}
+	for r in roots:
+		var dir := DirAccess.open(r.path_join(folder))
+		if dir == null:
+			continue
+		var files := dir.get_files()
+		files.sort()
+		for f in files:
+			if not f.ends_with(".json"):
+				continue
+			var text := FileAccess.get_file_as_string(r.path_join(folder).path_join(f))
+			var parsed: Variant = JSON.parse_string(text)
+			if parsed is Dictionary:
+				var entry := parsed as Dictionary
+				table[str(entry.get("id", f.get_basename()))] = entry
+			else:
+				push_error("Compendium: %s/%s is not a JSON object" % [folder, f])
+	tables[folder] = table
 
 
 ## Magic items' own powers that work like spells (a Wand of Paralysis's ray, a Necklace of Fireballs' bead) are
@@ -110,7 +115,11 @@ func _register_item_recipes() -> void:
 	_variants.clear()
 
 
+## One folder's entries. A folder the engine doesn't list in FOLDERS (a campaign's own: its reading's deck) is read
+## from the roots the first time it is asked for.
 func table(folder: String) -> Dictionary:
+	if not tables.has(folder) and not roots.is_empty() and folder.is_valid_filename():
+		_load_folder(folder)
 	return tables.get(folder, {}) as Dictionary
 
 

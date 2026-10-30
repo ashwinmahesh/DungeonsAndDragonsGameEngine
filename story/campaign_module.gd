@@ -45,9 +45,15 @@ func ensure_drawn(_st: StoryState) -> void:
 	pass
 
 
-## One slot of the reading, as {card, slot, title, verse} to show; {} when the slot holds nothing.
+## One slot of the reading, as {card, slot, title, verse, slot_name?} to show; {} when the slot holds nothing.
+## `slot_name` labels the card face (a hero's name, "The ally"); without it the face takes the title's part before ": ".
 func reading(_slot: String, _st: StoryState) -> Dictionary:
 	return {}
+
+
+## One card of the reading's deck as the card face shows it: {name, deck?, suit?, value?, art?} (ReadingDeck's data).
+func reading_card(card_id: String) -> Dictionary:
+	return ReadingDeck.card(card_id)
 
 
 # --- A villain's attention ---------------------------------------------------------------------------------------

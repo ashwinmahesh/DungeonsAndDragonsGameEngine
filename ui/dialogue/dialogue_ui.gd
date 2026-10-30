@@ -203,7 +203,7 @@ func _ready() -> void:
 	_speaker_button.visible = false
 	left.add_child(_speaker_button)
 	_build_history()
-	# The Tarokka spread: each card Madam Eva turns stays face up above the conversation.
+	# The reading's spread (ReadingDeck): each card the reader turns stays face up above the conversation.
 	_spread = HBoxContainer.new()
 	_spread.add_theme_constant_override("separation", 14)
 	_spread.anchor_left = 0.5
@@ -339,9 +339,10 @@ func _remember(line: String) -> void:
 		_history.pop_front()
 
 
-## A face-up Tarokka card: its art if there is any, else its name, suit and number on a card face.
-func _tarokka_card(card_id: String, slot: String) -> Control:
-	var card := Tarokka.card(card_id)
+## A face-up card of the reading: its art if the campaign has any, else its name, suit and number on a card face;
+## under it the slot it was dealt to (`slot_name`).
+func _reading_card(card_id: String, slot_name: String) -> Control:
+	var card := Campaign.module().reading_card(card_id)
 	var face := PanelContainer.new()
 	var st := StyleBoxFlat.new()
 	st.bg_color = Look.color("vellum")
@@ -354,8 +355,8 @@ func _tarokka_card(card_id: String, slot: String) -> Control:
 	var v := VBoxContainer.new()
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	face.add_child(v)
-	var art := "res://art/tarokka/%s.png" % str(card.get("art", card_id))
-	if ResourceLoader.exists(art):
+	var art := ReadingDeck.art(card_id)
+	if art != "":
 		var tex := TextureRect.new()
 		tex.texture = load(art) as Texture2D
 		tex.custom_minimum_size = Vector2(150, 170)
@@ -363,7 +364,8 @@ func _tarokka_card(card_id: String, slot: String) -> Control:
 		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		v.add_child(tex)
 	else:
-		var glyph := {"swords": "⚔", "stars": "✶", "coins": "◉", "glyphs": "✠"}.get(str(card.get("suit", "")), "☾") as String
+		var glyph := {"swords": "⚔", "stars": "✶", "coins": "◉", "glyphs": "✠", "cups": "♆", "wands": "⚚",
+			"pentacles": "⛤"}.get(str(card.get("suit", "")), "☾") as String
 		var big := _label(glyph, 64, "blood_deep" if str(card.get("deck", "")) == "high" else "ui_black")
 		big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(big)
@@ -375,13 +377,23 @@ func _tarokka_card(card_id: String, slot: String) -> Control:
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(nm)
-	var sl := _label(str(Tarokka.SLOT_NAMES.get(slot, "")), 12, "peat")
+	var sl := _label(slot_name, 12, "peat")
 	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(sl)
 	for l in v.find_children("*", "Label", false, false):
 		(l as Label).add_theme_constant_override("outline_size", 0)
 	return face
+
+
+## Keeps a spread of any size inside its row: past the five or six cards a row holds, every card shrinks to fit.
+func _fit_spread() -> void:
+	var n := _spread.get_child_count()
+	var w := minf(170.0, (1120.0 - 14.0 * float(n - 1)) / float(maxi(1, n)))
+	for c in _spread.get_children():
+		(c as Control).custom_minimum_size = Vector2(w, w * 250.0 / 170.0)
+		for t in (c as Control).find_children("*", "TextureRect", true, false):
+			(t as TextureRect).custom_minimum_size = Vector2(w - 20.0, (w - 20.0) * 170.0 / 150.0)
 
 
 ## Starts a conversation at "file:node". Returns false if it doesn't exist.
@@ -445,8 +457,9 @@ func _show(beat: Dictionary) -> void:
 			_waiting_continue = true
 			if beat.has("card"):
 				Audio.sfx("card")
-				var card := _tarokka_card(str(beat["card"]), str(beat.get("slot", "")))
+				var card := _reading_card(str(beat["card"]), str(beat.get("slot_name", "")))
 				_spread.add_child(card)
+				_fit_spread()
 				UiMotion.flip_in(card)
 		"check":
 			var colour := "bile" if bool(beat["success"]) else "vampire_red"
@@ -776,7 +789,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 			return
 	if _waiting_continue:
-		# A click that no part of the screen took (the Tarokka cards) continues too.
+		# A click that no part of the screen took (the reading's cards) continues too.
 		var go := event.is_action_pressed(&"combat_confirm") or event.is_action_pressed(&"combat_end_turn") \
 			or event.is_action_pressed(&"combat_cancel") \
 			or (event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT)

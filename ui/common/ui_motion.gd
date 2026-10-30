@@ -1,7 +1,7 @@
 class_name UiMotion
 extends RefCounted
 ## G9, the interface in motion: screens that rise into place and sink away, a leaf that turns across the journal,
-## Tarokka cards that flip face up, and numbers (Hit Points, gold) that roll to their new value instead of jumping.
+## A reading's cards that flip face up, and numbers (Hit Points, gold) that roll to their new value instead of jumping.
 ## Everything is cosmetic and short; tweens run on the scene tree so a paused game still animates its menus. Motion is
 ## off in headless runs (tests) and in still captures, where every frame has to show the finished screen; a capture
 ## that wants it passes --motion.
@@ -152,7 +152,7 @@ static func _leaf(c: Control, page: Control, forward: bool) -> void:
 	c.draw_line(top, bottom, Look.color("gilt_light"), 2.0, true)
 
 
-## A Tarokka card turning face up: it shows its back, then flips about its middle to its face. `delay` holds the back
+## A reading's card turning face up: it shows its back, then flips about its middle to its face. `delay` holds the back
 ## a moment first (cards dealt one after another).
 static func flip_in(card: Control, delay: float = 0.15) -> void:
 	if not on():
@@ -163,7 +163,7 @@ static func flip_in(card: Control, delay: float = 0.15) -> void:
 		if ci != null and ci.visible:
 			face.append(ci)
 			ci.visible = false
-	var paint_back := func() -> void: _tarokka_back(card)
+	var paint_back := func() -> void: _card_back(card)
 	card.draw.connect(paint_back)
 	card.queue_redraw()
 	var swap := func() -> void:
@@ -186,8 +186,8 @@ static func flip_in(card: Control, delay: float = 0.15) -> void:
 		card.tree_entered.connect(start, CONNECT_ONE_SHOT)
 
 
-## A Vistani card back: crimson field, a gilt rule inset, a lozenge eye in the middle and a lozenge at each corner.
-static func _tarokka_back(card: Control) -> void:
+## A card back: crimson field, a gilt rule inset, a lozenge eye in the middle and a lozenge at each corner.
+static func _card_back(card: Control) -> void:
 	var r := Rect2(Vector2.ZERO, card.size)
 	if r.size.x < 8.0 or r.size.y < 8.0:
 		return

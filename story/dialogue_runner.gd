@@ -249,8 +249,12 @@ func next() -> Dictionary:
 				var reading := Campaign.module().reading(str(s["slot"]), st)
 				if reading.is_empty():
 					continue
-				_queued.append(_line_beat(str(s["speaker"]), "", str(reading["verse"])))
-				return {"kind": "notice", "text": str(reading["title"]), "card": reading["card"], "slot": reading["slot"]}
+				var reader := str(s["speaker"]) if str(s["speaker"]) != "" else str(ReadingDeck.setting("reader"))
+				_queued.append(_line_beat(reader, "", str(reading["verse"])))
+				# The card's slot as the card face names it: the module's `slot_name`, else what its title says first.
+				var slot_name := str(reading.get("slot_name", str(reading["title"]).get_slice(": ", 0) if str(reading["title"]).contains(": ") else ""))
+				return {"kind": "notice", "text": str(reading["title"]), "card": reading["card"], "slot": reading["slot"],
+					"slot_name": slot_name}
 			"reading_give":
 				pc += 1
 				# The treasures the reading hid here, handed to the party's leader (ADR 0011).

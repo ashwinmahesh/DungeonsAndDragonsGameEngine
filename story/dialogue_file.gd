@@ -191,7 +191,7 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			if parts.size() >= 2 and parts[1] == "draw":
 				return {"t": "reading_draw"}
 			if parts.size() >= 3 and parts[1] == "read":
-				return {"t": "reading_read", "slot": parts[2], "speaker": parts[3] if parts.size() > 3 else "madam_eva"}
+				return {"t": "reading_read", "slot": parts[2], "speaker": parts[3] if parts.size() > 3 else ""}
 			if parts.size() == 3 and parts[1] == "give":
 				return {"t": "reading_give", "place": parts[2]}
 		"dark_gift":
