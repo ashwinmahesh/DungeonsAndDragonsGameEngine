@@ -281,7 +281,7 @@ func _modern_finish() -> void:
 	# Wide, soft halos round what burns, lit windows and the moon on water (Visual Polish Plan 5, after Octopath
 	# Traveler 2): the broad levels on as well as the near ones, each softer as it widens.
 	for level: int in GLOW_LEVELS:
-		env.set_glow_level(level, float(GLOW_LEVELS[level]))
+		env.set_glow_level(level, float(GLOW_LEVELS[level]) * (float(hd2d["bloom_wide"]) if level >= 4 else 1.0))
 	env.ssao_enabled = not Graphics.mobile_renderer()
 	env.ssao_radius = 1.1
 	env.ssao_intensity = maxf(float(mood.get("ambient_occlusion", 0.0)), 1.8)
@@ -485,12 +485,20 @@ func _focus_blur() -> void:
 
 
 ## The game's HD-2D depth of field and tilt-shift (Look.HD2D focus and tilt_shift), eased off with the edge blur
-## (`amount`): the screen pass blurs the world by its depth away from the party's, which the camera follows.
+## (`amount`): the screen pass blurs the world by its depth away from the party's, which the camera follows. A mood's
+## `focus` scales it for the place; a fight takes the game's focus_fight (the board stays readable) and a
+## conversation, as TalkCamera leans in, its focus_talk (the pair stand out).
 func _hd2d_focus(amount: float) -> void:
 	if float(hd2d["focus"]) <= 0.0 and float(hd2d["tilt_shift"]) <= 0.0:
 		return   # off (the shader's own defaults)
-	var focus := float(hd2d["focus"]) * amount
-	var tilt := float(hd2d["tilt_shift"]) * amount
+	var view := get_parent()
+	if view != null and bool(view.get("in_combat")):
+		amount *= float(hd2d["focus_fight"])
+	else:
+		amount *= lerpf(1.0, float(hd2d["focus_talk"]), clampf(_rig.shot_weight / TalkCamera.LEAN, 0.0, 1.0))
+	amount *= float(mood.get("focus", 1.0))
+	var focus := clampf(float(hd2d["focus"]) * amount, 0.0, 1.0)
+	var tilt := clampf(float(hd2d["tilt_shift"]) * amount, 0.0, 1.0)
 	_post.set_shader_parameter("focus_blur", focus)
 	_post.set_shader_parameter("tilt_shift", tilt)
 	if focus <= 0.0 and tilt <= 0.0:

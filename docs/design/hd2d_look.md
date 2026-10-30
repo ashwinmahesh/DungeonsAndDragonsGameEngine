@@ -38,7 +38,9 @@ must exist before the engine will even compile (see "Hard requirements" below).
   (`tilt_shift`, the top and bottom of the screen soften), both in the screen pass so markers, names and characters
   stay sharp; the bloom's strength, threshold and spread; flames and lamps brighter, further reaching and lighting more
   haze (`lamp_*`); and drifting specks of light everywhere (`motes`; a mood's weather `"motes"` for one place). A time
-  of day's `moon_colour` colours the moon's disc apart from the light it casts.
+  of day's `moon_colour` colours the moon's disc apart from the light it casts. A fight and a conversation scale the
+  blur (`focus_fight`, `focus_talk`) and a mood's `focus` scales it for a place; `bloom_wide` widens the halos; a
+  mood's weather `"moths"` sets moths fluttering round its lamps.
 - **Camera and scale** (ADR 0004): one world unit is one 5 ft square, a Medium character is about 1.2 units tall,
   the camera looks down at 40 degrees (a game's `"camera": {"pitch"}` in `data/campaign.json` changes it), starts at a 45 degree heading and turns in 90 degree steps. That is why
   sprites need 8 directions. Real-world sizes: a person is 6 ft and props are sized to match.

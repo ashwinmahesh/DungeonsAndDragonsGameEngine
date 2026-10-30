@@ -1,7 +1,8 @@
 class_name AtmosphereWeather
 extends RefCounted
 ## A place's weather (Atmosphere, docs/art/atmosphere.md): falling leaves, rain with splashes, snow, will-o'-wisps
-## and fireflies, crows circling overhead, chimney smoke, embers over fires and candlelight from lit windows. Every
+## and fireflies, crows circling overhead, chimney smoke, embers over fires, moths round the lamps, drifting motes of
+## light and candlelight from lit windows. Every
 ## piece draws opaque, hard-edged shapes in palette colours, so the screen pass snaps it like the rest of the world and
 ## nothing adds grain. The kinds a mood lists in `weather` are built here; each may be a name or {kind, ...settings}.
 
@@ -66,6 +67,8 @@ static func build(parent: Node, board: ArenaBoard, mood: Dictionary, outdoors: b
 				w._embers(view)
 			"motes":
 				w._motes(spec)
+			"moths":
+				w._moths(view, spec)
 	# The game's HD-2D motes (Look.HD2D "motes"): specks of light over every place, in the Modern and Toon finishes.
 	var hd := (parent as Atmosphere).hd2d if parent is Atmosphere else Look.HD2D
 	if int(hd["motes"]) > 0 and Look.modern():
@@ -473,6 +476,58 @@ func _embers(view: Node) -> void:
 		mat.set_shader_parameter("core", Look.color("wick"))
 		mat.set_shader_parameter("rim", Look.color("candle"))
 		mat.set_shader_parameter("glow", true)
+		quad.material = mat
+		p.draw_pass_1 = quad
+		l.get_parent().add_child(p)
+		p.position = l.position
+
+
+## Moths fluttering round the lamps and lanterns (a mood's weather "moths" {amount per light, colour, lights}): a few
+## pale specks held close to each flame, darting on the turbulence and seen only where the lamp lights them, as moths
+## are. Fires are left to their embers; the busiest lamps first, up to `lights` of them.
+func _moths(view: Node, spec: Dictionary) -> void:
+	if view == null:
+		return
+	var flame := Look.color("flame")
+	var most := int(spec.get("lights", 12))
+	for n in view.find_children("*", "CandleFlicker", true, false):
+		var l := n as CandleFlicker
+		if l.light_color.is_equal_approx(flame) or most <= 0:
+			continue
+		most -= 1
+		var p := GPUParticles3D.new()
+		p.name = "Moths"
+		p.amount = int(spec.get("amount", 5))
+		p.lifetime = 6.0
+		p.preprocess = 6.0
+		p.local_coords = false
+		p.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 4, 4))
+		p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var pm := ParticleProcessMaterial.new()
+		pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+		pm.emission_sphere_radius = 0.35
+		pm.spread = 180.0
+		pm.initial_velocity_min = 0.3
+		pm.initial_velocity_max = 0.7
+		pm.gravity = Vector3.ZERO
+		pm.radial_accel_min = -1.6   # pulled back toward the flame
+		pm.radial_accel_max = -1.0
+		pm.damping_min = 0.4
+		pm.damping_max = 0.8
+		pm.turbulence_enabled = Graphics.particle_turbulence()
+		pm.turbulence_noise_strength = 2.5
+		pm.turbulence_noise_scale = 0.8
+		pm.turbulence_noise_speed = Vector3(0.6, 0.6, 0.6)
+		pm.turbulence_influence_min = 0.3
+		pm.turbulence_influence_max = 0.6
+		p.process_material = pm
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * float(spec.get("size", 0.06))
+		var mat := ShaderMaterial.new()
+		mat.shader = DUST_SHADER
+		mat.set_shader_parameter("core", Look.color(str(spec.get("colour", "vellum"))))
+		mat.set_shader_parameter("light_cap", 0.8)
+		mat.set_shader_parameter("twinkle", 0.9)
 		quad.material = mat
 		p.draw_pass_1 = quad
 		l.get_parent().add_child(p)

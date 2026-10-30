@@ -25,6 +25,8 @@ func test_a_game_that_names_none_keeps_the_picture() -> void:
 	for k: String in ["lamp_energy", "lamp_reach", "lamp_haze"]:
 		assert_eq(float(h[k]), 1.0, "%s as before" % k)
 	assert_eq(int(h["motes"]), 0, "no motes")
+	for k: String in ["focus_fight", "focus_talk", "bloom_wide"]:
+		assert_eq(float(h[k]), 1.0, "%s as before" % k)
 
 
 func test_a_game_sets_its_own_and_unknown_keys_are_left_out() -> void:
@@ -60,3 +62,23 @@ func test_motes_drift_and_glow() -> void:
 	var mat := (p.draw_pass_1 as QuadMesh).material as ShaderMaterial
 	assert_true(bool(mat.get_shader_parameter("glow")), "they glow in the dark")
 	parent.free()
+
+
+func test_moths_flutter_round_the_lamps_not_the_fires() -> void:
+	var view := Node3D.new()
+	add_child(view)
+	var lamp := CandleFlicker.new()
+	lamp.light_color = Look.color("candle")
+	lamp.position = Vector3(2, 1, 3)
+	view.add_child(lamp)
+	var fire := CandleFlicker.new()
+	fire.light_color = Look.color("flame")
+	view.add_child(fire)
+	var w := AtmosphereWeather.new()
+	w._parent = view
+	w._moths(view, {"amount": 4})
+	var moths := view.find_children("Moths*", "GPUParticles3D", true, false)
+	assert_eq(moths.size(), 1, "one swarm, at the lamp only")
+	assert_eq((moths[0] as GPUParticles3D).amount, 4, "as many as asked")
+	assert_eq((moths[0] as Node3D).position, lamp.position, "at the lamp")
+	view.free()

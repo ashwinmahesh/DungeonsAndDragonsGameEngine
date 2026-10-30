@@ -98,15 +98,17 @@ static func forget_toon_settings() -> void:
 ##   focus (0 to 1): depth of field: the world nearer or further than the party by more than focus_range (world units)
 ##   softens, fully focus_falloff past that. tilt_shift (0 to 1): the top and bottom of the screen soften, the middle
 ##   tilt_band of its height sharp. Both blur only the world, as the edge blur does, and go with Settings' depth blur.
+##   focus_fight and focus_talk scale both in a fight and in a conversation; a mood's `focus` scales them for a place.
 ##   bloom: the glow's strength (times the engine's), bloom_threshold: how bright a pixel blooms from, bloom_spread: the
-##   soft wash every bright area adds.
+##   soft wash every bright area adds, bloom_wide: the wide halo levels (times the engine's).
 ##   lamp_energy, lamp_reach and lamp_haze: times the flames' and lamps' brightness, reach and the haze they light
 ##   (pools of light and halos; spells and windows keep theirs).
 ##   motes (a count): specks of light drifting over every place, mote_colour and mote_rim (palette names), mote_size
 ##   (world units) and motes_night_only.
 const HD2D := {
 	"focus": 0.0, "focus_range": 3.0, "focus_falloff": 10.0, "tilt_shift": 0.0, "tilt_band": 0.35,
-	"bloom": 1.0, "bloom_threshold": 0.9, "bloom_spread": 0.02,
+	"focus_fight": 1.0, "focus_talk": 1.0,
+	"bloom": 1.0, "bloom_threshold": 0.9, "bloom_spread": 0.02, "bloom_wide": 1.0,
 	"lamp_energy": 1.0, "lamp_reach": 1.0, "lamp_haze": 1.0,
 	"motes": 0, "mote_colour": "wick", "mote_rim": "flame", "mote_size": 0.05, "motes_night_only": false,
 }
