@@ -84,6 +84,8 @@ var _mask: ImageTexture = null
 var _lev := PackedFloat32Array()
 var _level := PackedFloat32Array()
 var _sloped := false
+## The water squares the field covers.
+var _wet: Dictionary = {}
 ## How many times the squares' levels are smoothed (a 3 x 3 average each time): the stream's slope spreads over about
 ## this many squares either side of a step.
 const LEVEL_BLUR := 2
@@ -129,6 +131,7 @@ static func build(board_: ArenaBoard, skin: Dictionary, flat: Dictionary) -> Sho
 		again._lev = k._lev
 		again._level = k._level
 		again._sloped = k._sloped
+		again._wet = k._wet
 		return again
 	var s := Shores.new()
 	s.board = board_
@@ -169,6 +172,7 @@ func _levels() -> void:
 			if g.has_flag(c, CombatGrid.WATER):
 				var k := sz * _sw + sx
 				_lev[k] = g.height(c) / float(CombatGrid.FEET)
+				_wet[c] = true
 				steps[k] = 0
 				front.append(Vector2i(sx, sz))
 				_sloped = _sloped or not is_zero_approx(_lev[k])
@@ -535,15 +539,16 @@ func touches(p: Vector2) -> bool:
 
 ## Draws what the shore needs besides the ground: the water's mask (the foam and the depth colour follow the contour) and
 ## a skirt of water under the walkable squares beside it, at the board's water level, for the bank to dip into. `parent`
-## is the surround; `water` the water's material (the board's own plain one where the mood has none).
-func dress(parent: Node3D, water: Material) -> void:
+## is the surround; `water` the water's material (the board's own plain one where the mood has none); `on` the board
+## being dressed (a shore kept from an earlier visit was worked out on that visit's board).
+func dress(parent: Node3D, water: Material, on: ArenaBoard = null) -> void:
 	var w := water
 	if w == null:
 		w = Look.cel_textured("wild/water")
 	if water is ShaderMaterial:
 		(water as ShaderMaterial).set_shader_parameter("water_mask", mask())
 	if _sloped and w != null:
-		_dress_stream(parent, w)
+		_dress_stream(parent, w, on if on != null else board)
 		return
 	if _zone_land.is_empty() or w == null:
 		return
@@ -604,15 +609,12 @@ func mask() -> ImageTexture:
 ## Water off the board's level (a creek down a hillside): one surface over the water squares and the walkable squares
 ## beside them, a point every third of a square at the water's own smoothed level, so the stream runs down the slope
 ## between its banks. The board's flat water boxes (ArenaBoard._water) are hidden for it.
-func _dress_stream(parent: Node3D, water: Material) -> void:
+func _dress_stream(parent: Node3D, water: Material, on: ArenaBoard) -> void:
 	var cover := {}
 	for c: Vector2i in _zone_land:
 		cover[c] = true
-	for sz in _sd:
-		for sx in _sw:
-			var c := Vector2i(_x0 + sx, _z0 + sz)
-			if board.grid.has_flag(c, CombatGrid.WATER):
-				cover[c] = true
+	for c: Vector2i in _wet:
+		cover[c] = true
 	var verts := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var idx := PackedInt32Array()
@@ -641,6 +643,6 @@ func _dress_stream(parent: Node3D, water: Material) -> void:
 	mi.material_override = water
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
-	for n: Node in board.get_children():
+	for n: Node in on.get_children():
 		if n.has_meta(&"water_cell"):
 			(n as Node3D).visible = false
