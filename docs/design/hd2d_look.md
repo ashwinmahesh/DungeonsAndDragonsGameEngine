@@ -33,6 +33,12 @@ must exist before the engine will even compile (see "Hard requirements" below).
   colour in the shade. Every setting is the game's data under `"toon"` (`Look.TOON` lists them): the bands (3, 2, or 0
   for a painted world's soft light), where they break, the fills' flatness and colour, relief, the world's ink (0 leaves
   only the characters inked) and the grade; a mood's `toon` block goes over its `modern` one.
+- **HD-2D options** (2026-10-30), off unless a game asks under `data/campaign.json`'s `"hd2d"` (`Look.HD2D` lists
+  them), in Modern and Toon: depth of field (`focus`, the world away from the party's depth softens) and tilt-shift
+  (`tilt_shift`, the top and bottom of the screen soften), both in the screen pass so markers, names and characters
+  stay sharp; the bloom's strength, threshold and spread; flames and lamps brighter, further reaching and lighting more
+  haze (`lamp_*`); and drifting specks of light everywhere (`motes`; a mood's weather `"motes"` for one place). A time
+  of day's `moon_colour` colours the moon's disc apart from the light it casts.
 - **Camera and scale** (ADR 0004): one world unit is one 5 ft square, a Medium character is about 1.2 units tall,
   the camera looks down at 40 degrees (a game's `"camera": {"pitch"}` in `data/campaign.json` changes it), starts at a 45 degree heading and turns in 90 degree steps. That is why
   sprites need 8 directions. Real-world sizes: a person is 6 ft and props are sized to match.

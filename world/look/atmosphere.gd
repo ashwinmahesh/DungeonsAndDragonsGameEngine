@@ -36,6 +36,8 @@ var land: AtmosphereLand = null
 var weather: AtmosphereWeather = null
 var water: ShaderMaterial = null
 var _water_reflect := 1.0          ## how much of the sky the water shows (the mood's water `reflect`)
+## The game's HD-2D options (Look.hd2d_settings), read once for the place.
+var hd2d: Dictionary = Look.HD2D
 
 var _post: ShaderMaterial = null
 var _rig: CameraRig = null
@@ -65,6 +67,7 @@ static func create(loc_id: String, loc_: Dictionary, board_: ArenaBoard) -> Atmo
 	a.loc_id = loc_id
 	a.mood_id = mood_for(loc_id, loc_)
 	a.mood = a._dressed()
+	a.hd2d = Look.hd2d_settings()
 	a._rng.seed = hash(loc_id)   # cosmetic only, never rules
 	# The region's own ground colours (a mood's `ground_tint`), before the land's materials are made.
 	Look.set_surface_tints(a._ground_tints())
@@ -269,10 +272,10 @@ func _modern_finish() -> void:
 	env.tonemap_exposure = MODERN_EXPOSURE
 	env.tonemap_white = 6.0
 	env.glow_enabled = not Graphics.software_simulator()
-	env.glow_intensity = 0.7
+	env.glow_intensity = 0.7 * float(hd2d["bloom"])
 	env.glow_strength = 1.0
-	env.glow_bloom = 0.02
-	env.glow_hdr_threshold = 0.9
+	env.glow_bloom = float(hd2d["bloom_spread"])
+	env.glow_hdr_threshold = float(hd2d["bloom_threshold"])
 	env.glow_hdr_scale = 2.0
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	# Wide, soft halos round what burns, lit windows and the moon on water (Visual Polish Plan 5, after Octopath
@@ -469,6 +472,7 @@ func _focus_blur() -> void:
 	var amount := 0.0
 	if Look.modern() and GameSettings.depth_blur():
 		amount = 1.0 - smoothstep(0.0, 0.6, _rig.horizon_shown)
+	_hd2d_focus(amount)
 	var setting := edge_blur()
 	if is_equal_approx(amount, _blur_shown) and setting == _blur_setting:
 		return
@@ -478,6 +482,25 @@ func _focus_blur() -> void:
 	_post.set_shader_parameter("edge_blur", amount)
 	_post.set_shader_parameter("edge_blur_start", float(k["start"]))
 	_post.set_shader_parameter("edge_blur_lod", float(k["lod"]))
+
+
+## The game's HD-2D depth of field and tilt-shift (Look.HD2D focus and tilt_shift), eased off with the edge blur
+## (`amount`): the screen pass blurs the world by its depth away from the party's, which the camera follows.
+func _hd2d_focus(amount: float) -> void:
+	if float(hd2d["focus"]) <= 0.0 and float(hd2d["tilt_shift"]) <= 0.0:
+		return   # off (the shader's own defaults)
+	var focus := float(hd2d["focus"]) * amount
+	var tilt := float(hd2d["tilt_shift"]) * amount
+	_post.set_shader_parameter("focus_blur", focus)
+	_post.set_shader_parameter("tilt_shift", tilt)
+	if focus <= 0.0 and tilt <= 0.0:
+		return
+	var cam := _rig.camera
+	if cam != null and cam.is_inside_tree():
+		var at := cam.global_transform.affine_inverse() * _rig.global_position
+		_post.set_shader_parameter("focus_depth", maxf(-at.z, 0.1))
+	_post.set_shader_parameter("focus_range", Vector2(float(hd2d["focus_range"]), float(hd2d["focus_falloff"])))
+	_post.set_shader_parameter("tilt_band", float(hd2d["tilt_band"]))
 
 
 const MODERN_TONEMAP := Environment.TONE_MAPPER_AGX
@@ -750,7 +773,7 @@ func _apply_sky(v: Dictionary) -> void:
 	_post.set_shader_parameter("sky_zenith", sky.darkened(0.25))
 	_post.set_shader_parameter("sky_cloud_lit", sky.lerp(key, 0.45))
 	_post.set_shader_parameter("sky_cloud_shade", sky.lerp(Look.color("void"), 0.45))
-	_post.set_shader_parameter("sky_moon_colour", key.lightened(0.2))
+	_post.set_shader_parameter("sky_moon_colour", v["moon_colour"] as Color)
 	_post.set_shader_parameter("sky_moon", float(v["moon"]))
 	_post.set_shader_parameter("sky_moon_size", float(v.get("moon_size", 1.0)))
 	# Towards the light, brought down to where a camera looking out can see it.
@@ -1111,6 +1134,9 @@ func _target(p: String) -> Dictionary:
 		"tone_key": float(tone.get("key", 1.0)),
 		"moon": float(MOON_SHOWS.get(p, 0.0)) * moon_brightness(p),
 		"moon_size": float(_moon_tonight().get("size", 1.0)),
+		# The moon's own colour in the sky (a time's `moon_colour`), else its light's, a little paler.
+		"moon_colour": Look.color(str(t["moon_colour"])) if t.has("moon_colour") \
+			else Look.color(str(t.get("key", "moonlight"))).lightened(0.2),
 	}
 
 
@@ -1449,6 +1475,8 @@ const LIGHT_KINDS := {
 const SHAFT_HEIGHT := 2.6
 const SHAFT_FOG := 2.0
 const SHAFT_GLOW := 0.3
+## The kinds of light the HD-2D lamp settings (Look.HD2D lamp_*) brighten: what burns, not spells, magic or windows.
+const HD2D_LAMPS: Array[String] = ["candle", "lamp", "lantern", "torch", "fire", "lit_window"]
 const SHAFT_SHADER := preload("res://addons/dnd_core/shaders/world/light_shaft.gdshader")
 var _data_lights: Dictionary = {}
 
@@ -1490,9 +1518,11 @@ func _dress_light(light: Variant) -> void:
 	if bool(spec.get("no_shadow", false)):
 		l.set_meta("no_shadow", true)   # (_update_lamp_shadows leaves it out of its budget)
 	l.light_size = float(spec["size"]) if Graphics.lamp_soft() else 0.0
-	l.light_volumetric_fog_energy = float(spec["fog"])
-	l.omni_range *= float(spec.get("reach", 1.0))
-	var gain := float(spec.get("energy", 1.0))
+	# The game's HD-2D lamps (Look.HD2D): flames and lamps burn brighter, reach further and light more of the haze.
+	var flame := kind in HD2D_LAMPS
+	l.light_volumetric_fog_energy = float(spec["fog"]) * (float(hd2d["lamp_haze"]) if flame else 1.0)
+	l.omni_range *= float(spec.get("reach", 1.0)) * (float(hd2d["lamp_reach"]) if flame else 1.0)
+	var gain := float(spec.get("energy", 1.0)) * (float(hd2d["lamp_energy"]) if flame else 1.0)
 	if l is CandleFlicker:
 		(l as CandleFlicker).base_energy *= gain
 	else:

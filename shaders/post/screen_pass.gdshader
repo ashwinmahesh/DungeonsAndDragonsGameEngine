@@ -145,6 +145,14 @@ uniform sampler2D blur_tex : hint_screen_texture, filter_linear_mipmap, repeat_d
 uniform float edge_blur : hint_range(0.0, 1.0) = 0.0;
 uniform float edge_blur_start = 0.7;
 uniform float edge_blur_lod = 2.5;
+// HD-2D depth of field and tilt-shift (Look.HD2D, both 0 = off), on the same mips: the world nearer or further than the
+// party (focus_depth, linear) by more than focus_range.x softens, fully focus_range.y past that; the top and bottom of
+// the screen soften, the middle tilt_band of its height sharp. The sky counts as far.
+uniform float focus_blur : hint_range(0.0, 1.0) = 0.0;
+uniform float focus_depth = 13.0;
+uniform vec2 focus_range = vec2(3.0, 10.0);
+uniform float tilt_shift : hint_range(0.0, 1.0) = 0.0;
+uniform float tilt_band = 0.35;
 
 const float BAYER[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
 
@@ -297,8 +305,15 @@ void fragment() {
 	vec2 cell = floor(FRAGCOORD.xy / pixel_size);
 	vec2 uv = (cell + 0.5) * pixel_size / vp;
 	vec3 lin_in = texture(screen_tex, uv).rgb;
-	if (edge_blur > 0.0) {
+	if (edge_blur > 0.0 || focus_blur > 0.0 || tilt_shift > 0.0) {
 		float w = smoothstep(edge_blur_start, 1.4142, length(uv * 2.0 - 1.0)) * edge_blur;
+		if (tilt_shift > 0.0) {
+			w = max(w, smoothstep(tilt_band * 0.5, 0.5, abs(uv.y - 0.5)) * tilt_shift);
+		}
+		if (focus_blur > 0.0) {
+			float d = texture(depth_tex, uv).r <= 0.0 ? 1e4 : linear_depth(uv, INV_PROJECTION_MATRIX);
+			w = max(w, smoothstep(focus_range.x, focus_range.x + focus_range.y, abs(d - focus_depth)) * focus_blur);
+		}
 		if (w > 0.0) {
 			// Four taps half a texel of that mip apart smooth over the mips' square texels.
 			float lod = w * max(edge_blur_lod + log2(vp.y / 1080.0), 0.0);

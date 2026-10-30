@@ -64,6 +64,13 @@ static func build(parent: Node, board: ArenaBoard, mood: Dictionary, outdoors: b
 				w._window_light()
 			"embers":
 				w._embers(view)
+			"motes":
+				w._motes(spec)
+	# The game's HD-2D motes (Look.HD2D "motes"): specks of light over every place, in the Modern and Toon finishes.
+	var hd := (parent as Atmosphere).hd2d if parent is Atmosphere else Look.HD2D
+	if int(hd["motes"]) > 0 and Look.modern():
+		w._motes({"amount": int(hd["motes"]), "core": hd["mote_colour"], "rim": hd["mote_rim"],
+			"size": hd["mote_size"], "night_only": hd["motes_night_only"]})
 	# Sunbeams and moonbeams through the gaps in the trees and between the houses (Visual Polish Plan 2).
 	if outdoors and parent is Atmosphere:
 		SunShafts.build(parent as Atmosphere, board, view)
@@ -239,6 +246,35 @@ func _wisps(spec: Dictionary) -> void:
 	quad.material = mat
 	p.draw_pass_1 = quad
 	if bool(spec.get("night_only", true)):
+		night_only.append(p)
+
+
+## Specks of light drifting slowly through the air at every height a figure stands, glowing and breathing in and out
+## (HD-2D's floating light; a mood's weather "motes", or the game's Look.HD2D "motes" everywhere). Outdoors or in.
+func _motes(spec: Dictionary) -> void:
+	var p := _particles("Motes", int(spec.get("amount", 40)), 14.0, Vector3(12, 1.3, 12), 1.6)
+	var pm := p.process_material as ParticleProcessMaterial
+	pm.gravity = Vector3(0, 0.015, 0)
+	pm.initial_velocity_min = 0.03
+	pm.initial_velocity_max = 0.12
+	pm.spread = 180.0
+	pm.turbulence_enabled = Graphics.particle_turbulence()
+	pm.turbulence_noise_strength = 0.6
+	pm.turbulence_noise_scale = 3.0
+	pm.turbulence_influence_min = 0.05
+	pm.turbulence_influence_max = 0.15
+	var size := float(spec.get("size", 0.05))
+	var quad := QuadMesh.new()
+	quad.size = Vector2(size, size)
+	var mat := ShaderMaterial.new()
+	mat.shader = MOTE_SHADER
+	mat.set_shader_parameter("core", Look.color(str(spec.get("core", "wick"))))
+	mat.set_shader_parameter("rim", Look.color(str(spec.get("rim", "flame"))))
+	mat.set_shader_parameter("glow", true)
+	mat.set_shader_parameter("pulse", 0.6)
+	quad.material = mat
+	p.draw_pass_1 = quad
+	if bool(spec.get("night_only", false)):
 		night_only.append(p)
 
 

@@ -92,6 +92,36 @@ static func forget_toon_settings() -> void:
 	_toon = {}
 
 
+## HD-2D options (after Octopath Traveler 2) a game turns on under data/campaign.json's "hd2d", in the Modern and Toon
+## finishes only. Every default leaves the picture as it was, so a game that names none looks the same:
+##   focus (0 to 1): depth of field: the world nearer or further than the party by more than focus_range (world units)
+##   softens, fully focus_falloff past that. tilt_shift (0 to 1): the top and bottom of the screen soften, the middle
+##   tilt_band of its height sharp. Both blur only the world, as the edge blur does, and go with Settings' depth blur.
+##   bloom: the glow's strength (times the engine's), bloom_threshold: how bright a pixel blooms from, bloom_spread: the
+##   soft wash every bright area adds.
+##   lamp_energy, lamp_reach and lamp_haze: times the flames' and lamps' brightness, reach and the haze they light
+##   (pools of light and halos; spells and windows keep theirs).
+##   motes (a count): specks of light drifting over every place, mote_colour and mote_rim (palette names), mote_size
+##   (world units) and motes_night_only.
+const HD2D := {
+	"focus": 0.0, "focus_range": 3.0, "focus_falloff": 10.0, "tilt_shift": 0.0, "tilt_band": 0.35,
+	"bloom": 1.0, "bloom_threshold": 0.9, "bloom_spread": 0.02,
+	"lamp_energy": 1.0, "lamp_reach": 1.0, "lamp_haze": 1.0,
+	"motes": 0, "mote_colour": "wick", "mote_rim": "flame", "mote_size": 0.05, "motes_night_only": false,
+}
+
+
+## HD2D under the game's own "hd2d" settings, read each call (Atmosphere keeps a copy for the place it draws).
+static func hd2d_settings() -> Dictionary:
+	var out := HD2D.duplicate()
+	var own: Variant = Campaign.config().get("hd2d", {})
+	if own is Dictionary:
+		for k: String in own as Dictionary:
+			if HD2D.has(k):
+				out[k] = (own as Dictionary)[k]
+	return out
+
+
 ## Hands a lit world material the Toon settings (the shaders' toon_* uniforms; they read them only in the Toon finish).
 static func toon_material(m: ShaderMaterial) -> void:
 	if m == null or not toon():

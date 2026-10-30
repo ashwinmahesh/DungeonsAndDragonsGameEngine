@@ -52,6 +52,8 @@ func test_the_screen_pass_inks_the_world_only_in_toon() -> void:
 
 func test_godot_lit_shaders_take_toon_light_in_toon_only() -> void:
 	var foliage := load("res://addons/dnd_core/shaders/atmosphere/foliage.gdshader") as Shader
+	Campaign.use_config({"toon": {"bands": 3}})   # banded light, whatever the host game's own Toon asks
+	Look.forget_toon_settings()
 	Look.set_style("modern", false)
 	assert_eq(Look.toon_shader(foliage), foliage, "Modern keeps the shader")
 	Look.set_style("toon", false)
