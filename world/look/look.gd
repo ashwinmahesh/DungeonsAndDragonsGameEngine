@@ -141,6 +141,7 @@ static func hd2d_settings() -> Dictionary:
 ##   a crescent's bite, moon_water_ripple how much the ripples break it up).
 ##   moon_face: a picture of the game's own moon (a res:// path; alpha its shape) drawn in the sky and the water in
 ##   place of the plain disc, moon_face_size its angular radius in the sky.
+##   lightning_cutout: a close lightning strike's first instant drawn as a cut-out, lit faces pale and the rest ink.
 const PAINTED := {
 	"strokes": 0.0, "stroke_radius": 4.0, "stroke_sharpness": 600.0,
 	"ramp": [], "ramp_amount": 0.0, "steps": 5, "step_edge": 0.18, "keep_hue": 0.3, "keep_light": 1.0,
@@ -148,7 +149,7 @@ const PAINTED := {
 	"brush": 0.0, "brush_scale": 1.4, "edges": 0.0, "lines": 0.0,
 	"boughs": 0.0, "bough_height": 7.0, "bough_scale": 0.05, "bough_sway": 0.12, "boughs_by_trees": false,
 	"moon_water": 0.0, "moon_water_size": 0.07, "moon_water_bite": 0.6, "moon_water_ripple": 0.35,
-	"moon_face": "", "moon_face_size": 0.12,
+	"moon_face": "", "moon_face_size": 0.12, "lightning_cutout": 0.0,
 }
 
 

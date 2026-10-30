@@ -128,3 +128,17 @@ func test_a_game_paints_its_own_moon() -> void:
 	Campaign.use_config({"painted": {"moon_face": "res://nowhere/moon.png"}})
 	PaintedFinish.apply(mat, Look.painted_settings())
 	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "a missing picture keeps the disc")
+
+
+func test_a_close_strike_flashes_a_cut_out() -> void:
+	var a := Atmosphere.new()
+	a.painted = Look.painted_settings({"lightning_cutout": 0.9})
+	var mat := _post()
+	a.set("_post", mat)
+	a.set("_flash", 1.0)
+	a._flash_cutout()
+	assert_eq(_f(mat, "flash_silhouette"), 0.9, "the strike's first instant")
+	a.set("_flash", 0.5)
+	a._flash_cutout()
+	assert_eq(_f(mat, "flash_silhouette"), 0.0, "gone as the flash fades")
+	a.free()

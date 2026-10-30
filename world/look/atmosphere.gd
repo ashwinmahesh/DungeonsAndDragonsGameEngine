@@ -1275,7 +1275,15 @@ func _lightning(delta: float) -> bool:
 		if _flicker_at <= 0.0:
 			_flash = maxf(_flash, _flicker)
 	_flash = maxf(0.0, _flash - step * 6.0)
+	_flash_cutout()
 	return _flash > 0.0 or was > 0.0
+
+
+## A close strike's first instant as a cut-out (the game's painted `lightning_cutout`): pale lit faces, ink shade.
+func _flash_cutout() -> void:
+	var k := float(painted["lightning_cutout"])
+	if _post != null and k > 0.0 and Look.modern():
+		_post.set_shader_parameter("flash_silhouette", k * smoothstep(0.72, 0.95, _flash))
 
 
 ## One strike now (`near`: a close one, or left to chance). The flash is full for a close one and weaker for a far one.
