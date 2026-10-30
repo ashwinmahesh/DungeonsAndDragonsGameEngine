@@ -65,6 +65,8 @@ const CONTROLS: Array[String] = [
 	"In conversations: 1-9 pick an answer · Space, Enter or a click goes on · H shows what's been said.",
 	"Controller: left stick walks · right stick turns and zooms the camera · {@mark_prev} / {@mark_next} mark the thing before or next · {@use_marked} uses it · {@marked_menu} everything you can do with it · {@search} searches · {@leader_prev} / {@leader_next} who leads · {@sneak} sneak · {@plan_mode} turn-based ({@plan_round} ends the round) · hold {@show_names} for names, what foes see and the battle grid · {@hud_bar}: the bar's buttons · {@show_controls}: these controls · {@open_map} map · {start} menu. Settings, Keys, Controller moves them.",
 ]
+## Added to the card when the campaign lets the camera tilt (CameraRig.tilt_limits).
+const TILT_CONTROL := "Camera: {camera_tilt_up} / {camera_tilt_down} tilt it (or drag with the middle mouse button) · {camera_reset} puts the view back."
 var _controls: PanelContainer
 var _control_lines: Array[Label] = []
 
@@ -230,7 +232,10 @@ func build(state: StoryState) -> void:
 	var cbox := VBoxContainer.new()
 	cbox.add_theme_constant_override("separation", 8)
 	cbox.add_child(_label("Controls (F1 to close)", 20, "gilt_light"))
-	for line: String in CONTROLS:
+	var lines: Array[String] = CONTROLS.duplicate()
+	if CameraRig.tilt_limits() != Vector2.ZERO:
+		lines.append(TILT_CONTROL)
+	for line: String in lines:
 		var l := _label(line, 15, "vellum")
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size = Vector2(820, 0)

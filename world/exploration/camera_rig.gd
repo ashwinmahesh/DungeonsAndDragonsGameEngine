@@ -46,6 +46,8 @@ var _free_yaw := 0.0
 ## figures look squashed or stretched. Zero (the default): no tilt, the pitch stays the campaign's.
 var tilt_range := Vector2.ZERO
 const DRAG_TILT := 0.15
+## The tilt keys held (camera_tilt_up and camera_tilt_down), in degrees a second.
+const TILT_SPEED := 30.0
 ## The pad's right stick turns the camera (a flick left or right is a quarter turn) and zooms it (up and down) while
 ## this is on: exploring turns it on (game_root); a fight's radial menu aims with the stick instead (U6).
 var pad_look := false
@@ -127,6 +129,15 @@ func tilt_by(degrees: float) -> void:
 	pitch_deg = -clampf(-pitch_deg + degrees, tilt_range.x, tilt_range.y)
 
 
+## Puts the view back: the campaign's pitch, the heading the view started on (a free turn or a touch twist undone; the
+## quarter turns a view set itself stay) and no touch pan.
+func reset_view() -> void:
+	pitch_deg = play_pitch()
+	_free_yaw = 0.0
+	_touch_yaw = 0.0
+	touch_offset = Vector3.ZERO
+
+
 ## Turns the camera by `degrees` (positive: as rotate_step(1) does), at once, in free turning.
 func turn_by(degrees: float) -> void:
 	_free_yaw = wrapf(_free_yaw + deg_to_rad(degrees), -PI, PI)
@@ -198,6 +209,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return   # exploring, the stick clicks sneak and switch turn-based; the right stick turns the camera
 	if event.is_action_pressed(&"camera_tactical"):
 		tactical = not tactical
+	elif event.is_action_pressed(&"camera_reset"):
+		reset_view()
 	elif free_turn and (event.is_action(&"camera_rotate_left") or event.is_action(&"camera_rotate_right")):
 		return   # (held, they turn it smoothly: _process)
 	elif event.is_action_pressed(&"camera_rotate_left"):
@@ -220,6 +233,10 @@ func _process(delta: float) -> void:
 		var held := Input.get_axis(&"camera_rotate_left", &"camera_rotate_right")
 		if held != 0.0:
 			turn_by(held * TURN_SPEED * delta)
+	if tilt_range != Vector2.ZERO and is_inside_tree() and InputMap.has_action(&"camera_tilt_up") and InputMap.has_action(&"camera_tilt_down"):
+		var tilting := Input.get_axis(&"camera_tilt_up", &"camera_tilt_down")
+		if tilting != 0.0:
+			tilt_by(tilting * TILT_SPEED * delta)
 	if follow:
 		global_position = global_position.lerp(follow.global_position + touch_offset, clampf(delta * 6.0, 0.0, 1.0))
 	var goal := _goal_yaw()

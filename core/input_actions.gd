@@ -16,6 +16,11 @@ const BINDINGS := {
 	&"camera_rotate_left": [KEY_Q],
 	&"camera_rotate_right": [KEY_E],
 	&"camera_tactical": [KEY_O],
+	# Tilt (a campaign's "camera": {"tilt": [...]}) and putting the view back, for the keyboard and a trackpad, which
+	# have no middle button to drag with.
+	&"camera_tilt_up": [KEY_COMMA, KEY_PAGEUP],
+	&"camera_tilt_down": [KEY_PERIOD, KEY_PAGEDOWN],
+	&"camera_reset": [KEY_BACKSLASH, KEY_HOME],
 	&"cycle_leader": [KEY_TAB],
 	&"select_member_1": [KEY_1],
 	&"select_member_2": [KEY_2],
@@ -75,6 +80,9 @@ const COMMANDS := [
 	[&"camera_rotate_left", "Turn the camera left", "both"],
 	[&"camera_rotate_right", "Turn the camera right", "both"],
 	[&"camera_tactical", "Tactical camera (from above)", "both"],
+	[&"camera_tilt_up", "Tilt the camera up (flatter)", "both"],
+	[&"camera_tilt_down", "Tilt the camera down (steeper)", "both"],
+	[&"camera_reset", "Put the camera back (angle and heading)", "both"],
 	[&"cycle_leader", "Next party member", "both"],
 	[&"select_member_1", "Lead: first", "explore"],
 	[&"select_member_2", "Lead: second", "explore"],

@@ -88,3 +88,56 @@ func test_no_tilt_without_the_setting() -> void:
 	rig.snap_to_target()
 	assert_between(rig.camera.rotation_degrees.x, -30.01, -29.99, "the pitch stays")
 	rig.free()
+
+
+func _held(action: StringName) -> void:
+	Input.action_press(action)
+
+
+func test_tilt_keys_held_tilt_within_the_range() -> void:
+	Campaign.use_config({"camera": {"pitch": 40, "tilt": [30, 50]}})
+	var rig := _rig()
+	_held(&"camera_tilt_down")
+	rig._process(10.0)
+	Input.action_release(&"camera_tilt_down")
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -50.01, -49.99, "held down, no steeper than 50")
+	_held(&"camera_tilt_up")
+	rig._process(10.0)
+	Input.action_release(&"camera_tilt_up")
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -30.01, -29.99, "held up, no flatter than 30")
+	rig.free()
+
+
+func test_tilt_keys_do_nothing_without_a_range() -> void:
+	Campaign.use_config({"camera": {"pitch": 40}})
+	var rig := _rig()
+	_held(&"camera_tilt_down")
+	rig._process(1.0)
+	Input.action_release(&"camera_tilt_down")
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -40.01, -39.99, "the pitch stays")
+	rig.free()
+
+
+func test_reset_puts_the_angle_and_heading_back() -> void:
+	Campaign.use_config({"camera": {"pitch": 40, "free_turn": true, "tilt": [30, 50]}})
+	var rig := _rig()
+	rig.rotate_step(-1)   # (a location view starts a quarter round)
+	rig.turn_by(77.0)
+	rig.tilt_by(9.0)
+	_press(rig, &"camera_reset")
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -40.01, -39.99, "the campaign's pitch")
+	assert_between(rad_to_deg(rig.rotation.y), -45.1, -44.9, "the heading the view started on")
+	rig.free()
+
+
+func test_the_tilt_keys_are_in_the_keys_page() -> void:
+	var listed: Array[StringName] = []
+	for c: Array in InputActions.COMMANDS:
+		listed.append(c[0] as StringName)
+	for a: StringName in [&"camera_tilt_up", &"camera_tilt_down", &"camera_reset"]:
+		assert_true(a in listed, "%s can be rebound" % a)
+		assert_true(InputMap.has_action(a), "%s is registered" % a)
