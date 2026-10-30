@@ -598,7 +598,9 @@ steep runs, and a drop of 10 ft or more between water squares pours over as a wa
   own pitch in `data/campaign.json` (`"camera": {"pitch": 30}`, plan E28): the fight camera, the shots that lean off
   it and the sun's shadow reach follow, and its sprites are rendered for that angle.
   `"free_turn": true` there turns the camera to any heading (held turn keys, a middle-mouse drag, the pad's right
-  stick) instead of quarter turns; the 8-direction sprites pick their frame from the real heading.
+  stick) instead of quarter turns; the 8-direction sprites pick their frame from the real heading. `"tilt": [22, 38]` lets
+  the player drag the pitch (middle mouse, up and down) within that range; keep it near the angle the sprites are drawn
+  for (about 8 degrees either side), past which flat figures look squashed or stretched.
 
 ### 5.4 Stealth that buys something (2026-10-18, standing)
 

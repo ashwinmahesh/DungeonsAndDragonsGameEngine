@@ -62,3 +62,29 @@ func test_sprites_pick_their_frame_at_any_heading() -> void:
 		var cam := Basis(Vector3.UP, deg_to_rad(step * 10.0)) * Basis(Vector3.RIGHT, deg_to_rad(-30.0))
 		seen[DirectionalSprite.direction_for(Vector3(0, 0, -1), cam)] = true
 	assert_eq(seen.size(), 8, "all eight frames come round")
+
+
+func test_tilt_stays_in_the_campaigns_range() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true, "tilt": [22, 38]}})
+	var rig := _rig()
+	assert_eq(rig.tilt_range, Vector2(22, 38), "the range")
+	var drag := InputEventMouseMotion.new()
+	drag.button_mask = MOUSE_BUTTON_MASK_MIDDLE
+	drag.relative = Vector2(0, 1000)
+	rig._unhandled_input(drag)
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -38.01, -37.99, "dragged down, no steeper than 38")
+	drag.relative = Vector2(0, -2000)
+	rig._unhandled_input(drag)
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -22.01, -21.99, "dragged up, no flatter than 22")
+	rig.free()
+
+
+func test_no_tilt_without_the_setting() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true}})
+	var rig := _rig()
+	rig.tilt_by(10.0)
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -30.01, -29.99, "the pitch stays")
+	rig.free()

@@ -41,6 +41,11 @@ var free_turn := false
 const TURN_SPEED := 120.0
 const DRAG_TURN := 0.3
 var _free_yaw := 0.0
+## How far the player may tilt the camera (degrees down, lowest and highest): a campaign's "camera": {"tilt": [22, 38]},
+## dragged up and down with the middle mouse button. Kept close to the pitch the sprites are drawn for, past which flat
+## figures look squashed or stretched. Zero (the default): no tilt, the pitch stays the campaign's.
+var tilt_range := Vector2.ZERO
+const DRAG_TILT := 0.15
 ## The pad's right stick turns the camera (a flick left or right is a quarter turn) and zooms it (up and down) while
 ## this is on: exploring turns it on (game_root); a fight's radial menu aims with the stick instead (U6).
 var pad_look := false
@@ -78,6 +83,7 @@ func _init() -> void:
 	name = "CameraRig"
 	pitch_deg = play_pitch()
 	free_turn = turns_freely()
+	tilt_range = tilt_limits()
 	camera = Camera3D.new()
 	camera.fov = 32.0
 	camera.near = 0.3
@@ -100,6 +106,25 @@ static func play_pitch() -> float:
 static func turns_freely() -> bool:
 	var cam: Variant = Campaign.config().get("camera", {})
 	return cam is Dictionary and bool((cam as Dictionary).get("free_turn", false))
+
+
+## The tilt a game allows (data/campaign.json "camera" "tilt": [lowest, highest] degrees down, within PITCH_RANGE), or
+## zero for none.
+static func tilt_limits() -> Vector2:
+	var cam: Variant = Campaign.config().get("camera", {})
+	var t: Variant = (cam as Dictionary).get("tilt", []) if cam is Dictionary else []
+	if not t is Array or (t as Array).size() != 2:
+		return Vector2.ZERO
+	var lo := clampf(absf(float((t as Array)[0])), PITCH_RANGE.x, PITCH_RANGE.y)
+	var hi := clampf(absf(float((t as Array)[1])), PITCH_RANGE.x, PITCH_RANGE.y)
+	return Vector2(minf(lo, hi), maxf(lo, hi))
+
+
+## Tilts the camera `degrees` further down (negative: flatter), within tilt_range; nothing without one.
+func tilt_by(degrees: float) -> void:
+	if tilt_range == Vector2.ZERO:
+		return
+	pitch_deg = -clampf(-pitch_deg + degrees, tilt_range.x, tilt_range.y)
 
 
 ## Turns the camera by `degrees` (positive: as rotate_step(1) does), at once, in free turning.
@@ -162,8 +187,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				horizon = minf(horizon + 1.0 / HORIZON_STEPS, 1.0)
 			else:
 				distance = clampf(distance + 1.0, zoom_min, zoom_max)
-	if free_turn and event is InputEventMouseMotion and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_MIDDLE) != 0:
-		turn_by((event as InputEventMouseMotion).relative.x * DRAG_TURN)
+	if (free_turn or tilt_range != Vector2.ZERO) and event is InputEventMouseMotion \
+			and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_MIDDLE) != 0:
+		var drag := (event as InputEventMouseMotion).relative
+		if free_turn:
+			turn_by(drag.x * DRAG_TURN)
+		tilt_by(drag.y * DRAG_TILT)
 		return
 	if pad_look and event is InputEventJoypadButton:
 		return   # exploring, the stick clicks sneak and switch turn-based; the right stick turns the camera
