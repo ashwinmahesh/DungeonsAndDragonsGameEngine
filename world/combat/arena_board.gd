@@ -1366,11 +1366,67 @@ func _plan_terrain() -> void:
 	if not any:
 		return
 	_corner_h.resize(grid.width * grid.depth * 4)
+	var roll := ground_roll()
+	if roll > 0.0:
+		_rollable_squares()
 	for z in grid.depth:
 		for x in grid.width:
 			var c := Vector2i(x, z)
 			for i in 4:
-				_corner_h[_corner_index(c) + i] = _corner_y(c, _CORNERS[i])
+				_corner_h[_corner_index(c) + i] = _corner_y(c, _CORNERS[i]) + (_roll_at(c + _CORNERS[i], roll) if roll > 0.0 else 0.0)
+
+
+## Gently rolling open ground (plan N9, Crooked Moon 2026-10-29): how far (world units, up and down) natural ground rolls
+## between its rules heights, a long low swell seeded by the place, so a meadow is never a plane of tilted squares. The
+## place's look `roll` (SetDressing catalog place_looks), else the campaign's "ground_roll" (data/campaign.json), else
+## none: Curse of Strahd's ground is as it was. Cosmetic: the rules' heights never change, and everything that stands on
+## the drawn ground (tokens, rings, the battle grid, props, the skin) stands on the roll, since it is in the corners.
+const ROLL_MAX := 0.3
+const ROLL_SCALE := 0.19
+
+
+func ground_roll() -> float:
+	var cfg := float(Campaign.config().get("ground_roll", 0.0))
+	return clampf(float(_look.get("roll", cfg)), 0.0, ROLL_MAX)
+
+
+## The roll at grid corner `p`, where every square meeting there is open natural ground (not empty, not water, not across
+## a cliff, no house or door), easing to nothing toward anything that isn't, so shores, cliffs and built things keep
+## their own heights.
+func _roll_at(p: Vector2i, amount: float) -> float:
+	var clear := 2
+	for r in range(1, 3):
+		for dz in range(-r, r):
+			for dx in range(-r, r):
+				var o := p + Vector2i(dx, dz)
+				if not grid.in_bounds(o) or _rolls_at[o.y * grid.width + o.x] == 0:
+					clear = mini(clear, r - 1)
+	if clear == 0:
+		return 0.0
+	var seed_at := Vector2(float(hash(place) % 997), float(hash(place + "~") % 991))
+	var q := Vector2(p) * ROLL_SCALE + seed_at
+	var n := Shores.noise(q) * 0.7 + Shores.noise(q * 2.3 + Vector2(3.7, 9.1)) * 0.3
+	return (n - 0.5) * 2.0 * amount * (0.5 if clear == 1 else 1.0)
+
+
+## Which squares the ground may roll on (1): open natural ground, no wall or tree, water, door or house on it and no
+## cliff beside it. Worked out once per board.
+var _rolls_at := PackedByteArray()
+
+
+func _rollable_squares() -> void:
+	_rolls_at.resize(grid.width * grid.depth)
+	for z in grid.depth:
+		for x in grid.width:
+			var o := Vector2i(x, z)
+			var ok := grid.has_flag(o, CombatGrid.NATURAL) and (grid.flags(o) & (CombatGrid.VOID | CombatGrid.WATER | CombatGrid.WALL)) == 0 \
+				and not door_cells.has(o) and not house_cells.has(o)
+			if ok:
+				for d: Vector2i in CombatGrid.DIRS:
+					if grid.in_bounds(o + d) and grid.is_cliff(o, o + d):
+						ok = false
+						break
+			_rolls_at[z * grid.width + x] = 1 if ok else 0
 
 
 func _corner_index(c: Vector2i) -> int:
