@@ -63,10 +63,10 @@ func show_area(v: LocationView) -> void:
 
 ## What a way out is called and where it goes, for the map and its list: `title` (what it is: "Church") and `goes` (where it
 ## leads: "Village Church"), "" when the name already says it ("Blood of the Vine" into the Blood of the Vine). A road that
-## opens the travel map leads to the map of Barovia.
+## opens the travel map leads to the map of the land (the campaign's `land_name`).
 static func naming(e: Dictionary) -> Dictionary:
 	var title := str(e["label"])
-	var goes := "The map of Barovia" if str(e["to"]) == "travel" else str(e["destination"])
+	var goes := "The map of %s" % Campaign.path("land_name") if str(e["to"]) == "travel" else str(e["destination"])
 	if goes != "" and title.to_lower().contains(goes.to_lower()):
 		goes = ""
 	return {"title": title, "goes": goes}

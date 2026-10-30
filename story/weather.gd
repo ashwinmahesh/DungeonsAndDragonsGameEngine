@@ -1,6 +1,6 @@
 class_name Weather
 extends RefCounted
-## Weather as world state (F12; data/weather/barovia.json, docs/regions/weather.md). Each region has a climate (the
+## Weather as world state (F12; the campaign's `weather` file, Campaign.path; docs/regions/weather.md). Each region has a climate (the
 ## valley's fog and rain, Krezk's and the Abbey's highland snow, the mountains' blizzards, Strahd's own storms over the
 ## castle); the weather holds for a spell of six hours, picked from the climate's weights by the playthrough's seed, the
 ## day and the spell, so nothing is saved and a reload never changes it. Strahd's attention (F9) brings more storms.
@@ -9,7 +9,6 @@ extends RefCounted
 ## (`weather == fog`). Lane 6's Atmosphere dresses a place's look from it (dress_mood); the fight half (obscured
 ## squares, Call Lightning's storm) is lane 2's and reads now().
 
-const PATH := "res://data/weather/barovia.json"
 const SPELL_HOURS := 6
 
 static var _data: Dictionary = {}
@@ -17,7 +16,7 @@ static var _data: Dictionary = {}
 
 static func data() -> Dictionary:
 	if _data.is_empty():
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(Campaign.path("weather")))
 		_data = parsed as Dictionary if parsed is Dictionary else {"kinds": {}, "climates": {}}
 	return _data
 

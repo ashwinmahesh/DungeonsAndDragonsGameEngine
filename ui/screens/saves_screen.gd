@@ -26,7 +26,6 @@ const TABS: Array[String] = ["Your Saves", "Chapters"]
 ## Under the page's hint once a game has been finished: the ending kept its own save and wrote over none of the player's.
 const FINISHED_NOTE := "A finished game is kept apart, so an ending never writes over your saves."
 ## The travel map, for a chapter's picture and a save without one of its own.
-const MAP := "res://art/ui/map/barovia.png"
 ## How much of the map a picture shows, in map pixels (16:9).
 const MAP_VIEW := Vector2(640, 360)
 
@@ -87,7 +86,7 @@ func _build() -> void:
 	head.add_child(_hint)
 	_sort = UiKit.button(_sort_words(), _next_sort, 15)
 	_sort.name = "Sort"
-	_sort.tooltip_text = "How the list is sorted: newest first, by place, or by the day in Barovia."
+	_sort.tooltip_text = "How the list is sorted: newest first, by place, or by the day in %s." % Campaign.path("land_name")
 	head.add_child(_sort)
 	box.add_child(head)
 	if mode == Mode.SAVE:
@@ -401,9 +400,10 @@ static func picture(s: Dictionary) -> Control:
 ## null when it's off the map (Death House's cellars are in the village's region; a test room is nowhere).
 static func map_view(location_id: String, place: String = "") -> Texture2D:
 	var at := _map_place(location_id, place)
-	if at.is_empty() or not ResourceLoader.exists(MAP):
+	var art := Campaign.path("travel_map")
+	if at.is_empty() or not ResourceLoader.exists(art):
 		return null
-	var map := load(MAP) as Texture2D
+	var map := load(art) as Texture2D
 	var pos := at.get("pos", []) as Array
 	var size := map.get_size()
 	var view := Rect2(Vector2(float(pos[0]), float(pos[1])) * size - MAP_VIEW / 2.0, MAP_VIEW)

@@ -1,7 +1,7 @@
 class_name TravelScreen
 extends CanvasLayer
-## The map of Barovia (plan §5.2, ADR 0010): an illustrated gothic map of the whole valley, painted as the land itself
-## (art/ui/map/barovia.png, docs/ui/travel_map.md) with the places the party knows and the roads between them drawn on
+## The travel map (plan §5.2, ADR 0010): an illustrated map of the whole land, painted as the land itself (the
+## campaign's `travel_map` painting, Campaign.path; docs/ui/travel_map.md) with the places the party knows and the roads between them drawn on
 ## top, so names stay sharp at any zoom. Mist covers what the party hasn't learned of: the land around and between
 ## known places and along known roads is clear (Travel.known: been there, one road away, or heard of), and with every
 ## place known the whole valley is. Pick a place to see the way there (roads, hours, when you'd arrive, day or night) and set out. The wheel zooms and dragging pans.
@@ -12,7 +12,6 @@ extends CanvasLayer
 signal travel_chosen(place_id: String)
 signal closed
 
-const MAP_ART := preload("res://art/ui/map/barovia.png")
 ## The map panel at zoom 1: the whole valley. The art is 3:2 and a place's `pos` is a fraction of it.
 const MAP_SIZE := Vector2(1152, 768)
 const ZOOM_MAX := 2.4
@@ -23,16 +22,19 @@ const FOG_SHADER := preload("res://addons/dnd_core/shaders/ui/map_fog.gdshader")
 ## along a known road.
 const REVEAL := 0.065
 const REVEAL_ROAD := 0.028
-## Castle Ravenloft on its pillar of rock is seen from everywhere in the valley: [x, y, radius] as fractions.
-const ALWAYS_SEEN: Array[Array] = [[0.695, 0.73, 0.085]]
+## What is seen from everywhere on the map, never under mist: [x, y, radius] as fractions of the art, from the campaign's
+## `travel_map_always_seen` (the first game's: its castle on a pillar of rock).
+const ALWAYS_SEEN_DEFAULT: Array = [[0.695, 0.73, 0.085]]
 ## The fog mask over the whole art, in pixels (3:2 like the art).
 const MASK := Vector2i(288, 192)
 
-## The map's two views, in the toggle's order: the valley, and the place the party is in (AreaMap).
-const VIEWS: Array[String] = ["Barovia", "Local area"]
 ## The setting that keeps which view a map opened to look (M) shows first.
 const AREA_SETTING := "map_area"
 
+## The map's two views, in the toggle's order: the land (named by the campaign's `land_name`), and the place the party is
+## in (AreaMap).
+var views: Array[String] = [Campaign.path("land_name"), "Local area"]
+var _map_art: Texture2D = null
 var st: StoryState
 ## The location the party is in, set before open_map: with it the map offers the local area view.
 var area_view: LocationView = null
@@ -102,6 +104,13 @@ class TouchMap extends Control:
 		gestures.cancel()
 
 
+## The campaign's painting of its land (data/campaign.json `travel_map`, a 3:2 picture), loaded once.
+func map_art() -> Texture2D:
+	if _map_art == null:
+		_map_art = load(Campaign.path("travel_map")) as Texture2D
+	return _map_art
+
+
 func _init() -> void:
 	name = "TravelScreen"
 	layer = 31
@@ -112,7 +121,7 @@ func open_map(state: StoryState, from_place: String, can_travel: bool) -> void:
 	here = from_place
 	setting_out = can_travel
 	_at = here if here != "" else _place_of_region(st.location)
-	var frame := MobilePage.build(self, "Barovia", _mobile_close) if MobileDevice.enabled() else UiKit.screen_frame(self, "Barovia", Vector2(1540, 840))
+	var frame := MobilePage.build(self, views[0], _mobile_close) if MobileDevice.enabled() else UiKit.screen_frame(self, views[0], Vector2(1540, 840))
 	_mobile_body = frame if MobileDevice.enabled() else null
 	var row: BoxContainer = VBoxContainer.new() if MobileDevice.enabled() else HBoxContainer.new()
 	if MobileDevice.enabled():
@@ -247,7 +256,7 @@ func set_area_mode(on: bool) -> void:
 	_redraw()
 	# The panel was rebuilt: a pad lands on the toggle again.
 	(func() -> void:
-		var b := _info.find_child("LocalArea" if area_mode else "Barovia", true, false) as Button
+		var b := _info.find_child("LocalArea" if area_mode else views[0].validate_node_name(), true, false) as Button
 		if b != null and PadNav.current != null and is_inside_tree():
 			PadNav.current.focus_on(b)).call_deferred()
 
@@ -356,7 +365,7 @@ func road_points(road: Dictionary, a: Vector2, b: Vector2) -> PackedVector2Array
 # --- Drawing ---------------------------------------------------------------------------------------
 
 func _draw_art() -> void:
-	_map.draw_texture_rect(MAP_ART, Rect2(pan, MAP_SIZE * zoom), false)
+	_map.draw_texture_rect(map_art(), Rect2(pan, MAP_SIZE * zoom), false)
 	if st.is_night():
 		_map.draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color(Look.color("night_deep"), 0.18))
 
@@ -387,7 +396,7 @@ func _build_reveal() -> void:
 		_set_reveal_texture()
 		return
 	var spots: Array[Vector3] = []
-	for a in ALWAYS_SEEN:
+	for a: Array in Campaign.setting("travel_map_always_seen", ALWAYS_SEEN_DEFAULT) as Array:
 		spots.append(Vector3(float(a[0]), float(a[1]), float(a[2])))
 	var by_id := {}
 	var outline := PackedVector2Array()
@@ -737,9 +746,9 @@ func _show_info() -> void:
 		_info.remove_child(c)   # so the new Set out is the only one by that name
 		c.queue_free()
 	if _area != null:
-		var strip := UiParts.tab_strip(VIEWS, VIEWS[1] if area_mode else VIEWS[0], func(t: String) -> void: set_area_mode(t == VIEWS[1]))
+		var strip := UiParts.tab_strip(views, views[1] if area_mode else views[0], func(t: String) -> void: set_area_mode(t == views[1]))
 		strip.name = "MapViews"
-		strip.get_child(0).name = "Barovia"
+		strip.get_child(0).name = views[0].validate_node_name()
 		strip.get_child(1).name = "LocalArea"
 		(strip.get_child(0) as Button).tooltip_text = "The valley, and the roads between its places."
 		(strip.get_child(1) as Button).tooltip_text = "The whole place you are in, with each way out named by where it goes."

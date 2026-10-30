@@ -1,24 +1,22 @@
 class_name Travel
 extends RefCounted
-## Travelling Barovia (plan §5.2, ADR 0010): places joined by roads on data/travel/barovia.json. A journey follows
+## Travelling the land (plan §5.2, ADR 0010): places joined by roads on data/travel/ (the campaign's `travel_main` file first). A journey follows
 ## the quickest known roads; each road takes its hours off the clock and rolls its random encounter table (the
 ## day or night chance, lowered on ground the party knows and raised by Strahd's attention and by fog, then a weighted
 ## entry whose condition holds); bad weather lengthens a leg (Weather, F12). Pure logic: the game root moves the party.
 
-const MAP := "barovia"
-
-
-## The one map: data/travel/barovia.json, then every region's own file (ADR 0011) in id order, places and roads
-## merged, so writers of different regions never edit the same file.
+## The one map: the campaign's main travel file (`travel_main`, an id in data/travel/), then every region's own file
+## (ADR 0011) in id order, places and roads merged, so writers of different regions never edit the same file.
 static func map_data() -> Dictionary:
 	var files := Compendium.shared().table("travel")
-	var out := (files.get(MAP, {}) as Dictionary).duplicate()
+	var main := Campaign.path("travel_main")
+	var out := (files.get(main, {}) as Dictionary).duplicate()
 	var places: Array = (out.get("places", []) as Array).duplicate()
 	var roads: Array = (out.get("roads", []) as Array).duplicate()
 	var ids: Array = files.keys()
 	ids.sort()
 	for id: Variant in ids:
-		if str(id) == MAP:
+		if str(id) == main:
 			continue
 		var f := files[id] as Dictionary
 		places.append_array(f.get("places", []) as Array)
