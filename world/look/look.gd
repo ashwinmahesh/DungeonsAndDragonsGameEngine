@@ -144,6 +144,7 @@ static func hd2d_settings() -> Dictionary:
 ##   lightning_cutout: a close lightning strike's first instant drawn as a cut-out, lit faces pale and the rest ink.
 ##   wakes: rings spreading across the water round figures standing in it, foam at their legs (FigureWake);
 ##   plants_part: how far reeds, grass and bushes lean aside as figures walk through (world units at a plant's top).
+##   window_frames: a lit window throws its panes onto the ground outside after dark (their brightness; 0 none).
 const PAINTED := {
 	"strokes": 0.0, "stroke_radius": 4.0, "stroke_sharpness": 600.0,
 	"ramp": [], "ramp_amount": 0.0, "steps": 5, "step_edge": 0.18, "keep_hue": 0.3, "keep_light": 1.0,
@@ -152,7 +153,7 @@ const PAINTED := {
 	"boughs": 0.0, "bough_height": 7.0, "bough_scale": 0.05, "bough_sway": 0.12, "boughs_by_trees": false,
 	"moon_water": 0.0, "moon_water_size": 0.07, "moon_water_bite": 0.6, "moon_water_ripple": 0.35,
 	"moon_face": "", "moon_face_size": 0.12, "lightning_cutout": 0.0,
-	"wakes": 0.0, "plants_part": 0.0,
+	"wakes": 0.0, "plants_part": 0.0, "window_frames": 0.0,
 }
 
 

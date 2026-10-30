@@ -431,6 +431,47 @@ func _window_light() -> void:
 		l.position = w.position + out * 0.7 + Vector3(0, -0.2, 0)
 		w.get_parent().add_child(l)
 		night_lights.append(l)
+		var frames := float(Look.painted_settings()["window_frames"])
+		if frames > 0.0:
+			var s := window_frame_light(out, frames)
+			s.position = w.position - out * 0.25 + Vector3(0, 0.15, 0)
+			w.get_parent().add_child(s)
+			night_lights.append(s)
+
+
+## The window's panes thrown onto the ground outside (a game's painted `window_frames`, Visual Polish Plan E44): a
+## spotlight just inside the glass, shining out and down through a picture of the frame, `strength` its brightness.
+static func window_frame_light(out: Vector3, strength: float) -> SpotLight3D:
+	var s := SpotLight3D.new()
+	s.name = "WindowFrames"
+	s.light_color = Look.color("candle")
+	s.light_energy = 1.6 * strength
+	s.spot_range = 4.5
+	s.spot_angle = 32.0
+	s.spot_attenuation = 1.2
+	s.shadow_enabled = false
+	s.light_projector = _frame_texture()
+	s.set_meta("no_shadow", true)
+	var down := (out + Vector3(0, -0.75, 0)).normalized()
+	s.basis = Basis.looking_at(down, Vector3.UP if absf(down.y) < 0.99 else Vector3.FORWARD)
+	return s
+
+
+static var _frames: ImageTexture
+
+
+## Four panes of light with dark wooden bars between them and a frame round them (white light, black wood).
+static func _frame_texture() -> ImageTexture:
+	if _frames != null:
+		return _frames
+	var n := 64
+	var img := Image.create(n, n, false, Image.FORMAT_L8)
+	img.fill(Color.BLACK)
+	var pane := Color(1, 1, 1)
+	for r: Rect2i in [Rect2i(7, 7, 23, 23), Rect2i(34, 7, 23, 23), Rect2i(7, 34, 23, 23), Rect2i(34, 34, 23, 23)]:
+		img.fill_rect(r, pane)
+	_frames = ImageTexture.create_from_image(img)
+	return _frames
 
 
 static func _lit_window(w: Node3D) -> bool:

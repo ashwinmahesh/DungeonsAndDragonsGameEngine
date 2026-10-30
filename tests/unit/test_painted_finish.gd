@@ -171,3 +171,12 @@ func test_wakes_and_parting_plants_only_when_the_game_asks() -> void:
 	var w := FigureWake.build(a, Look.painted_settings({"wakes": 1.0}))
 	assert_true(w != null and w.get_parent() == a, "rings in the water when asked")
 	a.free()
+
+
+func test_a_lit_window_throws_its_panes_outside() -> void:
+	var s := AtmosphereWeather.window_frame_light(Vector3(0, 0, 1), 1.0)
+	assert_true(s.light_projector != null, "through a picture of the frame")
+	var aim := -s.basis.z
+	assert_true(aim.z > 0.3 and aim.y < -0.3, "out of the house and down onto the ground (%s)" % aim)
+	assert_false(s.shadow_enabled, "no shadow map of its own")
+	s.free()
