@@ -102,7 +102,7 @@ Paths are `res://` in the game. **Hard** means the core preloads it, so the game
 | `art/palette/palette.json`, `art/palette/ui_palette.json` | read at start | Every world colour by name, and the menu-only colours. `Look.color(name)` asserts the name exists. |
 | `art/plants/cards.png` | hard | The plant card atlas (`Flora`). Also `art/plants/cards.json`, `flora.json`, `manifest.json`. |
 | `art/ui/map/barovia.png` | hard | The travel map's painting (`ui/screens/travel_screen.gd`, `saves_screen.gd`). The name is a Strahd leftover: see section 4. |
-| `data/campaign.json` | yes | Module, look, bug report folder. |
+| `data/campaign.json` | yes | Module, look, bug report folder; optional settings read through `Campaign.config()`: `camera.pitch` (degrees down, default 40), `finishes` (default Modern and Classic), `toon` (the Toon finish's settings), `ground_roll` (rolling open ground, default none). |
 | `art/atmosphere/moods.json` | yes | Every place's mood: light by time of day, mist, grade, water, weather, ground tints ([../reference/art/atmosphere.md](../reference/art/atmosphere.md)). |
 | `art/vistas/vistas.json` | yes | What shows past the map edge when the camera tilts up. |
 | `art/sprites/props/catalog.json` | yes | Set dressing: props, containers, doors, exits by model or id. |

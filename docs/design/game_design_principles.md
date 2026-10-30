@@ -539,20 +539,30 @@ daises) use the same heights, so every big thing in a place is something to figh
 1. Sketch the place as a place first: where the land rises, where water lies and how its shore runs, where the woods
    and clearings are (round them, don't rule them), the buildings, the big things to climb.
 2. Lay it into the grid rows and the `elevation` rows. Give every outdoor place some height; a flat outdoor map needs a
-   reason.
+   reason. The authoring kit does the laying (plan E29, 2026-10-30): paint a height picture and a layout in a few flat
+   colours over the source's map, never thinking of squares, and `world/authoring/sketch_tool.gd` (`PlaceSketch`)
+   derives both sets of rows, each square taking what covers most of it and the mean height of its ground, writes them
+   into the location (refusing to close a walked square, spawn or exit), draws a preview of the derived grid, and
+   reports cliffs between walkable squares, lone specks of water or difficult ground, rectangular water and a flat place.
 3. Pick the place's look keys: crags for rock country, `cave` for caves, `ruin` for fallen places, the bend of its
    buildings.
 4. Keep fights, exits, spawns and walked paths off the squares a shape might crowd, and never move an existing walkable
    square, spawn or exit later (the bots are path-sensitive): extend a map, don't redraw it.
-5. Check it from the play camera and from straight above, before and after: the game's `natural_audit.tscn`
-   capture (`NA_LOCS=a,b`) shoots every place whole, at play height and tilted to the horizon. A map is done when no
+5. Check it from the play camera and from straight above, before and after: the engine's
+   `world/authoring/natural_audit.tscn` capture (`NA_LOCS=a,b`) shoots every place whole, whole with the battle grid
+   laid over it, at play height and tilted to the horizon. A map is done when no
    square corner of water, row of trees, flat-topped block or straight slab shows. The game's look tests
    (`test_grid_overlay`, `test_ground_relief`, `test_shores`, `test_woods`, `test_crags`, `test_cliffs`, `test_caves`,
    `test_building_bend`, `test_hand_placed`, `test_natural_small_things`) and the engine's `test_high_ground` and
    `test_height_and_falls` guard it.
 
-*Not built:* open ground the party walks on never rises above its square's floor (the skin only dips), so a gently
-rolling meadow under the tokens is still open (the plan's N9, the owner's taste).
+**Rolling ground** (N9, 2026-10-30): a campaign's `"ground_roll"` in `data/campaign.json` (or a place look's `roll`,
+up to 0.3 units) swells natural open ground a little between its rules heights, a long low swell seeded by the place,
+easing off toward water, walls, cliffs and the map's edge. It is in the board's corner heights, so tokens, rings, the
+battle grid, props and the skin all stand on it; the rules' heights never move. Curse of Strahd sets none.
+
+**Water on raised ground** (2026-10-30): water lies at its own squares' height, so a creek down a hillside runs down the
+slope between its banks (Shores' level field) instead of every shore cutting down to the board's level.
 
 ### 5.2 Every place its own look (standing)
 
@@ -581,7 +591,9 @@ rolling meadow under the tokens is still open (the plan's N9, the owner's taste)
 - **Buildings never collapse or cut away near the party.** No x-ray cut-outs: whatever blocks the view **fades**
   (2026-10-17: "walls collapse down when looking from certain angles... I don't like this behaviour"). Walls stay full
   height from every side.
-- Exploration camera: 40 degrees down, turns in 90 degree steps (so sprites need 8 drawn directions).
+- Exploration camera: 40 degrees down, turns in 90 degree steps (so sprites need 8 drawn directions). A game picks its
+  own pitch in `data/campaign.json` (`"camera": {"pitch": 30}`, plan E28): the fight camera, the shots that lean off
+  it and the sun's shadow reach follow, and its sprites are rendered for that angle.
 
 ### 5.4 Stealth that buys something (2026-10-18, standing)
 

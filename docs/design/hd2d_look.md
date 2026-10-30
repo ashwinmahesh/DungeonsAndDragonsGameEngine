@@ -27,8 +27,14 @@ must exist before the engine will even compile (see "Hard requirements" below).
   depth blur toward the screen's edges with the middle sharp. *Classic*: every world pixel snapped to the palette,
   light in two or three hard bands. Classic is frozen as it was on 2026-10-07: new work keeps it working, not
   current. A new game can drop Classic from its settings if it never wants it; the engine still supports it.
+- **Toon** (plan E27, 2026-10-30), a third finish a game offers by naming it in `data/campaign.json`'s `"finishes"`
+  (its default first; a game that names none offers Modern and Classic): Modern's natural world, haze and bloom, with
+  the light in hard cel bands, a hard highlight, flatter and more vivid fills, ink on the world and a grade that keeps
+  colour in the shade. Every setting is the game's data under `"toon"` (`Look.TOON` lists them): the bands (3, 2, or 0
+  for a painted world's soft light), where they break, the fills' flatness and colour, relief, the world's ink (0 leaves
+  only the characters inked) and the grade; a mood's `toon` block goes over its `modern` one.
 - **Camera and scale** (ADR 0004): one world unit is one 5 ft square, a Medium character is about 1.2 units tall,
-  the camera looks down at 40 degrees, starts at a 45 degree heading and turns in 90 degree steps. That is why
+  the camera looks down at 40 degrees (a game's `"camera": {"pitch"}` in `data/campaign.json` changes it), starts at a 45 degree heading and turns in 90 degree steps. That is why
   sprites need 8 directions. Real-world sizes: a person is 6 ft and props are sized to match.
 - **UI is not part of the world.** Menus and the HUD draw on CanvasLayers, so the screen pass and the palette never
   touch them. They have their own colour list.
