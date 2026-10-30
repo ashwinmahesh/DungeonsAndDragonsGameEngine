@@ -84,6 +84,9 @@ palette and mood.
   }
   ```
 
+  The same file holds the campaign's settings (level cap, calendar, reading, travel map art, weather file, arena fight,
+  title): see [../reference/contracts/campaign.md](../reference/contracts/campaign.md). Read it through
+  `Campaign.config()`, never with a reader of your own.
   `CampaignModule` (`story/campaign_module.gd`) is the story engine's hook: the reshuffle reading (`reading draw|read|give`
   dialogue statements), the villain's attention and visits, field oracles, endings, the parley before a final battle,
   treasure spots, fight barks, scouting spells, achievements. Its base class does nothing, so a game that overrides
@@ -101,52 +104,54 @@ Paths are `res://` in the game. **Hard** means the core preloads it, so the game
 | `art/palette/palette.png` | hard | The palette strip the screen pass and Classic snap use (`Look`). Built by `make palette` from `palette.json`. |
 | `art/palette/palette.json`, `art/palette/ui_palette.json` | read at start | Every world colour by name, and the menu-only colours. `Look.color(name)` asserts the name exists. |
 | `art/plants/cards.png` | hard | The plant card atlas (`Flora`). Also `art/plants/cards.json`, `flora.json`, `manifest.json`. |
-| `art/ui/map/barovia.png` | hard | The travel map's painting (`ui/screens/travel_screen.gd`, `saves_screen.gd`). The name is a Strahd leftover: see section 4. |
+| the travel map's painting | yes | `travel_map` in `data/campaign.json` (default `art/ui/map/barovia.png`, the first game's). |
 | `data/campaign.json` | yes | Module, look, bug report folder; optional settings read through `Campaign.config()`: `camera.pitch` (degrees down, default 40), `camera.free_turn` (any heading, default quarter turns), `finishes` (default Modern and Classic), `toon` (the Toon finish's settings), `ground_roll` (rolling open ground, default none). |
+| `data/campaign.json`: the story's settings | no | The level cap, calendar, reading, travel map, land name, weather file, arena fight and title ([../reference/contracts/campaign.md](../reference/contracts/campaign.md)); each defaults to the first game's. |
 | `art/atmosphere/moods.json` | yes | Every place's mood: light by time of day, mist, grade, water, weather, ground tints ([../reference/art/atmosphere.md](../reference/art/atmosphere.md)). |
 | `art/vistas/vistas.json` | yes | What shows past the map edge when the camera tilts up. |
 | `art/sprites/props/catalog.json` | yes | Set dressing: props, containers, doors, exits by model or id. |
 | `art/ui/title_backdrop.png` | soft | Title and skirmish backdrop. |
 | `art/sprites/villager/walk.tres` | soft | The gray-box fallback walker. |
 | `art/portraits/`, `art/busts/`, `art/cutscenes/`, `art/creator/`, `art/sprites/lying/` | soft | The game's people and pictures (looked up through `ArtPaths`). |
-| `art/tarokka/<card>.png` | soft | The reshuffle's card art in the dialogue UI. Strahd leftover. |
-| `data/weather/barovia.json` | yes | Climates per region (`story/weather.gd`). Strahd leftover name. |
+| the reading's deck and card art | soft | `reading.deck` (a data folder) and `reading.art` in `data/campaign.json` (`ReadingDeck`). |
+| the weather file | yes | `weather` in `data/campaign.json` (default `data/weather/barovia.json`): climates per region (`story/weather.gd`). |
 | `data/progression/xp.json`, `data/progression/chapters.json` | yes | XP awards; the save screen's chapter list. |
 | `data/treasure/levels.json` | yes | Treasure by place and level. |
 | `data/ai/profiles.json` | yes | AI behaviour profiles, boss wanted items. |
-| `data/camp/night_visitors.json`, `data/schedule/`, `data/loading/cards.json`, `data/glossary/terms.json`, `data/busts/facing.json`, `data/achievements/`, `data/cutscenes/` | yes | Camp visitors, townsfolk routines, loading tips, the glossary, bust facing, achievements, cutscenes. |
+| `data/camp/night_visitors.json`, `data/schedule/` (optional), `data/loading/cards.json`, `data/glossary/terms.json`, `data/busts/facing.json`, `data/achievements/`, `data/cutscenes/` | yes | Camp visitors, townsfolk routines, loading tips, the glossary, bust facing, achievements, cutscenes. |
 | `narrative/` | yes | Every `.dialogue` file; `narrative/combat/barks.json` (battle cries) and `bosses.json` (who counts as a boss). |
 | `audio/voice/` | soft | Voice clips by speaker and text hash ([../reference/adr/0013-voice-over.md](../reference/adr/0013-voice-over.md)). |
 | `scenes/main_menu.tscn`, `scenes/game.tscn`, `scenes/combat/arena.tscn`, `scenes/skirmish.tscn` | yes | Thin scene roots the router changes to. |
 | `tests/saves/` | for tests | Golden saves every test run loads. |
 
-## 4. Still hard-wired to Curse of Strahd (fix before or while starting the new game)
+## 4. What is still Curse of Strahd's in the core
 
-These are known leftovers. Each is small; do them as engine patches in the core (section 6) so both games benefit.
+Fixed on 2026-10-30 (the second game's engine wave 0): the travel map's painting, the land's name, the weather file,
+the main travel file, the arena's fight, the reading's deck, card art and reader, and the error report's title are
+campaign settings (section 2), each defaulting to the first game's; the level cap and the calendar are settings too;
+the touch controls name no game class (anything exploring with a `view` works), a game may have no `data/schedule/`,
+and `vistas.json` needs no `castle` or `lake`; `LongRest.STRAHD` and `waits_on_strahd` are `VISIT` and
+`waits_on_visit` (the old names stay as aliases); the engine's own tests no longer need the first game's content. The
+user data folder stays in `project.godot` (`config/name`, `custom_user_dir_name`): Godot reads it before any script.
 
-1. **`art/ui/map/barovia.png`** is preloaded by name. Make the travel map art a key in `data/campaign.json` (or
-   `game.json`) and load it, so a game names its own.
-2. **`data/weather/barovia.json`** is the weather file's fixed path. Same fix: a key, or a neutral `data/weather/world.json`.
-3. **`art/tarokka/<card>.png`** in `ui/dialogue/dialogue_ui.gd`: the reading's card beat should use a neutral folder
-   or ask the module for the card's art.
-4. **The game's title, user data folder and error-report header.** `ErrorWatch` writes "Curse of Strahd error report";
-   the user folder and title come from `project.godot` and the main menu. The scope audit proposed one `game.json`
-   (title, folder name, credits file, title art) read by the engine. Not built.
-5. **Campaign names left in engine code**: the guard baseline counts about 115 code lines in 40 files that still name
+1. **Campaign names left in engine code**: the guard baseline counts about 115 code lines in 40 files that still name
    Strahd's people or places (comments are skipped), for example `combat/ai/boss_brain.gd`, `story/story_state.gd`,
    `story/story_conditions.gd`, `rules/data/compendium.gd`, `combat/item_powers.gd` (the relics). Most are behaviour
    for Curse of Strahd items or entries that sit behind data; a new game that never uses those ids is not affected,
    but each one is a place where the engine knows a campaign. Copy the guard test into the new game with its own
    baseline from day one, so the count can only fall.
-6. **Implicit assumptions** the audit flagged and did not check: a party of four, level cap 11 (Skirmish goes to 20),
-   the 5 ft grid, the calendar. If the new game differs, audit these first.
+2. **Implicit assumptions** the audit flagged and did not check: a party of four, the 5 ft grid. If the new game
+   differs, audit these first. (The level cap and the calendar are settings now.)
 
 ## 5. Starting the new game, step by step
 
 1. **Make the repo** on GitHub (the owner creates it), with Git LFS on (`git lfs install`) and a `.gitattributes` that
    puts new images, voice clips and sound clips in LFS from the first commit.
 2. **Add the core**: `git submodule add https://github.com/ashwinmahesh/DungeonsAndDragonsGameEngine.git addons/dnd_core`,
-   then `git submodule update --init` in every clone and lane.
+   then `git submodule update --init` in every clone and lane. A fresh submodule has no Git LFS filter: run
+   `git lfs install --local` inside `addons/dnd_core`, then `git lfs pull` there, or its models and textures stay
+   pointer files. A lane script that makes worktrees must do the same for each lane's core (or borrow the main
+   checkout's LFS objects), or a new lane's engine art is pointers.
 3. **Copy the tooling** from Curse of Strahd and rename `strahd` in it: `Makefile`, `tools/run_tests.py`,
    `tools/check.py`, `tools/lint_gd.sh`, `tools/logcheck.sh`, `tools/godot_slot.sh`, `tools/import.sh`, `tools/godot`
    and `tools/macos/nofocus.m`, `tools/lane.sh`, `tools/edge/`, `tools/lfs_quiet.sh`, `tools/git/pre-push` (`make hooks`),

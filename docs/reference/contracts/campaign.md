@@ -1,6 +1,44 @@
-# Campaign data: Tarokka, travel, random encounters, shops and guests (ADR 0010)
+# Campaign data: settings, readings, travel, random encounters, shops and guests (ADR 0010)
 
 `make validate` checks every file below against its schema and every id it names.
+
+## data/campaign.json: the campaign's plug and settings
+
+Read once through `Campaign.config()` (story/campaign.gd). Every setting is optional: one a game leaves out keeps the
+engine's default, which is how the first game (Curse of Strahd) played.
+
+```json
+{
+  "module": "res://story/<your>_campaign.gd",
+  "look": "res://world/look/<your>_look.gd",
+  "bug_reports": {"vault": "Documents/<vault folder>", "env": "<YOUR>_BUG_REPORTS"},
+  "title": "The game's name in error reports (default: project.godot's application/config/name)",
+  "level_cap": 11,
+  "boon_ability_max": 20,
+  "travel_map": "res://art/ui/map/<land>.png",
+  "travel_map_always_seen": [[0.5, 0.5, 0.08]],
+  "land_name": "The land's name on the travel map's tab and title",
+  "travel_main": "<the data/travel id merged first>",
+  "weather": "res://data/weather/<land>.json",
+  "arena_encounter": "<the arena scene's encounter id>",
+  "reading": {"deck": "<data folder>", "art": "res://art/<cards>", "reader": "<speaker id>", "cards_per_hero": 1},
+  "calendar": {"night": [19, 6], "eternal_night": false, "dawn": "06:00", "dusk": "18:00", "start": "18:00",
+               "hours": [{"from": "18:00", "name": "...", "phase": "dusk"}], "words": {"dawn": "dawn"},
+               "moon": {"size": 1.0, "brightness": 1.0, "nights": [{"size": 1.2, "brightness": 0.9}]}}
+}
+```
+
+| Key | Default | What it does |
+|---|---|---|
+| `level_cap` | 11 | The highest level the story takes the party to. A number, or `{"cap": 13, "raised": [{"when": "<condition>", "cap": 20}]}`: the highest raised cap whose condition holds wins (`StoryState.level_cap()`, `Campaign.level_cap(st)`) |
+| `boon_ability_max` | 20 | How high a story's boon may take a score (`StoryBoons.raise_ability`) |
+| `travel_map`, `travel_map_always_seen`, `land_name`, `travel_main` | the first game's | The travel map's 3:2 painting, the spots never under mist, the land's name, and the travel file merged first |
+| `weather` | the first game's | The climates file (story/weather.gd) |
+| `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
+| `reading` | the first game's deck | See "The reading" below (`ReadingDeck`) |
+| `calendar` | the engine's day | Night 19:00-06:00, dusk 18:00, dawn 06:00, a 18:00 start, no hour names, one moon. Under `eternal_night` it is always night (no sun); named hours show in every clock ("22:15 · the Witching Hour"), may set their own look (`phase`: day, dusk, night, dawn) and may be used in an NPC's `hours`; `dawn` and `dusk` are when items' charges come back, `words` what the screens call them; the moon's `nights` cycle one a day and size its disc and brighten its key light outdoors (`Calendar`) |
+
+Paths the first game used are its defaults (`Campaign.LEGACY`); a new game names its own.
 
 ## data/tarokka/cards.json (schema: tarokka_cards.schema.json)
 
@@ -35,10 +73,18 @@ image in `art/tarokka/`.
 
 ## The reading in dialogue and conditions
 
+The deck is the data folder `reading.deck` names (the first game's `data/tarokka/` above; any number of cards, each
+`{id, name, deck?, suit?, value?, art?}` in its `cards.json`), its pictures `<reading.art>/<art or id>.png`. The campaign
+module draws and answers (`ensure_drawn`, `reading(slot)`, `reading_card(id)`); `ReadingDeck.draw(slots, seed)` deals a
+card to each slot with no repeats, and `ReadingDeck.hero_slots(n)` names a party's slots: `hero_1` .. `hero_N`, then
+`hero_1b` .. `hero_Nb` when `cards_per_hero` is 2. A slot's `slot_name` from the module labels its card face (else the
+title's part before ": "). Six or more cards shrink to fit the spread.
+
 ```
 reading draw              Draws the reading (once per playthrough; StoryState.seed decides it).
-reading read tome         Madam Eva (the speaker) turns a card: a notice with the card's name, then her verse.
-                          Slots: tome, symbol, sword, ally, enemy.
+reading read <slot> [who] The reader (`who`, else the campaign's `reading.reader`) turns a card: a notice with the
+                          card's name, then the verse. The first game's slots: tome, symbol, sword, ally, enemy.
+reading give <place>      Hands the party's leader what the reading hid at <place>.
 ```
 
 Conditions: `tarokka.drawn`, `tarokka.sword == swords_3` (the card), `tarokka.sword.region == vallaki`,
