@@ -209,7 +209,7 @@ func _feel(target: Node3D, from: Vector3, w: String) -> void:
 			{"core": Look.color("vampire_red"), "glow": Look.color("blood")}, 1.6, 0.0, GameSettings.combat_pace())
 	var frames := int(GameFeel.num("impact_frame"))
 	if frames > 0 and w in ["crit", "kill"]:
-		ImpactFrame.play(self, frames, target.global_position)
+		ImpactFrame.play(self, frames)
 
 
 func _slow_motion() -> void:

@@ -21,6 +21,8 @@ const MOTION := {
 }
 ## Procedural fallbacks are drawn at this size (pixels).
 const SIDE := 256
+## The ink line's width (a share of the shape) on a shape 1.2 world units across.
+const INK := 0.03
 
 static var _textures: Dictionary = {}
 ## Cosmetic randomness (never the dice).
@@ -45,6 +47,9 @@ static func play(parent: Node3D, kind: String, at: Vector3, cols: Dictionary, si
 	m.set_shader_parameter("body", cols.get("glow", Color.ORANGE))
 	m.set_shader_parameter("ink", Look.color("void"))
 	m.set_shader_parameter("spin", angle)
+	var s := size * GameFeel.num("shape_size")
+	# The ink line keeps about the same width on the screen however big the shape is.
+	m.set_shader_parameter("ink_px", INK * clampf(1.2 / maxf(s, 0.01), 0.3, 1.5))
 	var q := QuadMesh.new()
 	q.size = Vector2.ONE
 	var mi := MeshInstance3D.new()
@@ -54,7 +59,6 @@ static func play(parent: Node3D, kind: String, at: Vector3, cols: Dictionary, si
 	parent.add_child(mi)
 	mi.global_position = at
 	var mo := MOTION[kind] as Dictionary
-	var s := size * GameFeel.num("shape_size")
 	var fps := maxf(1.0, GameFeel.num("shape_fps"))
 	var steps := maxi(2, roundi(float(mo["time"]) * pace * fps))
 	var turn := float(mo["turn"]) * (1.0 if rng.randf() < 0.5 else -1.0)

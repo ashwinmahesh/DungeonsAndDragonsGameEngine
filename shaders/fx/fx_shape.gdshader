@@ -18,7 +18,7 @@ uniform float spin = 0.0;
 uniform float ink_px = 0.035;
 uniform float boil = 0.012;
 // Brightness of the coloured parts (the ink stays ink), so they bloom like the other effects.
-uniform float energy = 1.4;
+uniform float energy = 1.0;
 
 void vertex() {
 	mat4 world = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);

@@ -16,8 +16,8 @@ var _half := 0
 var _pending := 0
 
 
-## Shows the frame for `frames` drawn frames in the window `from` is in, its speed lines out from `at`.
-static func play(from: Node, frames: int, at: Vector3 = Vector3.INF) -> void:
+## Shows the frame for `frames` drawn frames in the window `from` is in.
+static func play(from: Node, frames: int) -> void:
 	if frames <= 0 or from == null or not from.is_inside_tree() or MobileNative.reduced_motion() \
 			or DisplayServer.get_name() == "headless":
 		return
@@ -25,7 +25,7 @@ static func play(from: Node, frames: int, at: Vector3 = Vector3.INF) -> void:
 	f._mat.set_shader_parameter("ink", Look.color(str(GameFeel.settings()["impact_ink"])))
 	f._mat.set_shader_parameter("paper", Look.color(str(GameFeel.settings()["impact_paper"])))
 	if f.is_inside_tree():
-		f._start(frames, at)
+		f._start(frames)
 	else:
 		f._pending = frames
 
@@ -54,7 +54,7 @@ static func _for(from: Node) -> ImpactFrame:
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if _pending > 0:
-		_start(_pending, Vector3.INF)
+		_start(_pending)
 		_pending = 0
 
 
@@ -64,15 +64,7 @@ func _exit_tree() -> void:
 			_layers.erase(key)
 
 
-func _start(frames: int, at: Vector3) -> void:
-	var vp := get_viewport()
-	var size := vp.get_visible_rect().size
-	var cam := vp.get_camera_3d()
-	var centre := Vector2(0.5, 0.5)
-	if at != Vector3.INF and cam != null and not cam.is_position_behind(at):
-		centre = cam.unproject_position(at) / size
-	_mat.set_shader_parameter("centre", centre)
-	_mat.set_shader_parameter("aspect", size.x / maxf(size.y, 1.0))
+func _start(frames: int) -> void:
 	_left = frames
 	_half = maxi(1, frames / 2)
 	_mat.set_shader_parameter("invert", true)
