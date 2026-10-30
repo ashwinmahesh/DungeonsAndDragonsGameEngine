@@ -562,7 +562,10 @@ easing off toward water, walls, cliffs and the map's edge. It is in the board's 
 battle grid, props and the skin all stand on it; the rules' heights never move. Curse of Strahd sets none.
 
 **Water on raised ground** (2026-10-30): water lies at its own squares' height, so a creek down a hillside runs down the
-slope between its banks (Shores' level field) instead of every shore cutting down to the board's level.
+slope between its banks (Shores' level field) instead of every shore cutting down to the board's level. It runs: the
+water shader streams downhill along each creek's own course (Shores.flow_map), faster where steep, with white water on
+steep runs, and a drop of 10 ft or more between water squares pours over as a waterfall. A mood's water `current` and
+`white_water` tune it.
 
 ### 5.2 Every place its own look (standing)
 
@@ -594,6 +597,8 @@ slope between its banks (Shores' level field) instead of every shore cutting dow
 - Exploration camera: 40 degrees down, turns in 90 degree steps (so sprites need 8 drawn directions). A game picks its
   own pitch in `data/campaign.json` (`"camera": {"pitch": 30}`, plan E28): the fight camera, the shots that lean off
   it and the sun's shadow reach follow, and its sprites are rendered for that angle.
+  `"free_turn": true` there turns the camera to any heading (held turn keys, a middle-mouse drag, the pad's right
+  stick) instead of quarter turns; the 8-direction sprites pick their frame from the real heading.
 
 ### 5.4 Stealth that buys something (2026-10-18, standing)
 

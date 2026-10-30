@@ -32,6 +32,15 @@ var follow: Node3D
 var camera: Camera3D
 ## This rig's play pitch (degrees, negative: down), the campaign's (play_pitch) unless a tool sets another.
 var pitch_deg := PITCH_DEG
+## Free turning (a campaign's "camera": {"free_turn": true}): the camera turns to any heading, not in quarter turns.
+## Holding the turn keys (Q and E) turns it smoothly, dragging with the middle mouse button turns it with the mouse, and
+## the pad's right stick turns it as far as it leans. The 8-direction sprites pick their frame from the real heading
+## (DirectionalSprite.direction_for), so they stay right at any angle. Off, the camera turns in quarter turns as before.
+var free_turn := false
+## Free turning's speeds: degrees a second with a key held or the stick fully over, and degrees per pixel dragged.
+const TURN_SPEED := 120.0
+const DRAG_TURN := 0.3
+var _free_yaw := 0.0
 ## The pad's right stick turns the camera (a flick left or right is a quarter turn) and zooms it (up and down) while
 ## this is on: exploring turns it on (game_root); a fight's radial menu aims with the stick instead (U6).
 var pad_look := false
@@ -68,6 +77,7 @@ var _touch_yaw := 0.0
 func _init() -> void:
 	name = "CameraRig"
 	pitch_deg = play_pitch()
+	free_turn = turns_freely()
 	camera = Camera3D.new()
 	camera.fov = 32.0
 	camera.near = 0.3
@@ -84,6 +94,22 @@ static func play_pitch() -> float:
 	if not cam is Dictionary or not (cam as Dictionary).has("pitch"):
 		return PITCH_DEG
 	return -clampf(absf(float((cam as Dictionary)["pitch"])), PITCH_RANGE.x, PITCH_RANGE.y)
+
+
+## Whether this game's camera turns freely: data/campaign.json's "camera" "free_turn" (default false).
+static func turns_freely() -> bool:
+	var cam: Variant = Campaign.config().get("camera", {})
+	return cam is Dictionary and bool((cam as Dictionary).get("free_turn", false))
+
+
+## Turns the camera by `degrees` (positive: as rotate_step(1) does), at once, in free turning.
+func turn_by(degrees: float) -> void:
+	_free_yaw = wrapf(_free_yaw + deg_to_rad(degrees), -PI, PI)
+
+
+## The heading the camera eases to: the start's 45 degrees, its quarter turns, and any free or touch turning.
+func _goal_yaw() -> float:
+	return deg_to_rad(45.0) + _yaw_steps * PI / 2.0 + _touch_yaw + _free_yaw
 
 
 func rotate_step(dir: int) -> void:
@@ -103,7 +129,7 @@ func ground_basis() -> Array[Vector3]:
 func snap_to_target() -> void:
 	if follow:
 		global_position = follow.global_position
-	_yaw = deg_to_rad(45.0) + _yaw_steps * PI / 2.0 + _touch_yaw
+	_yaw = _goal_yaw()
 	horizon_shown = horizon
 	_apply()
 
@@ -136,10 +162,15 @@ func _unhandled_input(event: InputEvent) -> void:
 				horizon = minf(horizon + 1.0 / HORIZON_STEPS, 1.0)
 			else:
 				distance = clampf(distance + 1.0, zoom_min, zoom_max)
+	if free_turn and event is InputEventMouseMotion and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_MIDDLE) != 0:
+		turn_by((event as InputEventMouseMotion).relative.x * DRAG_TURN)
+		return
 	if pad_look and event is InputEventJoypadButton:
 		return   # exploring, the stick clicks sneak and switch turn-based; the right stick turns the camera
 	if event.is_action_pressed(&"camera_tactical"):
 		tactical = not tactical
+	elif free_turn and (event.is_action(&"camera_rotate_left") or event.is_action(&"camera_rotate_right")):
+		return   # (held, they turn it smoothly: _process)
 	elif event.is_action_pressed(&"camera_rotate_left"):
 		rotate_step(-1)
 	elif event.is_action_pressed(&"camera_rotate_right"):
@@ -156,9 +187,13 @@ var _flicked := false
 func _process(delta: float) -> void:
 	if pad_look:
 		_look(delta)
+	if free_turn and is_inside_tree() and InputMap.has_action(&"camera_rotate_left") and InputMap.has_action(&"camera_rotate_right"):
+		var held := Input.get_axis(&"camera_rotate_left", &"camera_rotate_right")
+		if held != 0.0:
+			turn_by(held * TURN_SPEED * delta)
 	if follow:
 		global_position = global_position.lerp(follow.global_position + touch_offset, clampf(delta * 6.0, 0.0, 1.0))
-	var goal := deg_to_rad(45.0) + _yaw_steps * PI / 2.0 + _touch_yaw
+	var goal := _goal_yaw()
 	_yaw = lerp_angle(_yaw, goal, clampf(delta * 9.0, 0.0, 1.0))
 	horizon_shown = move_toward(horizon_shown, horizon, delta * 1.6)
 	tactical_shown = move_toward(tactical_shown, 1.0 if tactical else 0.0, delta * 3.0)
@@ -171,7 +206,10 @@ func _look(delta: float) -> void:
 	if not InputMap.has_action(&"look_left"):
 		return
 	var v := Input.get_vector(&"look_left", &"look_right", &"look_up", &"look_down")
-	if absf(v.x) >= LOOK_FLICK and not _flicked and absf(v.x) > absf(v.y):
+	if free_turn:
+		if absf(v.x) > 0.2 and absf(v.x) >= absf(v.y) * 0.5:
+			turn_by(v.x * TURN_SPEED * delta)
+	elif absf(v.x) >= LOOK_FLICK and not _flicked and absf(v.x) > absf(v.y):
 		_flicked = true
 		rotate_step(1 if v.x > 0.0 else -1)
 	elif absf(v.x) < LOOK_REST:
