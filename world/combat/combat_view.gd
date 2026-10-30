@@ -2204,6 +2204,9 @@ func _play_events() -> void:
 				var step := STEP_TIME * GameSettings.combat_pace()   # the fast combat speed (Settings)
 				# A move taken back (undo) glides home like a rewind: no walking, no turning round.
 				var back := bool(ev.get("undo", false))
+				# An ordinary walk goes at its side's pace (heroes slower, enemies quicker); a push, a pull, a drag or a glide home doesn't.
+				if not back and not bool(ev.get("forced", false)):
+					step /= WalkPace.combat_scale(tok.combatant)
 				tok.face(Vector2.ZERO if back else Vector2(to - from), not bool(ev.get("forced", false)) and not back, step)
 				walking[tok] = true
 				var tw := create_tween()

@@ -55,9 +55,10 @@ signal guidance_asked(offer: Dictionary, answered: Callable)
 signal aid_asked(offer: Dictionary, answered: Callable)
 
 ## Seconds a square takes walking (owner 2026-10-07: tokens moved too fast between squares; about 30% slower than
-## the earlier 0.18 and 0.32); then 25% faster (owner 2026-10-18, WalkPace.FASTER).
-const STEP_TIME := 0.26 / WalkPace.FASTER
-const SNEAK_STEP_TIME := 0.46 / WalkPace.FASTER
+## the earlier 0.18 and 0.32); then 25% faster (owner 2026-10-18, WalkPace.FASTER); the heroes then 25% slower
+## (owner 2026-10-30, WalkPace.HEROES).
+const STEP_TIME := 0.26 / (WalkPace.FASTER * WalkPace.HEROES)
+const SNEAK_STEP_TIME := 0.46 / (WalkPace.FASTER * WalkPace.HEROES)
 const DOOR_OPEN := "open"
 
 var loc: Dictionary = {}
