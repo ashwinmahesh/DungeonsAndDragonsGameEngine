@@ -170,7 +170,7 @@ func report_path() -> String:
 		if f == null:
 			_written = ENTRIES_WRITTEN   # nowhere to write: stop trying (each failure would be an error of its own)
 		else:
-			f.store_string("Curse of Strahd error report\nStarted: %s\nBuild: %s\nNewest save: %s\n\n" % [
+			f.store_string(Campaign.title() + " error report\nStarted: %s\nBuild: %s\nNewest save: %s\n\n" % [
 				Time.get_datetime_string_from_system(false, true), build(),
 				save.get_file() + " (copied here)" if save != "" else "none"])
 			f.close()

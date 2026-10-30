@@ -393,20 +393,25 @@ func take_item(item_id: String, qty: int) -> int:
 	return qty - left
 
 
-## The highest level the campaign takes the party to (plan §10, Phase 5: 10 or 11 by the Amber Temple).
-const LEVEL_CAP := 11
+## The default level cap (Campaign.LEVEL_CAP); a game sets its own in data/campaign.json `level_cap`.
+const LEVEL_CAP := Campaign.LEVEL_CAP
+
+
+## The highest level the campaign takes the party to now (Campaign.level_cap: a cap the story can raise).
+func level_cap() -> int:
+	return Campaign.level_cap(self)
 
 
 ## The level the story gives the party now: where it starts plus the milestones it has reached (plan §5.6).
 func story_level() -> int:
-	return mini(LEVEL_CAP, start_level + milestones)
+	return mini(level_cap(), start_level + milestones)
 
 
 ## The level the party may reach now. Milestone levelling: the story's. XP levelling (story/xp.gd): the XP pool's, which
 ## the floor and the ceiling keep within a level of the story's.
 func target_level() -> int:
 	if Xp.active(self):
-		return mini(LEVEL_CAP, maxi(start_level, Xp.level_for(xp)))
+		return mini(level_cap(), maxi(start_level, Xp.level_for(xp, level_cap())))
 	return story_level()
 
 

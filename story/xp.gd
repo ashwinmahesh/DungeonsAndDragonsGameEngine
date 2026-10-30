@@ -54,25 +54,27 @@ static func threshold(level: int) -> int:
 	return int(t[clampi(level - 1, 0, t.size() - 1)])
 
 
-## The level `xp` is worth, up to the game's cap.
-static func level_for(xp: int) -> int:
+## The level `xp` is worth, up to `cap` (the campaign's cap without a story when 0).
+static func level_for(xp: int, cap: int = 0) -> int:
 	var level := 1
-	for l in range(2, StoryState.LEVEL_CAP + 1):
+	for l in range(2, (cap if cap > 0 else Campaign.level_cap()) + 1):
 		if xp >= threshold(l):
 			level = l
 	return level
 
 
 ## XP still needed for the next level, 0 at the cap.
-static func to_next(xp: int) -> int:
-	var level := level_for(xp)
-	return 0 if level >= StoryState.LEVEL_CAP else threshold(level + 1) - xp
+static func to_next(xp: int, cap: int = 0) -> int:
+	cap = cap if cap > 0 else Campaign.level_cap()
+	var level := level_for(xp, cap)
+	return 0 if level >= cap else threshold(level + 1) - xp
 
 
 ## How far `xp` is through its level, 0 to 1 (1 at the cap), for a progress bar.
-static func progress(xp: int) -> float:
-	var level := level_for(xp)
-	if level >= StoryState.LEVEL_CAP:
+static func progress(xp: int, cap: int = 0) -> float:
+	cap = cap if cap > 0 else Campaign.level_cap()
+	var level := level_for(xp, cap)
+	if level >= cap:
 		return 1.0
 	return clampf(float(xp - threshold(level)) / float(threshold(level + 1) - threshold(level)), 0.0, 1.0)
 
@@ -90,16 +92,16 @@ static func amount_for(st: StoryState, kind: String) -> int:
 	var a := (data().get("awards", {}) as Dictionary).get(kind, {}) as Dictionary
 	if a.is_empty():
 		return 0
-	return maxi(1, roundi(float(budget(level_for(st.xp), str(a["budget"]))) * float(a["times"])))
+	return maxi(1, roundi(float(budget(level_for(st.xp, st.level_cap()), str(a["budget"]))) * float(a["times"])))
 
 
 ## The most XP the pool can hold now: one short of the level two above the story's, so the party is never more than one
 ## level ahead of milestone mode (at the end, the cap's own threshold).
 static func ceiling(st: StoryState) -> int:
 	var s := st.story_level()
-	if s + 2 <= StoryState.LEVEL_CAP:
+	if s + 2 <= st.level_cap():
 		return threshold(s + 2) - 1
-	return threshold(StoryState.LEVEL_CAP)
+	return threshold(st.level_cap())
 
 
 # --- Gaining --------------------------------------------------------------------------------------
@@ -109,16 +111,16 @@ static func ceiling(st: StoryState) -> int:
 ## is lost. Returns {gained, held, lost}. A level the pool reaches is said at once (StoryState.xp_gained), unless the caller
 ## says it in its own notice (`announce` false: a milestone).
 static func gain(st: StoryState, amount: int, repeatable: bool = false, announce: bool = true) -> Dictionary:
-	var before := level_for(st.xp)
+	var before := level_for(st.xp, st.level_cap())
 	var take := mini(maxi(0, ceiling(st) - st.xp), maxi(0, amount))
 	st.xp += take
-	if announce and level_for(st.xp) > before:
-		st.xp_gained.emit("The party reaches level %d" % level_for(st.xp))
+	if announce and level_for(st.xp, st.level_cap()) > before:
+		st.xp_gained.emit("The party reaches level %d" % level_for(st.xp, st.level_cap()))
 	var rest := maxi(0, amount) - take
 	var held := 0
 	var lost := 0
 	if rest > 0:
-		if repeatable or st.story_level() >= StoryState.LEVEL_CAP:
+		if repeatable or st.story_level() >= st.level_cap():
 			lost = rest
 		else:
 			held = rest
@@ -165,7 +167,7 @@ static func fmt(n: int) -> String:
 ## the floor (the pool is lifted to the level the story now gives), then the reserve is paid up to the new ceiling.
 ## Returns the notice.
 static func milestone(st: StoryState) -> String:
-	var before := level_for(st.xp)
+	var before := level_for(st.xp, st.level_cap())
 	var start := st.xp
 	gain(st, amount_for(st, "milestone"), false, false)   # the notice below says if a level came of it
 	var s := st.story_level()
@@ -175,11 +177,11 @@ static func milestone(st: StoryState) -> String:
 		var pay_now := mini(st.xp_reserve, maxi(0, ceiling(st) - st.xp))
 		st.xp += pay_now
 		st.xp_reserve -= pay_now
-	if s >= StoryState.LEVEL_CAP:
+	if s >= st.level_cap():
 		st.xp_reserve = 0   # nothing is left to wait for
 	var text := "Milestone: +%s XP" % fmt(st.xp - start)
-	if level_for(st.xp) > before:
-		text += ", the party reaches level %d" % level_for(st.xp)
+	if level_for(st.xp, st.level_cap()) > before:
+		text += ", the party reaches level %d" % level_for(st.xp, st.level_cap())
 	return text
 
 
@@ -319,8 +321,8 @@ static func _notice(lead: String, got: Dictionary) -> String:
 
 ## "Level 6 · 15,240 / 23,000 XP"; at the cap "Level 11 · 85,000 XP".
 static func line(st: StoryState) -> String:
-	var level := level_for(st.xp)
-	if level >= StoryState.LEVEL_CAP:
+	var level := level_for(st.xp, st.level_cap())
+	if level >= st.level_cap():
 		return "Level %d · %s XP" % [level, fmt(st.xp)]
 	return "Level %d · %s / %s XP" % [level, fmt(st.xp), fmt(threshold(level + 1))]
 

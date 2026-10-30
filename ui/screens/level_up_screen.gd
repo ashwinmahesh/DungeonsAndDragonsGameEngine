@@ -74,10 +74,10 @@ func open(root_: Node, state: StoryState, index: int) -> void:
 func _blocked_line() -> String:
 	if not Xp.active(st):
 		return "%s has reached the level the story allows (%d). Milestones raise it." % [ch.name, st.target_level()]
-	if st.target_level() >= StoryState.LEVEL_CAP:
+	if st.target_level() >= st.level_cap():
 		return "%s has reached the highest level the story takes the party to (%d)." % [ch.name, st.target_level()]
 	return "%s has reached the party's level (%d). It needs %s more XP for level %d." % [ch.name, st.target_level(),
-		Xp.fmt(Xp.to_next(st.xp)), st.target_level() + 1]
+		Xp.fmt(Xp.to_next(st.xp, st.level_cap())), st.target_level() + 1]
 
 
 func _redraw() -> void:

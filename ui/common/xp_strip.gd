@@ -26,7 +26,7 @@ static func build(st: StoryState, width: float, compact: bool = false) -> Contro
 		line.tooltip_text += "\n%s. %s" % [held, Xp.reserve_tip()]
 	head.add_child(line)
 	box.add_child(head)
-	var bar := UiParts.bar(Xp.progress(st.xp) * 1000.0, 1000.0, 0.0, "", "gilt", Callable(), width, 10.0)
+	var bar := UiParts.bar(Xp.progress(st.xp, st.level_cap()) * 1000.0, 1000.0, 0.0, "", "gilt", Callable(), width, 10.0)
 	bar.name = "XpBar"
 	box.add_child(bar)
 	if held != "" and not compact:
