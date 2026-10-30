@@ -13,7 +13,7 @@ extends RefCounted
 ## into. The water shader's shore foam and depth follow the contour (the mask). Cosmetic only: the rules grid never sees
 ## any of it; water squares stay water and walkable ones walkable. The Classic look is frozen and keeps its squares.
 ##
-## Water on raised ground (a creek running down a hillside, a tarn up on a shelf; Crooked Moon's natural world, 2026-10-29)
+## Water on raised ground (a creek running down a hillside, a tarn up on a shelf; 2026-10-29)
 ## lies at its own squares' height, not the board's: every square of the field takes the level of the nearest water
 ## (a water square its own floor), smoothed so a stream slopes down the hill instead of stepping down it square by
 ## square, and the bank, the shelf, the skirt and the water's surface follow that level. Where all the water is at the

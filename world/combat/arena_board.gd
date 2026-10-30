@@ -1376,7 +1376,7 @@ func _plan_terrain() -> void:
 				_corner_h[_corner_index(c) + i] = _corner_y(c, _CORNERS[i]) + (_roll_at(c + _CORNERS[i], roll) if roll > 0.0 else 0.0)
 
 
-## Gently rolling open ground (plan N9, Crooked Moon 2026-10-29): how far (world units, up and down) natural ground rolls
+## Gently rolling open ground (plan N9, 2026-10-29): how far (world units, up and down) natural ground rolls
 ## between its rules heights, a long low swell seeded by the place, so a meadow is never a plane of tilted squares. The
 ## place's look `roll` (SetDressing catalog place_looks), else the campaign's "ground_roll" (data/campaign.json), else
 ## none: Curse of Strahd's ground is as it was. Cosmetic: the rules' heights never change, and everything that stands on
