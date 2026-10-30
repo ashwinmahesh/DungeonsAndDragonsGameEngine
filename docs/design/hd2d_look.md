@@ -41,6 +41,15 @@ must exist before the engine will even compile (see "Hard requirements" below).
   of day's `moon_colour` colours the moon's disc apart from the light it casts. A fight and a conversation scale the
   blur (`focus_fight`, `focus_talk`) and a mood's `focus` scales it for a place; `bloom_wide` widens the halos; a
   mood's weather `"moths"` sets moths fluttering round its lamps.
+- **The painted finish** (2026-10-30), off unless a game asks under `data/campaign.json`'s `"painted"` (`Look.PAINTED`
+  lists them; a mood's own `"painted"` block goes over it), in Modern and Toon, drawn by `PaintedFinish` through the
+  screen pass (`shaders/post/painted.gdshaderinc`): the world as gouache, in flat value steps coloured through a ramp
+  of palette names, with dry-brush streaks fixed to the world, pigment pooling at value edges and brushy ink lines;
+  brush strokes (a sector filter, the costly part) only where `Graphics.paint_strokes()` allows it (High). Also the
+  swaying shadows of bare boughs overhead (`boughs`, by the trees with `boughs_by_trees`) and the moon mirrored in any
+  water in view at night (`moon_water`). Characters draw after the pass and stay crisp.
+- **Strings of lantern bulbs** (2026-10-30): a location's `"light_strings"` (`LightString`), each bulb glowing for the
+  bloom and laying a warm pool on the ground, one real unshadowed light every few bulbs, so a street can carry dozens.
 - **Camera and scale** (ADR 0004): one world unit is one 5 ft square, a Medium character is about 1.2 units tall,
   the camera looks down at 40 degrees (a game's `"camera": {"pitch"}` in `data/campaign.json` changes it), starts at a 45 degree heading and turns in 90 degree steps. That is why
   sprites need 8 directions. Real-world sizes: a person is 6 ft and props are sized to match.

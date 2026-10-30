@@ -125,6 +125,42 @@ static func hd2d_settings() -> Dictionary:
 	return out
 
 
+## The painted finish (a game's Visual Polish Plan E37, E36, E44) a game turns on under data/campaign.json's "painted",
+## and a mood may change under its own "painted" block, in the Modern and Toon finishes only (PaintedFinish draws it
+## through the screen pass). Every default leaves the picture as it was:
+##   strokes (0 to 1): the world pressed into flat strokes of paint stroke_radius pixels long (at 1080 lines), edges
+##   kept by stroke_sharpness; drawn only on presets that allow it (Graphics.paint_strokes).
+##   ramp (palette names, darkest first) and ramp_amount: the world's values in `steps` flat steps (step_edge soft)
+##   coloured through the ramp, keeping keep_hue of each surface's own hue; strong or warm light keeps its colour
+##   (keep_light); below ink_below the shade is `ink`.
+##   brush: dry-brush streaks fixed to the world (brush_scale strokes a unit); edges: pigment pooling where values
+##   meet; lines: brushy ink drawn from the picture's own edges.
+##   boughs: the shadows of bare boughs overhead swaying across the ground (bough_height, bough_scale, bough_sway),
+##   only by the trees when boughs_by_trees.
+##   moon_water: the moon mirrored in any water on screen, at night (moon_water_size its angular size, moon_water_bite
+##   a crescent's bite, moon_water_ripple how much the ripples break it up).
+const PAINTED := {
+	"strokes": 0.0, "stroke_radius": 4.0, "stroke_sharpness": 600.0,
+	"ramp": [], "ramp_amount": 0.0, "steps": 5, "step_edge": 0.18, "keep_hue": 0.3, "keep_light": 1.0,
+	"ink_below": 0.0, "ink": "void",
+	"brush": 0.0, "brush_scale": 1.4, "edges": 0.0, "lines": 0.0,
+	"boughs": 0.0, "bough_height": 7.0, "bough_scale": 0.05, "bough_sway": 0.12, "boughs_by_trees": false,
+	"moon_water": 0.0, "moon_water_size": 0.07, "moon_water_bite": 0.6, "moon_water_ripple": 0.35,
+}
+
+
+## PAINTED under the game's own "painted" settings and then `mood_own` (a mood's "painted" block); unknown keys
+## left out.
+static func painted_settings(mood_own: Dictionary = {}) -> Dictionary:
+	var out := PAINTED.duplicate(true)
+	for own: Variant in [Campaign.config().get("painted", {}), mood_own]:
+		if own is Dictionary:
+			for k: String in own as Dictionary:
+				if PAINTED.has(k):
+					out[k] = (own as Dictionary)[k]
+	return out
+
+
 ## Hands a lit world material the Toon settings (the shaders' toon_* uniforms; they read them only in the Toon finish).
 static func toon_material(m: ShaderMaterial) -> void:
 	if m == null or not toon():

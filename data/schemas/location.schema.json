@@ -555,6 +555,23 @@
         }
       }
     },
+    "light_strings": {
+      "type": "array",
+      "description": "Strings of lantern bulbs hung between two squares (LightString): every bulb glows and pools light on the ground, one real light in every `every` bulbs lights the figures. Only painted: no light zone in a fight.",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"$ref": "#/$defs/cell"},
+          "to": {"$ref": "#/$defs/cell"},
+          "height_ft": {"type": "number", "minimum": 0, "description": "The ends' height above the ground (9)."},
+          "sag_ft": {"type": "number", "minimum": 0, "description": "How far the middle sags (2)."},
+          "colour": {"type": "string", "pattern": "^[a-z_]+$", "description": "The bulbs' palette colour (flame)."},
+          "every": {"type": "integer", "minimum": 1, "description": "A real light every so many bulbs (5)."}
+        }
+      }
+    },
     "traps": {
       "type": "array",
       "items": {

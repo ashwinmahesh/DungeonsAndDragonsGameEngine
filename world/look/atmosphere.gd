@@ -38,6 +38,8 @@ var water: ShaderMaterial = null
 var _water_reflect := 1.0          ## how much of the sky the water shows (the mood's water `reflect`)
 ## The game's HD-2D options (Look.hd2d_settings), read once for the place.
 var hd2d: Dictionary = Look.HD2D
+## The game's painted finish under the mood's own (Look.painted_settings), read once for the place.
+var painted: Dictionary = Look.PAINTED
 
 var _post: ShaderMaterial = null
 var _rig: CameraRig = null
@@ -68,6 +70,7 @@ static func create(loc_id: String, loc_: Dictionary, board_: ArenaBoard) -> Atmo
 	a.mood_id = mood_for(loc_id, loc_)
 	a.mood = a._dressed()
 	a.hd2d = Look.hd2d_settings()
+	a.painted = Look.painted_settings(a.mood.get("painted", {}) as Dictionary)
 	a._rng.seed = hash(loc_id)   # cosmetic only, never rules
 	# The region's own ground colours (a mood's `ground_tint`), before the land's materials are made.
 	Look.set_surface_tints(a._ground_tints())
@@ -877,6 +880,7 @@ func attach(rig: CameraRig, post: MeshInstance3D) -> void:
 	_blur_shown = -1.0   # a new screen pass starts with the blur off
 	_focus_blur()
 	_apply_static()
+	PaintedFinish.apply(_post, painted)
 	weather = AtmosphereWeather.build(self, board, mood, outdoors, get_parent())
 	_show_night_pieces()
 	_set_weather_on_surfaces()
@@ -1226,6 +1230,7 @@ func _process(delta: float) -> void:
 			var off := wx.get_meta("offset") as Vector3
 			wx.global_position = Vector3(_rig.global_position.x + off.x, wx.global_position.y, _rig.global_position.z + off.z)
 	_focus_blur()
+	PaintedFinish.aim_moon(_post, painted, _rig.camera)
 	_fit_sun_shadows()
 	_shadow_scan -= delta
 	if _shadow_scan <= 0.0:

@@ -1,6 +1,6 @@
 class_name LightString
 extends Node3D
-## A string of lantern bulbs hung between two points, sagging (a game's Visual Polish Plan E35, a prototype): every bulb
+## A string of lantern bulbs hung between two points, sagging (a game's Visual Polish Plan E35): every bulb
 ## glows (so the bloom catches it) and lays a warm pool on the ground below, but only one real light in every
 ## `per_light` bulbs lights the figures, so a street can carry dozens of bulbs for the price of a few lamps.
 
@@ -100,6 +100,9 @@ func _build(a: Vector3, b: Vector3, floor_at: Callable, sag: float, spacing: flo
 			l.omni_range = reach * 3.0
 			l.omni_attenuation = 1.6
 			l.shadow_enabled = false
+			# A lantern to the atmosphere, left out of the lamp shadows' budget (Atmosphere._update_lamp_shadows).
+			l.set_meta("light_kind", "lantern")
+			l.set_meta("no_shadow", true)
 			add_child(l)
 			l.global_position = p + Vector3(0, -0.15, 0)
 			LightFlicker.give(l, "lantern")
@@ -125,3 +128,24 @@ static func _pool_texture() -> Texture2D:
 	t.height = 128
 	_pool = t
 	return _pool
+
+
+## A place's own strings (a location's "light_strings": {from, to: [x, z] squares; height_ft, the ends' height above
+## the ground, 9; sag_ft at the middle, 2; colour, a palette name, "flame"; every, a real light every so many bulbs,
+## 5}), hung on `board`.
+static func hang_all(board: ArenaBoard, strings: Array) -> Array[LightString]:
+	var out: Array[LightString] = []
+	var floor_at := func(p: Vector3) -> float: return board.floor_y(Vector2i(floori(p.x), floori(p.z)))
+	for v: Variant in strings:
+		var d := v as Dictionary
+		if d == null or not d.has("from") or not d.has("to"):
+			continue
+		var ends: Array[Vector3] = []
+		for key: String in ["from", "to"]:
+			var c := d[key] as Array
+			var p := board.cell_center(Vector2i(int(c[0]), int(c[1])))
+			p.y = float(floor_at.call(p)) + float(d.get("height_ft", 9.0)) / 5.0
+			ends.append(p)
+		out.append(hang(board, ends[0], ends[1], floor_at, float(d.get("sag_ft", 2.0)) / 5.0, 0.45,
+			maxi(int(d.get("every", 5)), 1), Look.color(str(d.get("colour", "flame")))))
+	return out

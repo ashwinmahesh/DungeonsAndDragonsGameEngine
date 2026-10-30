@@ -164,6 +164,7 @@ static func _prop_art(prop: Dictionary) -> String:
 
 
 static func _build_lights(view: LocationView) -> void:
+	LightString.hang_all(view.board, view.loc.get("light_strings", []) as Array)   # strings of lantern bulbs (E35)
 	for l: Variant in view.loc.get("lights", []):
 		var li := l as Dictionary
 		var omni := CandleFlicker.new()
