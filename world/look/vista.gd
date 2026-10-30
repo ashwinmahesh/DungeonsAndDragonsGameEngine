@@ -63,19 +63,22 @@ static func build(board: ArenaBoard, set_id: String) -> Vista:
 	v.centre = Vector3(board.grid.width / 2.0, 0.0, board.grid.depth / 2.0)
 	var styles := cfg.get("styles", {}) as Dictionary
 	v._ring(styles.get(set_id, styles.get("forest", {})) as Dictionary, float(cfg.get("radius", 230.0)))
+	# The one landmark seen from most of the land (`castle`) and a great lake (`lake`) are both optional.
 	var castle := seen_from(cfg.get("castle", {}) as Dictionary, board.place)   # (its `from` for a place that sees it from afar)
-	var c_at := Vector2(float((castle["at"] as Array)[0]), float((castle["at"] as Array)[1]))
-	var c_far := (here as Vector2).distance_to(c_at)
 	var taken: Array[float] = []
-	if c_far > 0.02 and c_far < float(castle.get("within", 0.5)) and ResourceLoader.exists(ArtPaths.of(str(castle["art"]))):
-		var way := on_skyline(c_at - (here as Vector2), taken)
-		v._card("CastleRavenloft", castle, Vector2.from_angle(way), c_far)
-		taken.append(way)
+	if castle.get("at") is Array and castle.has("art"):
+		var c_at := Vector2(float((castle["at"] as Array)[0]), float((castle["at"] as Array)[1]))
+		var c_far := (here as Vector2).distance_to(c_at)
+		if c_far > 0.02 and c_far < float(castle.get("within", 0.5)) and ResourceLoader.exists(ArtPaths.of(str(castle["art"]))):
+			var way := on_skyline(c_at - (here as Vector2), taken)
+			v._card("CastleRavenloft", castle, Vector2.from_angle(way), c_far)
+			taken.append(way)
 	v._landmarks(cfg.get("landmarks", {}) as Dictionary, here as Vector2, taken, board.place)
 	var lake := cfg.get("lake", {}) as Dictionary
-	var l_at := Vector2(float((lake["at"] as Array)[0]), float((lake["at"] as Array)[1]))
-	if (here as Vector2).distance_to(l_at) < float(lake.get("within", 0.15)):
-		v._lake(lake, l_at - (here as Vector2))
+	if lake.get("at") is Array:
+		var l_at := Vector2(float((lake["at"] as Array)[0]), float((lake["at"] as Array)[1]))
+		if (here as Vector2).distance_to(l_at) < float(lake.get("within", 0.15)):
+			v._lake(lake, l_at - (here as Vector2))
 	return v
 
 

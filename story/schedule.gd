@@ -20,7 +20,7 @@ static var _events: Array[Dictionary] = []
 
 ## Every region's events (loaded once, files in name order).
 static func events() -> Array[Dictionary]:
-	if _events.is_empty():
+	if _events.is_empty() and DirAccess.dir_exists_absolute(DIR):   # a game may have no schedule at all
 		var files := Array(DirAccess.get_files_at(DIR))
 		files.sort()
 		for f: String in files:

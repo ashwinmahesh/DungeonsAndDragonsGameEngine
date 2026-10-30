@@ -176,7 +176,8 @@ func _camera(target: Node = null) -> void:
 		target = UiFeel.touch.world_target()
 	if target == null:
 		return
-	var rig := (target as CombatView).rig if target is CombatView else ((target as TutorialSession).location.rig if target is TutorialSession else (target.get("view") as LocationView).rig)
+	# A fight's view, or whatever explores a place (the game root, a game's tutorial): anything with a `view`.
+	var rig := (target as CombatView).rig if target is CombatView else (target.get("view") as LocationView).rig
 	var body := _page("Camera")
 	for spec: Array in [["Turn left", -1], ["Turn right", 1]]:
 		var step := int(spec[1])
