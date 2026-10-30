@@ -390,7 +390,7 @@ func _terrain() -> void:
 			if on_map:
 				h = _map_corner(Vector2i(i - r, j - r))
 			elif water:
-				h = WATER_Y
+				h = WATER_Y + _water_lift(edge)
 			else:
 				if road > 0:
 					h *= 1.0 - 0.8 * float(road) / 4.0
@@ -429,7 +429,7 @@ func _terrain() -> void:
 	up.resize(flat.size())
 	for k in flat.size():
 		var v := flat[k]
-		v.y = WATER_Y
+		v.y = WATER_Y + _water_lift(Vector2(v.x, v.z).clamp(Vector2.ZERO, Vector2(_w, _d)))
 		flat[k] = v
 		up[k] = Vector3.UP
 	var mesh := ArrayMesh.new()
@@ -632,6 +632,17 @@ func map_y(p: Vector2) -> float:
 ## Where the land meets the map at grid point `p`: on the map's own floor or shaped ground; on a map with natural
 ## ground, level with the lowest of the map's own squares there (the others' sides fill the step), so the land never
 ## hangs above an edge.
+## How far above the board's own level the water past the map's edge lies, at `edge` (a point on the edge): a creek that
+## leaves a hillside map carries on at its own height (the highest water square touching that point), 0 elsewhere.
+func _water_lift(edge: Vector2) -> float:
+	var lift := 0.0
+	for o: Vector2 in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.5)]:
+		var c := Vector2i(floori(edge.x + o.x), floori(edge.y + o.y))
+		if board.grid.in_bounds(c) and board.grid.has_flag(c, CombatGrid.WATER):
+			lift = maxf(lift, board.grid.height(c) / float(CombatGrid.FEET))
+	return lift
+
+
 func _map_corner(p: Vector2i) -> float:
 	if not board.has_terrain():
 		return relief.height(Vector2(p)) if relief != null else 0.0

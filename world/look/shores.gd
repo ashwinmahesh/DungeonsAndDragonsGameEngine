@@ -13,6 +13,12 @@ extends RefCounted
 ## into. The water shader's shore foam and depth follow the contour (the mask). Cosmetic only: the rules grid never sees
 ## any of it; water squares stay water and walkable ones walkable. The Classic look is frozen and keeps its squares.
 ##
+## Water on raised ground (a creek running down a hillside, a tarn up on a shelf; Crooked Moon's natural world, 2026-10-29)
+## lies at its own squares' height, not the board's: every square of the field takes the level of the nearest water
+## (a water square its own floor), smoothed so a stream slopes down the hill instead of stepping down it square by
+## square, and the bank, the shelf, the skirt and the water's surface follow that level. Where all the water is at the
+## board's own level (every Curse of Strahd place) it is drawn exactly as before.
+##
 ## Built for speed (a place is built on every arrival): the field is worked out once per place on flat arrays over the
 ## water's bounding box and kept, like GroundRelief's.
 
@@ -73,6 +79,14 @@ var _shift := PackedFloat32Array()
 var _zone_water: Dictionary = {}
 var _zone_land: Dictionary = {}
 var _mask: ImageTexture = null
+## The water's level (world units above the board's own) at each square of the field (the nearest water square's floor)
+## and at each fine cell (smoothed between squares), and whether any of it is off the board's own level.
+var _lev := PackedFloat32Array()
+var _level := PackedFloat32Array()
+var _sloped := false
+## How many times the squares' levels are smoothed (a 3 x 3 average each time): the stream's slope spreads over about
+## this many squares either side of a step.
+const LEVEL_BLUR := 2
 
 
 ## Whether the Modern look draws natural shores (not Classic, and not for a QA shot of the places as they were).
@@ -112,6 +126,9 @@ static func build(board_: ArenaBoard, skin: Dictionary, flat: Dictionary) -> Sho
 		again._zone_water = k._zone_water
 		again._zone_land = k._zone_land
 		again._mask = k._mask
+		again._lev = k._lev
+		again._level = k._level
+		again._sloped = k._sloped
 		return again
 	var s := Shores.new()
 	s.board = board_
@@ -121,6 +138,7 @@ static func build(board_: ArenaBoard, skin: Dictionary, flat: Dictionary) -> Sho
 	s._sd = mini(hi.y + PAD + 1, g.depth) - s._z0
 	s._cw = s._sw * RES
 	s._cd = s._sd * RES
+	s._levels()
 	s._zones(skin)
 	s._field(skin, flat)
 	_kept[key] = s
@@ -132,7 +150,96 @@ static func build(board_: ArenaBoard, skin: Dictionary, flat: Dictionary) -> Sho
 
 ## Whether a shore can meet square `c`: its ground is not a cliff above the water (Natural Maps plan N6).
 func _near(c: Vector2i) -> bool:
-	return absf(board.floor_y(c)) <= REACHABLE
+	return absf(board.floor_y(c) - _lev_of(c)) <= REACHABLE
+
+
+## The level of the water nearest each square of the field (a water square's own floor; 8 ways, the lowest on a tie), and
+## the fine cells' levels, smoothed (_lev, _level, _sloped).
+func _levels() -> void:
+	var g := board.grid
+	var count := _sw * _sd
+	_lev.resize(count)
+	var steps := PackedInt32Array()
+	steps.resize(count)
+	steps.fill(1 << 20)
+	var front: Array[Vector2i] = []
+	for sz in _sd:
+		for sx in _sw:
+			var c := Vector2i(_x0 + sx, _z0 + sz)
+			if g.has_flag(c, CombatGrid.WATER):
+				var k := sz * _sw + sx
+				_lev[k] = g.height(c) / float(CombatGrid.FEET)
+				steps[k] = 0
+				front.append(Vector2i(sx, sz))
+				_sloped = _sloped or not is_zero_approx(_lev[k])
+	while not front.is_empty():
+		var next: Array[Vector2i] = []
+		for at: Vector2i in front:
+			var k := at.y * _sw + at.x
+			for dz in range(-1, 2):
+				for dx in range(-1, 2):
+					var nx := at.x + dx
+					var nz := at.y + dz
+					if nx < 0 or nz < 0 or nx >= _sw or nz >= _sd:
+						continue
+					var nk := nz * _sw + nx
+					if steps[nk] > steps[k] + 1:
+						steps[nk] = steps[k] + 1
+						_lev[nk] = _lev[k]
+						next.append(Vector2i(nx, nz))
+					elif steps[nk] == steps[k] + 1:
+						_lev[nk] = minf(_lev[nk], _lev[k])
+		front = next
+	_level.resize(_cw * _cd)
+	if not _sloped:
+		return   # (all zero: the board's own level, as before)
+	var soft := _lev.duplicate()
+	for _pass in LEVEL_BLUR:
+		var out := soft.duplicate()
+		for sz in _sd:
+			for sx in _sw:
+				var sum := 0.0
+				var n := 0
+				for dz in range(-1, 2):
+					for dx in range(-1, 2):
+						var nx := sx + dx
+						var nz := sz + dz
+						if nx >= 0 and nz >= 0 and nx < _sw and nz < _sd:
+							sum += soft[nz * _sw + nx]
+							n += 1
+				out[sz * _sw + sx] = sum / n
+		soft = out
+	for j in _cd:
+		for i in _cw:
+			var fx := (i + 0.5) / RES - 0.5
+			var fz := (j + 0.5) / RES - 0.5
+			var x0 := clampi(floori(fx), 0, _sw - 1)
+			var z0 := clampi(floori(fz), 0, _sd - 1)
+			var x1 := mini(x0 + 1, _sw - 1)
+			var z1 := mini(z0 + 1, _sd - 1)
+			var ax := clampf(fx - x0, 0.0, 1.0)
+			var az := clampf(fz - z0, 0.0, 1.0)
+			_level[j * _cw + i] = lerpf(lerpf(soft[z0 * _sw + x0], soft[z0 * _sw + x1], ax),
+				lerpf(soft[z1 * _sw + x0], soft[z1 * _sw + x1], ax), az)
+
+
+func _lev_of(c: Vector2i) -> float:
+	var sx := c.x - _x0
+	var sz := c.y - _z0
+	if sx < 0 or sz < 0 or sx >= _sw or sz >= _sd:
+		return 0.0
+	return _lev[sz * _sw + sx]
+
+
+## The water's surface height at a point of the map (world units): the board's water level, raised to the water's own
+## level where it lies on raised ground.
+func water_y(p: Vector2) -> float:
+	return WATER_Y + (_sample(_level, p, 0.0) if _sloped else 0.0)
+
+
+## Whether any of the place's water lies off the board's own level (a creek down a hillside).
+func sloped() -> bool:
+	return _sloped
 
 
 ## The water squares land may reach over (any beside a square the ground draws) and the drawn walkable squares water may
@@ -177,7 +284,7 @@ func _field(skin: Dictionary, flat: Dictionary) -> void:
 	for sz in _sd:
 		for sx in _sw:
 			if square[sz * _sw + sx] != 1:
-				rise[sz * _sw + sx] = maxf(board.floor_y(Vector2i(_x0 + sx, _z0 + sz)), 0.0)
+				rise[sz * _sw + sx] = maxf(board.floor_y(Vector2i(_x0 + sx, _z0 + sz)) - _lev[sz * _sw + sx], 0.0)
 	var rim := rise.duplicate()
 	for sz in _sd:
 		for sx in _sw:
@@ -384,13 +491,13 @@ func _sample(a: PackedFloat32Array, p: Vector2, outside: float) -> float:
 ## The ground's height over a point where the shore's distance is `d`, for ground at `ground` there (absolute): down a
 ## short bank (`width` squares) to the water's level at the contour with the bank's slope (a cubic from the ground's own
 ## height, so a raised bank rounds off into the water instead of standing as a wall), then a shelf under the water.
-static func shelf(d: float, ground: float = 0.0, width: float = BANK) -> float:
+static func shelf(d: float, ground: float = 0.0, width: float = BANK, water: float = WATER_Y) -> float:
 	if d <= -width:
 		return ground
 	if d <= 0.0:
 		var t := (d + width) / width
-		return ground + (WATER_Y - ground) * (3.0 * t * t - 2.0 * t * t * t) - BANK_SLOPE * width * (t * t * t - t * t)
-	return WATER_Y - SHELF * (1.0 - exp(-d * BANK_SLOPE / SHELF))
+		return ground + (water - ground) * (3.0 * t * t - 2.0 * t * t * t) - BANK_SLOPE * width * (t * t * t - t * t)
+	return water - SHELF * (1.0 - exp(-d * BANK_SLOPE / SHELF))
 
 
 ## Whether a point of the map is under the water (past the contour).
@@ -410,14 +517,15 @@ func water_squares() -> Dictionary:
 func lower(h: float, p: Vector2, base: float = 0.0) -> float:
 	var d := distance_at(p)
 	var bank := _sample(_bank, p, 0.0)
+	var lev := _sample(_level, p, 0.0) if _sloped else 0.0
 	if bank > PIT_RISE:
 		var w := maxf(_sample(_shift, p, 0.0), 0.1)
 		if d <= -w - PIT_BLEND:
 			return h
-		return lerpf(h, shelf(d, 0.5 * bank, w) - base, smoothstep(-w - PIT_BLEND, -w, d))
+		return lerpf(h, shelf(d, lev + 0.5 * bank, w, WATER_Y + lev) - base, smoothstep(-w - PIT_BLEND, -w, d))
 	if d <= -BANK:
 		return h
-	return minf(h, shelf(d, base + h) - base)
+	return minf(h, shelf(d, base + h, BANK, WATER_Y + lev) - base)
 
 
 ## Whether the shore lowers or raises the ground at a point (for tests of the skin's own shape: it is meant to).
@@ -434,6 +542,9 @@ func dress(parent: Node3D, water: Material) -> void:
 		w = Look.cel_textured("wild/water")
 	if water is ShaderMaterial:
 		(water as ShaderMaterial).set_shader_parameter("water_mask", mask())
+	if _sloped and w != null:
+		_dress_stream(parent, w)
+		return
 	if _zone_land.is_empty() or w == null:
 		return
 	var verts := PackedVector3Array()
@@ -488,3 +599,48 @@ func mask() -> ImageTexture:
 				data[j * mw + i] = roundi(clampf(0.125 + d * 0.25, 0.0, 1.0) * 255.0)
 	_mask = ImageTexture.create_from_image(Image.create_from_data(mw, md, false, Image.FORMAT_R8, data))
 	return _mask
+
+
+## Water off the board's level (a creek down a hillside): one surface over the water squares and the walkable squares
+## beside them, a point every third of a square at the water's own smoothed level, so the stream runs down the slope
+## between its banks. The board's flat water boxes (ArenaBoard._water) are hidden for it.
+func _dress_stream(parent: Node3D, water: Material) -> void:
+	var cover := {}
+	for c: Vector2i in _zone_land:
+		cover[c] = true
+	for sz in _sd:
+		for sx in _sw:
+			var c := Vector2i(_x0 + sx, _z0 + sz)
+			if board.grid.has_flag(c, CombatGrid.WATER):
+				cover[c] = true
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var idx := PackedInt32Array()
+	var step := 1.0 / RES
+	for c: Vector2i in cover:
+		for j in RES:
+			for i in RES:
+				var b := verts.size()
+				for q in 4:
+					var p := Vector2(c.x + (i + (q & 1)) * step, c.y + (j + (q >> 1)) * step)
+					verts.append(Vector3(p.x, water_y(p), p.y))
+					var dx := water_y(p + Vector2(step, 0)) - water_y(p - Vector2(step, 0))
+					var dz := water_y(p + Vector2(0, step)) - water_y(p - Vector2(0, step))
+					normals.append(Vector3(-dx, 2.0 * step, -dz).normalized())
+				idx.append_array(PackedInt32Array([b, b + 1, b + 2, b + 1, b + 3, b + 2]))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mi := MeshInstance3D.new()
+	mi.name = "StreamWater"
+	mi.mesh = mesh
+	mi.material_override = water
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	for n: Node in board.get_children():
+		if n.has_meta(&"water_cell"):
+			(n as Node3D).visible = false

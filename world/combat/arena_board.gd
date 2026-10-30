@@ -782,12 +782,14 @@ func _wagon(c: Vector2i) -> void:
 		_dress(c, first)
 
 
-## Deep water: a dark surface a little below the floor.
+## Deep water: a dark surface a little below the floor (its own square's, on raised ground). The Modern look's shore
+## (Shores) draws water on raised ground as one sloping stream and hides these (meta water_cell).
 func _water(c: Vector2i) -> void:
 	var m: Material = Look.cel_textured("wild/water")
 	if m == null:
 		m = Look.cel_checker("night", "night_deep", "night_deep")
-	_box("Water", Vector3(1, 0.1, 1), Vector3(c.x + 0.5, -0.18, c.y + 0.5), m)
+	var lift := grid.height(c) / float(CombatGrid.FEET)
+	_box("Water", Vector3(1, 0.1, 1), Vector3(c.x + 0.5, -0.18 + lift, c.y + 0.5), m).set_meta(&"water_cell", c)
 
 
 func _wall(c: Vector2i) -> void:
@@ -1509,7 +1511,8 @@ func rolling(c: Vector2i) -> bool:
 	for dz in range(-1, 2):
 		for dx in range(-1, 2):
 			var o := c + Vector2i(dx, dz)
-			if grid.in_bounds(o) and ((not grid.has_flag(o, CombatGrid.NATURAL) and not (grid.has_flag(o, CombatGrid.WATER) and Shores.on() and grid.height(c) <= 10)) or grid.is_cliff(c, o)):
+			# (water beside it is a shore the skin dips to, Shores, within two steps of the water's own level)
+			if grid.in_bounds(o) and ((not grid.has_flag(o, CombatGrid.NATURAL) and not (grid.has_flag(o, CombatGrid.WATER) and Shores.on() and absi(grid.height(c) - grid.height(o)) <= 10)) or grid.is_cliff(c, o)):
 				return false
 	return true
 
