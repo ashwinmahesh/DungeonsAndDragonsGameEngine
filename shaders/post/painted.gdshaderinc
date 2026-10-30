@@ -134,7 +134,7 @@ vec3 bough_shadows(vec3 col, vec3 wpos) {
 	vec2 sway = vec2(vnoise(cp2 * 0.15 + vec2(atmo_time * 0.35, 0.0)), vnoise(cp2 * 0.15 + vec2(3.1, atmo_time * 0.3))) - 0.5;
 	float lod = clamp(t * 0.22 - 0.4, 0.0, 4.0);
 	float sh = 1.0 - textureLod(branch_tex, cp2 * branch_scale + sway * branch_sway, lod).r;
-	float k = smoothstep(0.03, 0.25, luma(col));
+	float k = smoothstep(0.005, 0.08, luma(col));   // (the night's ground is dark: only true black is spared)
 	if (use_branch_mask && use_mist_mask && land_rect.z > land_rect.x) {
 		k *= smoothstep(0.1, 0.55, texture(mist_mask, (wpos.xz - land_rect.xy) / (land_rect.zw - land_rect.xy)).r);
 	}
