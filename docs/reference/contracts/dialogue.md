@@ -123,7 +123,8 @@ respec                             The player picks a party member to rebuild fr
 check Skill DC n -> ok | fail      A check with no choice (e.g. a passive moment). Uses the best party member.
 interject <selector>: Text         A party member matching the selector says Text, if one is present (the first
                                    match in marching order): class:rogue, species:elf, background:criminal,
-                                   tag:blunt, name:thistle, knows:remove_curse (can cast it now). Write
+                                   tag:blunt, name:thistle, knows:remove_curse (can cast it now), subclass:x,
+                                   feature:x, feat:x. Write
                                    class/species lines so any such character could say them; use name: for a
                                    pregen's own voice.
 combat encounter_id                Ends the conversation and starts a fight from the location's encounters.
@@ -167,7 +168,8 @@ inspire name:thistle: spoke her mind
 ## Conditions
 
 `flag.<id>` (truthy), `not flag.<id>`, `flag.<id> == 3` / `!= >= <= > <`, `class:cleric`, `species:elf`,
-`background:acolyte`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
+`background:acolyte`, `subclass:oath_of_vengeance`, `feature:<id>` (a trait, feature, feat benefit or gift part a party
+member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
 `quest_days.<id> >= 3` (whole days since the quest last moved to its current stage; false before the quest begins),
 `days_since.<flag> >= 2` (whole days since the flag was stamped with `set <flag> = now`; false while it hasn't been),
 `attitude.<npc> == friendly`, `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or

@@ -200,25 +200,59 @@ func dark_gifts() -> Array[String]:
 	return out
 
 
-## Takes a dark gift for good: its benefit and its cost both apply from now on.
-func accept_dark_gift(gift_id: String) -> void:
+## Takes a dark gift for good: its benefit and its cost both apply from now on. `only` (feature ids of the benefit)
+## takes just those parts of it and none of its cost: an offer that lets the taker choose (a god's last temptation).
+func accept_dark_gift(gift_id: String, only: Array[String] = []) -> void:
 	if gift_id in dark_gifts():
 		return
 	var list := build.get("dark_gifts", []) as Array
 	list.append(gift_id)
 	build["dark_gifts"] = list
+	if not only.is_empty():
+		var parts := build.get("dark_gift_parts", {}) as Dictionary
+		parts[gift_id] = only.duplicate()
+		build["dark_gift_parts"] = parts
 	refresh()
 
 
-## The modifiers of every dark gift carried: the benefit's and the cost's.
+## The benefit features taken of a gift accepted only in part, or [] when it was taken whole.
+func gift_parts(gift_id: String) -> Array[String]:
+	var out: Array[String] = []
+	for f: Variant in (build.get("dark_gift_parts", {}) as Dictionary).get(gift_id, []):
+		out.append(str(f))
+	return out
+
+
+## The modifiers of every dark gift carried: the benefit's and the cost's (a gift taken in part: no cost).
 func gift_modifiers() -> Array[Modifier]:
 	var out: Array[Modifier] = []
 	for id in dark_gifts():
 		var data := compendium.get_entry("dark_gifts", id)
 		for part: String in ["benefit", "cost"]:
+			if part == "cost" and not gift_parts(id).is_empty():
+				continue
 			for md: Variant in (data.get(part, {}) as Dictionary).get("modifiers", []):
 				out.append(Modifier.make(md as Dictionary, "%s (%s)" % [data.get("name", id), part], &"dark_gift", id, ""))
 	return out
+
+
+## A gift's features (resources, actions, choices and the code-read ones: `features` in its benefit and cost), walked
+## like a species' traits; a gift taken in part walks only the benefit features taken.
+func _walk_gifts() -> void:
+	for id in dark_gifts():
+		var data := compendium.get_entry("dark_gifts", id)
+		if data.is_empty():
+			continue
+		var only := gift_parts(id)
+		for part: String in ["benefit", "cost"]:
+			if part == "cost" and not only.is_empty():
+				continue
+			var src := _source("dark_gift", id, "%s (%s)" % [data.get("name", id), part])
+			for f: Variant in (data.get(part, {}) as Dictionary).get("features", []):
+				var fd := f as Dictionary
+				if part == "benefit" and not only.is_empty() and not str(fd.get("id", "")) in only:
+					continue
+				_walk_feature(fd, "gift.%s.%s" % [id, fd.get("id", "")], src, {})
 
 
 # --- Magic items and attunement (2024 DMG "Magic Items", ADR 0012) ----------------------------------
@@ -642,6 +676,7 @@ func refresh() -> void:
 	_walk_background()
 	_walk_languages()
 	_walk_classes()
+	_walk_gifts()
 	_fix_dynamic_counts()
 	_build_spellcasting()
 	_collect_granted_spells()
@@ -916,7 +951,10 @@ func _walk_feat(feat_id: String, key: String, parent: Dictionary, params: Dictio
 		var lp := _register_choice({"kind": "option", "count": 1, "options": options}, "%s.list" % key, src,
 			"%s: spell list" % feat.get("name", ""), scope)
 		scope["list"] = lp[0] if not lp.is_empty() else ""
-	if feat.has("ability_increase"):
+	# `min_level`: only for a feat taken at that character level or later (a book's rule that an origin feat taken at
+	# level 4 or later also raises an ability).
+	var taken_at := int(parent.get("character_level", 1))
+	if feat.has("ability_increase") and taken_at >= int((feat["ability_increase"] as Dictionary).get("min_level", 0)):
 		var ai := feat["ability_increase"] as Dictionary
 		var picks := _register_choice({"kind": "ability_increase", "count": int(ai.get("points", 1)),
 			"from": ai.get("from", Abilities.ALL), "per_ability": int(ai.get("per_ability", 1)),

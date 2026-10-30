@@ -59,10 +59,12 @@ func _fight() -> Dictionary:
 
 
 func test_a_game_without_a_module_gets_the_base() -> void:
+	GameFeatures.use(GameFeatures)   # whatever module this game names, a game without one has the base
 	var e := TestCombat.open_field()
 	assert_true(e.game != null, "every encounter has one")
 	assert_eq((e.game.get_script() as GDScript).resource_path, (GameFeatures as GDScript).resource_path, "the base, which does nothing")
 	assert_true(e.game.perform(null, "anything", null, Vector2i.ZERO, Vector2.ZERO).ok == false)
+	GameFeatures.use(null)
 
 
 func test_the_module_in_place_is_made_with_each_encounter_and_its_actions_reach_the_hotbar() -> void:
@@ -140,3 +142,50 @@ func test_a_background_may_raise_any_ability_and_give_picks_languages_and_any_or
 	assert_true((ch.proficiencies["languages"] as Dictionary).has("sylvan"), "the language")
 	assert_eq(ch.ability_score(&"cha"), int((ch.build["base_scores"] as Dictionary)["cha"]) + 2, "+2 Charisma")
 	bgs.erase("test_wanderer")
+
+
+func test_a_dark_gift_may_carry_features_and_be_taken_in_part() -> void:
+	var gifts := Compendium.shared().table("dark_gifts")
+	gifts["test_bargain"] = {"id": "test_bargain", "name": "Test Bargain", "vestige": "a voice", "summary": "A test.",
+		"benefit": {"text": "Power.", "features": [
+			{"id": "test_boon_a", "name": "Boon A", "summary": "A.", "text": "A.", "resource": {"id": "test_boon_a", "name": "Boon A", "max": 1, "recharge": "long"}},
+			{"id": "test_boon_b", "name": "Boon B", "summary": "B.", "text": "B.", "modifiers": [{"stat": "resistance", "value": "necrotic"}]}]},
+		"cost": {"text": "A price.", "features": [
+			{"id": "test_price", "name": "Price", "summary": "P.", "text": "P.", "modifiers": [{"stat": "vulnerability", "value": "psychic"}]}]}}
+	var whole := TestChars.custom("fighter", "human", 1)
+	whole.accept_dark_gift("test_bargain")
+	assert_eq(whole.resource_max("test_boon_a"), 1, "a benefit feature's resource")
+	assert_true(whole.resistance_source(&"necrotic") != "", "a benefit feature's modifier")
+	assert_true(whole.modifiers_for(&"vulnerability").size() > 0, "and the price")
+	assert_true(CombatFeatures.has_feature(TestCombat.open_field().add(whole, &"party", Vector2i(1, 1)), "test_price"), "code can read its features")
+	var part := TestChars.custom("fighter", "human", 1)
+	var only: Array[String] = ["test_boon_b"]
+	part.accept_dark_gift("test_bargain", only)
+	assert_true(part.resistance_source(&"necrotic") != "", "the part taken")
+	assert_eq(part.resource_max("test_boon_a"), 0, "not the part left")
+	assert_true(part.modifiers_for(&"vulnerability").is_empty(), "and no price")
+	gifts.erase("test_bargain")
+
+
+func test_an_ability_increase_with_a_minimum_level_comes_only_with_a_feat_taken_that_late() -> void:
+	var feats := Compendium.shared().table("feats")
+	feats["test_late_bloomer"] = {"id": "test_late_bloomer", "name": "Late Bloomer", "source": {"book": "test"}, "category": "origin",
+		"summary": "A test.", "ability_increase": {"points": 1, "max": 20, "min_level": 4},
+		"benefits": [{"id": "test_late_bloom", "name": "Bloom", "summary": "B.", "text": "B.", "modifiers": [{"stat": "initiative", "value": 1}]}]}
+	var late := TestChars.custom("fighter", "human", 4, {".4.ability_score_improvement": ["test_late_bloomer"]})
+	assert_true(late.choice_defs.any(func(c: Choice) -> bool: return c.key.ends_with("test_late_bloomer.abilities")), "taken at level 4: +1 to an ability")
+	var early := TestChars.custom("fighter", "human", 1, {"species.versatile": ["test_late_bloomer"]})
+	assert_true(early.feats_taken.any(func(f: Dictionary) -> bool: return str(f["id"]) == "test_late_bloomer"), "the feat itself at level 1")
+	assert_false(early.choice_defs.any(func(c: Choice) -> bool: return c.key.ends_with("test_late_bloomer.abilities")), "but no increase")
+	feats.erase("test_late_bloomer")
+
+
+func test_a_conversation_can_ask_for_a_subclass_a_feature_or_a_feat() -> void:
+	var ch := TestChars.custom("fighter", "human", 3, {"species.versatile": ["alert"]})
+	var sub := str(ch.subclasses.get("fighter", ""))
+	assert_true(sub != "")
+	assert_true(StoryState.member_matches(ch, "subclass:" + sub))
+	assert_false(StoryState.member_matches(ch, "subclass:circle_of_the_moon"))
+	assert_true(StoryState.member_matches(ch, "feature:second_wind"), "a class feature by id")
+	assert_true(StoryState.member_matches(ch, "feat:alert"))
+	assert_false(StoryState.member_matches(ch, "feat:tough"))

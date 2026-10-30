@@ -35,7 +35,8 @@
         "from": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/ability"}},
         "points": {"type": "integer", "minimum": 1},
         "per_ability": {"type": "integer", "minimum": 1},
-        "max": {"type": "integer"}
+        "max": {"type": "integer"},
+        "min_level": {"type": "integer", "minimum": 1, "description": "Only when the feat is taken at this character level or later (a book's Generalized Origin Feats: an origin feat taken at level 4+ also gives +1)."}
       }
     },
     "benefits": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/feature"}},

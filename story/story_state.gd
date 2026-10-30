@@ -262,6 +262,14 @@ static func member_matches(ch: Character, selector: String) -> bool:
 			return str(ch.build.get("species", "")) == value or ch.lineage == value
 		"background":
 			return str(ch.build.get("background", "")) == value
+		"subclass":
+			return value in ch.subclasses.values()
+		"feature":
+			# A species trait, class or subclass feature, feat benefit or gift part, by id (a book option's use in a
+			# conversation: a monk who talks with vermin, a paladin who can compel the truth).
+			return ch.features.any(func(f: Dictionary) -> bool: return str(f.get("id", "")) == value)
+		"feat":
+			return ch.feats_taken.any(func(f: Dictionary) -> bool: return str(f.get("id", "")) == value)
 		"tag":
 			var identity := ch.build.get("identity", {}) as Dictionary
 			return value in (identity.get("tags", []) as Array)

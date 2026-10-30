@@ -1,6 +1,6 @@
 {
   "$id": "dark_gift.schema.json",
-  "title": "A dark gift of the Amber Temple (ADR 0011)",
+  "title": "A dark gift or bargain: a benefit and its cost, taken for good (ADR 0011)",
   "type": "object",
   "required": [
     "id",
@@ -34,6 +34,13 @@
         },
         "flaw": {
           "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/feature"
+          },
+          "description": "What the part does beyond plain modifiers, walked like a species' traits: resources, actions, choices and the features a game's code reads (Character._walk_gifts)."
         },
         "text": {
           "type": "string"
