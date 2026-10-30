@@ -145,6 +145,8 @@ func reach_ft() -> int:
 		var main := (creature as Character).equipped("main_hand")
 		if "reach" in Gear.weapon_props(main):
 			best = 10
+	for m in creature.modifiers_for(&"reach"):
+		best += int(m.number("value"))
 	return best
 
 

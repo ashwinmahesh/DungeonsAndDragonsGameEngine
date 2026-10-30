@@ -94,7 +94,7 @@ func list(c: Combatant) -> Array[Dictionary]:
 	if e.shapes.is_shaped(c) and e.shapes.original(c) is Character and c.is_player_controlled():
 		if str((e.shapes.originals[c.id] as Dictionary).get("label", "")) == "Fluid Forms":
 			e.faerun.shaped_list(c, out)
-		else:
+		elif not e.game.shaped_list(c, out, bw):
 			out.append(_entry("cf:revert_shape", "Leave Wild Shape", "true form", "bonus", bw, "none", "Bonus Action: return to your true form."))
 	if ch == null:
 		return out

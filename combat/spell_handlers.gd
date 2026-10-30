@@ -68,7 +68,8 @@ func _sleep(ctx: Dictionary, cells: Array[Vector2i], r: CombatResult, pausable: 
 		var t := raw as Combatant
 		if t == c or c.allied_with(t):
 			return r
-		if t.creature.is_condition_immune(&"exhaustion") or t.creature.has_flag("trance") or t.creature.creature_type in [&"undead", &"construct"]:
+		# A hero's species says for itself whether it sleeps (`trance`): an Undead or Construct hero of a book may.
+		if t.creature.is_condition_immune(&"exhaustion") or t.creature.has_flag("trance") or (t.creature is Monster and t.creature.creature_type in [&"undead", &"construct"]):
 			r.lines.append(e.log.add("info", "%s doesn't sleep: unaffected" % t.name(), t.id))
 			return r
 		var roll := func() -> D20Test:
@@ -280,13 +281,14 @@ func free_on_teleport(c: Combatant) -> void:
 		e.events.append({"type": "condition", "id": c.id})
 
 
-## Why Revivify can't bring `t` back ("" when it can): dead for more than a minute (10 rounds), or Undead or a Construct.
+## Why Revivify can't bring `t` back ("" when it can): dead for more than a minute (10 rounds), or an Undead or Construct
+## creature (a hero of an Undead or Construct species is a soul in a made body, and comes back).
 ## The spell's targeting asks before anything is spent (SpellTargeting).
 static func revivify_why(e: Encounter, t: Combatant) -> String:
 	var died := int(t.get_meta("died_round", e.round_no)) if t.has_meta("died_round") else e.round_no
 	if e.round_no - died > 10:
 		return "%s has been dead too long for Revivify" % t.name()
-	if t.creature.creature_type in [&"undead", &"construct"]:
+	if t.creature is Monster and t.creature.creature_type in [&"undead", &"construct"]:
 		return "Revivify can't restore %s" % t.name()
 	return ""
 

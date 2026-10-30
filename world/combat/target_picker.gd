@@ -161,7 +161,7 @@ func second(who: Combatant, a: Dictionary, t: Combatant, slot_: int) -> bool:
 		_start(who, a, slot_, "strike")
 		first = t
 		return true
-	if str(a.get("kind", "")) in ["spell", "item_spell"] and str(a.get("spell_id", "")) == "crown_of_madness":
+	if str(a.get("kind", "")) in ["spell", "item_spell"] and SpellTargeting.crowns(str(a.get("spell_id", ""))):
 		_start(who, a, slot_, "victim")
 		first = t
 		return true
@@ -764,7 +764,7 @@ func _movers() -> Array[Combatant]:
 
 ## For Crown of Madness's keep-control action (a sustained action of `who`'s), the crowned creature's id; else "".
 func _crowned_by(who: Combatant, a: Dictionary) -> String:
-	if who == null or str(a.get("kind", "")) != "sustain" or str(a.get("spell_id", "")) != "crown_of_madness":
+	if who == null or str(a.get("kind", "")) != "sustain" or not SpellTargeting.crowns(str(a.get("spell_id", ""))):
 		return ""
 	for s in e.spells.sustained_actions(who):
 		if str(s["id"]) == str(a.get("sustain_id", "")):

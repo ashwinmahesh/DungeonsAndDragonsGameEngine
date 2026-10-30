@@ -932,7 +932,7 @@ static func spell_targeting(data: Dictionary) -> String:
 		return "multi"
 	if data.has("object") or str(data.get("id", "")) in SpellCaster.SUMMON_SPELLS:
 		return "place"
-	if str(data.get("id", "")) == "revivify":
+	if str(data.get("id", "")) == "revivify" or bool(t.get("dead", false)):
 		return "dead"
 	if str(t.get("count", "")) == "any" or int(t.get("count", 1)) > 1 or int((data.get("upcast", {}) as Dictionary).get("targets", 0)) > 0 \
 			or str(data.get("id", "")) in ["magic_missile", "scorching_ray", "eldritch_blast"]:

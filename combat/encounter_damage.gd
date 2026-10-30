@@ -308,6 +308,12 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		target.creature.hp = 1
 		target.creature.remove_condition(&"unconscious", "0 Hit Points")
 		dr.dropped_to_zero = false
+	# A game's own escape from dying outright (GameFeatures.cheats_death: it leaves the creature up and says so).
+	if was_up and target.creature.dead and e.game.cheats_death(target):
+		target.creature.dead = false
+		dr.dropped_to_zero = false
+		dr.died = false
+		dr.instant_death = false
 	# Death Ward: the first drop to 0 Hit Points (or death outright from damage) leaves it at 1 instead.
 	if was_up and (dr.dropped_to_zero or target.creature.dead) and target.creature.has_flag("death_ward"):
 		for fxw: Effect in target.creature.effects.duplicate():

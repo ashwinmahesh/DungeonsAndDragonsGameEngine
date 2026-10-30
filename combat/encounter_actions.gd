@@ -475,6 +475,12 @@ func search(c: Combatant) -> CombatResult:
 			t_hard = c.creature.roll_check(e.dice, &"perception", 0, [], [hard])
 	for h in e.hostiles_of(c):
 		var total := t.total if not (_hard_to_spot(c, h) != "" and t_hard != null) else mini(t.total, t_hard.total)
+		# A shrouded creature (perceived_penalty_die): the search subtracts the die to find it.
+		for m in h.creature.modifiers_for(&"perceived_penalty_die"):
+			if h.hidden:
+				var cut := e.dice.roll_expr(m.text("dice", "1d4"), m.source_name)
+				total -= int(cut["total"])
+				e.log.add("info", "%s is hard to make out: -%d to find them (%s)" % [h.name(), int(cut["total"]), m.source_name], h.id)
 		if h.hidden and total >= h.stealth_total:
 			reveal(h, "%s finds them" % c.name())
 			found.append(h.name())

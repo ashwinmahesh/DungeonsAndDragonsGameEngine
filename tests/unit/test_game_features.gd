@@ -189,3 +189,53 @@ func test_a_conversation_can_ask_for_a_subclass_a_feature_or_a_feat() -> void:
 	assert_true(StoryState.member_matches(ch, "feature:second_wind"), "a class feature by id")
 	assert_true(StoryState.member_matches(ch, "feat:alert"))
 	assert_false(StoryState.member_matches(ch, "feat:tough"))
+
+
+## Answers the hooks a book's options lean on: a spell that reaches anyone, an action wasted, a death cheated, a
+## minute-long casting allowed in a fight.
+class Hooks extends GameFeatures:
+	var wasted := false
+
+	func spell_reach(_c: Combatant, _s: Dictionary, _t: Combatant) -> bool:
+		return true
+
+	func wastes_action(_c: Combatant, kind: String) -> bool:
+		return wasted and kind == "attack"
+
+	func cheats_death(t: Combatant) -> bool:
+		t.creature.hp = 1
+		return true
+
+
+func test_the_hooks_a_book_leans_on() -> void:
+	GameFeatures.use(Hooks)
+	var e := TestCombat.open_field(5)
+	var c := TestCombat.caster_with(e, ["cure_wounds"], Vector2i(0, 0), 3, "silvain_aster")
+	var far := e.add(TestChars.custom("fighter", "human", 3), &"party", Vector2i(11, 7))
+	var foe := TestCombat.punching_bag(e, Vector2i(1, 0))
+	TestCombat.start_with(e, c)
+	var check := e.spells.targeting._check_targets(c, Compendium.shared().spell_data("cure_wounds"), 1, [far], Vector2.INF, {})
+	assert_eq(str(check.get("why", "")), "", "a touch spell reaches a far ally when the game says so")
+	(e.game as Hooks).wasted = true
+	c.attacks_left = 0
+	c.action_available = true
+	var r := e.attack(c, foe, str(e.attack_options(c)[0]["id"]))
+	assert_false(r.hit, "the Attack action is wasted")
+	assert_false(c.action_available, "and spent")
+	far.creature.hp = 1
+	e.deal_damage(foe, far, [{"amount": 500, "type": "force"}], false, "Test")
+	assert_false(far.creature.dead, "an outright death the game cheats")
+	assert_eq(far.creature.hp, 1)
+	GameFeatures.use(null)
+
+
+func test_a_hero_of_an_undead_or_construct_species_can_be_revived_and_put_to_sleep() -> void:
+	var e := TestCombat.open_field()
+	var ch := TestChars.custom("fighter", "human", 3)
+	ch.creature_type = &"undead"
+	var hero := e.add(ch, &"party", Vector2i(1, 1))
+	hero.creature.dead = true
+	assert_eq(SpellHandlers.revivify_why(e, hero), "", "a soul in a made body comes back")
+	var zombie := TestCombat.foe(e, "zombie", Vector2i(3, 3))
+	zombie.creature.dead = true
+	assert_true(SpellHandlers.revivify_why(e, zombie) != "", "an Undead monster doesn't")

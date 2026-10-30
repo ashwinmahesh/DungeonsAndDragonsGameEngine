@@ -42,6 +42,8 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 		against.append("save_vs:grappled")
 	elif mode == "shove_prone":
 		against.append("save_vs:prone")
+	else:
+		against.append("save_vs:moved")   # a shove away: saves against being moved
 	var s := target.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], mode.capitalize(), target.name()], against)
 	var r := CombatResult.new()
 	if s.success:
@@ -76,7 +78,8 @@ func escape_grapple(c: Combatant) -> CombatResult:
 	if c.has_meta("escape_dc"):
 		dc = int(c.get_meta("escape_dc"))
 	var skill := &"athletics" if c.creature.skill_bonus(&"athletics").total() >= c.creature.skill_bonus(&"acrobatics").total() else &"acrobatics"
-	var t := c.creature.roll_check(e.dice, skill, dc)
+	var escape_keys: Array[String] = ["escape:grappled"]
+	var t := c.creature.roll_check(e.dice, skill, dc, [], [], "", escape_keys)
 	if t.success:
 		e.grapples.erase(c.id)
 		c.creature.remove_condition(&"grappled")

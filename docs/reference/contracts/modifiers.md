@@ -63,6 +63,7 @@ A value is an integer or a formula string: terms joined by `+`/`-`. A term is an
 | `extra_damage` | dice, type, on (`weapon`, `attack`, `first_melee`), vs, penalty | extra dice on weapon and Unarmed Strike hits (Crusader's Mantle, Enlarge +1d4; Reduce −1d4 with `penalty`); `first_melee` is a stored charge for the first melee hit (weapon, Unarmed Strike or melee spell attack), whose effect ends with the hit (Absorb Elements) |
 | `damage_penalty_die` | dice | subtract a die from the creature's weapon damage (Ray of Enfeeblement) |
 | `attacked_penalty_die` | dice | attack rolls against the creature subtract the die (Blade Ward) |
+| `perceived_penalty_die` | dice | Wisdom (Perception) checks to find the creature (the Search action) subtract the die |
 | `attacked_with_by_type` | value, types | Advantage/Disadvantage only for attackers of these creature types (Protection from Evil and Good) |
 | `condition_immunity_by_type` | conditions, types | can't be given these conditions by creatures of these types |
 | `damage_reduction_die` | dice, type, once_per_turn | damage of that type is reduced by the die (Resistance cantrip) |

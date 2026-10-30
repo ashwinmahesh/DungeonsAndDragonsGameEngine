@@ -538,7 +538,11 @@ func _crown_turn(c: Combatant) -> CombatResult:
 				opt = mo
 	if best == null:
 		return null
-	e.log.add("info", "%s lashes out at %s (Crown of Madness)" % [c.name(), best.name()], c.id)
+	var crown_name := "Crown of Madness"
+	for fx: Effect in c.creature.effects:
+		if fx.modifiers.any(func(m: Modifier) -> bool: return m.stat == &"flag" and m.text("value") == "crowned"):
+			crown_name = fx.name
+	e.log.add("info", "%s lashes out at %s (%s)" % [c.name(), best.name(), crown_name], c.id)
 	last_plan = {"kind": "attack", "why": "Crown of Madness"}
 	if c.creature is Monster:
 		return e.monster_attack(c, best, str(opt.get("action_id", "")))

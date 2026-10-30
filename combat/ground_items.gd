@@ -224,6 +224,10 @@ func goes_down(c: Combatant) -> bool:
 ## square nearest the attacker): the weapon in its main hand, else what its other hand holds; a monster, its weapon.
 ## A failed save against Heat Metal lets go of the heated weapon the same way. False if it held nothing.
 func disarm(t: Combatant, by: Combatant, why: String, details: Array = []) -> bool:
+	# A grip nothing breaks while the holder can act (a game's `keeps_hold` flag).
+	if t.creature.has_flag("keeps_hold") and t.can_act():
+		enc().log.add("info", "%s's grip holds (%s)" % [t.name(), why], t.id, details)
+		return false
 	var what := held(t)
 	if what.is_empty():
 		enc().log.add("info", "%s holds nothing it could drop (%s)" % [t.name(), why], t.id, details)

@@ -494,7 +494,7 @@ func _check_targets(c: Combatant, s: Dictionary, slot: int, targets: Array, poin
 		if bool(s.get("requires_sight", false)) and not e.can_see(from, t) and not e.can_see(c, t):
 			out["why"] = "You must see the target"
 			return out
-		if id == "revivify":
+		if id == "revivify" or bool((s.get("targets", {}) as Dictionary).get("dead", false)):
 			if not t.creature.dead:
 				out["why"] = "%s isn't dead" % t.name()
 				return out
@@ -507,10 +507,12 @@ func _check_targets(c: Combatant, s: Dictionary, slot: int, targets: Array, poin
 		elif t.creature.dead:
 			out["why"] = "%s is dead" % t.name()
 			return out
-		if e.distance(from, t) > rng and e.distance(c, t) > rng:
+		# A game's feature that carries the spell to a marked ally (GameFeatures.spell_reach): no range or line of effect.
+		var reached := e.game.spell_reach(c, s, t)
+		if e.distance(from, t) > rng and e.distance(c, t) > rng and not reached:
 			out["why"] = "%s is out of range (%d ft)" % [t.name(), rng]
 			return out
-		if t != c and int(e.cover(from, t)["cover"]) == CombatGrid.Cover.TOTAL and int(e.cover(c, t)["cover"]) == CombatGrid.Cover.TOTAL:
+		if t != c and not reached and int(e.cover(from, t)["cover"]) == CombatGrid.Cover.TOTAL and int(e.cover(c, t)["cover"]) == CombatGrid.Cover.TOTAL:
 			out["why"] = "No line of effect to %s" % t.name()
 			return out
 		var only := str((s.get("targets", {}) as Dictionary).get("creature_type", ""))
@@ -656,6 +658,16 @@ func crown_victim_why(caster: Combatant, crowned: Combatant, victim: Combatant) 
 	if victim == caster:
 		return "It is Charmed by you and can't attack you"
 	return ""
+
+
+## Whether spell `spell_id` crowns its target (its effects carry the "crowned" flag: Crown of Madness and the like), so
+## its caster names the creature the crowned one must attack.
+static func crowns(spell_id: String) -> bool:
+	for fx: Variant in Compendium.shared().spell_data(spell_id).get("effects", []):
+		for m: Variant in ((fx as Dictionary).get("params", {}) as Dictionary).get("modifiers", []):
+			if str((m as Dictionary).get("stat", "")) == "flag" and str((m as Dictionary).get("value", "")) == "crowned":
+				return true
+	return false
 
 
 ## Names the creature `crowned` must attack on its turns (an id, or "" for no one): at casting (opts.crown_victim) and

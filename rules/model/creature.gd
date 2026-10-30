@@ -689,6 +689,10 @@ func preview_damage_parts(parts: Array) -> DamageResult:
 		if amount > 0 and not damage_type in r.types:
 			r.types.append(damage_type)
 		var imm := immunity_source(damage_type)
+		# A damage part marked `ignore_immunity` by a game's feature (a bane's silvered weapon) goes through.
+		if imm != "" and bool(pd.get("ignore_immunity", false)):
+			r.notes.append("%s ignores Immunity to %s" % [str(pd.get("ignore_source", "The attack")), damage_type])
+			imm = ""
 		if imm != "":
 			if amount > 0:
 				r.notes.append("Immunity to %s: %s" % [damage_type, imm])
@@ -1302,8 +1306,18 @@ func _speed_adjustments(_b: Breakdown) -> void:
 func darkvision() -> int:
 	var best := int(base_senses.get("darkvision", 0))
 	var ctx := formula_context()
+	var extend := 0
+	var alone := 0
 	for m in modifiers_for(&"darkvision"):
+		# `extend`: so many feet more when another source already gives Darkvision; its `value` when none does (a
+		# book's feat: Darkvision 60 ft, or 30 ft more).
+		if m.number("extend") > 0:
+			extend = maxi(extend, m.number("extend"))
+			alone = maxi(alone, mod_value(m, ctx))
+			continue
 		best = maxi(best, mod_value(m, ctx))
+	if extend > 0:
+		return best + extend if best > 0 else alone
 	return best
 
 

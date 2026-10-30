@@ -264,6 +264,10 @@
         "other": {
           "type": "boolean",
           "description": "Another creature, never the caster (Warding Bond)."
+        },
+        "dead": {
+          "type": "boolean",
+          "description": "A creature that died within the last minute, picked as Revivify's is (a game's revival spells)."
         }
       }
     },

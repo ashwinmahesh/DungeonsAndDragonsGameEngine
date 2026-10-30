@@ -59,6 +59,10 @@ static func build(c: Creature, item: Dictionary, as_thrown: bool = false, in_mai
 		p.long_range = int(rng[1])
 	if "reach" in p.properties:
 		p.reach = 10
+	# `reach` modifiers: more reach for melee attacks (nothing in the PHB data; a book's feature).
+	if p.melee:
+		for m in c.modifiers_for(&"reach"):
+			p.reach += int(m.number("value"))
 	# Grip: two-handed weapons always; versatile ones when the other hand is free.
 	var off := {}
 	var ch := c as Character

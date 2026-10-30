@@ -170,7 +170,7 @@ func cast(c: Combatant, spell_id: String, slot: int, targets: Array = [], point:
 	if not meta.is_empty():
 		spells.options._pay_metamagic(c, meta)
 	# Pay for it.
-	var unit := str(entry["casting"])
+	var unit := e.game.casting_unit(c, s, str(entry["casting"]))
 	if not sequence.is_empty():
 		e.triggered_features.begin_sequence(c, sequence)
 	elif war_magic:
@@ -181,6 +181,8 @@ func cast(c: Combatant, spell_id: String, slot: int, targets: Array = [], point:
 	else:
 		e.spend_action(c)
 		c.magic_action_used = true
+		if e.game.wastes_action(c, "magic"):
+			return CombatResult.new()
 	if not spells.casting_gate(c):
 		return CombatResult.new()
 	# A foe's Counterspell, and the chain of Counterspells it opens (SpellCounters): Subtle Spell leaves nothing to see
@@ -239,7 +241,7 @@ func _cast_after_counter(cx: Dictionary) -> CombatResult:
 	if bool(opts.get("splintered", false)):
 		ch.spend_resource("splintered_summons")
 	# A costly material component the spell uses up (2024: Revivify's diamond; checked with the rest in castable).
-	var used := ch.use_component(s) if ch != null else ""
+	var used := ch.use_component(s) if ch != null and not e.game.pays_component(c, s, true) else ""
 	if used != "":
 		e.log.add("info", "%s uses up %s (%s)" % [c.name(), used, s["name"]], c.id)
 	if c.hidden and bool((s.get("components", {}) as Dictionary).get("v", false)) and not e.faerun.sneaky_casting(c) \
@@ -258,6 +260,8 @@ func _cast_after_counter(cx: Dictionary) -> CombatResult:
 	var fey_free := spell_id == "summon_fey" and CombatFeatures.has_feature(c, "fey_reinforcements") and bool(opts.get("no_concentration", true))
 	# Spirits of Ill Omen, Second Skin: some castings need no Concentration (RavenloftFeatures.skips_concentration).
 	var unbound := e.ravenloft.skips_concentration(c, s, use_free) if bool((s.get("duration", {}) as Dictionary).get("concentration", false)) else {}
+	if unbound.is_empty() and bool((s.get("duration", {}) as Dictionary).get("concentration", false)):
+		unbound = e.game.skips_concentration(c, s, use_free)
 	if not unbound.is_empty():
 		s = s.duplicate(true)
 		s["duration"] = unbound
@@ -392,6 +396,8 @@ func cast_with_numbers(c: Combatant, spell_id: String, level: int, targets: Arra
 	else:
 		e.spend_action(c)
 		c.magic_action_used = true
+		if e.game.wastes_action(c, "magic"):
+			return CombatResult.new()
 	var tgt := check["targets"] as Array[Combatant]
 	if not spells.casting_gate(c):
 		return CombatResult.new()

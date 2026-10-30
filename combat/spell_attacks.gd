@@ -125,7 +125,7 @@ func spell_attack(ctx: Dictionary, t: Combatant, r: CombatResult) -> D20Test:
 	spells.trigger_ends(c, "attack_roll")
 	var ac := t.creature.ac_value() + int(sit["cover_bonus"])
 	var atk := ctx["nums"]["attack"] as Breakdown
-	var keys: Array[String] = ["attack", "attack:melee" if melee else "attack:ranged", "attack:spell"]
+	var keys: Array[String] = ["attack", "attack:melee" if melee else "attack:ranged", "attack:spell", "target:%s" % t.id]
 	var test := c.creature.roll_d20(e.dice, D20Test.Kind.ATTACK_ROLL, atk, ac, keys, sit["advantage"] as Array[String],
 		sit["disadvantage"] as Array[String], "%s → %s (%s)" % [c.name(), t.name(), s["name"]], int(s.get("crit_range", 20)))
 	if int(sit.get("height_bonus", 0)) != 0:

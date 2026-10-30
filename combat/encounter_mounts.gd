@@ -39,6 +39,8 @@ func mount_why(rider: Combatant, steed: Combatant) -> String:
 		return "Already mounted"
 	if rider_of(steed) != null or mount_of(steed) != null:
 		return "%s already carries someone" % steed.name()
+	if steed.has_meta("only_rider") and str(steed.get_meta("only_rider")) != rider.id:
+		return "Only its own rider can mount %s" % steed.name()
 	if not rider.allied_with(steed) or steed.is_down():
 		return "%s isn't willing" % steed.name()
 	if Creature.SIZES.find(steed.creature.size) <= Creature.SIZES.find(rider.creature.size):

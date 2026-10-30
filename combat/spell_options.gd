@@ -87,7 +87,7 @@ func _why_not(c: Combatant, s: Dictionary, entry: Dictionary) -> String:
 	if not has_combat_rules(s):
 		return "No effect in a fight (%s)" % _out_of_combat_word(s)
 	var ch := spells.caster_char(c)
-	var unit := str(entry["casting"])
+	var unit := enc().game.casting_unit(c, s, str(entry["casting"]))
 	if unit == "reaction":
 		return "Cast as a Reaction when it triggers"
 	if unit in ["minute", "hour"] and not enc().peaceful:
@@ -117,7 +117,7 @@ func _why_not(c: Combatant, s: Dictionary, entry: Dictionary) -> String:
 	var feature_cast := entry.get("resource_cast", {}) as Dictionary
 	if not bool((feature_cast.get("resource_cast", {}) as Dictionary).get("omit_material", false)):
 		var need := ch.component_why(s)
-		if need != "":
+		if need != "" and not enc().game.pays_component(c, s, false):
 			return need
 	var level := int(s.get("level", 0))
 	if level > 0 and not bool(entry["free"]):

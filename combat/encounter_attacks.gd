@@ -159,6 +159,9 @@ func attack(c: Combatant, target: Combatant, option_id: String, opts: Dictionary
 	if c.attacks_left > 0:
 		c.attacks_left -= 1
 	elif c.action_available:
+		if e.game.wastes_action(c, "attack"):
+			e.spend_action(c)
+			return CombatResult.new()
 		e.spend_action(c)
 		c.took_attack_action = true
 		c.attacks_left = e.attacks_per_action(c) - 1
@@ -372,6 +375,10 @@ func attack_situation(c: Combatant, target: Combatant, option: Dictionary) -> Di
 	if target.creature.has_flag("half_cover") and degree < CombatGrid.Cover.HALF:
 		degree = CombatGrid.Cover.HALF
 		by = "Bulwark of Force"
+	# A game's aura (`half_cover_ranged`): at least Half Cover against ranged attacks.
+	if not melee and target.creature.has_flag("half_cover_ranged") and degree < CombatGrid.Cover.HALF:
+		degree = CombatGrid.Cover.HALF
+		by = _flag_source(target, "half_cover_ranged")
 	# Holy Star of Mystra: at least Three-Quarters Cover.
 	if target.creature.has_flag("three_quarters_cover") and degree < CombatGrid.Cover.THREE_QUARTERS:
 		degree = CombatGrid.Cover.THREE_QUARTERS
@@ -384,6 +391,14 @@ func attack_situation(c: Combatant, target: Combatant, option: Dictionary) -> Di
 		by = ""
 	return {"advantage": adv, "disadvantage": dis, "cover": degree, "cover_bonus": CombatGrid.COVER_BONUS[degree],
 		"cover_by": by, "height_bonus": e.sight.height_edge(c, target, option)}
+
+
+## The name of what gives `c` the flag `flag` (an effect's or feature's name), for the cover tooltip.
+static func _flag_source(c: Combatant, flag: String) -> String:
+	for m in c.creature.modifiers_for(&"flag"):
+		if m.text("value") == flag:
+			return m.source_name
+	return ""
 
 
 ## The tooltip and log line for the high-ground house rule's bonus (EncounterSight.height_edge).
@@ -503,6 +518,7 @@ func _resolve_attack(c: Combatant, target: Combatant, option: Dictionary, opts: 
 	var before := e.echo_knight.before_roll(st)
 	before.append_array(e.reactions.before_roll(st))
 	before.append_array(e.items.before_roll(st))
+	e.game.before_roll(st, before)
 	return e.reactions.offer(before, func() -> CombatResult: return _roll_attack(st), r, st)
 
 
@@ -516,6 +532,7 @@ func _roll_attack(st: Dictionary) -> CombatResult:
 	var p := option["profile"] as WeaponProfile
 	var ac := int(st["ac"])
 	var keys := roll_keys(option)
+	keys.append("target:%s" % target.id)   # whom the roll is against, for a game's hooks
 	st["charge"] = e.monster_actions.charge_of(c, target, option)
 	c.clear_run()
 	var label := "%s → %s (%s)" % [c.name(), target.name(), p.name]

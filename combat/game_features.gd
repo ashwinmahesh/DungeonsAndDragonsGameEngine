@@ -152,6 +152,12 @@ func after_hit(_c: Combatant, _target: Combatant, _option: Dictionary, _st: Dict
 	pass
 
 
+## Offers before an attack roll is made (Warding Flare's shape: they may add to st["sit"]["disadvantage"]), as
+## Reactions.before_roll builds them: a Reaction when a creature targets someone with an attack.
+func before_roll(_st: Dictionary, _out: Array) -> void:
+	pass
+
+
 ## Reactions that can turn a hit into a miss, as Reactions.after_hit_target builds them.
 func after_hit_target(_st: Dictionary, _miss: Callable, _out: Array) -> void:
 	pass
@@ -204,6 +210,12 @@ func on_zero(_target: Combatant, _damage: int) -> bool:
 
 func on_death(_source: Combatant, _dead: Combatant) -> void:
 	pass
+
+
+## `target` would die outright (Massive Damage, a slaying effect): true when something keeps it alive; the module
+## sets its Hit Points and logs it, and the engine treats the creature as up.
+func cheats_death(_target: Combatant) -> bool:
+	return false
 
 
 ## A fight object dropped to 0 Hit Points or was smashed (`source` null when nothing in particular broke it).
@@ -262,6 +274,12 @@ func before_action(_c: Combatant) -> void:
 	pass
 
 
+## `c` is about to take the Attack action ("attack": its first attack) or the Magic action ("magic": a spell with a
+## casting time of an action): true when something wastes it (the action is spent and nothing more happens).
+func wastes_action(_c: Combatant, _kind: String) -> bool:
+	return false
+
+
 func after_action(_c: Combatant, _action: Dictionary, _targets: Array = []) -> void:
 	pass
 
@@ -298,6 +316,12 @@ func entered_cell(_c: Combatant, _cell: Vector2i) -> void:
 	pass
 
 
+## Hotbar entries for `c` in a shape this module made (a ShapeChange label of its own): true when it listed the way out
+## itself, so the engine's "Leave Wild Shape" isn't added.
+func shaped_list(_c: Combatant, _out: Array[Dictionary], _bw: String) -> bool:
+	return false
+
+
 ## Squares `c` can't move through (a set: cell -> true), read once per path search. Must be pure: path searches run on
 ## a worker thread.
 func barrier_cells(_c: Combatant) -> Dictionary:
@@ -312,9 +336,30 @@ func target_weight(_c: Combatant, _t: Combatant) -> float:
 
 # --- Spells -------------------------------------------------------------------------------------------------------
 
+## The casting time `c` casts `s` with in a fight (`unit` as the spell has it: a minute or more can't be cast in a fight
+## unless a feature says otherwise).
+func casting_unit(_c: Combatant, _s: Dictionary, unit: String) -> String:
+	return unit
+
+
+## Whether `c`'s spell `s` reaches `t` whatever its range and line of effect say (a feature that carries touch spells
+## to a marked ally).
+func spell_reach(_c: Combatant, _s: Dictionary, _t: Combatant) -> bool:
+	return false
+
 ## Before a spell's targets are resolved (`ctx` as SpellCasting builds it).
 func before_resolve(_ctx: Dictionary) -> void:
 	pass
+
+
+## A casting that needs no Concentration (RavenloftFeatures.skips_concentration's shape): the duration it has instead, or {}.
+func skips_concentration(_c: Combatant, _s: Dictionary, _free: bool) -> Dictionary:
+	return {}
+
+
+## Whether a feature pays `s`'s costly Material component instead of the carried item (with `spend`, it pays now).
+func pays_component(_c: Combatant, _s: Dictionary, _spend: bool) -> bool:
+	return false
 
 
 ## Resolves a spell that needs this module's code: true when it did (the engine then does nothing more with it).
