@@ -5,6 +5,10 @@ extends TestCase
 ## follow their caster for a day and join each fight.
 
 
+func after_each() -> void:
+	Campaign.use_config(null)
+
+
 func _caster(cls: String, level: int, spells: Array) -> Character:
 	var ch := TestChars.custom(cls, "human", level)
 	var prepared := (ch.spellcasting[0] as Dictionary)["prepared"] as Array
@@ -63,6 +67,7 @@ func test_animate_dead_raises_a_skeleton_that_joins_the_days_fights() -> void:
 
 
 func test_create_undead_only_at_night_and_three_ghouls() -> void:
+	Campaign.use_config({"calendar": {}})   # the engine's own day, whatever the host's calendar
 	var st := StoryState.new()
 	var wiz := _caster("wizard", 11, ["create_undead"])
 	st.party.append(wiz)

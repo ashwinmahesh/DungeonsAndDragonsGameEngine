@@ -3,6 +3,10 @@ extends TestCase
 ## manuals, figurines, Spell Scrolls, and random treasure.
 
 
+func after_each() -> void:
+	Campaign.use_config(null)
+
+
 func _comp() -> Compendium:
 	return Compendium.shared()
 
@@ -305,6 +309,7 @@ func test_no_one_uncommon_dominates_random_treasure() -> void:
 
 
 func test_charges_come_back_when_the_clock_passes_dawn() -> void:
+	Campaign.use_config({"calendar": {}})   # the engine's own day, whatever the host's calendar
 	var st := StoryState.new()
 	var ch := TestChars.pregen("silvain_aster", 5)
 	st.party.append(ch)
