@@ -67,7 +67,8 @@ func test_animate_dead_raises_a_skeleton_that_joins_the_days_fights() -> void:
 
 
 func test_create_undead_only_at_night_and_three_ghouls() -> void:
-	Campaign.use_config({"calendar": {}})   # the engine's own day, whatever the host's calendar
+	# The engine's own day, whatever the host's calendar (its other settings stay).
+	Campaign.use_config(Campaign.config().merged({"calendar": {}}, true))
 	var st := StoryState.new()
 	var wiz := _caster("wizard", 11, ["create_undead"])
 	st.party.append(wiz)

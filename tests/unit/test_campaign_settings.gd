@@ -1,6 +1,6 @@
 extends TestCase
 ## The campaign's settings in data/campaign.json (Campaign.config, plan E1, E2, E22): each one a game leaves out keeps
-## the engine's default; each one it names changes only what it names. Tests set them with Campaign.use_config.
+## the engine's default; each one it names changes only what it names. Tests lay theirs over the game's with _use.
 
 
 func after_each() -> void:
@@ -13,12 +13,21 @@ func _story() -> StoryState:
 	return st
 
 
+## The game's settings with `over` laid over them, key by key (the module and look stay the game's).
+func _use(over: Dictionary) -> void:
+	Campaign.use_config(null)
+	var cfg := Campaign.config().duplicate(true)
+	cfg.merge(over, true)
+	Campaign.use_config(cfg)
+
+
 ## The game's settings without `keys`, as if it had never named them.
 func _without(keys: Array) -> void:
+	Campaign.use_config(null)
 	var cfg := Campaign.config().duplicate(true)
 	for k: Variant in keys:
 		cfg.erase(k)
-	Campaign._config = cfg
+	Campaign.use_config(cfg)
 
 
 # --- The level cap -------------------------------------------------------------------------------------------------
@@ -31,7 +40,7 @@ func test_the_default_cap_is_eleven() -> void:
 
 
 func test_a_number_sets_the_cap() -> void:
-	Campaign.use_config({"level_cap": 13})
+	_use({"level_cap": 13})
 	var st := _story()
 	assert_eq(st.level_cap(), 13)
 	assert_eq(Xp.level_for(900000, st.level_cap()), 13)
@@ -41,7 +50,7 @@ func test_a_number_sets_the_cap() -> void:
 
 
 func test_the_story_raises_the_cap() -> void:
-	Campaign.use_config({"level_cap": {"cap": 13, "raised": [{"when": "flag.endgame", "cap": 20}]}})
+	_use({"level_cap": {"cap": 13, "raised": [{"when": "flag.endgame", "cap": 20}]}})
 	var st := _story()
 	st.milestones = 30
 	assert_eq(st.story_level(), 13, "before the flag")
@@ -53,7 +62,7 @@ func test_the_story_raises_the_cap() -> void:
 
 func test_the_boon_limit() -> void:
 	assert_eq(Campaign.boon_ability_max(), int(Campaign.config().get("boon_ability_max", 20)))
-	Campaign.use_config({"boon_ability_max": 24})
+	_use({"boon_ability_max": 24})
 	assert_eq(Campaign.boon_ability_max(), 24)
 
 
@@ -63,7 +72,7 @@ func test_paths_default_to_the_first_games() -> void:
 	_without(Campaign.LEGACY.keys())
 	for key: String in Campaign.LEGACY:
 		assert_eq(Campaign.path(key), str(Campaign.LEGACY[key]), key)
-	Campaign.use_config({"travel_map": "res://art/ui/map/elsewhere.png", "arena_encounter": "another_fight"})
+	_use({"travel_map": "res://art/ui/map/elsewhere.png", "arena_encounter": "another_fight"})
 	assert_eq(Campaign.path("travel_map"), "res://art/ui/map/elsewhere.png")
 	assert_eq(CombatArena.encounter_id(), "another_fight")
 
@@ -71,7 +80,7 @@ func test_paths_default_to_the_first_games() -> void:
 func test_the_title_is_the_projects_name_by_default() -> void:
 	_without(["title"])
 	assert_eq(Campaign.title(), str(ProjectSettings.get_setting("application/config/name")))
-	Campaign.use_config({"title": "Another Tale"})
+	_use({"title": "Another Tale"})
 	assert_eq(Campaign.title(), "Another Tale")
 
 
@@ -98,7 +107,7 @@ const NIGHTFALL := {"eternal_night": true, "dawn": "18:00", "dusk": "18:00", "wo
 
 
 func test_an_eternal_night() -> void:
-	Campaign.use_config({"calendar": NIGHTFALL})
+	_use({"calendar": NIGHTFALL})
 	for m in [0, 6 * 60, 12 * 60, 18 * 60, 23 * 60]:
 		assert_true(Calendar.is_night(m), "always night (%d)" % m)
 	assert_eq(Calendar.phase(18 * 60 + 30), "dusk", "a named hour's phase sets its look")
@@ -117,13 +126,13 @@ func test_an_eternal_night() -> void:
 
 
 func test_the_story_follows_the_calendar() -> void:
-	Campaign.use_config({"calendar": NIGHTFALL})
+	_use({"calendar": NIGHTFALL})
 	var st := _story()
 	assert_eq(st.minute_of_day, 18 * 60, "a new game starts at the calendar's start")
 	st.minute_of_day = 12 * 60
 	assert_true(st.is_night())
 	assert_true(StoryConditions.check("night", st))
-	Campaign.use_config({"calendar": {"night": ["20:30", "05:00"]}})
+	_use({"calendar": {"night": ["20:30", "05:00"]}})
 	st.minute_of_day = 20 * 60
 	assert_false(st.is_night())
 	st.minute_of_day = 20 * 60 + 30
@@ -131,7 +140,7 @@ func test_the_story_follows_the_calendar() -> void:
 
 
 func test_charges_come_back_at_the_calendars_dawn() -> void:
-	Campaign.use_config({"calendar": {"dawn": "18:00"}})
+	_use({"calendar": {"dawn": "18:00"}})
 	var st := _story()
 	var ch := st.party[0]
 	ch.add_item("wand_of_magic_missiles")
@@ -144,7 +153,7 @@ func test_charges_come_back_at_the_calendars_dawn() -> void:
 
 
 func test_shop_hours_take_named_hours() -> void:
-	Campaign.use_config({"calendar": NIGHTFALL})
+	_use({"calendar": NIGHTFALL})
 	var st := _story()
 	var spec := {"hours": ["the Twilight Hour", "the Dead Hour"]}
 	st.minute_of_day = 19 * 60
@@ -164,7 +173,7 @@ func _deck(n: int) -> void:
 	for i in n:
 		cards.append({"id": "card_%02d" % i, "name": "Card %d" % i, "deck": "high" if i < 3 else "common"})
 	Compendium.shared().tables["test_deck"] = {"cards": {"id": "cards", "cards": cards}}
-	Campaign.use_config({"reading": {"deck": "test_deck", "art": "res://art/test_cards", "reader": "test_reader",
+	_use({"reading": {"deck": "test_deck", "art": "res://art/test_cards", "reader": "test_reader",
 		"cards_per_hero": 1}})
 
 
@@ -190,7 +199,7 @@ func test_a_reading_deals_one_card_per_hero_without_repeats() -> void:
 
 func test_two_cards_per_hero_and_a_deck_part() -> void:
 	_deck(22)
-	Campaign.use_config({"reading": {"deck": "test_deck", "cards_per_hero": 2}})
+	_use({"reading": {"deck": "test_deck", "cards_per_hero": 2}})
 	var slots := ReadingDeck.hero_slots(4)
 	assert_eq(slots.size(), 8)
 	assert_eq(slots[4], "hero_1b")
@@ -219,7 +228,7 @@ func test_reading_read_says_the_verse_in_the_readers_voice() -> void:
 
 
 func test_a_story_boon_raises_a_score_to_the_campaigns_limit() -> void:
-	Campaign.use_config({"boon_ability_max": 24})
+	_use({"boon_ability_max": 24})
 	var ch := TestChars.pregen("silvain_aster", 5)
 	var start := ch.ability_score(&"int")
 	var got := 0
@@ -227,7 +236,7 @@ func test_a_story_boon_raises_a_score_to_the_campaigns_limit() -> void:
 		got += StoryBoons.raise_ability(ch, "int", 2, "The Sun's gift")
 	assert_eq(ch.ability_score(&"int"), 24, "up to 24 and no further")
 	assert_eq(got, 24 - start)
-	Campaign.use_config({"boon_ability_max": 20})
+	_use({"boon_ability_max": 20})
 	var other := TestChars.pregen("silvain_aster", 5)
 	for i in 6:
 		StoryBoons.raise_ability(other, "int", 2, "A gift")
