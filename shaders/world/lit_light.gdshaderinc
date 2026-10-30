@@ -30,11 +30,13 @@ const float SKY_SPECULAR = 0.5;
 // shade), the mid band's brightness and how soft a band's edge is. toon_band_count: 3 lit, mid and dark; 2 lit and mid;
 // 0 keeps Modern's soft light (a painted background). toon_gloss: how glossy a surface must be to hold a highlight, and
 // how bright it is. toon_fills: how far a texture flattens toward its own average colour, how much more saturated it
-// gets, and how much of its relief (normal map) still shows.
+// gets, and how much of its relief (normal map) still shows. toon_flat_mip: the mip a texture flattens toward (12 its
+// one average colour; lower keeps its larger shapes and loses only the fine noise, a painted look).
 uniform vec4 toon_light = vec4(0.42, 0.07, 0.52, 0.025);
 uniform int toon_band_count = 3;
 uniform vec2 toon_gloss = vec2(0.62, 0.55);
 uniform vec3 toon_fills = vec3(0.72, 1.3, 0.3);
+uniform float toon_flat_mip = 12.0;
 
 bool toon() {
 	return look_soft > 1.5;

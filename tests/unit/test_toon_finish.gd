@@ -72,7 +72,7 @@ func test_settings_offers_the_games_finishes() -> void:
 
 
 func test_a_game_tunes_the_finish_in_its_data() -> void:
-	Campaign.use_config({"toon": {"bands": 2, "flat": 0.4, "ink_width": 3.0, "nonsense": 1}})
+	Campaign.use_config({"toon": {"bands": 2, "flat": 0.4, "flat_mip": 5, "ink_width": 3.0, "nonsense": 1}})
 	Look.forget_toon_settings()
 	var t := Look.toon_settings()
 	assert_eq(int(t["bands"]), 2, "its band count")
@@ -83,6 +83,7 @@ func test_a_game_tunes_the_finish_in_its_data() -> void:
 	var m := Look.cel("bone")
 	assert_eq(int(m.get_shader_parameter("toon_band_count")), 2, "materials carry the bands")
 	assert_between((m.get_shader_parameter("toon_fills") as Vector3).x, 0.399, 0.401, "and the flatness")
+	assert_eq(float(m.get_shader_parameter("toon_flat_mip")), 5.0, "toward its own mip")
 
 
 func test_a_painted_world_has_no_ink_and_soft_light() -> void:

@@ -71,7 +71,7 @@ void fragment() {
 	vec3 base = (layered ? texture(albedo_layers, vec3(uv, layer)).rgb : texture(albedo_tex, uv).rgb) * tint;
 	float relief = normal_strength;
 	if (toon()) {
-		vec3 mean = (layered ? textureLod(albedo_layers, vec3(uv, layer), 12.0).rgb : textureLod(albedo_tex, uv, 12.0).rgb) * tint;
+		vec3 mean = (layered ? textureLod(albedo_layers, vec3(uv, layer), toon_flat_mip).rgb : textureLod(albedo_tex, uv, toon_flat_mip).rgb) * tint;
 		base = toon_fill(base, mean);
 		relief *= toon_fills.z;
 	}

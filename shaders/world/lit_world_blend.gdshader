@@ -125,7 +125,7 @@ Layer layer_of(sampler2DArray albedo, sampler2DArray nrm,
 	l.base = textureGrad(albedo, at, dx, dy).rgb * tint;
 	float rel = relief;
 	if (toon()) {
-		l.base = toon_fill(l.base, textureLod(albedo, at, 12.0).rgb * tint);
+		l.base = toon_fill(l.base, textureLod(albedo, at, toon_flat_mip).rgb * tint);
 		rel *= toon_fills.z;
 	}
 	l.base *= mix(1.0, 0.72 + 0.56 * macro, macro_k);

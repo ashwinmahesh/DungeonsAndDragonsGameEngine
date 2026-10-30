@@ -61,7 +61,8 @@ static func style() -> String:
 ##   bands: 3 (lit, mid, dark), 2 (lit, mid) or 0 (Modern's soft light, a painted background); band_lit and band_shade
 ##   where the bands break (light reaching a face, 0 to 1); band_mid the mid band's brightness; band_edge how soft a
 ##   band's edge is. gloss: how glossy a surface must be to hold a hard highlight; shine: how bright it is.
-##   flat: how far a texture flattens toward its own average colour (0 to 1); vivid: how much more saturated a fill is;
+##   flat: how far a texture flattens toward its own average colour (0 to 1); flat_mip: toward which mip (12 the one
+##   average; 4 to 6 keep a texture's larger shapes and lose its fine noise, a flatter painted ground); vivid: how much more saturated a fill is;
 ##   relief: how much of a surface's relief still shows.
 ##   ink_width (pixels at 1080 lines), ink_strength (0: no ink on the world, only the characters' own), ink_creases
 ##   (lines where faces fold, not only round silhouettes), ink_depth and ink_normal (how big a step or fold draws a
@@ -69,7 +70,7 @@ static func style() -> String:
 ##   tone_amount, shade_saturation and black: the grade's shade (Atmosphere.toon_tone); saturation: the whole picture's.
 const TOON := {
 	"bands": 3, "band_lit": 0.42, "band_shade": 0.07, "band_mid": 0.52, "band_edge": 0.025,
-	"gloss": 0.62, "shine": 0.55, "flat": 0.72, "vivid": 1.3, "relief": 0.3,
+	"gloss": 0.62, "shine": 0.55, "flat": 0.72, "flat_mip": 12.0, "vivid": 1.3, "relief": 0.3,
 	"ink_width": 2.2, "ink_strength": 1.0, "ink_creases": true, "ink_depth": 0.04, "ink_normal": 0.6, "ink_colour": "void",
 	"tone_amount": 0.5, "shade_saturation": 1.05, "black": 0.0, "saturation": 1.15,
 }
@@ -132,6 +133,7 @@ static func toon_material(m: ShaderMaterial) -> void:
 	m.set_shader_parameter("toon_band_count", int(t["bands"]))
 	m.set_shader_parameter("toon_gloss", Vector2(float(t["gloss"]), float(t["shine"])))
 	m.set_shader_parameter("toon_fills", Vector3(float(t["flat"]), float(t["vivid"]), float(t["relief"])))
+	m.set_shader_parameter("toon_flat_mip", float(t["flat_mip"]))
 
 
 ## The lit, natural world: Modern, and Toon, which is drawn on it. Everything Classic leaves out (the shaped land,
