@@ -12,7 +12,8 @@
   "additionalProperties": false,
   "properties": {
     "id": {
-      "const": "barovia"
+      "type": "string",
+      "description": "The file's id; the campaign names the file it reads (data/campaign.json `weather`)."
     },
     "summary": {
       "type": "string"
