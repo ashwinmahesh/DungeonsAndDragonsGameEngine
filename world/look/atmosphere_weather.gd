@@ -441,7 +441,7 @@ func _window_light() -> void:
 		w.get_parent().add_child(l)
 		night_lights.append(l)
 		var frames := float(Look.painted_settings()["window_frames"])
-		if frames > 0.0:
+		if frames > 0.0 and Graphics.world_touch():
 			var s := window_frame_light(out, frames)
 			s.position = w.position - out * 0.25 + Vector3(0, 0.15, 0)
 			w.get_parent().add_child(s)

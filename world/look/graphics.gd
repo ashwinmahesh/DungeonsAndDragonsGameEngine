@@ -41,24 +41,25 @@ const LABELS := {"low": "Low", "medium": "Medium", "high": "High"}
 ## - haze: the volumetric haze's grid (cells across and deep; 0 = no haze: the window shafts' cones still show).
 ## - sprite_shadows: the characters cast shadows from the lights (W6, the animations thread reads it).
 ## - paint_strokes: a game's painted finish draws its brush strokes (Look.PAINTED strokes, the costly part: 56 reads a
-##   pixel); without them it keeps its flat values and colours.
+##   pixel); without them it keeps its flat values and colours. world_touch: plants part round walkers and lit
+##   windows throw their panes (the painted finish's plants_part and window_frames), off on Low.
 const SPECS := {
 	"low": {"msaa": Viewport.MSAA_DISABLED, "edge_aa": Viewport.SCREEN_SPACE_AA_FXAA, "scale": 0.75,
 		"sun_map": 2048, "sun_splits": 2, "sun_soft": false, "lamp_atlas": 2048, "lamp_shadows": 2,
 		"lamp_soft": false, "filter": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "reflections": 0, "swaying": 0,
 		"ao": RenderingServer.ENV_SSAO_QUALITY_LOW, "ao_half": true, "bounce": -1, "haze": 0, "sprite_shadows": false,
-		"paint_strokes": false},
+		"paint_strokes": false, "world_touch": false},
 	"medium": {"msaa": Viewport.MSAA_DISABLED, "edge_aa": Viewport.SCREEN_SPACE_AA_SMAA, "scale": 1.0,
 		"sun_map": 4096, "sun_splits": 2, "sun_soft": true, "lamp_atlas": 4096, "lamp_shadows": 6,
 		"lamp_soft": true, "filter": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "reflections": 32, "swaying": 2,
 		"ao": RenderingServer.ENV_SSAO_QUALITY_MEDIUM, "ao_half": true, "bounce": -1, "haze": 48, "sprite_shadows": true,
-		"paint_strokes": false},
+		"paint_strokes": false, "world_touch": true},
 	"high": {"msaa": Viewport.MSAA_2X, "edge_aa": Viewport.SCREEN_SPACE_AA_SMAA, "scale": 1.0,
 		"sun_map": 4096, "sun_splits": 2, "sun_soft": true, "lamp_atlas": 8192, "lamp_shadows": 8,
 		"lamp_soft": true, "filter": RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "reflections": 56, "swaying": 2,
 		"ao": RenderingServer.ENV_SSAO_QUALITY_HIGH, "ao_half": true,
 		"bounce": RenderingServer.ENV_SSIL_QUALITY_MEDIUM, "haze": 64,
-		"sprite_shadows": true, "paint_strokes": true},
+		"sprite_shadows": true, "paint_strokes": true, "world_touch": true},
 }
 ## The renderer as Classic was frozen with: no anti-aliasing, full resolution, the sun's 4096 map in two splits, no
 ## lamp shadows, Godot's default filtering, contact shadows, no reflections, bounce or haze.
@@ -211,6 +212,11 @@ static func sprite_shadows() -> bool:
 ## Whether a game's painted finish draws its brush strokes (Look.PAINTED), High only.
 static func paint_strokes() -> bool:
 	return bool(spec().get("paint_strokes", false))
+
+
+## Whether plants part round walkers and lit windows throw their panes (Medium and High).
+static func world_touch() -> bool:
+	return bool(spec().get("world_touch", false))
 
 
 ## Whether light bounces off walls (SSIL) in the Modern finish.

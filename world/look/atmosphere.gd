@@ -319,6 +319,7 @@ func apply_graphics() -> void:
 		else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	sun.light_angular_distance = SUN_SIZE if Graphics.sun_soft() else 0.0
 	_fitted_distance = -1.0
+	PaintedFinish.apply(_post, painted)   # brush strokes come and go with the preset
 	env.ssil_enabled = Graphics.bounce()
 	env.volumetric_fog_enabled = Graphics.haze()
 	var steps := Graphics.reflection_steps()

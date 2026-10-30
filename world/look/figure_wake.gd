@@ -21,7 +21,7 @@ var _scan := 0.0
 
 static func build(atmo: Atmosphere, settings: Dictionary) -> FigureWake:
 	var w := float(settings.get("wakes", 0.0))
-	var p := float(settings.get("plants_part", 0.0))
+	var p := float(settings.get("plants_part", 0.0)) if Graphics.world_touch() else 0.0
 	if (w <= 0.0 and p <= 0.0) or not Look.modern():
 		return null
 	var f := FigureWake.new()
