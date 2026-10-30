@@ -58,6 +58,8 @@ static func build(parent: Node, board: ArenaBoard, mood: Dictionary, outdoors: b
 				w._dust(spec)
 			"crows":
 				w._crows(spec)
+			"bats":
+				w._crows(spec, true)
 			"chimney_smoke":
 				w._chimney_smoke()
 			"smoke":
@@ -316,8 +318,8 @@ func _dust(spec: Dictionary) -> void:
 	p.draw_pass_1 = quad
 
 
-## A few crows wheeling high over the place.
-func _crows(spec: Dictionary) -> void:
+## A few crows wheeling high over the place, or (`bats`) bats flitting low over it.
+func _crows(spec: Dictionary, bats := false) -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	var quad := QuadMesh.new()
@@ -325,18 +327,21 @@ func _crows(spec: Dictionary) -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = CROW_SHADER
 	mat.set_shader_parameter("colour", Look.color("void"))
-	mat.set_shader_parameter("radius", float(spec.get("radius", 7.0)))
+	mat.set_shader_parameter("radius", float(spec.get("radius", 4.0 if bats else 7.0)))
+	if bats:
+		mat.set_shader_parameter("bat", true)
+		mat.set_shader_parameter("span", 0.38)
 	quad.material = mat
 	mm.mesh = quad
 	mm.instance_count = int(spec.get("amount", 5))
 	for i in mm.instance_count:
 		mm.set_instance_transform(i, Transform3D.IDENTITY)
 	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Crows"
+	mmi.name = "Bats" if bats else "Crows"
 	mmi.multimesh = mm
 	mmi.custom_aabb = AABB(Vector3(-14, -4, -14), Vector3(28, 10, 28))
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mmi.position = Vector3(0, float(spec.get("height", 7.5)), 0)
+	mmi.position = Vector3(0, float(spec.get("height", 3.2 if bats else 7.5)), 0)
 	_parent.add_child(mmi)
 	follow.append(mmi)
 

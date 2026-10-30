@@ -180,3 +180,18 @@ func test_a_lit_window_throws_its_panes_outside() -> void:
 	assert_true(aim.z > 0.3 and aim.y < -0.3, "out of the house and down onto the ground (%s)" % aim)
 	assert_false(s.shadow_enabled, "no shadow map of its own")
 	s.free()
+
+
+func test_bats_flit_low_over_a_place() -> void:
+	var parent := Node3D.new()
+	add_child(parent)
+	var w := AtmosphereWeather.new()
+	w._parent = parent
+	w._crows({"amount": 6}, true)
+	var b := parent.get_node_or_null("Bats") as MultiMeshInstance3D
+	assert_true(b != null, "a flock of bats")
+	assert_eq(b.multimesh.instance_count, 6, "as many as asked")
+	assert_true(b.position.y < 7.5, "lower than the crows")
+	assert_true(bool((b.multimesh.mesh.surface_get_material(0) as ShaderMaterial).get_shader_parameter("bat")), "bat-winged")
+	assert_true(b in w.follow, "they follow the camera")
+	parent.free()
