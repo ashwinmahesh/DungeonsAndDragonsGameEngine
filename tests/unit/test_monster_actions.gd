@@ -107,8 +107,8 @@ func test_swarm_shares_spaces() -> void:
 
 func test_flyers_use_their_fly_speed() -> void:
 	var e := _field()
-	var b := TestCombat.foe(e, "broom_of_animated_attack", Vector2i(3, 3))
-	assert_eq(b.speed(), 50, "the broom flies 50 ft")
+	var b := TestCombat.foe(e, "animated_flying_sword", Vector2i(3, 3))
+	assert_eq(b.speed(), 50, "the flying sword flies 50 ft")
 
 
 func test_shambling_mound_absorbs_lightning() -> void:

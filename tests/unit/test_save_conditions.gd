@@ -1,9 +1,16 @@
 extends TestCase
 ## A condition from a failed save really lands, is obeyed and is told to the player: Abjure Foes (Paladin 9), Hold Monster,
-## the Gilded Knight's and the Revenant's glares, and the immunities that turn one away. Ashwin's reports of 2026-10-18
-## came from the Keepers' yard at Ghaki's: revenants and a helmed horror are immune to Frightened and Paralyzed, and the
+## a paralysing glare and the Revenant's glare, and the immunities that turn one away. Ashwin's reports of 2026-10-18
+## came from a yard of undead guards: revenants and a helmed horror are immune to Frightened and Paralyzed, and the
 ## party stood in a paladin's Aura of Courage, so Abjure Foes, Hold Monster and the Vengeful Glare all failed their saves
 ## and then did nothing, with no word in the log of why.
+
+
+var _fx := FixtureContent.new()
+
+
+func after_each() -> void:
+	_fx.restore()
 
 
 func _add(e: Encounter, ch: Character, cell: Vector2i) -> Combatant:
@@ -270,13 +277,15 @@ func test_hold_monster_ends_when_its_caster_loses_concentration() -> void:
 
 # --- Glares and an Aura of Courage ------------------------------------------------------------------------
 
-func test_the_gilded_knights_covetous_glare_paralyzes_a_hero() -> void:
+## A made-up warden (tests/fixtures/test_glare_warden.json) with a paralysing glare.
+func test_a_paralyzing_glare_paralyzes_a_hero() -> void:
+	_fx.add_file("monsters", "test_glare_warden.json")
 	var e := TestCombat.open_field(3)
 	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(2, 3), 9)
-	var k := TestCombat.foe(e, "gilded_knight", Vector2i(6, 3))
+	var k := TestCombat.foe(e, "test_glare_warden", Vector2i(6, 3))
 	_fails_saves(hero)
 	TestCombat.start_with(e, k)
-	var act := (k.creature as Monster).action("covetous_glare")
+	var act := (k.creature as Monster).action("paralyzing_glare")
 	var r := e.monster_actions.save_action(k, act, hero, CombatResult.new(), false)
 	assert_true(r.ok)
 	assert_true(hero.creature.has_condition(&"paralyzed"), "\n".join(e.log.texts().slice(-4)))

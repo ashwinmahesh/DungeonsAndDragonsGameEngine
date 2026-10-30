@@ -3,6 +3,19 @@ extends TestCase
 ## items and some potions besides, scaled to its level; a won fight at a place leaves its foes' coins and a find.
 
 
+var _fx := FixtureContent.new()
+
+
+func before_each() -> void:
+	# A place of the test's own with six chests, so a game with few places of its own still has one to roll for; where the host
+	# has a place with more chests, that one is the test's.
+	_fx.add_location("fixture_vault", 6, [{"id": "fine_clothes", "qty": 2}], 8)
+
+
+func after_each() -> void:
+	_fx.restore()
+
+
 ## The place with the most chests that has random loot, and its level.
 func _a_place() -> String:
 	var best := ""

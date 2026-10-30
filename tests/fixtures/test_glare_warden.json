@@ -1,0 +1,161 @@
+{
+  "id": "test_glare_warden",
+  "name": "Glare Warden",
+  "source": {
+    "book": "custom",
+    "note": "A made-up stat block for the engine tests (host-free): save actions that put a condition on whoever fails."
+  },
+  "size": "medium",
+  "type": "undead",
+  "tags": [
+    "boss"
+  ],
+  "alignment": "lawful neutral",
+  "ac": 19,
+  "initiative": 2,
+  "hp": {
+    "average": 178,
+    "dice": "21d8+84"
+  },
+  "speed": {
+    "walk": 30
+  },
+  "abilities": {
+    "str": 20,
+    "dex": 10,
+    "con": 18,
+    "int": 11,
+    "wis": 14,
+    "cha": 16
+  },
+  "saves": {
+    "str": 9,
+    "con": 8,
+    "wis": 6
+  },
+  "immunities": [
+    "poison"
+  ],
+  "condition_immunities": [
+    "charmed",
+    "exhaustion",
+    "frightened",
+    "paralyzed",
+    "poisoned",
+    "stunned"
+  ],
+  "senses": {
+    "darkvision": 60
+  },
+  "passive_perception": 12,
+  "languages": [
+    "Common"
+  ],
+  "cr": 10,
+  "xp": 5900,
+  "proficiency_bonus": 4,
+  "actions": [
+    {
+      "id": "longsword",
+      "name": "Longsword",
+      "kind": "melee",
+      "attack": {
+        "bonus": 9,
+        "reach": 5
+      },
+      "damage": [
+        {
+          "average": 14,
+          "dice": "2d8+5",
+          "type": "slashing"
+        }
+      ],
+      "summary": "A heavy blade.",
+      "text": "Melee Attack Roll: +9, reach 5 ft. Hit: 14 (2d8 + 5) Slashing damage."
+    },
+    {
+      "id": "paralyzing_glare",
+      "name": "Paralyzing Glare",
+      "kind": "save",
+      "recharge": "5-6",
+      "save": {
+        "ability": "wis",
+        "dc": 16,
+        "success": "none"
+      },
+      "targets": {
+        "range": 30
+      },
+      "on_fail": [
+        {
+          "do": "condition",
+          "condition": "paralyzed",
+          "until": "minute",
+          "repeat_save": {
+            "ability": "wis",
+            "dc": 16,
+            "when": "end"
+          }
+        }
+      ],
+      "summary": "Recharge 5-6: one creature within 30 ft; DC 16 Wis save or Paralyzed for a minute (saving at the end of its turns).",
+      "text": "Recharge 5-6: one creature within 30 ft; DC 16 Wis save or Paralyzed for a minute (saving at the end of its turns)."
+    },
+    {
+      "id": "dreadful_roar",
+      "name": "Dreadful Roar",
+      "kind": "save",
+      "recharge": "5-6",
+      "save": {
+        "ability": "wis",
+        "dc": 14,
+        "success": "none"
+      },
+      "area": {
+        "shape": "cone",
+        "size": 30
+      },
+      "targets": {
+        "range": 30
+      },
+      "on_fail": [
+        {
+          "do": "condition",
+          "condition": "frightened",
+          "until": "minute"
+        }
+      ],
+      "summary": "Recharge 5-6: a 30 ft cone; DC 14 Wis save or Frightened for a minute.",
+      "text": "Recharge 5-6: a 30 ft cone; DC 14 Wis save or Frightened for a minute."
+    },
+    {
+      "id": "choking_spores",
+      "name": "Choking Spores",
+      "kind": "save",
+      "recharge": "5-6",
+      "save": {
+        "ability": "con",
+        "dc": 14,
+        "success": "none"
+      },
+      "area": {
+        "shape": "emanation",
+        "size": 10
+      },
+      "targets": {
+        "range": 10
+      },
+      "on_fail": [
+        {
+          "do": "condition",
+          "condition": "poisoned",
+          "until": "minute"
+        }
+      ],
+      "summary": "Recharge 5-6: everything within 10 ft; DC 14 Con save or Poisoned for a minute.",
+      "text": "Recharge 5-6: everything within 10 ft; DC 14 Con save or Poisoned for a minute."
+    }
+  ],
+  "ai_profile": "brute",
+  "summary": "A made-up warden for the engine tests: a blade and three recharging save actions that each leave a condition."
+}

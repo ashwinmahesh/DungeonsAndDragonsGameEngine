@@ -4,11 +4,18 @@ extends TestCase
 ## works. Before, it went into the pack as the bare template, and wearing it broke the wearer's AC.
 
 
+var _fx := FixtureContent.new()
+
+
+func after_each() -> void:
+	_fx.restore()
+
+
 func _comp() -> Compendium:
 	return Compendium.shared()
 
 
-func test_the_warm_snows_rewards_equip_and_work() -> void:
+func test_rewards_that_name_a_template_equip_and_work() -> void:
 	var ch := TestChars.pregen("ilse_varga", 9)
 	ch.add_item("dragon_scale_mail_silver")
 	assert_true(ch.carries("dragon_scale_mail_silver__scale_mail"), "the mail is scale mail")
@@ -30,8 +37,10 @@ func test_concrete_picks_the_default_the_only_base_or_a_shield() -> void:
 	assert_eq(MagicItems.concrete("spell_scroll", _comp()), "spell_scroll", "a scroll's template has no default spell")
 
 
-## Every template a conversation gives or a place holds on its own turns into a real weapon, armour or shield.
+## Every template a conversation gives or a place holds on its own turns into a real weapon, armour or shield: those of the
+## host game's dialogue and places, plus a place of the test's own that holds two.
 func test_every_bare_template_reward_becomes_a_real_item() -> void:
+	_fx.add_location("fixture_hoard", 2, [{"id": "dragon_scale_mail_silver", "qty": 1}, {"id": "dragon_slayer", "qty": 1}])
 	var given: Array[String] = []
 	var re := RegEx.create_from_string("^\\s*give\\s+([a-z0-9_]+)")
 	for path in _dialogue_files("res://narrative"):
@@ -55,7 +64,7 @@ func test_every_bare_template_reward_becomes_a_real_item() -> void:
 		var real := _comp().item_data(MagicItems.concrete(id, _comp()))
 		assert_true(real.has("weapon") or real.has("armor") or str(real.get("category", "")) == "shield",
 			"%s becomes a real item (%s)" % [id, MagicItems.concrete(id, _comp())])
-	assert_true(n >= 2, "the Warm Snow's two at least (%d)" % n)
+	assert_true(n >= 2, "the fixture place's two at least (%d)" % n)
 
 
 func _dialogue_files(dir: String) -> Array[String]:

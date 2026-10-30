@@ -1,7 +1,17 @@
 extends TestCase
 ## Every monster save action and save spell that puts a condition on a creature that fails really does it (or says why
 ## it can't), so "it failed the save and nothing happened" can't hide in one of them. Found while looking into Ashwin's
-## reports of 2026-10-18 (test_save_conditions.gd has the cases that were wrong).
+## reports of 2026-10-18 (test_save_conditions.gd has the cases that were wrong). The sweep covers every monster the host game
+## has, plus a made-up warden (tests/fixtures/test_glare_warden.json) so it isn't empty in a game with few stat blocks of its own.
+
+## The engine's own stat blocks and the warden have 13 save actions with a condition rider (2026-10-30); a host adds its own.
+const AT_LEAST := 13
+
+var _fx := FixtureContent.new()
+
+
+func after_each() -> void:
+	_fx.restore()
 
 
 func _told_immune(e: Encounter, cond: String) -> bool:
@@ -12,6 +22,7 @@ func _told_immune(e: Encounter, cond: String) -> bool:
 ## of the middle of the monster's facing edge (a cone from a Huge creature starts there, so a hero beside its corner is
 ## outside it).
 func test_every_monster_save_action_lands_its_condition_or_says_why() -> void:
+	_fx.add_file("monsters", "test_glare_warden.json")
 	var bad: Array[String] = []
 	var checked := 0
 	for id: String in Compendium.shared().table("monsters"):
@@ -37,7 +48,7 @@ func test_every_monster_save_action_lands_its_condition_or_says_why() -> void:
 				if hero.creature.has_condition(StringName(cond)) or _told_immune(e, cond):
 					continue
 				bad.append("%s.%s: no %s and no word of why: %s" % [id, str(act["id"]), cond, " // ".join(e.log.texts().slice(-3))])
-	assert_true(checked >= 25, "%d save actions with a condition checked" % checked)
+	assert_true(checked >= AT_LEAST, "%d save actions with a condition checked" % checked)
 	assert_eq(bad, [] as Array[String], "\n".join(bad))
 
 

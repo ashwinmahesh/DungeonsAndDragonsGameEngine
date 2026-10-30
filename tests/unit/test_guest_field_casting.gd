@@ -5,6 +5,13 @@ extends TestCase
 ## party's rest for them too.
 
 
+var _fx := FixtureContent.new()
+
+
+func after_each() -> void:
+	_fx.restore()
+
+
 func _party(st: StoryState, ids: Array[String]) -> void:
 	for id in ids:
 		var ch := TestChars.pregen(id, 5)
@@ -22,39 +29,39 @@ func _effect_of(cr: Creature, spell_id: String) -> Effect:
 func test_cure_wounds_heals_a_guest() -> void:
 	var st := StoryState.new()
 	_party(st, ["liriel_dawnsong"])
-	assert_true(st.add_guest("adrian_martikov"))
-	var adrian := st.guests[0]
-	adrian.hp = 3
+	assert_true(st.add_guest(_fx.add_guest()))
+	var ally := st.guests[0]
+	ally.hp = 3
 	var liriel := st.party[0]
 	var slots := liriel.slots_left(1)
-	var res := FieldCasting.cast(st.party, liriel, "cure_wounds", 1, [adrian], DiceRoller.new(4), st)
+	var res := FieldCasting.cast(st.party, liriel, "cure_wounds", 1, [ally], DiceRoller.new(4), st)
 	assert_true(bool(res["ok"]), str(res))
-	assert_true(adrian.hp > 3, "Adrian healed")
+	assert_true(ally.hp > 3, "the ally healed")
 	assert_eq(liriel.slots_left(1), slots - 1)
 
 
 func test_aid_on_a_hero_and_a_guest_lasts_until_the_long_rest() -> void:
 	var st := StoryState.new()
 	_party(st, ["liriel_dawnsong"])
-	st.add_guest("adrian_martikov")
-	var adrian := st.guests[0]
+	st.add_guest(_fx.add_guest())
+	var ally := st.guests[0]
 	var liriel := st.party[0]
 	((liriel.spellcasting[0] as Dictionary)["prepared"] as Array).append("aid")
-	var before := adrian.max_hp()
-	var res := FieldCasting.cast(st.party, liriel, "aid", 2, [liriel, adrian], DiceRoller.new(4), st)
+	var before := ally.max_hp()
+	var res := FieldCasting.cast(st.party, liriel, "aid", 2, [liriel, ally], DiceRoller.new(4), st)
 	assert_true(bool(res["ok"]), str(res))
-	assert_eq(adrian.max_hp(), before + 5, "Aid raises the guest's Hit Point maximum")
+	assert_eq(ally.max_hp(), before + 5, "Aid raises the guest's Hit Point maximum")
 	st.advance_minutes(10 * 60)
-	assert_true(_effect_of(adrian, "aid") != null, "still on after 10 hours")
-	adrian.finish_long_rest()
-	assert_true(_effect_of(adrian, "aid") == null, "gone at the Long Rest (the rest screen rests guests too)")
+	assert_true(_effect_of(ally, "aid") != null, "still on after 10 hours")
+	ally.finish_long_rest()
+	assert_true(_effect_of(ally, "aid") == null, "gone at the Long Rest (the rest screen rests guests too)")
 
 
 func test_without_the_story_a_guest_isnt_on_hand() -> void:
 	var st := StoryState.new()
 	_party(st, ["liriel_dawnsong"])
-	st.add_guest("adrian_martikov")
-	var adrian := st.guests[0]
-	adrian.hp = 3
-	FieldCasting.cast(st.party, st.party[0], "cure_wounds", 1, [adrian], DiceRoller.new(4))
-	assert_eq(adrian.hp, 3, "only the party is on the board without the story state")
+	st.add_guest(_fx.add_guest())
+	var ally := st.guests[0]
+	ally.hp = 3
+	FieldCasting.cast(st.party, st.party[0], "cure_wounds", 1, [ally], DiceRoller.new(4))
+	assert_eq(ally.hp, 3, "only the party is on the board without the story state")

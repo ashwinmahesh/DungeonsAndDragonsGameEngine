@@ -5,6 +5,13 @@ extends TestCase
 ## Each spends its slot, its component and its casting time (FieldCasting.revive).
 
 
+var _fx := FixtureContent.new()
+
+
+func after_each() -> void:
+	_fx.restore()
+
+
 ## A cleric at `level` who prepares `spells`, with their components, and a fighter who has just died.
 func _party(spells: Array, level: int = 9) -> StoryState:
 	var st := StoryState.new()
@@ -128,7 +135,10 @@ func test_a_dead_hero_stays_with_the_party() -> void:
 	st.bench.append(fighter)
 	assert_true(st.bring_along(fighter), "brought back along")
 	assert_true(fighter in st.party and not fighter in st.bench)
-	var line := Services.offered(st, "father_lucian").filter(func(l: Dictionary) -> bool: return str(l["id"]) == "raise_dead")[0] as Dictionary
+	# A temple priest of the test's own who sells Raise Dead.
+	_fx.add("npcs", {"id": "test_priest", "name": "Test Priest", "summary": "A priest the test builds.", "attitude": "friendly",
+		"services": [{"id": "raise_dead", "scroll": true}]})
+	var line := Services.offered(st, "test_priest").filter(func(l: Dictionary) -> bool: return str(l["id"]) == "raise_dead")[0] as Dictionary
 	st.gold = 5000.0
 	assert_eq(Services.why_not(st, line, fighter), "", "and raised at the temple")
 	# Swapping: a dead hero can come in from camp, and can't be swapped out to it.

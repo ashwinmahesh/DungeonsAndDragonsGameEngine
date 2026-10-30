@@ -105,11 +105,13 @@ func test_a_creature_standing_on_a_body_is_attacked_like_any_other() -> void:
 
 
 
-## A recharged area save action is the plan only for a foe its area takes in. The Penitent's Winter's Embrace (a 20-ft
-## Emanation) on a hero 20 ft off with a wall between them caught no one, stayed charged and was its plan again every
-## turn, so it stood still while the last hero shot it and the fight ran out the 30-round limit (the Penitent at level 11
-## with bosses hitting harder, 2026-10-19). In the open it embraces her; with the wall it hurls ice instead.
+## A recharged area save action is the plan only for a foe its area takes in. A 20-ft Emanation save action on a hero 20 ft off
+## with a wall between them caught no one, stayed charged and was its plan again every turn, so the foe stood still while the
+## last hero shot it and the fight ran out the 30-round limit (a boss at level 11 with bosses hitting harder, 2026-10-19). In the
+## open it embraces her; with the wall it hurls ice instead. The foe is a stat block made for the test.
 func test_an_area_save_action_a_wall_keeps_off_isnt_the_plan() -> void:
+	var fx := FixtureContent.new()
+	fx.add_file("monsters", "test_ice_brute.json")
 	for walled: bool in [false, true]:
 		var rows: Array[String] = []
 		for z in 8:
@@ -117,16 +119,17 @@ func test_an_area_save_action_a_wall_keeps_off_isnt_the_plan() -> void:
 		var e := TestCombat.encounter(rows, 4)
 		e.default_player_reaction = "never"
 		var thistle := TestCombat.hero(e, "thistle", Vector2i(1, 6), 11)
-		var p := TestCombat.foe(e, "the_penitent", Vector2i(0, 0))
+		var p := TestCombat.foe(e, "test_ice_brute", Vector2i(0, 0))
 		TestCombat.start_with(e, p)
 		assert_eq(e.distance(p, thistle), 20, "she is in the embrace's range (walled %s)" % walled)
-		assert_eq(e.monster_actions.save_victims(p, p.creature.action("winters_embrace"), thistle).is_empty(), walled,
+		assert_eq(e.monster_actions.save_victims(p, p.creature.action("rime_embrace"), thistle).is_empty(), walled,
 			"the wall keeps the embrace off her (walled %s)" % walled)
 		e.ai.play_turn(p)
 		var texts := e.log.texts()
-		assert_eq(texts.any(func(t: String) -> bool: return t.begins_with("The Penitent uses Winter's Embrace")), not walled,
+		assert_eq(texts.any(func(t: String) -> bool: return t.begins_with("Ice Brute uses Rime Embrace")), not walled,
 			"embraced only in the open (walled %s)" % walled)
 		assert_false(p.action_available, "it used its action (walled %s)" % walled)
 		if walled:
-			assert_true(texts.any(func(t: String) -> bool: return t.begins_with("The Penitent hits Thistle") or t.begins_with("The Penitent misses Thistle")),
+			assert_true(texts.any(func(t: String) -> bool: return t.begins_with("Ice Brute hits Thistle") or t.begins_with("Ice Brute misses Thistle")),
 				"it struck at her some other way")
+	fx.restore()

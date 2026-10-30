@@ -1,0 +1,156 @@
+{
+  "id": "test_ice_brute",
+  "name": "Ice Brute",
+  "source": {
+    "book": "custom",
+    "note": "A made-up stat block for the engine tests (host-free); built from the 2025 Monster Manual frost giant."
+  },
+  "size": "huge",
+  "type": "undead",
+  "alignment": "neutral evil",
+  "ac": 16,
+  "initiative": 0,
+  "hp": {
+    "average": 210,
+    "dice": "20d12+80"
+  },
+  "speed": {
+    "walk": 30
+  },
+  "abilities": {
+    "str": 23,
+    "dex": 9,
+    "con": 21,
+    "int": 6,
+    "wis": 12,
+    "cha": 10
+  },
+  "saves": {
+    "con": 10,
+    "wis": 6
+  },
+  "immunities": [
+    "cold",
+    "poison"
+  ],
+  "resistances": [
+    "necrotic"
+  ],
+  "condition_immunities": [
+    "exhaustion",
+    "frightened",
+    "poisoned"
+  ],
+  "senses": {
+    "darkvision": 60
+  },
+  "passive_perception": 11,
+  "languages": [],
+  "cr": 11,
+  "xp": 7200,
+  "proficiency_bonus": 4,
+  "traits": [],
+  "actions": [
+    {
+      "id": "multiattack",
+      "name": "Multiattack",
+      "kind": "multiattack",
+      "multiattack": [
+        {
+          "action": "frozen_fist",
+          "count": 2,
+          "or": [
+            "hurled_ice"
+          ]
+        }
+      ],
+      "summary": "Two Frozen Fists, or Hurled Ice when no one is in reach.",
+      "text": "The Ice Brute makes two Frozen Fist attacks, or tears off slabs of ice and hurls them when no one is within its reach."
+    },
+    {
+      "id": "frozen_fist",
+      "name": "Frozen Fist",
+      "kind": "melee",
+      "attack": {
+        "bonus": 10,
+        "reach": 10
+      },
+      "damage": [
+        {
+          "average": 15,
+          "dice": "2d8+6",
+          "type": "bludgeoning"
+        },
+        {
+          "average": 4,
+          "dice": "1d8",
+          "type": "cold"
+        }
+      ],
+      "summary": "A fist of fused hands and ice, reach 10 ft.",
+      "text": "Hit: 15 (2d8 + 6) Bludgeoning damage plus 4 (1d8) Cold damage."
+    },
+    {
+      "id": "hurled_ice",
+      "name": "Hurled Ice",
+      "kind": "ranged",
+      "attack": {
+        "bonus": 10,
+        "range": [
+          60,
+          240
+        ]
+      },
+      "damage": [
+        {
+          "average": 15,
+          "dice": "2d8+6",
+          "type": "bludgeoning"
+        },
+        {
+          "average": 4,
+          "dice": "1d8",
+          "type": "cold"
+        }
+      ],
+      "summary": "Tears a slab of ice from itself and hurls it, 60/240 ft.",
+      "text": "Range 60/240 ft. Hit: 15 (2d8 + 6) Bludgeoning damage plus 4 (1d8) Cold damage."
+    },
+    {
+      "id": "rime_embrace",
+      "name": "Rime Embrace",
+      "kind": "save",
+      "recharge": "5-6",
+      "save": {
+        "ability": "con",
+        "dc": 16,
+        "success": "half"
+      },
+      "area": {
+        "shape": "emanation",
+        "size": 20
+      },
+      "targets": {
+        "range": 20
+      },
+      "damage": [
+        {
+          "average": 18,
+          "dice": "4d8",
+          "type": "cold"
+        }
+      ],
+      "on_fail": [
+        {
+          "do": "condition",
+          "condition": "restrained",
+          "until": "source_turn_end"
+        }
+      ],
+      "summary": "Recharge 5-6: everything within 20 ft makes a DC 16 Con save: 4d8 Cold and Restrained (frozen to the ground) until the end of its next turn, half damage on a success.",
+      "text": "Constitution Saving Throw: DC 16, each creature within 20 feet of the Ice Brute. Failure: 18 (4d8) Cold damage, and the target has the Restrained condition until the end of the Ice Brute's next turn. Success: Half damage only."
+    }
+  ],
+  "ai_profile": "brute",
+  "summary": "A made-up ice giant for the engine tests: fists with reach, hurled ice, and a recharging 20 ft embrace."
+}

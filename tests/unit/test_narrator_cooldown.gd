@@ -1,7 +1,7 @@
 extends TestCase
 ## The Narrator's `cooldown n` (story/narrator.gd): n game minutes between a trigger's lines, or n rounds within one
 ## fight. Lane 24's find (2026-10-12): the parser's line number overwrote the minutes, so every cooldown was the line's
-## number in its file instead (lake_zarovich's "cooldown 30" became 10; combat lines cooled for hundreds of rounds).
+## number in its file instead (a "cooldown 30" became 10; combat lines cooled for hundreds of rounds).
 
 const LINES := """# a comment, so the cooldown's line number isn't its minutes
 ~ test:minutes
@@ -16,8 +16,8 @@ cooldown 3
 """
 
 
-func _story() -> StoryState:
-	return SideQuestPlay.party(["ilse_varga"], 3, "lake_zarovich", 12)
+func _story(location: String = "fixture_place") -> StoryState:
+	return SideQuestPlay.party(["ilse_varga"], 3, location, 12)
 
 
 func test_the_cooldown_keeps_its_minutes() -> void:
@@ -50,23 +50,34 @@ func test_a_cooldown_in_rounds_is_honoured_within_a_fight() -> void:
 	assert_eq(n.line("combat:test_crit", back, null, {"round": 2, "fight": "b"}), "", "and the memory saves")
 
 
-## The real files: lake_zarovich's lines that cool for 30 minutes stay quiet for 29 of them.
-func test_the_lake_cools_for_thirty_minutes() -> void:
-	var key := ""
-	var df := DialogueFile.load_key("narrator/lake_zarovich")
-	for node: String in df.order:
-		for s: Dictionary in df.nodes[node]:
-			if str(s["t"]) == "cooldown" and int(s["minutes"]) == 30 and key == "":
-				key = node
-	assert_ne(key, "", "a 30-minute cooldown at the lake")
+## The host game's own narrator files: every trigger with a cooldown in minutes stays quiet for all but the last minute of
+## it, once it has spoken (the party is taken to the place the file is named for, as the file's conditions often ask).
+func test_the_hosts_cooldowns_hold_for_their_minutes() -> void:
+	var dir := DirAccess.open(DialogueFile.ROOT + "narrator")
+	if dir == null:
+		return
 	var n := Narrator.new(1)
-	var st := _story()
-	var spoke := false
-	for i in 20:   # until its conditions let it speak
-		if n.line(key, st) != "":
-			spoke = true
-			break
-		st.advance_minutes(60)
-	assert_true(spoke, "%s speaks at all" % key)
-	st.advance_minutes(29)
-	assert_eq(n.line(key, st), "", "%s cools for 30 minutes, not its line number" % key)
+	for file: String in dir.get_files():
+		if not file.ends_with(".dialogue"):
+			continue
+		var df := DialogueFile.load_key("narrator/" + file.get_basename())
+		for key: String in df.order:
+			if key.begins_with("combat:"):
+				continue
+			var minutes := 0
+			for s: Dictionary in df.nodes[key]:
+				if str(s["t"]) == "cooldown":
+					minutes = int(s["minutes"])
+			if minutes <= 1:
+				continue
+			var st := _story(file.get_basename())
+			var spoke := false
+			for i in 20:   # until its conditions let it speak
+				if n.line(key, st) != "":
+					spoke = true
+					break
+				st.advance_minutes(60)
+			if not spoke:
+				continue
+			st.advance_minutes(minutes - 1)
+			assert_eq(n.line(key, st), "", "%s cools for %d minutes, not its line number" % [key, minutes])

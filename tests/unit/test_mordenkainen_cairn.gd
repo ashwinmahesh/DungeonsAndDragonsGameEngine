@@ -1,11 +1,44 @@
 extends TestCase
-## What lies under the cairn on Mount Baratok (narrative/mount_baratok/events.dialogue, `cairn_open`; Ashwin, 2026-10-19:
-## "When we find Mordenkainen's spellbook, it gives us 2 level 1 spell scrolls, this is unacceptable. It should give us
-## 2 level 6 and 2 level 7 spell scrolls, ones with the best combat utility"): Chain Lightning and Disintegrate, Delayed
-## Blast Fireball and Forcecage, each readable from a scroll in a fight by the classes whose lists hold it.
+## What lies under a cairn that holds an archmage's spellbook (Ashwin, 2026-10-19: "When we find Mordenkainen's spellbook,
+## it gives us 2 level 1 spell scrolls, this is unacceptable. It should give us 2 level 6 and 2 level 7 spell scrolls, ones
+## with the best combat utility"): Chain Lightning and Disintegrate, Delayed Blast Fireball and Forcecage, each readable from a
+## scroll in a fight by the classes whose lists hold it. The conversation is one the test writes (the same statements the
+## game's own cairn uses); a host game that has its own cairn conversation is played too, with its own details checked.
 
 const LEVEL_6: Array[String] = ["chain_lightning", "disintegrate"]
 const LEVEL_7: Array[String] = ["delayed_blast_fireball", "forcecage"]
+
+const CAIRN := """
+~ cairn
+Narrator: A cairn of flat grey stones, waist-high.
+* Unstack the stones. -> cairn_open
+* Leave it standing. -> END
+
+~ cairn_open
+set test_spellbook_found
+if not quest.test_book_hunt >= book_found
+quest test_book_hunt book_found
+endif
+Narrator: Under the last stone lies a fat spellbook, and tucked inside its cover two loose scrolls, written fast.
+give spell_scroll__chain_lightning
+give spell_scroll__disintegrate
+Narrator: At the bottom of the bundle two more scrolls are stuck to the frozen cloth.
+give spell_scroll__delayed_blast_fireball
+give spell_scroll__forcecage
+-> END
+"""
+
+var _fx := FixtureContent.new()
+
+
+func before_each() -> void:
+	_fx.add_quest("test_book_hunt", "The Lost Spellbook", [["met", ""], ["book_found", ""], ["done", "success"]])
+	_fx.add_location("fixture_peak", 0, [], 9)
+	DialogueFile.register(DialogueFile.parse(CAIRN, "test_cairn/events"))
+
+
+func after_each() -> void:
+	_fx.restore()
 
 
 func _count(st: StoryState, id: String) -> int:
@@ -20,14 +53,13 @@ func _count(st: StoryState, id: String) -> int:
 	return n
 
 
-func test_opening_the_cairn_gives_two_level_6_and_two_level_7_scrolls_and_no_level_1_scroll() -> void:
-	var st := SideQuestPlay.party(["silvain_aster", "hedda_ironvow"], 9, "mount_baratok", 12)
-	var beats := SideQuestPlay.play(st, "mount_baratok/events:cairn", ["Unstack the stones"])
+## Opens a cairn by `ref` and checks the four scrolls, and no other, came out, once.
+func _open_and_check(ref: String, place: String, flag: String, quest: String, quest_stage: String) -> Array[Dictionary]:
+	var st := SideQuestPlay.party(["silvain_aster", "hedda_ironvow"], 9, place, 12)
+	var beats := SideQuestPlay.play(st, ref + ":cairn", ["Unstack the stones"])
 	assert_eq(SideQuestPlay.missing(beats), "")
-	assert_true(bool(st.get_flag("mordenkainen_spellbook_found", false)))
-	assert_eq(st.quest_stage("the_mad_mage"), "book_found")
-	assert_true(SideQuestPlay.text(beats).contains("two loose scrolls"), "the voiced line about the first two is unchanged")
-	assert_true(SideQuestPlay.text(beats).contains("two more scrolls"), "and a new line finds the last two")
+	assert_true(bool(st.get_flag(flag, false)))
+	assert_eq(st.quest_stage(quest), quest_stage)
 	for sp in LEVEL_6 + LEVEL_7:
 		assert_eq(_count(st, "spell_scroll__" + sp), 1, "one scroll of %s" % sp)
 	assert_eq(_count(st, "spell_scroll_level_1"), 0, "and not the two level 1 scrolls")
@@ -35,8 +67,27 @@ func test_opening_the_cairn_gives_two_level_6_and_two_level_7_scrolls_and_no_lev
 		for e: Dictionary in ch.inventory:
 			assert_false(str(e["id"]).begins_with("spell_scroll__") and not str(e["id"]).get_slice("__", 1) in LEVEL_6 + LEVEL_7,
 				"no other scroll turns up: %s" % e["id"])
-	SideQuestPlay.play(st, "mount_baratok/events:cairn")
+	SideQuestPlay.play(st, ref + ":cairn")
 	assert_eq(_count(st, "spell_scroll__chain_lightning"), 1, "it opens once")
+	return beats
+
+
+func test_opening_the_cairn_gives_two_level_6_and_two_level_7_scrolls_and_no_level_1_scroll() -> void:
+	var beats := _open_and_check("test_cairn/events", "fixture_peak", "test_spellbook_found", "test_book_hunt", "book_found")
+	assert_true(SideQuestPlay.text(beats).contains("two loose scrolls"), "the first two are told of")
+	assert_true(SideQuestPlay.text(beats).contains("two more scrolls"), "and a new line finds the last two")
+
+
+## The host game's own cairn, when it has one (Curse of Strahd's, on Mount Baratok): the same four scrolls, its quest and flag,
+## and the voiced line about the first two unchanged (a clip is keyed by its text).
+func test_the_hosts_own_cairn_gives_the_same_scrolls() -> void:
+	if DialogueFile.load_key("mount_baratok/events") == null or not Compendium.shared().has("quests", "the_mad_mage"):
+		return
+	var beats := _open_and_check("mount_baratok/events", "mount_baratok", "mordenkainen_spellbook_found", "the_mad_mage", "book_found")
+	assert_true(SideQuestPlay.text(beats).contains("two loose scrolls"), "the voiced line about the first two is unchanged")
+	assert_true(SideQuestPlay.text(beats).contains("two more scrolls"), "and a new line finds the last two")
+	# Berez's treasure is in the very rare band (docs/story/found_magic_items.md).
+	assert_true(Treasure.level_for("mount_baratok") >= 9, "very rare belongs to this mountain")
 
 
 func test_the_four_are_playable_spells_of_the_right_levels_and_very_rare_scrolls() -> void:
@@ -51,8 +102,9 @@ func test_the_four_are_playable_spells_of_the_right_levels_and_very_rare_scrolls
 			assert_false(scroll.is_empty(), "the scroll exists")
 			assert_eq(MagicItems.rarity(scroll), "very_rare", "%s: levels 6 to 8 are very rare" % sp)
 			assert_eq(Character.scroll_spell_of(scroll), sp)
-	# Berez's treasure is in the very rare band (docs/story/found_magic_items.md).
-	assert_true(Treasure.level_for("mount_baratok") >= 9, "very rare belongs to this mountain")
+	# A party at level 9 can roll treasure in the very rare band; the test's place is set at that level.
+	assert_eq(Treasure.level_for("fixture_peak"), 9)
+	assert_true(Treasure.rarity_weights(9).has("very_rare"), "very rare belongs to a place at level 9")
 
 
 ## A level 7 wizard has no slot above level 4: reading these takes the 2024 DMG's check (DC 10 + the spell's level), and a

@@ -1,8 +1,34 @@
 extends TestCase
-## The spells the Amber Temple's dark gifts grant can be cast (Ashwin, 2026-10-24: "yes, fix it"). A gift's modifiers join a
-## character through intrinsic_modifiers(), not the build's own list, so Character._collect_granted_spells never saw a gift's
-## `spell` modifier and no gift's spell (Fekre's Blight, Drizlash's Web, Khirad's Clairvoyance, Vaund's Misty Step, ...) reached
-## the spell list; it reads them now, with the gift's own casting ability and its uses a Long Rest.
+## The spells a dark gift grants can be cast (Ashwin, 2026-10-24: "yes, fix it"). A gift's modifiers join a character through
+## intrinsic_modifiers(), not the build's own list, so Character._collect_granted_spells never saw a gift's `spell` modifier and
+## no gift's spell reached the spell list; it reads them now, with the gift's own casting ability and its uses a Long Rest.
+## The gifts here are the ones the test builds (six, one per spell below) plus whatever dark gifts the host game has.
+
+var _fx := FixtureContent.new()
+
+## gift id -> [spell, ability, uses]; a count of "pb" is the Proficiency Bonus.
+const FIXTURE_GIFTS := {
+	"test_gift_web": ["web", "wis", "pb"],
+	"test_gift_blight": ["blight", "con", 1],
+	"test_gift_clairvoyance": ["clairvoyance", "wis", 1],
+	"test_gift_misty_step": ["misty_step", "dex", "pb"],
+	"test_gift_lightning_bolt": ["lightning_bolt", "con", 1],
+	"test_gift_cone_of_cold": ["cone_of_cold", "con", 1],
+}
+
+
+func before_each() -> void:
+	for id: String in FIXTURE_GIFTS:
+		var g := FIXTURE_GIFTS[id] as Array
+		_fx.add("dark_gifts", {
+			"id": id, "name": "Test Gift (%s)" % g[0], "summary": "A gift the test builds.",
+			"benefit": {"modifiers": [{"stat": "spell", "value": g[0], "ability": g[1], "uses": {"count": g[2], "recharge": "long"}}],
+				"spells": [g[0]], "text": "A spell a Long Rest."},
+			"cost": {"modifiers": [], "text": "None."}})
+
+
+func after_each() -> void:
+	_fx.restore()
 
 
 func _gift_spells() -> Dictionary:
@@ -74,9 +100,9 @@ func test_a_gifts_spell_is_on_the_list_free_in_a_fight() -> void:
 			assert_true(bool(entry.get("legal", false)), "%s: %s can be cast now (%s)" % [gift, spell, entry.get("reason", "")])
 
 
-## Drizlash's Web is cast from the gift, and the cast spends one of its uses.
-func test_drizlashs_web_is_cast_and_spent() -> void:
-	var ch := _hero_with("gift_of_drizlash", 5)
+## A web gift is cast from the gift, and the cast spends one of its uses.
+func test_a_web_gift_is_cast_and_spent() -> void:
+	var ch := _hero_with("test_gift_web", 5)
 	var e := TestCombat.open_field()
 	var c := e.add(ch, &"party", Vector2i(2, 2))
 	TestCombat.foe(e, "zombie", Vector2i(9, 5))
