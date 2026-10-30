@@ -117,6 +117,7 @@ func test_a_string_of_bulbs_lights_a_few_lamps() -> void:
 
 
 func test_a_game_paints_its_own_moon() -> void:
+	Campaign.use_config({"module": "res://nowhere.gd"})
 	var mat := _post()
 	PaintedFinish.apply(mat, Look.painted_settings())
 	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "the plain disc by default")
@@ -165,6 +166,7 @@ func test_the_nearest_figures_are_handed_on_walking_or_standing() -> void:
 
 
 func test_wakes_and_parting_plants_only_when_the_game_asks() -> void:
+	Campaign.use_config({"module": "res://nowhere.gd"})
 	var a := Atmosphere.new()
 	add_child(a)
 	assert_true(FigureWake.build(a, Look.painted_settings()) == null, "none by default")

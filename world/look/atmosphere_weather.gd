@@ -77,6 +77,10 @@ static func build(parent: Node, board: ArenaBoard, mood: Dictionary, outdoors: b
 	if int(hd["motes"]) > 0 and Look.modern():
 		w._motes({"amount": int(hd["motes"]), "core": hd["mote_colour"], "rim": hd["mote_rim"],
 			"size": hd["mote_size"], "night_only": hd["motes_night_only"]})
+	# The game's painted bats (Look.PAINTED "bats"): a flock over every place out of doors.
+	var painted := (parent as Atmosphere).painted if parent is Atmosphere else Look.PAINTED
+	if int(painted["bats"]) > 0 and outdoors and Look.modern():
+		w._crows({"amount": int(painted["bats"])}, true)
 	# Sunbeams and moonbeams through the gaps in the trees and between the houses (Visual Polish Plan 2).
 	if outdoors and parent is Atmosphere:
 		SunShafts.build(parent as Atmosphere, board, view)
