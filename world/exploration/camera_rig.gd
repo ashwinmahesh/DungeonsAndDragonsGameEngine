@@ -3,7 +3,11 @@ extends Node3D
 ## Fixed-pitch exploration camera (plan §4.1): about 40 degrees down, rotates in 90 degree steps,
 ## zooms, and follows a target smoothly. Sprites are rendered for these 8 headings.
 
+## Curse of Strahd's pitch, the default. A game sets its own in data/campaign.json ("camera": {"pitch": 30}, degrees
+## down; play_pitch), and its sprites are drawn for that angle.
 const PITCH_DEG := -40.0
+## The pitches a campaign may ask for (degrees down): flatter shows the sky, steeper turns into a map.
+const PITCH_RANGE := Vector2(20.0, 60.0)
 const ZOOM_MIN := 7.0
 const ZOOM_MAX := 22.0
 ## Past the farthest zoom, the wheel tilts the camera toward the horizon over HORIZON_STEPS more steps (owner pick
@@ -26,6 +30,8 @@ const SHAKE_FADE := 3.0
 
 var follow: Node3D
 var camera: Camera3D
+## This rig's play pitch (degrees, negative: down), the campaign's (play_pitch) unless a tool sets another.
+var pitch_deg := PITCH_DEG
 ## The pad's right stick turns the camera (a flick left or right is a quarter turn) and zooms it (up and down) while
 ## this is on: exploring turns it on (game_root); a fight's radial menu aims with the stick instead (U6).
 var pad_look := false
@@ -61,12 +67,23 @@ var _touch_yaw := 0.0
 
 func _init() -> void:
 	name = "CameraRig"
+	pitch_deg = play_pitch()
 	camera = Camera3D.new()
 	camera.fov = 32.0
 	camera.near = 0.3
 	camera.far = _far
 	add_child(camera)
 	_yaw = deg_to_rad(45.0)
+
+
+## The play camera's pitch for this game (degrees, negative: down): data/campaign.json's "camera" "pitch" (degrees
+## down, within PITCH_RANGE), else PITCH_DEG. The combat camera, the talk and impact shots (which lean off it), the
+## see-through walls (which follow the camera wherever it is) and the sun's shadow reach (Atmosphere) all go by it.
+static func play_pitch() -> float:
+	var cam: Variant = Campaign.config().get("camera", {})
+	if not cam is Dictionary or not (cam as Dictionary).has("pitch"):
+		return PITCH_DEG
+	return -clampf(absf(float((cam as Dictionary)["pitch"])), PITCH_RANGE.x, PITCH_RANGE.y)
 
 
 func rotate_step(dir: int) -> void:
@@ -183,7 +200,7 @@ func _apply() -> void:
 	var k := smoothstep(0.0, 1.0, horizon_shown)
 	var kt := smoothstep(0.0, 1.0, tactical_shown)
 	var reduce := MobileNative.reduced_motion()
-	var pitch := lerpf(PITCH_DEG, TACTICAL_PITCH_DEG, kt) + (0.0 if reduce else shot_pitch)
+	var pitch := lerpf(pitch_deg, TACTICAL_PITCH_DEG, kt) + (0.0 if reduce else shot_pitch)
 	var play := deg_to_rad(pitch)
 	var d := distance * (1.0 if reduce else shot_zoom) * lerpf(1.0, TACTICAL_ZOOM, kt)
 	var at := Vector3(0, -sin(play) * d, cos(play) * d) + Vector3(0, 0.6, 0)

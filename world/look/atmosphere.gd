@@ -329,12 +329,14 @@ var _fitted_distance := -1.0
 
 ## The sun's shadow reaches only as far as the camera can see, in splits packed round the ground in view (the camera
 ## looks 40 degrees down with a 32 degree field, so the ground in view runs from about 0.75 to 1.5 times its distance
-## to the party), so a square near the party gets four times the shadow detail it had with one 60 unit reach.
+## to the party), so a square near the party gets four times the shadow detail it had with one 60 unit reach. A
+## flatter camera (CameraRig.pitch_deg) sees further up the screen, and the reach and splits stretch with it (30
+## degrees down: about 1.3 times as far).
 func _fit_sun_shadows() -> void:
 	if _rig == null or not Look.modern() or is_equal_approx(_rig.distance, _fitted_distance):
 		return
 	_fitted_distance = _rig.distance
-	var d := _rig.distance
+	var d := _rig.distance * shadow_reach(_rig.pitch_deg, _rig.camera.fov)
 	var far := d * 1.7 + 12.0
 	sun.directional_shadow_max_distance = far
 	if sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS:
@@ -343,6 +345,14 @@ func _fit_sun_shadows() -> void:
 		sun.directional_shadow_split_3 = d * 1.45 / far
 	else:
 		sun.directional_shadow_split_1 = d * 1.15 / far
+
+
+## How much further the ground at the top of the screen lies, for a camera `pitch_deg` down (negative) with a vertical
+## field of `fov` degrees, than at Curse of Strahd's 40 degrees (1 there).
+static func shadow_reach(pitch_deg: float, fov: float) -> float:
+	var far_at := func(p: float) -> float:
+		return sin(deg_to_rad(p)) / sin(deg_to_rad(maxf(p - fov / 2.0, 6.0)))
+	return float(far_at.call(absf(pitch_deg))) / float(far_at.call(absf(CameraRig.PITCH_DEG)))
 
 
 ## Shadows for the lights near the party, up to the graphics preset's budget (W2): lamps, hearths, lit windows, the

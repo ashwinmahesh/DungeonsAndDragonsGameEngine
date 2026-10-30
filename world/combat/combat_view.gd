@@ -261,7 +261,7 @@ func _frame_the_fight(snap: bool) -> void:
 ## Whether every point in `spots` would show in the screen's clear middle (inside the turn order, party list, log and
 ## hotbar) with the rig at `at`, `dist` away: the rig's camera worked out by hand, as it isn't there yet.
 func _all_in_view(spots: Array[Vector3], at: Vector3, dist: float) -> bool:
-	var pitch := deg_to_rad(CameraRig.PITCH_DEG)
+	var pitch := deg_to_rad(rig.pitch_deg)
 	var turn := Basis(Vector3.UP, rig.rotation.y)
 	var basis := turn * Basis(Vector3.RIGHT, pitch)
 	var eye := at + turn * Vector3(0, -sin(pitch) * dist + 0.6, cos(pitch) * dist)
