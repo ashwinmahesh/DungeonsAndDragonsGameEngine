@@ -2,7 +2,8 @@ class_name Formula
 extends RefCounted
 ## Evaluates the small value expressions data uses (docs/contracts/modifiers.md):
 ## 3, "pb", "2*class_level+mod:int", "level/2", "-2*exhaustion".
-## Terms: integer, pb, level, class_level, slot_level, exhaustion, mod:<ability>, score:<ability>,
+## Terms: integer, pb, level, class_level, slot_level, exhaustion, tier (1 below level 7, 2 from 7, 3 from 13),
+## mod:<ability>, score:<ability>,
 ## each optionally scaled as N*term or term/N (rounded down). The caller supplies the term values.
 
 

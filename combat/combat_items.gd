@@ -247,6 +247,8 @@ func power_why(c: Combatant, p: Dictionary, level: int = 0) -> String:
 		return "Equip it first: in hand or in your other weapon set (inventory)"
 	if bool(power.get("combat", true)) == false:
 		return "Outside combat only"
+	if ch.character_level() < int(power.get("min_level", 0)):
+		return "From level %d" % int(power["min_level"])   # a growing item's later power
 	if str(power.get("custom", "")) == "ioun_orbit" and ch.equipped_all("ioun").size() >= MagicItems.IOUN_MAX:
 		return "Three Ioun Stones already orbit your head; stow them first"
 	var spell_id := power_spell(iid, power)
@@ -927,7 +929,8 @@ static func _rules(data: Dictionary, unarmed: bool = false) -> Dictionary:
 	return (data.get("unarmed_rules" if unarmed else "weapon_rules", {}) as Dictionary)
 
 
-## Whether a weapon rule's conditions hold: `vs` creature types, `while` a toggle is on, `nat20`/`crit` only.
+## Whether a weapon rule's conditions hold: `vs` creature types, `vs_condition` a condition the target has, `while` a
+## toggle is on, `nat20`/`crit` only.
 func _rule_applies(c: Combatant, target: Combatant, iid: String, rule: Dictionary, st: Dictionary) -> bool:
 	var vs := rule.get("vs", []) as Array
 	if not vs.is_empty() and not str(target.creature.creature_type) in vs:
@@ -944,6 +947,8 @@ func _rule_applies(c: Combatant, target: Combatant, iid: String, rule: Dictionar
 		return false
 	if rule.has("vs_marked") and str(c.get_meta(str(rule["vs_marked"]), "")) != target.id:
 		return false
+	if rule.has("vs_condition") and not target.creature.has_condition(StringName(str(rule["vs_condition"]))):
+		return false   # only against a creature that has it (Frightened)
 	if rule.has("ranged") and bool(rule["ranged"]) == bool((st["option"] as Dictionary).get("melee", true)):
 		return false
 	if rule.has("melee") and bool(rule["melee"]) != bool((st["option"] as Dictionary).get("melee", true)):

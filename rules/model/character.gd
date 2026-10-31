@@ -592,10 +592,11 @@ func _reset_budgets(e: Dictionary, data: Dictionary, when: String) -> void:
 		(e["budget_used"] as Dictionary).erase(str(pw.get("id", "")))
 
 
-## Dusk: items that regain charges at dusk (the Robe of Stars' stars).
+## Dusk: items that regain charges at dusk (the Robe of Stars' stars), and powers used "per dusk" come back.
 func on_dusk(dice: DiceRoller) -> void:
 	for e in inventory:
 		var data := compendium.item_data(str(e["id"]))
+		_reset_uses(e, data, ["dusk"])
 		var spec := MagicItems.charges(data)
 		if spec.is_empty() or str(spec.get("when", "")) != "dusk" or not spec.has("regain"):
 			continue
