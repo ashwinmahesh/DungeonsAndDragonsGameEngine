@@ -182,6 +182,23 @@ func _turn_start_flags(c: Combatant) -> void:
 		e.log.add("info", "%s can't take an action or a Bonus Action this turn" % c.name(), c.id)
 	if e.needs_death_save(c) and not c.is_player_controlled():
 		e.death_save(c, false)
+	_take_opening(c)
+
+
+## The party's chosen opening (Encounter.opening), made by `c` as its first turn begins: the flask thrown at its target
+## (EncounterActions.throw_flask), costing one of its attacks as any throw does. Spent whether or not it could be made.
+func _take_opening(c: Combatant) -> void:
+	var e := enc()
+	if e.opening.is_empty() or str(e.opening.get("by", "")) != c.id:
+		return
+	var o := e.opening
+	e.opening = {}
+	var target := e.get_c(str(o.get("target", "")))
+	if str(o.get("kind", "")) != "flask" or target == null or not target.is_alive() or target.has_meta("left_fight") or not c.can_act():
+		return
+	var r := e.actions.throw_flask(c, str(o["item"]), target)
+	if not r.ok:
+		e.log.add("info", "%s can't throw it now: %s" % [c.name(), r.reason], c.id)
 
 
 ## Ends the current creature's turn: end-of-turn effects and repeated saves, then the next creature (and round).

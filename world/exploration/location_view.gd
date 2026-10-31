@@ -102,6 +102,9 @@ var sneaking := false
 var sneak_totals: Dictionary = {}    ## Creature -> int
 var sneak_rolled: Dictionary = {}    ## Creature -> the game minute its total was rolled (StoryState.total_minutes)
 var waiting: Array[Dictionary] = []
+## What a party member chose to open the next fight with from the menu (LocationNpcs.throw_at_foe): {member (index),
+## item, cell}; the fight takes it as it starts (Encounter.opening) and clears it.
+var opening: Dictionary = {}
 ## The waiting fights whose area the party stepped into unnoticed while sneaking and has not left yet (LocationStealth.
 ## step_in): encounter id -> true. Not saved: a load forgets them.
 var _slipping: Dictionary = {}

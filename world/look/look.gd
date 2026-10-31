@@ -284,6 +284,14 @@ static func color(name: String) -> Color:
 	return Color(str(_colours[name]))
 
 
+## The palette key a menu colour comes from: a game names it in ui_palette.json (Crooked Moon's Witchlight menus set
+## ui_primary for the End Turn and pressed buttons), else the palette colour it stands in for, so a game that sets nothing
+## (Curse of Strahd) keeps its look.
+static func ui_key(name: String, fallback: String) -> String:
+	color("void")
+	return name if _colours.has(name) else fallback
+
+
 static func palette_size() -> int:
 	color("void")
 	return _palette.size()
