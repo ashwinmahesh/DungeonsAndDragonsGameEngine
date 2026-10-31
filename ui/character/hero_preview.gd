@@ -3,6 +3,10 @@ extends Control
 ## The custom hero's live sprite in the creator (docs/ui/character_creation.md, Appearance): the paper doll as the
 ## game puts it together (HeroLook), standing in a gothic arch and slowly turning through the 8 directions, or
 ## walking, or swinging its attack once. Taller picks stand taller in the arch.
+##
+## A look with a 3D body (HeroLook.figure_for) shows that figure instead, on a turntable in a little stage of its own
+## (a SubViewport): it turns slowly while standing, can be dragged round, walks, runs, swings, casts and greets with
+## the figure's own clips, and wears the parts it is given (`gear`, its starting gear: FigureModels.gear_for).
 
 signal turned(dir: String)
 
@@ -22,6 +26,21 @@ var _clock := 0.0
 var _turn_clock := 0.0
 var _pic: TextureRect
 var _note: Label
+## The 3D stage: the viewport, the turntable the figure stands on, and the figure (null for the paper doll).
+var _view: SubViewportContainer
+var _port: SubViewport
+var _table: Node3D
+var _camera: Camera3D
+var _fig: ModelFigure
+var _fig_body := ""
+## Parts the 3D figure wears (its starting gear).
+var gear: Array = []
+## Radians a second the standing figure turns, and how far a drag of one pixel turns it.
+const SPIN := 0.45
+const DRAG_TURN := 0.012
+## How fast the figure walks and runs, in squares a second (ModelFigure paces its clips to it).
+const WALK_PACE := 1.3
+const RUN_PACE := 3.6
 
 
 func _init() -> void:
@@ -43,7 +62,33 @@ func _init() -> void:
 func show_look(app: Dictionary, species_id: String) -> void:
 	appearance = app.duplicate()
 	species = species_id
+	var body := HeroLook.figure_for(appearance, species)
+	if body != "":
+		_show_figure(body)
+		return
+	_drop_figure()
 	_reload()
+
+
+## Whether the hero is shown as a 3D figure.
+func is_figure() -> bool:
+	return _fig != null
+
+
+## The parts the 3D figure wears (its starting gear), put on at once.
+func wear(parts: Array) -> void:
+	gear = parts.duplicate()
+	if _fig != null:
+		_fig.wear(gear)
+		_ink()
+
+
+## The figure's line as wide on the turntable as it is in play: the line is set in pixels at 1080 lines of the screen
+## it is drawn on, and this stage is only as tall as the arch.
+func _ink() -> void:
+	var px := float(Look.figure_settings().get("ink", 0.0))
+	if px > 0.0 and _view != null:
+		_fig.set_ink_width(px * 1080.0 / maxf(_view.size.y, 1.0) * 0.6)
 
 
 func dir() -> String:
@@ -51,6 +96,9 @@ func dir() -> String:
 
 
 func turn(step: int) -> void:
+	if _fig != null:
+		_table.rotation.y += float(step) * PI / 4.0
+		return
 	dir_index = posmod(dir_index + step, 8)
 	_turn_clock = 0.0
 	_reload()
@@ -59,7 +107,127 @@ func turn(step: int) -> void:
 
 func set_mode(m: String) -> void:
 	mode = m
+	if _fig != null:
+		_figure_mode()
+		return
 	_reload()
+
+
+# --- The 3D figure -------------------------------------------------------------------------------------------------
+
+## The stage, made the first time a figure is shown: a transparent viewport inside the arch with its own world, a
+## camera a little above the figure's middle looking slightly down, a key light from the front left, a cool rim from
+## behind and soft ambient light, and a turntable for the figure.
+func _stage() -> void:
+	if _view != null:
+		return
+	_view = SubViewportContainer.new()
+	_view.stretch = true
+	_view.position = Vector2(10, 40)
+	_view.size = ARCH - Vector2(20, 46)
+	_view.mouse_filter = Control.MOUSE_FILTER_STOP
+	_view.gui_input.connect(_drag)
+	add_child(_view)
+	move_child(_view, 0)
+	_port = SubViewport.new()
+	_port.transparent_bg = true
+	_port.own_world_3d = true
+	_port.msaa_3d = Viewport.MSAA_4X
+	_port.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	_view.add_child(_port)
+	var env := Environment.new()
+	env.background_mode = Environment.BG_CLEAR_COLOR
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Look.color("parchment")
+	env.ambient_light_energy = 0.22
+	_camera = Camera3D.new()
+	_camera.environment = env
+	_camera.fov = 30.0
+	_port.add_child(_camera)
+	var key := DirectionalLight3D.new()
+	key.light_energy = 1.25
+	key.rotation = Vector3(deg_to_rad(-30.0), deg_to_rad(-62.0), 0.0)   # from the front left, so half the figure is in shade
+	_port.add_child(key)
+	var rim := DirectionalLight3D.new()
+	rim.light_energy = 0.6
+	rim.light_color = Color(0.62, 0.7, 0.95)
+	rim.rotation = Vector3(deg_to_rad(-20.0), deg_to_rad(160.0), 0.0)
+	_port.add_child(rim)
+	_table = Node3D.new()
+	_table.name = "Turntable"
+	_port.add_child(_table)
+
+
+## Shows `body` as the hero: a fresh figure when the body changes, the same one resized when only the height does.
+func _show_figure(body: String) -> void:
+	_stage()
+	_pic.visible = false
+	_note.text = ""
+	var h := HeroLook.height_units(appearance, species)
+	if _fig == null or _fig_body != body or not is_equal_approx(float(_fig.get_meta("drawn_height", 0.0)), h):
+		if _fig != null:
+			_fig.queue_free()
+		_fig = DirectionalSprite.create(FigureModels.frames(body), h) as ModelFigure
+		_fig.set_meta("drawn_height", h)
+		_fig_body = body
+		_table.add_child(_fig)
+		_fig.attack_finished.connect(func() -> void: set_mode("turn"))
+		_fig.wear(gear)
+		_ink()
+	# Framed so the tallest figure fills the arch: the camera backs off with the height, a little above its middle.
+	var fit := maxf(h, 1.0) * 1.18
+	var dist := fit * 0.5 / tan(deg_to_rad(_camera.fov * 0.5))
+	var target := Vector3(0.0, h * 0.5, 0.0)
+	var eye := target + Vector3(0.0, dist * sin(deg_to_rad(12.0)), dist * cos(deg_to_rad(12.0)))
+	_camera.transform = Transform3D(Basis.looking_at(target - eye), eye)   # works before the stage is in the tree
+	_figure_mode()
+
+
+func _drop_figure() -> void:
+	if _fig != null:
+		_fig.queue_free()
+		_fig = null
+		_fig_body = ""
+	if _view != null:
+		_view.queue_free()
+		_view = null
+	_pic.visible = true
+
+
+## The figure does what the mode asks: stands (turning), walks or runs on the spot at a pace its clips match, or
+## swings, casts or greets once and then stands again.
+func _figure_mode() -> void:
+	_fig.moving = mode in ["walk", "run"]
+	if _fig.moving:
+		_fig.set_step_time(1.0 / (RUN_PACE if mode == "run" else WALK_PACE))
+	match mode:
+		"attack":
+			if not _fig.attack():
+				mode = "turn"
+		"cast":
+			if not _fig.cast() and not _fig.attack():
+				mode = "turn"
+			else:
+				_back_to_standing()
+		"greet":
+			_fig.gesture("greet")
+			_back_to_standing()
+
+
+## After a cast or a greeting (which say nothing when they end), standing again once the clip has played.
+func _back_to_standing() -> void:
+	var was := mode
+	await get_tree().create_timer(2.2).timeout
+	if mode == was and is_instance_valid(_fig):
+		set_mode("turn")
+
+
+func _drag(e: InputEvent) -> void:
+	if _table == null:
+		return
+	if e is InputEventMouseMotion and ((e as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		_table.rotation.y += (e as InputEventMouseMotion).relative.x * DRAG_TURN
+		_turn_clock = -1.5   # a dragged figure stays where it was put for a moment
 
 
 func _reload() -> void:
@@ -96,6 +264,11 @@ func _show_frame() -> void:
 
 
 func _process(delta: float) -> void:
+	if _fig != null:
+		_turn_clock += delta
+		if mode == "turn" and _turn_clock > 0.0:
+			_table.rotation.y += SPIN * delta
+		return
 	if _frames.is_empty():
 		return
 	match mode:

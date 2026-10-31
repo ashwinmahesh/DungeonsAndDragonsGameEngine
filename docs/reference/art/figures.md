@@ -128,6 +128,29 @@ the off hand is mirrored (`FigureModels.mirrored`, the id with `@off`). A figure
 shows none, since its model has its things drawn on. `CombatToken` dresses a character's figure when it is made and
 again whenever what they have on changes, whatever changed it.
 
+## Bodies: made heroes as figures
+
+A game whose heroes are 3D names the body a made hero wears under the manifest's `bodies`: species id (`"*"` for any)
+to gender (`"*"` for any) to a figure id, the species' own before `"*"`. `FigureModels.body_for(species, gender)` reads
+it; `HeroLook.figure_for(appearance, species)` asks it for a look.
+
+```json
+"bodies": {"*": {"female": "hero_body_female", "male": "hero_body_male"}, "curseborn": {"male": "curseborn_man"}},
+"figures": {"hero_body_female": {"base": "some_figure", "albedo": "art/figures/clay.png"}}
+```
+
+- `HeroLook.register` (called by `CombatToken.art_for` for every made hero) registers the hero's own art id as a figure
+  laid over that body (`base`), so their token, the gray-box room and anything else that draws them draws the body, at
+  the height `HeroLook.height_units` gives (the catalog's `species_heights` and height pick), wearing their gear when
+  the body's entry lists `gear` slots. A look with no body keeps the paper doll.
+- The creator's Appearance step (`AppearancePanel`, `HeroPreview`) shows the body on a turntable in a viewport of its
+  own: it turns slowly, can be dragged round, and stands, walks, runs, swings, casts and greets with its own clips,
+  wearing the hero's starting gear (`FigureModels.gear_for` on the builder's preview). Genders are offered where a
+  body exists; the picks only the paper doll draws (builds, heads, hair, beards, outfits, skin and hair colours) are
+  left out, and a tab with nothing to pick isn't shown.
+- A game with figures still keeps an `art/creator/catalog.json` for the rest of the look: genders, heights,
+  `species_heights`, portraits, voices and the defaults.
+
 ## The look
 
 `shaders/world/lit_figure.gdshader` and its ink pass `figure_ink.gdshader` light a figure the way the 2D figures are lit:

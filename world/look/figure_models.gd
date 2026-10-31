@@ -60,6 +60,8 @@ static var _registered: Dictionary = {}
 static var _parts: Dictionary = {}
 ## The manifests' "gear": item id (or the mundane item under a magic one) -> the part it shows as.
 static var _gear: Dictionary = {}
+## The manifests' "bodies": species id ("*" for any) -> gender ("*" for any) -> the figure a made hero wears.
+static var _bodies: Dictionary = {}
 static var _registered_parts: Dictionary = {}
 static var _frames: Dictionary = {}
 static var _blank: ImageTexture
@@ -74,6 +76,7 @@ static func manifest() -> Dictionary:
 		_defaults = all.get("defaults", {}) as Dictionary
 		_parts = all.get("parts", {}) as Dictionary
 		_gear = all.get("gear", {}) as Dictionary
+		_bodies = all.get("bodies", {}) as Dictionary
 	return _manifest
 
 
@@ -183,6 +186,7 @@ static func forget() -> void:
 	_defaults = {}
 	_parts = {}
 	_gear = {}
+	_bodies = {}
 	_entries.clear()
 	_frames.clear()
 
@@ -220,6 +224,18 @@ static func register_part(part_id: String, entry: Dictionary, packed: PackedScen
 
 static func unregister_part(part_id: String) -> void:
 	_registered_parts.erase(part_id)
+
+
+## The figure a made hero of `species` and `gender` wears (the manifests' "bodies", the species' own before "*"), or
+## "" when there is none and the hero keeps the paper doll (HeroLook).
+static func body_for(species: String, gender: String) -> String:
+	manifest()
+	for key: String in [species, "*"]:
+		var by := _bodies.get(key, {}) as Dictionary
+		var id := str(by.get(gender, by.get("*", "")))
+		if id != "" and has(id):
+			return id
+	return ""
 
 
 ## A part's id with this after it is the part held in the other hand (ModelFigure.wear).

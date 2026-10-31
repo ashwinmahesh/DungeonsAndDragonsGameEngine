@@ -5,6 +5,10 @@ extends HBoxContainer
 ## beside the live sprite (HeroPreview). Heads, hairstyles and beards show as small pictures of this hero's own head
 ## with that pick; skin tones and hair colours as arched swatches of their shades. Every pick is sent back through
 ## `changed(appearance)`; the panel redraws itself.
+##
+## A look with a 3D body (HeroLook.figure_for) shows the figure on a turntable instead (HeroPreview), with its run,
+## cast and greet too; the picks only the paper doll draws (build, heads, hair, beards, outfits, skin and hair
+## colours) are left out until the game has art for them, and a tab with nothing to pick isn't shown.
 
 signal changed(appearance: Dictionary)
 signal tab_changed(tab: String)
@@ -49,11 +53,41 @@ static func create(app: Dictionary, species_id: String, cls: String, start_tab: 
 	row.add_child(UiParts.small_button("Stand", func() -> void: p._preview.set_mode("turn")))
 	row.add_child(UiParts.small_button("Walk", func() -> void: p._preview.set_mode("walk")))
 	row.add_child(UiParts.small_button("Attack", func() -> void: p._preview.set_mode("attack")))
+	if HeroLook.figure_for(p.appearance, species_id) != "":
+		row.add_child(UiParts.small_button("Run", func() -> void: p._preview.set_mode("run")))
+		row.add_child(UiParts.small_button("Cast", func() -> void: p._preview.set_mode("cast")))
+		row.add_child(UiParts.small_button("Greet", func() -> void: p._preview.set_mode("greet")))
 	row.add_child(UiParts.small_button("▶", func() -> void: p._preview.turn(1)))
 	p._side.add_child(row)
 	p._redraw()
 	p._preview.show_look(p.appearance, species_id)
 	return p
+
+
+## The parts the 3D figure wears in the preview (the hero's starting gear, FigureModels.gear_for).
+func set_gear(parts: Array) -> void:
+	_preview.wear(parts)
+
+
+## Whether the paper doll draws this look (its 2D picks are offered); a look with a 3D body draws none of them.
+func _paper_doll() -> bool:
+	return HeroLook.figure_for(appearance, species) == ""
+
+
+## The tabs with something to pick.
+func _tabs() -> Array[String]:
+	var out: Array[String] = []
+	for t in TABS:
+		match t:
+			"Head":
+				if not _paper_doll() or (HeroLook.offered(appearance, "heads").is_empty()
+						and HeroLook.offered(appearance, "hair").size() <= 1 and HeroLook.offered(appearance, "beards").size() <= 1):
+					continue
+			"Outfit":
+				if not _paper_doll() or HeroLook.offered(appearance, "outfits").is_empty():
+					continue
+		out.append(t)
+	return out
 
 
 func _pick(key: String, value: String) -> void:
@@ -79,7 +113,10 @@ func _pick(key: String, value: String) -> void:
 func _redraw() -> void:
 	for c in _left.get_children():
 		c.queue_free()
-	_left.add_child(UiParts.tab_strip(TABS, tab, func(t: String) -> void:
+	var tabs := _tabs()
+	if not tab in tabs:
+		tab = tabs[0]
+	_left.add_child(UiParts.tab_strip(tabs, tab, func(t: String) -> void:
 		tab = t
 		tab_changed.emit(t)
 		_redraw(), {}, 14))
@@ -90,7 +127,10 @@ func _redraw() -> void:
 			_choice_row(body, "Gender", "genders", "gender")
 			_choice_row(body, "Build", "builds", "build")
 			_choice_row(body, "Height", "heights", "height")
-			_swatches(body, "Skin", "skins", "skin")
+			if _paper_doll():
+				_swatches(body, "Skin", "skins", "skin")
+			else:
+				body.add_child(UiKit.label("Faces, hair, skin and builds for each species come with its own bodies. Until then every hero stands as a plain figure of their height.", 13, "parchment", OPTIONS_W))
 		"Head":
 			_pictures(body, "Head", "heads", "head", 4)
 			_pictures(body, "Hair", "hair", "hair", 5)
@@ -106,10 +146,13 @@ func _redraw() -> void:
 
 ## Plain choices as a row of buttons, the current one lit.
 func _choice_row(box: VBoxContainer, title: String, category: String, key: String) -> void:
+	var offered := HeroLook.offered(appearance, category, species)
+	if offered.is_empty():
+		return
 	box.add_child(UiParts.section(title))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
-	for o: Variant in HeroLook.offered(appearance, category):
+	for o: Variant in offered:
 		var id := str((o as Dictionary)["id"])
 		var b := UiKit.button(str((o as Dictionary)["label"]), func() -> void: _pick(key, id), 15)
 		b.custom_minimum_size = Vector2(110, 36)

@@ -29,6 +29,8 @@ static var _frames: Dictionary = {}
 static var _views: Dictionary = {}
 ## Art id -> {appearance, species} for the custom characters met so far (CombatToken.art_for registers them).
 static var _known: Dictionary = {}
+## Art id -> the 3D body a registered hero wears (_wear_body).
+static var _bodied: Dictionary = {}
 
 
 # --- Catalog ----------------------------------------------------------------------------------------------------
@@ -70,27 +72,29 @@ static func default_appearance(gender: String = "female", class_id: String = "")
 
 ## The options of `category` the creator can offer with the look's other picks: those whose art exists. Bodies are
 ## gender x build x outfit, heads gender x head; hair, beards and portraits by their own art; colours, heights and
-## voices always.
-static func offered(app: Dictionary, category: String) -> Array:
+## voices always. A gender is also offered when the figures manifest has a 3D body for it (FigureModels.body_for).
+static func offered(app: Dictionary, category: String, species: String = "") -> Array:
 	var out: Array = []
 	for o: Variant in options(category):
 		var id := str((o as Dictionary)["id"])
-		if _has_art(app, category, id):
+		if _has_art(app, category, id, species):
 			out.append(o)
 	return out
 
 
-static func offered_ids(app: Dictionary, category: String) -> Array[String]:
+static func offered_ids(app: Dictionary, category: String, species: String = "") -> Array[String]:
 	var out: Array[String] = []
-	for o: Variant in offered(app, category):
+	for o: Variant in offered(app, category, species):
 		out.append(str((o as Dictionary)["id"]))
 	return out
 
 
-static func _has_art(app: Dictionary, category: String, id: String) -> bool:
+static func _has_art(app: Dictionary, category: String, id: String, species: String = "") -> bool:
 	var g := str(app.get("gender", "female"))
 	match category:
 		"genders":
+			if FigureModels.body_for(species, id) != "":
+				return true
 			for b: Variant in options("builds"):
 				for o: Variant in options("outfits"):
 					if _body_ready("%s_%s_%s" % [id, (b as Dictionary)["id"], (o as Dictionary)["id"]]):
@@ -167,7 +171,28 @@ static func register(ch: Character) -> String:
 	var app := ch.build.get("appearance", {}) as Dictionary
 	var art := str(app.get("art", app.get("portrait", "hero_01")))
 	_known[art] = {"appearance": app.duplicate(), "species": species_key(ch)}
+	_wear_body(art, app, str(ch.build.get("species", "")))
 	return art
+
+
+# --- 3D bodies (docs/reference/art/figures.md, "Bodies") -----------------------------------------------------------
+
+## The 3D figure a look is drawn as: the body the figures manifest names for the species and gender
+## (FigureModels.body_for), or "" for the paper doll.
+static func figure_for(app: Dictionary, species: String = "") -> String:
+	return FigureModels.body_for(species, str(app.get("gender", "female")))
+
+
+## A hero whose look has a body is registered as a figure under their own art id, wearing that body, so every place
+## that draws them (their token, the gray-box room) draws it; one that no longer has a body is let go.
+static func _wear_body(art: String, app: Dictionary, species: String) -> void:
+	var body := figure_for(app, species)
+	if body != "":
+		FigureModels.register(art, {"base": body})
+		_bodied[art] = body
+	elif _bodied.has(art):
+		FigureModels.unregister(art)
+		_bodied.erase(art)
 
 
 static func known(art_id: String) -> bool:
@@ -178,6 +203,8 @@ static func known(art_id: String) -> bool:
 static func frames_for_art(art_id: String) -> SpriteFrames:
 	if not _known.has(art_id):
 		return null
+	if _bodied.has(art_id) and FigureModels.has(art_id):
+		return FigureModels.frames(art_id)
 	return frames((_known[art_id] as Dictionary)["appearance"] as Dictionary)
 
 

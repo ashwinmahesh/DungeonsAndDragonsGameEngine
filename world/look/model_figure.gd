@@ -256,6 +256,25 @@ func set_ghost(amount: float) -> void:
 	_each_mesh("ghost", amount)
 
 
+## The ink line drawn `px` pixels wide (at 1080 lines) on this figure alone: a close view (the creator's turntable)
+## wants a wider line than the play camera's. Its surfaces' materials are copied, so other figures keep theirs; parts
+## worn after this keep the usual line.
+func set_ink_width(px: float) -> void:
+	for gi in _meshes:
+		var mi := gi as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var m := mi.get_surface_override_material(i) as ShaderMaterial
+			if m == null or not (m.next_pass is ShaderMaterial) or (m.next_pass as ShaderMaterial).shader != INK:
+				continue
+			var own := m.duplicate() as ShaderMaterial
+			var ink := (m.next_pass as ShaderMaterial).duplicate() as ShaderMaterial
+			ink.set_shader_parameter("width", px)
+			own.next_pass = ink
+			mi.set_surface_override_material(i, own)
+
+
 ## A ghost's look, as a manifest entry's "ghost" gives it (each 0 to 1, any left out is none): `wash` toward its colour
 ## (set_ghost), `colour` (a palette name; the material's grey without one), `glow` its own light (set_glow),
 ## `see_through` the share of it the world shows through, `rim` a glow along its edges, `pulse` how far its glow

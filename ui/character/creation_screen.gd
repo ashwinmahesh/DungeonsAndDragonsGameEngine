@@ -690,6 +690,10 @@ func _appearance_step() -> void:
 			if portrait_changed:
 				_draw_strip())
 		_body.add_child(panel)
+		# A hero drawn as a 3D figure wears their starting gear in the preview, as they will in the world.
+		var body := HeroLook.figure_for(app, str(b().build.get("species", "")))
+		if body != "":
+			panel.set_gear(FigureModels.gear_for(body, b().preview()))
 		return
 	if rebuilding and str(app.get("art", "")) != "":
 		# A prebuilt hero rebuilt at Madam Eva's keeps their own look (owner, 2026-10-08).
