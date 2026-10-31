@@ -73,6 +73,8 @@ static func _reading(arts: Array[String], portraits: bool) -> PlacePreload:
 		var wanted: Array[String] = []
 		for sheet: String in DirectionalSprite.SHEETS:
 			wanted.append(ArtPaths.of("art/sprites/%s/%s.tres" % [art, sheet]))
+		if FigureModels.path_of(art) != "":
+			wanted.append(FigureModels.path_of(art))   # a 3D figure's model
 		if portraits:
 			wanted.append(ArtPaths.of("art/portraits/%s.png" % art))
 		for path in wanted:

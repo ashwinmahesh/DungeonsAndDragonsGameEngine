@@ -163,9 +163,10 @@ static func art_for(cr: Creature) -> String:
 		var look := str(((cr as Character).build.get("appearance", {}) as Dictionary).get("art", ""))
 		if look != "":
 			return look
-		# A pregen with art of its own (the six on the roster) wears it; anyone else borrows a look by class.
+		# A pregen with art of its own (the six on the roster: a sprite or a 3D figure) wears it; anyone else borrows a
+		# look by class.
 		for own: String in [cr.id, cr.name.to_snake_case()]:
-			if own != "" and ArtPaths.exists("art/sprites/%s/walk.tres" % own):
+			if own != "" and (ArtPaths.exists("art/sprites/%s/walk.tres" % own) or FigureModels.has(own)):
 				return own
 		return default_look(cr as Character)
 	return cr.name.to_snake_case()
@@ -179,9 +180,10 @@ static func default_look(ch: Character) -> String:
 	return "ilse_varga"
 
 
-## Sprite height in world units for an art id: a custom hero's from its species and height pick, else HEIGHTS.
+## Sprite height in world units for an art id: a custom hero's from its species and height pick, else HEIGHTS, else a
+## 3D figure's own `height` (FigureModels).
 static func height_for(aid: String) -> float:
-	return HeroLook.height_for_art(aid, float(HEIGHTS.get(aid, 1.2)))
+	return HeroLook.height_for_art(aid, float(HEIGHTS.get(aid, FigureModels.height_of(aid, 1.2))))
 
 
 ## Sprite height for a combatant: its stat block's own `art_height` when it borrows a smaller creature's sprite at a
@@ -232,10 +234,13 @@ func _build() -> void:
 		sprite.play(&"idle_s")
 		if OWN_LIGHT.has(aid):
 			DirectionalSprite.glow(sprite, float(OWN_LIGHT[aid]))
-			sprite.reflection.copy_look()
+			if sprite.reflection != null:
+				sprite.reflection.copy_look()
 		if _is_echo() and sprite.material_override is ShaderMaterial:
 			(sprite.material_override as ShaderMaterial).set_shader_parameter("ghost", 1.0)
 			(sprite.material_override as ShaderMaterial).set_shader_parameter("ghost_tint", Look.color("silver"))
+		elif _is_echo() and sprite is ModelFigure:
+			(sprite as ModelFigure).set_ghost(1.0)
 		add_child(sprite)
 		body = sprite
 		_lying = Sprite3D.new()
@@ -468,6 +473,12 @@ func lie_down(how: Dictionary) -> void:
 	var head := how.get("head", Vector2(1, 0)) as Vector2
 	if str(how.get("pose", "back")) == "picture":
 		_show_picture(how, Vector3(offset.x, lift, offset.y))
+		refresh()
+		return
+	if sprite is ModelFigure:
+		# A 3D figure lies on its back itself (pose "down"), head first the way `head` points, on what it lies on.
+		face(-head, false)
+		sprite.position = Vector3(offset.x, lift, offset.y)
 		refresh()
 		return
 	if str(how.get("pose", "back")) == "belly":
@@ -727,6 +738,11 @@ func start_attack(dir: Vector2) -> bool:
 		return false
 	face(dir, false)
 	return sprite.attack()
+
+
+## A talk or greet gesture (FigureTalk): a 3D figure's clip; false for a sprite, which has none.
+func gesture(kind: String) -> bool:
+	return sprite != null and sprite.visible and sprite.gesture(kind)
 
 
 ## Turns toward `dir` (x, z) and starts the drawn spell gesture. False when the sprite has none.
