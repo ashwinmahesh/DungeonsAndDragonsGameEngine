@@ -985,6 +985,23 @@ func _items(c: Combatant, out: Array[Dictionary]) -> void:
 			it["range"] = 5
 			it["kind"] = "consumable"
 			out.append(it)
+	# Flasks to throw (Holy Water, Alchemist's Fire, Acid): one of your attacks (EncounterActions.throw_flask).
+	if c.creature is Character:
+		var thrown := {}
+		for entry in (c.creature as Character).inventory:
+			var fid := str(entry["id"])
+			if thrown.has(fid) or int(entry["qty"]) <= 0:
+				continue
+			var flask := Compendium.shared().item_data(fid)
+			var dmg := EncounterActions.flask_damage(flask)
+			if dmg.is_empty():
+				continue
+			thrown[fid] = true
+			var fl := _entry("flask:" + fid, ITEMS, "Throw %s" % str(flask.get("name", fid)), "%d left · %s %s" % [e.item_count(c, fid),
+				str(dmg.get("dice", "")), str(dmg.get("damage_type", ""))], "attack" if c.attacks_left > 0 else "action", _attack_why(c), "enemy",
+				str(flask.get("summary", "")))
+			fl["range"] = int(dmg.get("range", 20))
+			out.append(fl)
 	if e.has_kit(c):
 		var kit := _entry("healers_kit", ITEMS, "Healer's Kit", "stabilize, no check", "action", e._action_check(c), "dying")
 		kit["range"] = 5
@@ -1412,6 +1429,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
 		"catch":
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
+		"flask":
+			return e.actions.throw_flask(c, id.substr(6), t)
 		"fly":
 			return e.fly_vertical(c, CombatGrid.FEET if id == "fly:up" else -CombatGrid.FEET)
 		"jump_down":
