@@ -1859,8 +1859,11 @@ func _update_hover() -> void:
 			# A melee weapon in hand and the foe within the movement left: the walk up drawn like a move, then the blow's
 			# odds as seen from where it ends (owner, 2026-10-12).
 			var ma := catalog.melee_approach(c, o, _reach)
+			var body_warn := Legendary.body_warning(o)   # "Fire or crushing ends her for good" (a body rule's `warn`)
 			if bool(ma["ok"]) and bool(ma["walk"]):
-				var warns := ma["warnings"] as Array
+				var warns := (ma["warnings"] as Array).duplicate()
+				if body_warn != "":
+					warns.append(body_warn)
 				var provokes := false
 				for w: String in warns:
 					provokes = provokes or w.contains("Opportunity")
@@ -1882,10 +1885,13 @@ func _update_hover() -> void:
 						break
 				var pv0 := catalog.attack_preview(c, first, o) if not first.is_empty() else {"title": o.name(), "lines": []}
 				var why0 := catalog.attack_blocker(c, o)
-				hud.show_tooltip(str(pv0["title"]), (pv0["lines"] as Array) + _stack_note(o), [why0 if why0 != "" else "Out of reach: move closer, or pick a ranged attack"], at)
+				var warns0: Array = [why0 if why0 != "" else "Out of reach: move closer, or pick a ranged attack"]
+				if body_warn != "":
+					warns0.append(body_warn)
+				hud.show_tooltip(str(pv0["title"]), (pv0["lines"] as Array) + _stack_note(o), warns0, at)
 			else:
 				var pv := catalog.attack_preview(c, a, o)
-				hud.show_tooltip(str(pv["title"]), (pv["lines"] as Array) + _stack_note(o), [], at, str(pv.get("edge", "")))
+				hud.show_tooltip(str(pv["title"]), (pv["lines"] as Array) + _stack_note(o), [body_warn] if body_warn != "" else [], at, str(pv.get("edge", "")))
 				_show_odds(pv, o)
 		else:
 			var about: Array = ["HP %d/%d · AC %d" % [o.creature.hp, o.creature.max_hp(), o.creature.ac_value()], hud._chips(o)]

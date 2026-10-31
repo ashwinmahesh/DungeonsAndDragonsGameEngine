@@ -835,6 +835,30 @@
                   "type": "boolean",
                   "description": "false: this foe isn't one of the game's bosses whatever its stat block (Difficulty.boss_entry): no boss bar, no boss damage or to-hit step (a lieutenant on a boss's block)."
                 },
+                "body": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "A body some damage ruins for good (a villager hollowed into a foe): when it drops to 0 Hit Points and any damage of a type in `ruined_by` landed in that blow, `flag` is set and 1 is added to the story flag `count`; `warn` shows on its tooltip and hover.",
+                  "properties": {
+                    "ruined_by": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "flag": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "string",
+                      "description": "A story flag the fight adds 1 to for each body ruined."
+                    },
+                    "warn": {
+                      "type": "string",
+                      "description": "The warning its tooltip and hover show (whose body it is, and what ends it)."
+                    }
+                  }
+                },
                 "catch": {
                   "type": "object",
                   "additionalProperties": false,
@@ -1203,6 +1227,10 @@
                   "type": "integer",
                   "minimum": 1
                 },
+                "until_flag": {
+                  "type": "string",
+                  "description": "It stops once the fight has set this flag (a fire put out in the fight)."
+                },
                 "times": {
                   "type": "integer",
                   "minimum": 1
@@ -1427,6 +1455,11 @@
     "floor": {
       "type": "string",
       "description": "The floor of a building or dungeon this map is on (Castle Ravenloft's: ground, court, tower, larders, catacombs). The enemies of a floor are the ones that keep a Long Rest from starting on it (RestRules.rest_maps); the building's other floors don't. A map without one is part of the whole building."
+    },
+    "recheck_minutes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Re-check who stands where and which props show every this many game minutes (a place that changes by the minute: a `when` reading `minutes_since`), besides each hour."
     },
     "rest": {
       "type": "string",

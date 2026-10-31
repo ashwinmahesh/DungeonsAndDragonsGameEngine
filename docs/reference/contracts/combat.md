@@ -346,9 +346,11 @@ The Tarokka (story/tarokka.gd): the card `mists` (room `castle_ravenloft`, `Taro
 ### Boss phases (combat/boss_phases.gd)
 
 A stat block's `phases` change the creature mid-fight, once each, in the block's order (`$defs/phase` in the monster
-schema). `when` is one trigger: `bloodied: true`, `hp_below: N`, `at_zero: true` (a second life: instead of dying it
-stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down), `round: N` (from that round's turn
-on), or `flag` (one this fight set: a game module's set piece, another phase). What begins with it: `hp` ("full",
+schema). `when` is a trigger: `bloodied: true`, `hp_below: N`, `at_zero: true` (a second life: instead of dying it
+stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down), `gone: {monster, at_least}` (that
+many creatures of a stat block dead, down or off the board, caught or vanished or withdrawn, on any side; checked as
+each falls or leaves), `round: N` (from that round's turn on), or `flag` (one this fight set: a game module's set
+piece, another phase, a catch's flag). With two triggers it begins on whichever is met first. What begins with it: `hp` ("full",
 "half" or a number) or `heal`; `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
 actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
 `summon: {monster, count}`; `say` (a Narrator key: the fight's view speaks its line as it begins, as any Narrator line in
@@ -369,7 +371,8 @@ fight (its summons, `summoner` meta) or that names it as `minion_of` (block fiel
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
 storm's gusts, a breach letting the mist in, reinforcements. Each acts on `at` (default 20, losing ties, like a lair),
-in the rounds `from_round`, `every`, `until_round` and `times` allow, as itself or as one entry of its `table` (`pick`:
+in the rounds `from_round`, `every`, `until_round`, `times` and `until_flag` (it stops once the fight sets that flag)
+allow, as itself or as one entry of its `table` (`pick`:
 "cycle" in turn, else at random, never the one used last). An outcome is a `save` (whoever it reaches, `affects` party,
 enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
 for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and

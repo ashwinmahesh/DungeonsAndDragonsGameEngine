@@ -1244,6 +1244,7 @@ func leave_grid(c: Combatant, how: String) -> void:
 		if at < e.turn_index:
 			e.turn_index -= 1
 	e.events.append({"type": "vanish", "id": c.id, "left": how})
+	e.legendary.phases.someone_fell()   # a phase counting those gone (`gone`) may begin
 	e._check_over()
 
 

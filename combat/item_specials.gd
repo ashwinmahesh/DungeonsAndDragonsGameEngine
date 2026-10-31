@@ -38,6 +38,8 @@ func has(c: Combatant, item_or_template: String) -> bool:
 
 ## "" if a custom power can be used now, else why not.
 func why(c: Combatant, p: Dictionary) -> String:
+	if enc().game.handles_item_power(str((p["power"] as Dictionary).get("custom", ""))):
+		return enc().game.item_power_why(c, p)   # a game's own item power
 	var fw := fr.why(c, p)
 	if fw != "" or str((p["power"] as Dictionary).get("custom", "")).begins_with("fr_"):
 		return fw
@@ -50,6 +52,8 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 	var power := p["power"] as Dictionary
 	var t: Combatant = targets[0] as Combatant if not targets.is_empty() and targets[0] is Combatant else c
 	var id := str(power.get("custom", ""))
+	if enc().game.handles_item_power(id):
+		return enc().game.item_power_use(c, p, targets, point, opts)
 	match id:
 		"drink_grant", "drink_field_spell", "potion_of_vitality", "potion_of_longevity", "potion_of_poison", "philter_of_love":
 			return _drink(c, p, t, id)
