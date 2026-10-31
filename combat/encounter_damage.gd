@@ -278,6 +278,7 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		target.creature.remove_effect(slayer)
 	if source != null and dr.final > 0:
 		e.spells.trigger_ends(source, "deal_damage")
+		e.turns.note_hurt(source, target)
 	if dr.final > 0:
 		for fx: Effect in target.creature.effects.duplicate():
 			if fx.ends_on_damage:

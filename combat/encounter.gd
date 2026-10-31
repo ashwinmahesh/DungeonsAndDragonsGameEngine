@@ -41,7 +41,11 @@ var peaceful := false
 ## start-of-turn damage and lair actions happened twice). Off for simulations and tests, which don't save.
 var keep_round_snapshots := false
 var round_snapshot: Dictionary = {}
-var outcome: String = ""
+var outcome: String = ""   ## "victory", "defeat", or "ended": over with no winner (`ends_when`)
+## Ways this fight ends with no winner (a location encounter's `ends_when`, LocationFights): `exits`, squares ([x, y])
+## where a hero who ends their turn up steps out of the fight, and it ends once no hero who is up is left on the board;
+## `trigger_hero_down`, it ends when the first hero to hurt a foe in it is down. {} for neither.
+var ends_when: Dictionary = {}
 var log := CombatLog.new()
 ## For the scene: {type: move|attack|damage|heal|condition|death|turn|round|spell|reaction|over, ...}
 var events: Array[Dictionary] = []

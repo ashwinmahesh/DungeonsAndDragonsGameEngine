@@ -54,6 +54,8 @@ var _last_option_key := ""     ## the spent-option key of the last social check 
 var _last_check: Dictionary = {}        ## {who, test, skill, said} of the last check rolled
 var _check_jumps: Array[String] = []    ## [ok, fail] targets of the last check
 var _queued: Array[Dictionary] = []   ## beats a statement produced beyond its first (a Tarokka card, then the verse)
+var _cards_read: Dictionary = {}      ## the reading's slots `reading read` has turned in this conversation
+var _reading_told := false            ## the campaign has heard this conversation finished the reading
 ## The game's conversations offer Guidance before a check (a `guidance` beat); off for the bots and tools that play
 ## conversations without a screen.
 var offer_guidance := false
@@ -76,6 +78,8 @@ func _init(state: StoryState, dice_: DiceRoller, narrator_: Narrator = null) -> 
 func start(ref: String) -> bool:
 	speaker = st.leader_character()
 	_queued.clear()
+	_cards_read.clear()
+	_reading_told = false
 	_picking = false
 	finished = false
 	combat = ""
@@ -193,8 +197,13 @@ func next() -> Dictionary:
 			"gold":
 				pc += 1
 				var amount := float(s["amount"])
-				st.gold = maxf(0.0, st.gold + amount)
-				return {"kind": "notice", "text": ("Gained %d gp" if amount >= 0 else "Paid %d gp") % absi(roundi(amount))}
+				# `gold +5 each`: that much for every hero who isn't dead (the party keeps one purse).
+				var heroes := _living().size() if bool(s.get("each", false)) else 1
+				st.gold = maxf(0.0, st.gold + amount * heroes)
+				var said := ("Gained %d gp" if amount >= 0 else "Paid %d gp") % absi(roundi(amount * heroes))
+				if bool(s.get("each", false)):
+					said += " (%d each)" % absi(roundi(amount))
+				return {"kind": "notice", "text": said}
 			"attitude":
 				pc += 1
 				st.attitudes[str(s["npc"])] = str(s["value"])
@@ -247,6 +256,7 @@ func next() -> Dictionary:
 			"reading_read":
 				pc += 1
 				var reading := Campaign.module().reading(str(s["slot"]), st)
+				_card_turned(str(s["slot"]))
 				if reading.is_empty():
 					continue
 				var reader := str(s["speaker"]) if str(s["speaker"]) != "" else str(ReadingDeck.setting("reader"))
@@ -255,6 +265,26 @@ func next() -> Dictionary:
 				var slot_name := str(reading.get("slot_name", str(reading["title"]).get_slice(": ", 0) if str(reading["title"]).contains(": ") else ""))
 				return {"kind": "notice", "text": str(reading["title"]), "card": reading["card"], "slot": reading["slot"],
 					"slot_name": slot_name}
+			"heal":
+				pc += 1
+				var healed := _heal(s)
+				if healed != "":
+					return {"kind": "notice", "text": healed}
+			"temp_hp":
+				pc += 1
+				var shielded := _temp_hp(s)
+				if shielded != "":
+					return {"kind": "notice", "text": shielded}
+			"bless":
+				pc += 1
+				var blessed := _bless(s)
+				if blessed != "":
+					return {"kind": "notice", "text": blessed}
+			"inspiration":
+				pc += 1
+				var inspired := _inspiration(bool(s["party"]))
+				if inspired != "":
+					return {"kind": "notice", "text": inspired}
 			"reading_give":
 				pc += 1
 				# The treasures the reading hid here, handed to the party's leader (ADR 0011).
@@ -375,6 +405,99 @@ func next() -> Dictionary:
 			_:
 				pc += 1
 	return _end_beat()
+
+
+## `slot` of the reading has been read: once every slot the reading dealt has been, in this conversation, the campaign
+## hears that the reading is finished (CampaignModule.reading_finished), once.
+func _card_turned(slot: String) -> void:
+	_cards_read[slot] = true
+	if _reading_told or st.tarokka.is_empty():
+		return
+	for k: Variant in st.tarokka:
+		if not _cards_read.has(str(k)):
+			return
+	_reading_told = true
+	Campaign.module().reading_finished(st)
+
+
+## `heal <dice> [party] [temp]`: one roll of `dice` heals the speaking hero, or with `party` every hero who isn't dead;
+## with `temp` the part past a hero's Hit Point maximum becomes Temporary Hit Points. Returns the notice, or "".
+func _heal(s: Dictionary) -> String:
+	var who := _receivers(bool(s["party"]))
+	if who.is_empty():
+		return ""
+	var amount := int(dice.roll_expr(str(s["dice"]), "Healing")["total"])
+	var regained := 0
+	var temp := 0
+	for ch in who:
+		var healed := ch.heal(amount, "Healing")
+		regained = maxi(regained, healed)
+		if bool(s["temp"]) and healed < amount and ch.add_temp_hp(amount - healed, "Healing"):
+			temp += 1
+	if regained == 0 and temp == 0:
+		return ""
+	var lead := ("Each hero regains %d Hit Points" % amount) if bool(s["party"]) else ("%s regains %d Hit Points" % [_first(who[0]), amount])
+	return lead + (" (the rest as Temporary Hit Points)" if temp > 0 else "")
+
+
+## Who a story's gift goes to: the hero in the conversation, or with `party` every hero who isn't dead.
+func _receivers(party: bool) -> Array[Character]:
+	if party:
+		return _living()
+	var out: Array[Character] = []
+	if speaker != null and not speaker.dead:
+		out.append(speaker)
+	return out
+
+
+## `temp_hp <dice> [party]`: one roll of Temporary Hit Points for the hero in the conversation or every living hero (a
+## hero who already has more keeps theirs). Returns the notice, or "".
+func _temp_hp(s: Dictionary) -> String:
+	var who := _receivers(bool(s["party"]))
+	if who.is_empty():
+		return ""
+	var amount := int(dice.roll_expr(str(s["dice"]), "Temporary Hit Points")["total"])
+	var got: Array[String] = []
+	for ch in who:
+		if ch.add_temp_hp(amount, "Temporary Hit Points"):
+			got.append(_first(ch))
+	if got.is_empty():
+		return ""
+	return ("Each hero gains %d Temporary Hit Points" % amount) if got.size() == who.size() and bool(s["party"]) \
+		else "%s %s %d Temporary Hit Points" % [_names(got), "gains" if got.size() == 1 else "gain", amount]
+
+
+## `bless [party] [<n>m|<n>h]`: Bless's own bonus on the hero in the conversation or every living hero, for that long,
+## with no Concentration to keep (StoryBoons.spell_boon). Returns the notice, or "".
+func _bless(s: Dictionary) -> String:
+	var got: Array[String] = []
+	for ch in _receivers(bool(s["party"])):
+		if StoryBoons.spell_boon(ch, "bless", int(s["minutes"])):
+			got.append(_first(ch))
+	if got.is_empty():
+		return ""
+	var minutes := int(s["minutes"])
+	var span := ("%d hour%s" % [roundi(minutes / 60.0), "" if minutes == 60 else "s"]) if minutes % 60 == 0 \
+		else "%d minute%s" % [minutes, "" if minutes == 1 else "s"]
+	return "%s %s blessed for %s" % [_names(got), "is" if got.size() == 1 else "are", span]
+
+
+## `inspiration [party]`: Heroic Inspiration for the hero in the conversation or every living hero who lacks it.
+## Returns the notice, or "".
+func _inspiration(party: bool) -> String:
+	var got: Array[String] = []
+	for ch in _receivers(party):
+		if not ch.heroic_inspiration:
+			ch.heroic_inspiration = true
+			got.append(_first(ch))
+	return "" if got.is_empty() else "%s %s Heroic Inspiration" % [_names(got), "gains" if got.size() == 1 else "gain"]
+
+
+## "Ada", "Ada and Bo", "Ada, Bo and Cy".
+static func _names(names: Array[String]) -> String:
+	if names.size() <= 1:
+		return "".join(names)
+	return "%s and %s" % [", ".join(names.slice(0, -1)), names[-1]]
 
 
 func _end_beat() -> Dictionary:

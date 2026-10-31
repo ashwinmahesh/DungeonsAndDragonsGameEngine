@@ -208,7 +208,10 @@ func enter(c: Combatant, phase_id: String) -> bool:
 		var made := leg()._summon(c, str(sm["monster"]), leg()._count(sm), c.cell, -1)
 		if made > 0:
 			leg()._log("info", "%s calls %d %s" % [c.name(), made, Legendary._plural(str(sm["monster"]), made)], c)
-	e.events.append({"type": "phase", "id": c.id, "phase": phase_id, "name": label, "say": str(ph.get("say", ""))})
+	# What the view says as it begins: `say`, a Narrator key spoken as any Narrator line in a fight is, and `cutscene`, a
+	# cutscene played over the fight with that line as its caption (CombatView._phase_begins).
+	e.events.append({"type": "phase", "id": c.id, "phase": phase_id, "name": label, "say": str(ph.get("say", "")),
+		"cutscene": str(ph.get("cutscene", ""))})
 	e.events.append({"type": "condition", "id": c.id})
 	return true
 

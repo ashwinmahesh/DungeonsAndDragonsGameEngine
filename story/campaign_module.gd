@@ -58,6 +58,20 @@ func reading(_slot: String, _st: StoryState) -> Dictionary:
 	return {}
 
 
+## The reading is finished: a conversation's `reading read` has just turned the last of the slots the reading dealt
+## (each read at least once in it). Called once per conversation that reads them all, after that card's `reading`. For
+## what taking part in the reading gives (a blessing that starts when the last card is turned).
+func reading_finished(_st: StoryState) -> void:
+	pass
+
+
+## A quest has just moved into a stage that ends it (`ending`: "success" or "failure"; StoryState.quest_finished).
+## What to tell the player besides the journal's notice ("" for nothing): it is added to StoryState.quest_notice. `dice`
+## rolls what it needs, seeded from the playthrough and the moment, so a reload rolls the same.
+func quest_finished(_st: StoryState, _quest_id: String, _ending: String, _dice: DiceRoller) -> String:
+	return ""
+
+
 ## One card of the reading's deck as the card face shows it: {name, deck?, suit?, value?, art?} (ReadingDeck's data).
 func reading_card(card_id: String) -> Dictionary:
 	return ReadingDeck.card(card_id)

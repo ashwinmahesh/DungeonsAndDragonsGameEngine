@@ -888,7 +888,11 @@
         },
         "say": {
           "type": "string",
-          "description": "A Narrator key or cutscene sting the view plays as it begins."
+          "description": "A Narrator key whose line the view speaks as it begins."
+        },
+        "cutscene": {
+          "type": "string",
+          "description": "A cutscene played over the fight as it begins, with `say`'s line as its caption."
         },
         "traits_add": {
           "type": "array",

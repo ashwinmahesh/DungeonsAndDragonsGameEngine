@@ -71,6 +71,14 @@ static func for_trigger(key: String, st: StoryState) -> String:
 	return ""
 
 
+## The cutscene to play for Narrator key `key` now: `named` (a phase's `cutscene`) when it has a picture for this story
+## and isn't a `once` one already shown, else the one `key` triggers (for_trigger), else "".
+static func for_moment(key: String, named: String, st: StoryState) -> String:
+	if named != "" and image(named, st) != "" and not (bool(get_cutscene(named).get("once", false)) and played(named, st)):
+		return named
+	return for_trigger(key, st)
+
+
 ## The scene that follows `id` (data `then`: a cutscene with its own picture and a `caption` Narrator key), or "".
 static func then_of(id: String) -> String:
 	return str(get_cutscene(id).get("then", ""))

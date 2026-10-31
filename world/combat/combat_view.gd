@@ -352,7 +352,7 @@ func _advance() -> void:
 		var tail := "R: fight again" if restart_allowed else "Space or A: continue"
 		var head := e.legendary.end_title()
 		if head == "":
-			head = "Victory!" if e.outcome == "victory" else "The party has fallen"
+			head = {"victory": "Victory!", "ended": "The fight is over"}.get(e.outcome, "The party has fallen") as String
 		hud.banner(head + "\n" + tail, 600.0)
 		return
 	if e.pending != null:
@@ -2449,6 +2449,9 @@ func _play_events() -> void:
 							if lo != null:
 								lon.append(lo)
 						await fx.cast(lcue, lt, lon, [], board, false)
+			"phase":
+				_stop_walking(walking)
+				_phase_begins(ev)
 			"form":
 				_stop_walking(walking)   # its figure is about to be swapped, and a freed token can't be told to stand
 				await _swap_form_art(str(ev["id"]), str(ev.get("art", "")), str(ev.get("kind", "")))
@@ -2784,8 +2787,18 @@ func _impact_on(struck: Array[CombatToken], events: Array, at: int, final_fall: 
 	return false
 
 
-## A Narrator line in the combat log (and briefly as a banner), if the story has one for this moment.
-func _narrate(key: String, actor: Combatant, target: Combatant) -> void:
+## A boss's phase beginning (BossPhases): its `say` is a Narrator line like any other in the fight, and its `cutscene`
+## plays over the fight with that line as the caption.
+func _phase_begins(ev: Dictionary) -> void:
+	if str(ev.get("say", "")) == "":
+		return
+	var boss := e.get_c(str(ev.get("id", "")))
+	_narrate(str(ev["say"]), boss, null, str(ev.get("cutscene", "")))
+
+
+## A Narrator line in the combat log (and briefly as a banner), if the story has one for this moment. `cutscene` names
+## one to play with it; without it, the cutscene the key triggers, if any.
+func _narrate(key: String, actor: Combatant, target: Combatant, cutscene: String = "") -> void:
 	if narrator == null or story == null:
 		return
 	var who: Character = actor.creature as Character if actor != null and actor.creature is Character else null
@@ -2796,7 +2809,7 @@ func _narrate(key: String, actor: Combatant, target: Combatant) -> void:
 		if not _log_held:
 			hud.refresh_log()
 		# A story cutscene for this moment (story/cutscenes.gd): its picture over the fight, the line as its caption.
-		var cut := Cutscenes.for_trigger(key, story)
+		var cut := Cutscenes.for_moment(key, cutscene, story)
 		if cut != "":
 			var player := CutscenePlayer.new()
 			add_child(player)
