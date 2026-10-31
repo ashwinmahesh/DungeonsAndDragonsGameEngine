@@ -274,6 +274,7 @@ func _hips_track(anim: Animation) -> int:
 func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:
 	FigureModels.register(ID, {}, model())
 	var ch := Character.new()
+	ch.id = "test_figure_hero"   # not "": CombatToken keeps the art it wears by id, for every later test
 	ch.name = "Test Figure"
 	var tok := CombatToken.create(Combatant.new(ch, &"party", Vector2i.ZERO), ID)
 	add_child(tok)
@@ -284,6 +285,7 @@ func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:
 	await get_tree().process_frame
 	var fig := tok.sprite as ModelFigure
 	assert_eq(fig._meshes[0].get_instance_shader_parameter(&"tint"), Vector4(1, 1, 1, 0.5), "a fade reaches the surfaces")
+	CombatToken._looks.erase(tok.combatant.id)
 	tok.free()
 
 
@@ -363,7 +365,18 @@ func test_a_ghost_look_reaches_its_surfaces() -> void:
 	assert_eq(mi.get_instance_shader_parameter(&"see_through"), 0.4, "seen through")
 	assert_eq(mi.get_instance_shader_parameter(&"ghost_rim"), 0.6, "its edge glowing")
 	assert_eq(mi.get_instance_shader_parameter(&"pulse"), 0.2, "throbbing")
+	var depth := mi.get_surface_override_material(0) as ShaderMaterial
+	assert_eq(depth.shader, ModelFigure.DEPTH, "seen through softly: its depth first")
+	assert_eq(depth.render_priority, DirectionalSprite.RENDER_PRIORITY, "at the figures' priority")
+	var body := depth.next_pass as ShaderMaterial
+	assert_eq(body.shader, ModelFigure.SHADER, "then its surfaces")
+	assert_true(bool(body.get_shader_parameter("soft_through")), "blended, not dithered")
+	assert_eq(body.render_priority, DirectionalSprite.RENDER_PRIORITY + 1, "after every figure's depth")
 	fig.free()
+	var glow_only := _figure(1.0, {"ghost": {"glow": 0.8, "rim": 0.5}})
+	assert_eq((glow_only._meshes[0].get_surface_override_material(0) as ShaderMaterial).shader, ModelFigure.SHADER,
+		"a ghost nobody sees through keeps the solid material")
+	glow_only.free()
 
 
 func test_a_game_can_draw_a_figure_with_its_own_shader() -> void:

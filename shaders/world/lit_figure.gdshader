@@ -9,7 +9,8 @@
 // Drawn as the 2D figures are, after the screen pass (ModelFigure sets DirectionalSprite.RENDER_PRIORITY): the place's
 // mist, grade, palette and depth blur are the world's, and the figure stays clear over them. It is fully opaque (ALPHA
 // 1) and writes depth, so it hides itself and other figures as a solid thing does; a fade is a screen-door dither, and
-// so is a ghost seen through (figure.gdshaderinc), whose edge can glow in its own colour.
+// and so is a ghost seen through unless its material is soft (figure.gdshaderinc: blended after a depth pass of its
+// own); a ghost's edge can glow in its own colour.
 // A game can draw a figure with its own shader instead (a manifest entry's "shader"): include figure.gdshaderinc and
 // take the uniforms ModelFigure.surface_material sets.
 shader_type spatial;
@@ -70,7 +71,7 @@ void fragment() {
 	ROUGHNESS = roughness;
 	SPECULAR = 0.0;
 	METALLIC = 0.0;
-	ALPHA = 1.0;
+	ALPHA = soft_through ? figure_shown() : 1.0;
 }
 
 void light() {

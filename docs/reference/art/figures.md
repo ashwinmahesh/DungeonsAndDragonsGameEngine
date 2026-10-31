@@ -49,7 +49,9 @@ For creatures, and figures whose models are still to come:
 - `ghost`: `{"wash", "colour", "glow", "see_through", "rim", "pulse"}`, each 0 to 1 (`ModelFigure.set_ghost_look`):
   washed toward `colour` (a palette name; the silver of an Echo Knight's echo without one), its own light, the share of
   it the world shows through, a glow along its edges in its colour (its ink darkens to that colour too), and how far
-  its glow throbs. Seen-through is the screen-door dither the fades use, in both passes, so a ghost keeps its depth.
+  its glow throbs. A ghost seen through is blended softly: a depth pass of its own (`figure_depth.gdshader`) at the
+  figures' render priority, then its surfaces and ink one priority later, so only its nearest surface shows (never its
+  far arm through its chest) and its line fades less than its body. Fades stay the screen-door dither.
 - `shader`: a game's own spatial shader for the figure's surfaces in place of `lit_figure` (the hook for a look the
   engine doesn't draw). It includes `figure.gdshaderinc` and takes the uniforms `ModelFigure.surface_material` sets.
 

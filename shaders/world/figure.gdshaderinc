@@ -16,11 +16,24 @@ instance uniform float see_through = 0.0;
 instance uniform float ghost_rim = 0.0;
 instance uniform float pulse = 0.0;
 
-// A figure only part there is drawn through a screen-door pattern (a 4x4 ordered dither) rather than blended: it stays in
-// the opaque pass, so it keeps its depth, its outline and its shadow, and nothing behind it sorts wrongly. A ghost seen
-// through is the same: both passes leave out the same pixels, so the world shows through its body and its ink alike.
+// A soft ghost's material (ModelFigure: a ghost seen through): its surfaces are blended rather than dithered, after a
+// depth pass of their own (figure_depth.gdshader) so only the nearest surface shows and the body never shows its own
+// insides.
+uniform bool soft_through = false;
+
+// How much of a soft ghost shows (its fade and its see-through together).
+float figure_shown() {
+	return tint.a * (1.0 - clamp(see_through, 0.0, 0.95));
+}
+
+// A figure only part there is drawn through a screen-door pattern (a 4x4 ordered dither) rather than blended: it keeps
+// its depth, its outline and its shadow, and nothing behind it sorts wrongly. A ghost seen through without a soft
+// material is the same: both passes leave out the same pixels, so the world shows through its body and its ink alike.
 bool figure_hidden(vec2 frag) {
-	float shown = tint.a * (1.0 - clamp(see_through, 0.0, 0.95));
+	if (soft_through) {
+		return false;
+	}
+	float shown = figure_shown();
 	if (shown >= 0.999) {
 		return false;
 	}

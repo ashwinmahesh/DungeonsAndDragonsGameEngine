@@ -19,6 +19,7 @@ extends DirectionalSprite
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/lit_figure.gdshader")
 const INK := preload("res://addons/dnd_core/shaders/world/figure_ink.gdshader")
+const DEPTH := preload("res://addons/dnd_core/shaders/world/figure_depth.gdshader")
 ## Seconds to blend from one clip into the next.
 const BLEND := 0.22
 ## How fast a figure turns to a new facing, radians a second.
@@ -44,6 +45,8 @@ var _posture: Node3D
 var _player: AnimationPlayer
 var _skeleton: Skeleton3D
 var _meshes: Array[GeometryInstance3D] = []
+## Drawn as a soft ghost: its surfaces blended, after a depth pass of their own (set_ghost_look with see_through).
+var _soft := false
 var _info: Dictionary = {}
 ## role -> the clips that play it: [{"name", "from", "to", "hit", "speed"}]
 var _roles: Dictionary = {}
@@ -103,10 +106,11 @@ func _build() -> void:
 	for n in model.find_children("*", "Skeleton3D", true, false):
 		_skeleton = n as Skeleton3D
 		break
+	var ghostly := _info.get("ghost", {}) as Dictionary
+	_soft = float(ghostly.get("see_through", 0.0)) > 0.0
 	_dress()
 	_bones()
 	_read_clips()
-	var ghostly := _info.get("ghost", {}) as Dictionary
 	if not ghostly.is_empty():
 		set_ghost_look(ghostly)
 	_play_loop("idle", 1.0)
@@ -148,7 +152,7 @@ func _dress() -> void:
 			continue
 		for i in mi.mesh.get_surface_count():
 			var src := mi.get_active_material(i)
-			mi.set_surface_override_material(i, surface_material(src, paint, own_shader))
+			mi.set_surface_override_material(i, surface_material(src, paint, own_shader, _soft))
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_meshes.append(mi)
 
@@ -166,7 +170,9 @@ func _own_shader() -> Shader:
 
 ## The figure material standing in for a model's own `src` (its albedo texture and colour), made once per look.
 ## `paint` replaces a textured surface's texture (a dressing of a shared body); `own_shader` replaces lit_figure.
-static func surface_material(src: Material, paint: Texture2D = null, own_shader: Shader = null) -> ShaderMaterial:
+## `soft`: a ghost seen through, blended rather than dithered: a depth pass (figure_depth) at RENDER_PRIORITY first, then
+## its surfaces and ink one priority later, so they show only the nearest surface.
+static func surface_material(src: Material, paint: Texture2D = null, own_shader: Shader = null, soft := false) -> ShaderMaterial:
 	var tex: Texture2D = null
 	var colour := Color.WHITE
 	if src is BaseMaterial3D:
@@ -174,8 +180,8 @@ static func surface_material(src: Material, paint: Texture2D = null, own_shader:
 		colour = (src as BaseMaterial3D).albedo_color
 	if paint != null and tex != null:
 		tex = paint
-	var key := "%s|%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style(),
-		own_shader.resource_path if own_shader != null else ""]
+	var key := "%s|%s|%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style(),
+		own_shader.resource_path if own_shader != null else "", "soft" if soft else ""]
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var s := Look.figure_settings()
@@ -203,6 +209,16 @@ static func surface_material(src: Material, paint: Texture2D = null, own_shader:
 		ink.set_shader_parameter("ink", Look.color(str(s["ink_colour"])))
 		ink.set_shader_parameter("width", float(s["ink"]))
 		m.next_pass = ink
+	if soft:
+		for each: ShaderMaterial in [m, m.next_pass as ShaderMaterial]:
+			if each != null:
+				each.set_shader_parameter("soft_through", true)
+				each.render_priority = RENDER_PRIORITY + 1
+		var depth := ShaderMaterial.new()
+		depth.shader = DEPTH
+		depth.render_priority = RENDER_PRIORITY
+		depth.next_pass = m
+		m = depth
 	_materials[key] = m
 	return m
 
@@ -220,8 +236,13 @@ func set_ghost(amount: float) -> void:
 ## A ghost's look, as a manifest entry's "ghost" gives it (each 0 to 1, any left out is none): `wash` toward its colour
 ## (set_ghost), `colour` (a palette name; the material's grey without one), `glow` its own light (set_glow),
 ## `see_through` the share of it the world shows through, `rim` a glow along its edges, `pulse` how far its glow
-## throbs. The ink pass leaves out the same pixels as the body, so a ghost seen through has no dark ghost of its line.
+## throbs. A ghost seen through is blended softly (surface_material's `soft`), its line fading less than its body.
 func set_ghost_look(look: Dictionary) -> void:
+	var soft := float(look.get("see_through", 0.0)) > 0.0
+	if soft != _soft and model != null:
+		_soft = soft
+		_meshes.clear()
+		_dress()   # seen through or not changes the surfaces' materials (surface_material's `soft`)
 	set_ghost(float(look.get("wash", 0.0)))
 	set_glow(float(look.get("glow", 0.0)))
 	var colour := str(look.get("colour", ""))
