@@ -38,6 +38,7 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   and CastleBuilder for the castle gates' wall walk): drawing only, the rules still have a 5 ft step up. A 10 ft face
   is a climb and has none; nor does a prop stood on (`stand_ft`) or natural ground, which slopes. Doors are cells listed in `doors` (drawn as a closed door; a closed
   door blocks movement and sight until opened).
+- **Exits that the module answers:** an exit whose `to` is `module_<key>` (an id) leads where `CampaignModule.exit_target(st, from_location, to)` says (the Crooked Moon's train shuffles its cars from the playthrough's seed); the base answers with `to` itself. The data checks can't know the answer, so a game's tools list the places such an exit may reach.
 - **Doors:** `locked` or a `lock_dc` makes a lock, opened by its `key`, by picking (thieves' tools, `lock_dc`), forcing
   (Athletics, `lock_dc` + 2) or Knock; `secret_dc` hides the door until it's found. `when` is a condition the door
   needs before it opens at all (a portcullis a story flag raises; until then it won't budge), and `unlocked_when` one

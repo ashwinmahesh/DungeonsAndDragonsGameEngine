@@ -25,6 +25,13 @@ func final_room(_st: StoryState) -> String:
 	return ""
 
 
+## Where an exit really leads. An exit whose `to` is `module_<key>` is answered here (a train whose cars shuffle per playthrough:
+## the module shuffles them from the playthrough's seed); any other `to` is the location it names. `from_location` is the place the
+## exit is in.
+func exit_target(_st: StoryState, _from_location: String, to: String) -> String:
+	return to
+
+
 ## The treasure ids hidden at `place` that the party hasn't taken.
 func treasures_at(_place: String, _st: StoryState) -> Array[String]:
 	return []

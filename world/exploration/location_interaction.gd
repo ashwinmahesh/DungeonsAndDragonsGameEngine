@@ -104,7 +104,7 @@ static func actions_at(view: LocationView, cell: Vector2i) -> Dictionary:
 		"exit":
 			title = str(spec.get("label", "The way on"))
 			var open := StoryConditions.check(str(spec.get("when", "")), view.st)
-			out.append({"id": "go", "label": "Go: %s" % Compendium.shared().get_entry("locations", str(spec["to"])).get("name", spec["to"]),
+			out.append({"id": "go", "label": "Go: %s" % Compendium.shared().get_entry("locations", Campaign.module().exit_target(view.st, view.loc_id, str(spec["to"]))).get("name", spec["to"]),
 				"enabled": open, "why": "" if open else str(spec.get("locked_text", "The way is barred."))})
 	# A piece of scenery's own first line is already "Look" (its narration): no second one.
 	if not (str(thing["kind"]) == "prop" and str(thing["label"]).begins_with("Look at ")):
@@ -221,7 +221,7 @@ static func _look(view: LocationView, cell: Vector2i, thing: Dictionary) -> void
 				Creature.ABILITY_NAMES.get(StringName(str(save.get("ability", "dex"))), "Dexterity"),
 				(" and %s damage" % spec["damage"]) if spec.has("damage") else ""])
 		"exit":
-			view.narration.emit("%s, to %s." % [spec.get("label", "A way on"), Compendium.shared().get_entry("locations", str(spec["to"])).get("name", spec["to"])])
+			view.narration.emit("%s, to %s." % [spec.get("label", "A way on"), Compendium.shared().get_entry("locations", Campaign.module().exit_target(view.st, view.loc_id, str(spec["to"]))).get("name", spec["to"])])
 		"foe":
 			view.narration.emit("%s. It hasn't seen you yet." % str(thing["name"]))
 		_:

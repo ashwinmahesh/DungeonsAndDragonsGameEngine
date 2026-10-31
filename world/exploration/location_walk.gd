@@ -212,7 +212,7 @@ static func _check_cell_events(view: LocationView) -> bool:
 				return true
 			_exit_moves_quest(view, exit)
 			view.st.advance_minutes(5)   # walking between places takes a few minutes; rests take the hours
-			view.exit_requested.emit(str(exit["to"]), str(exit.get("spawn", "default")))
+			view.exit_requested.emit(Campaign.module().exit_target(view.st, view.loc_id, str(exit["to"])), str(exit.get("spawn", "default")))
 			return true
 	return false
 
