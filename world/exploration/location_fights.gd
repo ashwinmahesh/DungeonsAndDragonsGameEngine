@@ -366,6 +366,8 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 			mon.set_meta(&"lying", md["lying"])   # lies there until its fight opens (LyingFigures)
 		if md.has("steps_down"):
 			mon.set_meta(&"steps_down", md["steps_down"])   # a person of the place stepping down into this foe (StepDown)
+		if md.has("catch"):
+			mon.set_meta(EncounterGrapples.CATCH, md["catch"])   # a loose creature the heroes can catch (EncounterGrapples)
 		if md.has("hp"):
 			# A tuned stat block for this fight (docs/contracts/locations.md).
 			mon.hp_max_base = int(md["hp"])
@@ -586,6 +588,12 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 			for c in e.combatants:
 				if c.side == &"enemy" and c.name() == str((md as Dictionary).get("name", "")):
 					c.creature.set_meta(&"steps_down", (md as Dictionary)["steps_down"])
+		# So is one the heroes can catch (by its name, else its stat block).
+		if (md as Dictionary).has("catch"):
+			for c in e.combatants:
+				var named := str((md as Dictionary).get("name", ""))
+				if c.creature is Monster and (c.name() == named if named != "" else str((c.creature as Monster).data.get("id", "")) == str((md as Dictionary)["monster"])):
+					c.creature.set_meta(EncounterGrapples.CATCH, (md as Dictionary)["catch"])
 	var ctokens := _fight_tokens(view, e, false)
 
 	view.combat_view = CombatView.new()

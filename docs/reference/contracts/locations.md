@@ -87,7 +87,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   stat block's (Vasilka fights on a flesh golem's block in her own look); a round-start save keeps it. Its `steps_down:
   {npc}` says the foe is that person of the place (the Amber Sentinel on its dais): however the fight starts, their figure
   leaves the board and the foe's takes their place and strides to its start square (StepDown, addons/dnd_core/world/combat/step_down.gd;
-  motion off cuts to it), its stat block's size untouched.
+  motion off cuts to it), its stat block's size untouched. A monster's `catch: {flag}` makes it a loose creature the
+  heroes can catch (a lamb in a wolf fight; often `side: "neutral"`): a hero within 5 ft spends one of their attacks, as
+  for a grapple, and it makes a Strength or Dexterity save against 8 + their Strength modifier + Proficiency Bonus or is
+  caught, carried out of the fight (`vanish`, left: `caught`), with `flag` set whatever the fight's outcome
+  (EncounterGrapples.catch_creature).
   Its `boss: false` keeps a foe on a boss's stat block out of the game's bosses (Difficulty.boss_entry): no boss bar, no
   boss damage or to-hit step (the brides on the vampire's block).
   Its `states` (ids from the stat block's own `states`) join its traits for this fight: Sarkhaza chained or
