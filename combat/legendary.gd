@@ -280,6 +280,7 @@ func leave(c: Combatant, how: String) -> void:
 			_log("info", "%s: \"%s\"" % [c.name(), say], c)
 	e.events.append({"type": "vanish", "id": c.id, "left": how, "narration": str(me.get("narration", "")) if how == "mist" else "",
 		"say": say, "speaker": str(withdraw_of(c).get("speaker", "")) if say != "" else ""})
+	phases.someone_fell()   # a phase counting those gone (`gone`) may begin
 	e._check_over()
 
 
@@ -1109,6 +1110,12 @@ func _count(spec: Dictionary) -> int:
 	if spec.has("max"):
 		n = mini(n, int(spec["max"]))
 	return maxi(1, n)
+
+
+## The same for a game module (a creature that reforms where its master likes): `n` of `monster_id` on `by`'s side near
+## `near`, after `by` in the order unless `initiative` is 0 or more. Returns how many came.
+func summon_near(by: Combatant, monster_id: String, n: int, near: Vector2i, initiative: int = -1) -> int:
+	return _summon(by, monster_id, n, near, initiative)
 
 
 ## Puts `n` of monster `monster_id` on `by`'s side near `near`: after `by` in the order, or on initiative count

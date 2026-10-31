@@ -793,7 +793,7 @@
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,
-          "description": "bloodied: true (half its Hit Points or fewer); hp_below: N; at_zero: true (a second life: it stays at the phase's `hp`); allies_down: [stat block ids], all down; round: N (from that round's turn on); flag: a flag this fight set.",
+          "description": "bloodied: true (half its Hit Points or fewer); hp_below: N; at_zero: true (a second life: it stays at the phase's `hp`); allies_down: [stat block ids], all down; gone: {monster, at_least}, so many of a stat block dead, caught or gone; round: N (from that round's turn on); flag: a flag this fight set.",
           "properties": {
             "bloodied": {
               "type": "boolean"
@@ -808,6 +808,23 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            },
+            "gone": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "monster"
+              ],
+              "description": "So many creatures of stat block `monster` dead, down or off the board (caught, vanished, withdrawn), on any side.",
+              "properties": {
+                "monster": {
+                  "type": "string"
+                },
+                "at_least": {
+                  "type": "integer",
+                  "minimum": 1
+                }
               }
             },
             "round": {
@@ -1611,6 +1628,17 @@
         "$ref": "#/$defs/phase"
       },
       "description": "Boss phases (combat/boss_phases.gd)."
+    },
+    "catch": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Every creature of this stat block can be caught and carried out of a fight, however it came (a summon, a round event's arrivals): as a location monster entry's `catch`, which wins over it.",
+      "properties": {
+        "flag": {
+          "type": "string",
+          "description": "The story flag set when one is caught."
+        }
+      }
     },
     "minions": {
       "type": "object",

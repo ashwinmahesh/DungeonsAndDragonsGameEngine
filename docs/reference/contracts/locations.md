@@ -91,7 +91,9 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   heroes can catch (a lamb in a wolf fight; often `side: "neutral"`): a hero within 5 ft spends one of their attacks, as
   for a grapple, and it makes a Strength or Dexterity save against 8 + their Strength modifier + Proficiency Bonus or is
   caught, carried out of the fight (`vanish`, left: `caught`), with `flag` set whatever the fight's outcome
-  (EncounterGrapples.catch_creature).
+  (EncounterGrapples.catch_creature). A stat block's own `catch` makes every creature of it catchable however it
+  arrived (a summon, a round event's arrivals, a phase's); an entry's `catch` wins over it. A game module summons near
+  a creature with `e.legendary.summon_near(by, monster_id, n, cell)`.
   Its `boss: false` keeps a foe on a boss's stat block out of the game's bosses (Difficulty.boss_entry): no boss bar, no
   boss damage or to-hit step (the brides on the vampire's block).
   Its `states` (ids from the stat block's own `states`) join its traits for this fight: Sarkhaza chained or

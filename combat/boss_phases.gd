@@ -11,9 +11,11 @@ extends RefCounted
 ## loaded fight comes back the same (to_dict keeps the start data and the phases begun). Legendary owns this and calls
 ## the hooks below.
 
-## Triggers, checked in this order of what can happen: after damage (bloodied, hp_below, at_zero, allies_down), at
-## the start of its turn (round, flag), and when the story or a game module calls `enter`.
-const TRIGGERS := ["bloodied", "hp_below", "at_zero", "allies_down", "round", "flag"]
+## Triggers, checked in this order of what can happen: after damage (bloodied, hp_below, at_zero, allies_down), when
+## a creature falls or leaves the board (allies_down, gone: {monster, at_least}, so many of that stat block dead, caught
+## or gone), at the start of its turn (round, flag), and when the story or a game module calls `enter`. A `when` with
+## two triggers begins on whichever is met first.
+const TRIGGERS := ["bloodied", "hp_below", "at_zero", "allies_down", "gone", "round", "flag"]
 
 var _legendary: WeakRef
 ## Creature id -> {base: the stat block at the fight's start, active: [phase ids begun, in order]}.
@@ -93,14 +95,16 @@ func after_damage(c: Combatant, was_up: bool) -> bool:
 	return false
 
 
-## Someone fell: a phase waiting on its allies being down may begin.
+## Someone fell or left the board (killed, caught, gone): a phase waiting on its allies being down, or on so many of
+## a stat block being gone, may begin.
 func someone_fell() -> void:
 	for id: String in _state.keys():
 		var c := enc().get_c(id)
 		if c != null and c.is_alive():
-			var ph := _next(c, "allies_down")
-			if not ph.is_empty():
-				enter(c, str(ph["id"]))
+			for kind: String in ["allies_down", "gone"]:
+				var ph := _next(c, kind)
+				if not ph.is_empty():
+					enter(c, str(ph["id"]))
 
 
 ## The start of `c`'s turn: a phase that waits for a round or a story flag.
@@ -141,6 +145,15 @@ func _met(c: Combatant, when: Dictionary, kind: String) -> bool:
 			return enc().round_no >= int(when["round"])
 		"flag":
 			return _flag_set(str(when["flag"]))
+		"gone":
+			# So many creatures of a stat block dead, down or off the board (caught, vanished), on any side.
+			var g := when["gone"] as Dictionary
+			var n := 0
+			for o in enc().combatants:
+				if str(MonsterActions.data_of(o).get("id", "")) == str(g.get("monster", "")) \
+						and (not o.is_alive() or o.is_down() or o.has_meta("left_fight")):
+					n += 1
+			return n >= int(g.get("at_least", 1))
 		"allies_down":
 			var ids := when["allies_down"] as Array
 			for o in enc().combatants:
