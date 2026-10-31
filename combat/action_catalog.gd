@@ -393,6 +393,15 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	var stab := _entry("stabilize", COMMON, "Stabilize", "DC 10 Medicine", "action", why, "dying", "Help a dying creature within 5 ft: a DC 10 Wisdom (Medicine) check makes it Stable (or brings round one that was knocked out).")
 	stab["range"] = 5
 	out.append(stab)
+	# A loose creature the heroes can catch and carry out of the fight (EncounterGrapples.catch_creature).
+	if c.side in [&"party", &"guest"]:
+		for t in e.grappling.catchable(c):
+			var cdc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
+			var cwhy := _attack_why(c)
+			if cwhy == "" and e.distance(c, t) > 5:
+				cwhy = "Get within 5 ft first"
+			out.append(_entry("catch:" + t.id, COMMON, "Catch %s" % t.name(), "DC %d" % cdc, "attack" if c.attacks_left > 0 else "action", cwhy, "none",
+				"One of your attacks: %s makes a Str or Dex save or you have it, out of the fight." % t.name()))
 	if e.grapples.has(c.id):
 		out.append(_entry("escape", COMMON, "Escape Grapple", "Athletics or Acrobatics", "action", why, "none"))
 	# Whoever it holds: it drags them as it moves (1 extra foot per foot), or lets go for free.
@@ -1401,6 +1410,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.objects.perform(c, action, targets, point)
 		"let_go":
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
+		"catch":
+			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
 		"fly":
 			return e.fly_vertical(c, CombatGrid.FEET if id == "fly:up" else -CombatGrid.FEET)
 		"jump_down":

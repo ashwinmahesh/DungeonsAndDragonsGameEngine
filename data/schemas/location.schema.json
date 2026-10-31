@@ -835,6 +835,17 @@
                   "type": "boolean",
                   "description": "false: this foe isn't one of the game's bosses whatever its stat block (Difficulty.boss_entry): no boss bar, no boss damage or to-hit step (a lieutenant on a boss's block)."
                 },
+                "catch": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "A loose creature the heroes can catch (one of their attacks, as a grapple: it makes a Str or Dex save or is caught): it is carried out of the fight, and `flag` is set whatever the fight's outcome.",
+                  "properties": {
+                    "flag": {
+                      "type": "string",
+                      "description": "The story flag set when it is caught."
+                    }
+                  }
+                },
                 "steps_down": {
                   "type": "object",
                   "required": ["npc"],
