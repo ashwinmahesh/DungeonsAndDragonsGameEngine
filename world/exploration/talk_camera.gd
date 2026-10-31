@@ -89,8 +89,10 @@ static func speaker(view: LocationView, speaker_id: String) -> void:
 	var aim := tok.global_position + Vector3.UP * fig._height * CLOSE_AIM
 	# The rig looks at its own point 0.6 up, leaned all the way to the focus: the focus is the aim less that rise.
 	_ease(rig, aim - Vector3(0.0, 0.6, 0.0), CLOSE_DISTANCE / maxf(rig.distance, 0.1), CLOSE_PITCH, 1.0, CLOSE_IN)
-	var cam := rig.camera.global_position
-	tok.face(Vector2(cam.x - tok.global_position.x, cam.z - tok.global_position.z), false)
+	# Toward where the camera is going (it looks along the rig's heading), not where it is now: coming from another
+	# speaker's close-up it may still be on the far side of this one.
+	var back := rig.global_basis.z
+	tok.face(Vector2(back.x, back.z), false)
 	if fig is ModelFigure:
 		(fig as ModelFigure).set_close_up(true)
 	rig.set_meta(SPEAKER, tok)
