@@ -34,6 +34,29 @@ const MOST := 9
 ## Seconds between checks of the weather and of squares hidden behind secret doors.
 const CHECK_EVERY := 0.5
 
+## A game's own beams (data/campaign.json "sun_shafts"), each left out as the engine draws them: `strength` times their
+## brightness, `rays` how strongly the streaks show along a beam and in its pool (0 none, 1 as drawn), `width` times a
+## beam's width, `soft` how much more gently a beam's sides fade (1 as drawn; 2 fades twice as far in from its edge),
+## `fewest` and `most` how many a place has.
+const SETTINGS := {"strength": 1.0, "rays": 1.0, "width": 1.0, "soft": 1.0, "fewest": FEWEST, "most": MOST}
+static var _settings: Dictionary = {}
+
+
+static func settings() -> Dictionary:
+	if _settings.is_empty():
+		_settings = SETTINGS.duplicate()
+		var own: Variant = Campaign.config().get("sun_shafts", {})
+		if own is Dictionary:
+			for k: String in own as Dictionary:
+				if SETTINGS.has(k):
+					_settings[k] = (own as Dictionary)[k]
+	return _settings
+
+
+## Forgets the settings (a test that changed the campaign).
+static func forget_settings() -> void:
+	_settings = {}
+
 ## Captures and the perf probe turn the beams off to compare (perf_run.py --effects SunShafts).
 static var enabled := true
 ## Every place's beams, so a switch shows at once.
@@ -92,7 +115,7 @@ static func spots(grid: CombatGrid, rng: RandomNumberGenerator) -> Array[Vector2
 				# Best halfway between open ground and the thick of the wood.
 				scored.append([-absf(shade - 8.0) + rng.randf() * 4.0, c])
 	scored.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
-	var want := clampi(open / PER_OPEN, FEWEST, MOST)
+	var want := clampi(open / PER_OPEN, int(settings()["fewest"]), int(settings()["most"]))
 	var out: Array[Vector2i] = []
 	for s in scored:
 		var c := s[1] as Vector2i
@@ -114,8 +137,8 @@ func _add_beam(board: ArenaBoard, c: Vector2i, rng: RandomNumberGenerator) -> vo
 	var foot := board.cell_center(c) + Vector3(rng.randf_range(-0.3, 0.3), 0.0, rng.randf_range(-0.3, 0.3))
 	var seed_ := rng.randf()
 	var cone := CylinderMesh.new()
-	cone.top_radius = RADIUS_TOP
-	cone.bottom_radius = RADIUS_FOOT
+	cone.top_radius = RADIUS_TOP * float(settings()["width"])
+	cone.bottom_radius = RADIUS_FOOT * float(settings()["width"])
 	cone.height = 1.0   # scaled to the light's slope each frame
 	cone.radial_segments = 16
 	cone.rings = 1
@@ -145,6 +168,8 @@ static func _material(seed_: float, pool: bool) -> ShaderMaterial:
 	m.set_shader_parameter("seed", seed_)
 	m.set_shader_parameter("pool", pool)
 	m.set_shader_parameter("shaft_length", 1.0)
+	m.set_shader_parameter("ray_amount", clampf(float(settings()["rays"]), 0.0, 1.0))
+	m.set_shader_parameter("core_power", 3.0 * maxf(float(settings()["soft"]), 0.1))
 	return m
 
 
@@ -161,7 +186,7 @@ func _process(delta: float) -> void:
 func target() -> float:
 	if not enabled or atmosphere == null:
 		return 0.0
-	return float(PHASE_STRENGTH.get(atmosphere.phase, 0.0)) * _weather
+	return float(PHASE_STRENGTH.get(atmosphere.phase, 0.0)) * _weather * float(settings()["strength"])
 
 
 func _update(delta: float, now: bool) -> void:
@@ -201,7 +226,8 @@ func _update(delta: float, now: bool) -> void:
 			continue
 		var foot := b["foot"] as Vector3
 		beam.global_transform = Transform3D(Basis(side, up * length, side.cross(up)), foot + up * length * 0.5)
-		pool.global_transform = Transform3D(Basis(side * RADIUS_FOOT * 2.2, Vector3.UP, across * RADIUS_FOOT * 2.2 * stretch),
+		var wide := RADIUS_FOOT * 2.2 * float(settings()["width"])
+		pool.global_transform = Transform3D(Basis(side * wide, Vector3.UP, across * wide * stretch),
 			foot + Vector3(0.0, 0.05, 0.0))
 		for m: ShaderMaterial in [beam.material_override as ShaderMaterial, pool.material_override as ShaderMaterial]:
 			m.set_shader_parameter("strength", shown)

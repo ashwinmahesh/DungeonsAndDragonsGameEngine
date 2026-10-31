@@ -489,6 +489,12 @@ take its colour, and are brightest at dusk and dawn, fainter through the overcas
 the screen pass, so they fade out toward the screen's blurred edges instead of standing sharp there. Hidden squares
 (HiddenAreas) get none. Cost at 3440 x 1440: 0.0 to 0.1 ms (`perf_run.py --only effects_fast --effects SunShafts`).
 
+A game softens its own under data/campaign.json's `"sun_shafts"` (`SunShafts.settings`; each key it leaves out keeps
+the engine's beams): `strength` times their brightness, `rays` how strongly the streaks show along a beam and in its
+pool (0 none, 1 as drawn), `width` times a beam's width and its pool's, `soft` how much further in from its edge a
+beam's sides fade (1 as drawn), and `fewest` and `most` how many a place has. Crooked Moon's are fainter, wider and
+softer, with faint streaks and at most five a place: as drawn they read as hard bright bars.
+
     make capture SCENE=res://tools/capture/look_capture.tscn NAME=look/beams FRAMES=10 \
       LOOK_SHOTS=road_dusk,village_dusk,lake_dusk   # LOOK_OFF=sunbeams for without
 
