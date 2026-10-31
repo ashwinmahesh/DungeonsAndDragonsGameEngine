@@ -485,6 +485,10 @@ func _quest_card(q: Dictionary) -> Control:
 		col.add_child(row)
 	for text: String in q["entries"]:
 		col.add_child(UiKit.label(text, UiScale.text(15), "vellum" if status == "active" else "parchment", DETAIL_W))
+	if str(q.get("waiting", "")) != "":
+		var wait := UiKit.label(str(q["waiting"]), UiScale.text(15), "parchment", DETAIL_W)   # it picks up later (a stage's `waits`)
+		wait.name = "Waiting"
+		col.add_child(wait)
 	for o: String in q["objectives"]:
 		var orow := HBoxContainer.new()
 		orow.add_theme_constant_override("separation", 8)
@@ -495,7 +499,7 @@ func _quest_card(q: Dictionary) -> Control:
 		var warn := UiKit.label(str(q["warn"]), UiScale.text(15), "flame", DETAIL_W)   # time is running (the quest's `closes`)
 		warn.name = "Warning"
 		col.add_child(warn)
-	if status == "active":
+	if status == "active" and str(q.get("waiting", "")) == "":
 		var who := _talk_to(qid)
 		if who != null:
 			col.add_child(who)

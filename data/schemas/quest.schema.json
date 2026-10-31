@@ -104,6 +104,22 @@
             "type": "string",
             "description": "What to do next at this stage, for the journal's Hint button: the place and the person or action, never the twist. Every stage that doesn't end the quest has one (make validate)."
           },
+          "waits": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["until", "text"],
+            "description": "This stage waits on a later part of the story (a thread that picks up in another chapter): until `until` holds, the journal shows `text` in place of its objectives and hint, with no warning and no Track, and the HUD passes it by.",
+            "properties": {
+              "until": {
+                "type": "string",
+                "description": "A condition (docs/contracts/dialogue.md) that holds once the story has reached the part it waits on."
+              },
+              "text": {
+                "type": "string",
+                "description": "What the journal says meanwhile (where and when it picks up)."
+              }
+            }
+          },
           "ends": {
             "type": "string",
             "enum": [

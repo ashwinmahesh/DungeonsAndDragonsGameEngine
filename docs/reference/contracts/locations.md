@@ -198,6 +198,10 @@ last; open quests come first under each heading, the finished ones after. A ques
 The journal shows each reached stage's text in order. `hint` says what to do next at that stage, behind the journal's
 Hint button: the place and the person or action, never the twist (`{tarokka.<slot>.hint}` fills in the party's
 reading). Every stage that doesn't end its quest has one; `make validate` fails without it.
+A stage's `waits: {until, text}` parks a thread that picks up in a later chapter (a Connection whose next part is in
+another place of the story): until the condition `until` holds, the journal shows `text` in place of the stage's
+objectives and hint, with no warning, no Track and no one to talk to, and the HUD's objective passes it by
+(QuestLog.journal's `waiting`). Once it holds, the stage reads as any other.
 
 ## data/flags/<region>.json (the flag registry, one file per region so writers don't collide)
 
