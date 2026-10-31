@@ -138,12 +138,58 @@ func after_damage(target: Combatant, parts: Array, dr: DamageResult, was_up: boo
 		leave(target, "withdraw")
 		return true
 	if down:
+		_ruin(target, parts)
 		if _misty_escape(target):
 			return true
 		if target.creature.dead:
 			phases.fell(target)
 			phases.someone_fell()
 	return false
+
+
+# --- Bodies ruined for good ---------------------------------------------------------------------------------------
+
+## The meta on a creature whose body is ruined by some kinds of damage (a location monster entry's `body`: {ruined_by:
+## [damage types], flag, count, warn}): a villager hollowed into a foe whom fire or crushing ends for good.
+const BODY := &"body"
+
+
+## `c`'s body rule ({ruined_by, flag, count, warn}), or {}: the entry's, else its stat block's.
+static func body_of(c: Combatant) -> Dictionary:
+	if c.creature.has_meta(BODY):
+		return c.creature.get_meta(BODY) as Dictionary
+	var block := MonsterActions.data_of(c).get("body", {})
+	return block as Dictionary if block is Dictionary else {}
+
+
+## The line a creature's tooltip warns with (its body rule's `warn`), or "".
+static func body_warning(c: Combatant) -> String:
+	return str(body_of(c).get("warn", "")) if c.is_alive() and not c.is_down() else ""
+
+
+## `target` just dropped from `parts`: if any part of a type its body rule names landed (more than 0, and it isn't
+## immune), it is ruined for good: the rule's `flag` is set and 1 is added to its `count` (story_flags `{add: n}`, which
+## the story adds to the flag's number).
+func _ruin(target: Combatant, parts: Array) -> void:
+	var body := body_of(target)
+	if body.is_empty() or target.has_meta("ruined"):
+		return
+	var by := body.get("ruined_by", []) as Array
+	var hit := false
+	for p: Variant in parts:
+		var pd := p as Dictionary
+		if str(pd["type"]) in by and int(pd["amount"]) > 0 and target.creature.immunity_source(StringName(str(pd["type"]))) == "":
+			hit = true
+	if not hit:
+		return
+	target.set_meta("ruined", true)
+	if str(body.get("flag", "")) != "":
+		story_flags[str(body["flag"])] = true
+	var count := str(body.get("count", ""))
+	if count != "":
+		var was: Variant = story_flags.get(count, {"add": 0})
+		story_flags[count] = {"add": int((was as Dictionary).get("add", 0)) + 1 if was is Dictionary else 1}
+	_log("info", "%s is ruined for good" % target.name(), target)
 
 
 ## Legendary Resistance (after a D20 Test of `c`, D20Responses): a failed saving throw succeeds instead while uses are

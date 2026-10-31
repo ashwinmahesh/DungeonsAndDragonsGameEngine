@@ -1640,6 +1640,30 @@
         }
       }
     },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A body some damage ruins for good (a villager hollowed into a foe): when it drops to 0 Hit Points and any damage of a type in `ruined_by` landed in that blow, `flag` is set and 1 is added to the story flag `count`; `warn` shows on its tooltip and hover.",
+      "properties": {
+        "ruined_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flag": {
+          "type": "string"
+        },
+        "count": {
+          "type": "string",
+          "description": "A story flag the fight adds 1 to for each body ruined."
+        },
+        "warn": {
+          "type": "string",
+          "description": "The warning its tooltip and hover show (whose body it is, and what ends it)."
+        }
+      }
+    },
     "minions": {
       "type": "object",
       "additionalProperties": false,

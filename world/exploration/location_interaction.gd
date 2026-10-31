@@ -287,8 +287,9 @@ static func thing_at(view: LocationView, cell: Vector2i) -> Dictionary:
 	if not w.is_empty():
 		var foe := w["foe"] as Combatant
 		var state := LocationNpcs.state_of(foe.creature)   # what's on them shows here too (asleep, Faerie Fire ...)
-		return {"kind": "foe", "id": str(w["encounter"]), "name": foe.name(), "label": "Attack %s%s" % [foe.name(), " (%s)" % state if state != "" else ""],
-			"spec": {"cell": [foe.cell.x, foe.cell.y]}}
+		var warn := Legendary.body_warning(foe)   # and a body some damage ruins for good
+		return {"kind": "foe", "id": str(w["encounter"]), "name": foe.name(), "label": "Attack %s%s%s" % [foe.name(), " (%s)" % state if state != "" else "",
+			". %s" % warn if warn != "" else ""], "spec": {"cell": [foe.cell.x, foe.cell.y]}}
 	for shown in view._npc_shown:
 		var spec := shown["spec"] as Dictionary
 		if shown["cell"] == cell:
