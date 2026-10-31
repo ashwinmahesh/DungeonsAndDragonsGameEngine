@@ -98,3 +98,10 @@ func test_a_large_portrait_follows_the_pictures_shape_within_limits() -> void:
 	var big := UiParts.large_portrait("no_such_creature", "no_such_creature", 240.0)
 	assert_true(big.find_child("Placeholder", true, false) != null)
 	big.free()
+
+
+func test_a_stat_block_with_no_look_of_ignores_a_blank_look() -> void:
+	# A character built with no id once left a "" look behind, and every stat block without `look_of` matched it.
+	CombatToken._looks[""] = "someone"
+	assert_eq(CombatToken.monster_art({"id": "wolf"}), "wolf")
+	CombatToken._looks.erase("")
