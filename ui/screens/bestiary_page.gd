@@ -6,6 +6,8 @@ extends RefCounted
 ## rules words gilded (U1) and conditions as tags that open their cards. What's still unknown says how to learn it.
 
 const LIST_W := 300.0
+## How wide the entry's large portrait is (PortraitArt.large), its height following the picture's shape.
+const ENTRY_PORTRAIT_W := 240.0
 ## Where the list was scrolled to when a creature was picked, so the page comes back the same.
 static var _scroll := 0
 
@@ -44,7 +46,7 @@ static func _list_row(st: StoryState, id: String, lit: bool, on_pick: Callable) 
 	var d := Compendium.shared().monster_data(id)
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 8)
-	line.add_child(UiParts.framed_portrait(art(id), 40.0))
+	line.add_child(UiParts.framed_portrait(art(id), 40.0, false, false, id))
 	var name_ := UiKit.label(str(d.get("name", id)), 15, "gilt_light" if lit else "vellum")
 	name_.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_.clip_text = true
@@ -72,19 +74,26 @@ static func entry(st: StoryState, id: String) -> Control:
 	col.add_theme_constant_override("separation", 8)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 16)
-	head.add_child(UiParts.framed_portrait(art(id), 132.0))
+	# The photographs sit large beside the words, which wrap narrower to leave the page as wide as it was; a game without
+	# them keeps the small framed token art.
+	var words_w := 630.0
+	if PortraitArt.large():
+		head.add_child(UiParts.large_portrait(art(id), id, ENTRY_PORTRAIT_W))
+		words_w -= ENTRY_PORTRAIT_W - 132.0
+	else:
+		head.add_child(UiParts.framed_portrait(art(id), 132.0, false, false, id))
 	var who := VBoxContainer.new()
 	who.add_theme_constant_override("separation", 4)
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.add_child(UiKit.title(str(d.get("name", id))))
 	who.add_child(UiParts.caption("%s %s" % [str(d.get("size", "")).capitalize(), str(d.get("type", "")).capitalize()], 12))
 	if str(d.get("summary", "")) != "":
-		who.add_child(TermText.make(str(d["summary"]), UiScale.text(15), "vellum", 630))
+		who.add_child(TermText.make(str(d["summary"]), UiScale.text(15), "vellum", words_w))
 	var place := str(Compendium.shared().get_entry("locations", str(e.get("where", ""))).get("name", ""))
 	var met := "First fought on day %d" % int(e.get("met", 1)) + (" in %s" % place if place != "" else "")
 	var felled := int(e.get("defeated", 0))
 	met += " · felled: %d" % felled if felled > 0 else " · none felled yet"
-	who.add_child(UiKit.label(met + ".", UiScale.text(13), "parchment", 630))
+	who.add_child(UiKit.label(met + ".", UiScale.text(13), "parchment", words_w))
 	head.add_child(who)
 	col.add_child(head)
 	col.add_child(UiParts.section("From fighting it"))
@@ -162,6 +171,6 @@ static func _named_line(name_text: String, text: String) -> Control:
 	return box
 
 
-## The creature's picture: its token art, as the fights show it.
+## The creature's token art id, as the fights show it (a portrait of its own is looked up by its stat block id, PortraitArt).
 static func art(id: String) -> String:
 	return CombatToken.art_for(Monster.from_data(Compendium.shared().monster_data(id)))

@@ -66,7 +66,8 @@ func _centre() -> Vector3:
 ## The feet of the `MAX` figures nearest `centre`, each Vector4(x, y, z, 1 walking / 0 standing), remembering where
 ## each stood in `last`.
 static func feet_of(figures: Array[Node3D], last: Dictionary, delta: float, centre: Vector3) -> PackedVector4Array:
-	var near := figures.filter(func(f: Node3D) -> bool: return is_instance_valid(f))
+	# (Untyped: a figure freed since the last scan, a crowd leaving a place, can't be passed as a Node3D to test it.)
+	var near := figures.filter(func(f: Variant) -> bool: return is_instance_valid(f))
 	near.sort_custom(func(a: Node3D, b: Node3D) -> bool:
 		return a.global_position.distance_squared_to(centre) < b.global_position.distance_squared_to(centre))
 	var out := PackedVector4Array()

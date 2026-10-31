@@ -733,20 +733,42 @@ static func primary_button(text: String, on_press: Callable, icon_id: String = "
 	return b
 
 
-## A portrait in a double gilt frame with lozenges at the corners; greyed when down, faded when dead.
-static func framed_portrait(art_id: String, side: float, down: bool = false, dead: bool = false) -> Control:
+## A portrait in a double gilt frame with lozenges at the corners; greyed when down, faded when dead. `monster_id` is the
+## stat block id of a monster (PortraitArt.monster_id_of): its own portrait is looked up by that.
+static func framed_portrait(art_id: String, side: float, down: bool = false, dead: bool = false, monster_id: String = "") -> Control:
+	var tex := PortraitArt.square(PortraitArt.texture(art_id, monster_id))
+	return framed_art(tex, Vector2(side, side), down, dead, tex == null and PortraitArt.photoreal())
+
+
+## The frame for a creature in a fight: the turn order's, the party frames', the examine card's.
+static func framed_portrait_of(c: Combatant, side: float) -> Control:
+	return framed_portrait(CombatToken.portrait_id(c), side, c.is_down(), c.creature.dead, PortraitArt.monster_id_of(c))
+
+
+## A picture in that frame at any size (`tex` null leaves it empty, or `silhouette` draws a head and shoulders in it).
+static func framed_art(tex: Texture2D, size: Vector2, down: bool = false, dead: bool = false, silhouette: bool = false) -> Control:
+	var side := minf(size.x, size.y)
 	var holder := Control.new()
-	holder.custom_minimum_size = Vector2(side, side)
+	holder.custom_minimum_size = size
 	holder.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var inset := 4.0 if side < 100.0 else 6.0
 	var back := ColorRect.new()
 	back.color = Look.color("ui_black")
 	back.position = Vector2(inset, inset)
-	back.size = Vector2(side - inset * 2.0, side - inset * 2.0)
+	back.size = size - Vector2(inset, inset) * 2.0
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(back)
-	var pic := UiKit.portrait(art_id, side - inset * 2.0)
+	var pic: Control
+	if silhouette:
+		pic = PortraitArt.placeholder(back.size)
+	else:
+		var t := TextureRect.new()
+		t.texture = tex
+		t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pic = t
+	pic.custom_minimum_size = back.size
 	pic.position = back.position
 	pic.size = back.size
 	pic.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -757,7 +779,7 @@ static func framed_portrait(art_id: String, side: float, down: bool = false, dea
 		pic.modulate = Look.color("pewter")
 	holder.add_child(pic)
 	var big := side >= 100.0
-	holder.add_child(drawn(Vector2(side, side), func(c: Control) -> void:
+	holder.add_child(drawn(size, func(c: Control) -> void:
 		var r := Rect2(Vector2.ZERO, c.size)
 		c.draw_rect(r.grow(-1), Look.color("gilt"), false, 2.0 if big else 1.5)
 		if big:
@@ -767,6 +789,12 @@ static func framed_portrait(art_id: String, side: float, down: bool = false, dea
 			diamond(c, p, k, Look.color("void"), true)
 			diamond(c, p, k - 2.0, Look.color("gilt_light"), true)))
 	return holder
+
+
+## The Bestiary entry's large portrait: the creature's own picture at its own shape, `width` wide, or the silhouette.
+static func large_portrait(art_id: String, monster_id: String, width: float) -> Control:
+	var tex := PortraitArt.texture(art_id, monster_id)
+	return framed_art(tex, PortraitArt.large_size(tex, width), false, false, tex == null)
 
 
 ## A party member's chip: their portrait and first name, the chosen one lit, greyed when they're down.
