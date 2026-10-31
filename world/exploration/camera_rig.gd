@@ -48,6 +48,10 @@ var tilt_range := Vector2.ZERO
 const DRAG_TILT := 0.15
 ## The tilt keys held (camera_tilt_up and camera_tilt_down), in degrees a second.
 const TILT_SPEED := 30.0
+## A trackpad (a Mac's has no middle button or wheel; it sends gestures): pinching zooms, a two-finger swipe across turns
+## the camera (in free turning) and one up or down zooms as the wheel does. Degrees and world units per unit of swipe.
+const PAN_TURN := 6.0
+const PAN_ZOOM := 0.6
 ## The pad's right stick turns the camera (a flick left or right is a quarter turn) and zooms it (up and down) while
 ## this is on: exploring turns it on (game_root); a fight's radial menu aims with the stick instead (U6).
 var pad_look := false
@@ -225,6 +229,20 @@ func touch_camera(update: Dictionary) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.has_meta(&"touch_gui"):
+		return
+	if event is InputEventMagnifyGesture:
+		distance = clampf(distance / maxf((event as InputEventMagnifyGesture).factor, 0.01), zoom_min, zoom_max)
+		return
+	if event is InputEventPanGesture:
+		var swipe := (event as InputEventPanGesture).delta
+		if free_turn and absf(swipe.x) > absf(swipe.y):
+			turn_by(swipe.x * PAN_TURN)
+		elif swipe.y < 0.0 and horizon > 0.0:
+			horizon = maxf(horizon + swipe.y * PAN_ZOOM / HORIZON_STEPS, 0.0)
+		elif swipe.y > 0.0 and distance >= zoom_max - 0.01 and Look.modern():
+			horizon = minf(horizon + swipe.y * PAN_ZOOM / HORIZON_STEPS, 1.0)
+		else:
+			distance = clampf(distance + swipe.y * PAN_ZOOM, zoom_min, zoom_max)
 		return
 	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
 		var mb := event as InputEventMouseButton

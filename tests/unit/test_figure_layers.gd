@@ -206,3 +206,29 @@ func test_an_upright_piece_follows_its_bone_but_stands_as_the_figure_does() -> v
 	fig.wear([])
 	assert_true(fig._upright.is_empty(), "no longer followed once off")
 	fig.free()
+
+
+func test_a_hovering_ghost_part_bobs_beside_the_figure_in_its_own_look() -> void:
+	FigureModels.register_part(LANTERN, {"bone": "Spine", "size": 0.3, "offset": [0.2, 0.15, -0.05], "hover": [0.05, 2.0],
+		"ghost": {"see_through": 0.4, "wash": 0.6, "glow": 0.5}}, _lantern())
+	var fig := _figure({"layers": [LANTERN]})
+	var holds := fig._skeleton.find_children("Holds_*", "Node3D", false, false)
+	assert_eq(holds.size(), 1, "the companion is on")
+	var hold := holds[0] as Node3D
+	assert_false(hold is BoneAttachment3D, "standing as the figure stands")
+	var heights := {}
+	for i in 8:
+		fig._time = i * 0.25
+		fig._follow_bones()
+		heights[snappedf(hold.position.y, 0.001)] = true
+	assert_true(heights.size() > 4, "it bobs over its place")
+	var spread: float = float((heights.keys() as Array).max()) - float((heights.keys() as Array).min())
+	assert_between(spread, 0.0, 0.05 * 2.0 * fig._rest_height / fig._skeleton_scale() + 0.001, "by its hover height")
+	var ghost := (fig._layers[LANTERN] as Dictionary)["meshes"][0] as MeshInstance3D
+	assert_eq(ghost.get_instance_shader_parameter(&"see_through"), 0.4, "the part is see-through")
+	fig.set_glow(0.0)
+	assert_eq(ghost.get_instance_shader_parameter(&"glow"), 0.5, "and keeps its own glow when the figure's changes")
+	fig._each_mesh(&"tint", Vector4(1, 1, 1, 0.5))
+	assert_eq(ghost.get_instance_shader_parameter(&"tint"), Vector4(1, 1, 1, 0.5), "but fades with the figure")
+	assert_eq(fig._own_meshes[0].get_instance_shader_parameter(&"see_through"), null, "the figure itself isn't a ghost")
+	fig.free()
