@@ -11,7 +11,8 @@ extends DirectionalSprite
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
 ## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
 ## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
-## lies on its back; without a hurt clip it recoils; without an idle it stirs on its walk (FigureModels.FALLBACKS).
+## lies on its back; without a hurt clip it recoils; without an idle it stands still and breathes, unless its manifest says
+## `idle_from_walk`, then it stirs on its walk.
 ## Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
 ## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear. An entry
 ## can paint the model with a texture of its own (`albedo`, a dressing of a shared body), draw it with a game's shader
@@ -29,6 +30,8 @@ const TURN_RATE := 11.0
 ## The fall without a die clip, and getting up again, in seconds.
 const FALL_SECONDS := 0.5
 const RISE_SECONDS := 0.45
+## Getting up after a die clip: the fall plays backwards over this long, then blends into the idle.
+const RISE_CLIP_SECONDS := 0.85
 ## A walk plays at the rate that matches its stride to the ground covered, within these: legs a little faster or
 ## slower than the ground look fine, past them they skate. Over RUN_FROM the run clip plays instead, if there is one:
 ## a figure walks for as long as its walk keeps up with the ground, and runs only past that (never when sneaking).
@@ -37,6 +40,8 @@ const MAX_WALK_RATE := 2.2
 const RUN_FROM := MAX_WALK_RATE
 ## A walk clip that doesn't move the model (made in place) is taken to cover this many of the figure's heights a second.
 const IN_PLACE_PACE := 0.62
+## The speed of a walk-only model's idle when its manifest says `idle_from_walk`: its walk, slowed to a stir.
+const IDLE_STIR := 0.3
 ## Roles whose clips are all used, in turn, rather than the first found.
 const VARIED: Array[String] = ["talk", "greet"]
 
@@ -79,6 +84,8 @@ var _shown_modulate := Color(-1, -1, -1, -1)
 var _walk_at := -1.0
 var _tilt := 0.0
 var _tilt_v := 0.0
+## Getting up by playing the die clip backwards: the clip's start it rises to, or -1 when not rising.
+var _rise_to := -1.0
 static var _materials: Dictionary = {}
 
 
@@ -532,17 +539,15 @@ func _read_clips() -> void:
 				break
 		if not specs.is_empty():
 			_roles[role] = specs
-	# A role without a clip of its own borrows another role's, at its speed (FigureModels.FALLBACKS).
-	for role: String in FigureModels.FALLBACKS:
-		var fb := FigureModels.FALLBACKS[role] as Dictionary
-		if _roles.has(role) or not _roles.has(str(fb["role"])):
-			continue
-		var borrowed: Array[Dictionary] = []
-		for spec: Dictionary in _roles[str(fb["role"])] as Array:
+	# A walk-only rig stands still and breathes (_play_loop), unless its manifest says idle_from_walk: then it idles on its
+	# walk, slowed to a stir.
+	if not _roles.has("idle") and _roles.has("walk") and bool(_info.get("idle_from_walk", false)):
+		var stir: Array[Dictionary] = []
+		for spec: Dictionary in _roles["walk"] as Array:
 			var b := spec.duplicate()
-			b["speed"] = float(spec.get("speed", 1.0)) * float(fb["speed"])
-			borrowed.append(b)
-		_roles[role] = borrowed
+			b["speed"] = float(spec.get("speed", 1.0)) * IDLE_STIR
+			stir.append(b)
+		_roles["idle"] = stir
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add
@@ -690,6 +695,12 @@ func _play_loop(role: String, rate: float) -> void:
 	if spec.is_empty():
 		if role != "idle":
 			_play_loop("idle", 1.0)
+		elif _loop != "idle":
+			# No idle clip (a walk-only rig): stand in the rest pose, breathing (_breath), rather than walking on the spot.
+			_player.stop()
+			if _skeleton != null:
+				_skeleton.reset_bone_poses()
+			_loop = "idle"
 		return
 	_rate = rate
 	if role != _loop or _player.current_animation != str(spec["name"]):
@@ -719,6 +730,7 @@ func _play_role(role: String, lands: bool) -> bool:
 	_struck = not lands
 	moving = false
 	_loop = ""
+	_rise_to = -1.0   # a clip cuts a getting-up short
 	_player.play(name, BLEND)
 	_player.seek(from, true)
 	_player.speed_scale = float(spec.get("speed", 1.0))
@@ -861,6 +873,11 @@ func _process(delta: float) -> void:
 	finish_stride = false
 	if pose == "down":
 		return
+	if _rise_to >= 0.0:
+		if not moving and _player.is_playing() and _player.current_animation_position > _rise_to + 0.02:
+			return   # still getting up
+		_rise_to = -1.0
+		_one_shot = ""
 	var role := str(get_meta("walk_role", "walk")) if moving else "idle"
 	if not has_role(role):
 		role = "walk" if moving else "idle"
@@ -908,7 +925,7 @@ func _pose_step(dt: float) -> void:
 		_lie_to = 0.0
 		if _fell_by_clip:
 			_fell_by_clip = false
-			_play_loop("idle", 1.0)
+			_get_up_by_clip()
 	if _lie != _lie_to:
 		var falling := _lie_to > _lie
 		_lie = move_toward(_lie, _lie_to, dt / (FALL_SECONDS if falling else RISE_SECONDS))
@@ -925,7 +942,37 @@ func _pose_step(dt: float) -> void:
 	var back := Basis(Vector3.RIGHT, -PI * 0.5 * f)
 	var pivot := Vector3(0.0, c, 0.0)
 	var lie := Transform3D(back, pivot - back * pivot + Vector3(0.0, (_back_depth() - c) * f, 0.0))
-	_posture.transform = lie * Transform3D(Basis(Vector3.RIGHT, clampf(_tilt, -1.0, 1.0) * 0.18 * (1.0 - f)), Vector3.ZERO)
+	var lean := Basis(Vector3.RIGHT, clampf(_tilt, -1.0, 1.0) * 0.18 * (1.0 - f))
+	_posture.transform = lie * Transform3D(lean * _breath(), Vector3.ZERO)
+
+
+## A model with no idle clip, standing still, breathes: a little taller and narrower at the top of each breath, from
+## its feet (GameFeel's `breath` scales it, as for sprites). Otherwise no change.
+func _breath() -> Basis:
+	if has_role("idle") or moving or pose == "down" or _lie > 0.0 or _one_shot != "":
+		return Basis.IDENTITY
+	var b := sin(_time * TAU / BREATH_PERIOD + _breath_phase) * BREATH * GameFeel.num("breath")
+	return Basis.from_scale(Vector3(1.0 - b * 0.5, 1.0 + b, 1.0 - b * 0.5))
+
+
+## Gets up from a die clip's last frame: the fall played backwards to its start over RISE_CLIP_SECONDS, then the idle
+## blends in (_process). Without the clip, the idle at once.
+func _get_up_by_clip() -> void:
+	var specs := _roles.get("die", []) as Array
+	if specs.is_empty() or _player == null:
+		_play_loop("idle", 1.0)
+		return
+	var spec := specs[0] as Dictionary
+	var name := str(spec["name"])
+	var length := _player.get_animation(name).length
+	var from := clampf(float(spec.get("from", 0.0)), 0.0, length)
+	var to := clampf(float(spec.get("to", length)), from, length)
+	_player.play(name, 0.0, -(to - from) / RISE_CLIP_SECONDS, true)
+	_player.seek(to, true)
+	_player.speed_scale = 1.0
+	_rise_to = from
+	_one_shot = "rise"
+	_loop = ""
 
 
 ## How far the model's back lies behind its middle (its depth from front to back, halved), so it lies on the ground.

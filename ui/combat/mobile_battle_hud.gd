@@ -179,7 +179,7 @@ func details(title: String, lines: Array) -> void:
 
 func examine(card: Dictionary, c: Combatant) -> void:
 	var body := open_page(str(card["title"]))
-	body.add_child(UiParts.framed_portrait(CombatToken.portrait_id(c), 72, c.is_down(), c.creature.dead))
+	body.add_child(UiParts.framed_portrait_of(c, 72.0))
 	for key: String in ["subtitle", "summary"]:
 		if str(card.get(key, "")) != "":
 			body.add_child(MobileUi.text(str(card[key])))

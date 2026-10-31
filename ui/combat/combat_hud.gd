@@ -763,7 +763,7 @@ func _area_row(r: Dictionary) -> HBoxContainer:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var who := e.get_c(str(r["id"]))
 	if who != null:
-		row.add_child(UiParts.framed_portrait(CombatToken.portrait_id(who), AREA_PORTRAIT, who.is_down(), who.creature.dead))
+		row.add_child(UiParts.framed_portrait_of(who, AREA_PORTRAIT))
 	var mid := VBoxContainer.new()
 	mid.add_theme_constant_override("separation", -2)
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -992,7 +992,7 @@ func _refresh_strip() -> void:
 		var v := VBoxContainer.new()
 		v.add_theme_constant_override("separation", 1)
 		card.add_child(v)
-		v.add_child(UiParts.framed_portrait(CombatToken.portrait_id(c), ORDER_PORTRAIT_ACTIVE if active else ORDER_PORTRAIT, c.is_down(), c.creature.dead))
+		v.add_child(UiParts.framed_portrait_of(c, ORDER_PORTRAIT_ACTIVE if active else ORDER_PORTRAIT))
 		var short := order_name(c.name(), c.side == &"enemy")
 		var sl := _label(short, ORDER_NAME_SIZE if not active else ORDER_NAME_SIZE_ACTIVE, "gilt_light" if active else "vellum")
 		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1090,7 +1090,7 @@ func _refresh_party() -> void:
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation", 8)
 		card.add_child(row)
-		row.add_child(UiParts.framed_portrait(CombatToken.portrait_id(c), PARTY_PORTRAIT, c.is_down(), c.creature.dead))
+		row.add_child(UiParts.framed_portrait_of(c, PARTY_PORTRAIT))
 		var v := VBoxContainer.new()
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		v.add_theme_constant_override("separation", 2)
@@ -1997,7 +1997,7 @@ func show_examine(card: Dictionary, t: Combatant) -> void:
 		ch.queue_free()
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
-	head.add_child(UiParts.framed_portrait(CombatToken.portrait_id(t), 72.0, t.is_down(), t.creature.dead))
+	head.add_child(UiParts.framed_portrait_of(t, 72.0))
 	var names := VBoxContainer.new()
 	names.add_theme_constant_override("separation", 0)
 	var title := _label(str(card["title"]), 22, "gilt_light")
@@ -2356,12 +2356,12 @@ func _process(delta: float) -> void:
 # --- Helpers --------------------------------------------------------------------------------------
 
 func _portrait_for(c: Combatant) -> Texture2D:
-	var aid := CombatToken.portrait_id(c)
-	if _portraits.has(aid):
-		return _portraits[aid] as Texture2D
-	var path := ArtPaths.of("art/portraits/%s.png" % aid)
-	var tex: Texture2D = load(path) as Texture2D if ResourceLoader.exists(path) else null
-	_portraits[aid] = tex
+	var key := "%s|%s" % [PortraitArt.monster_id_of(c), CombatToken.portrait_id(c)]
+	if _portraits.has(key):
+		return _portraits[key] as Texture2D
+	var tex := PortraitArt.square(PortraitArt.texture_for(c))
+	if tex != null:
+		_portraits[key] = tex
 	return tex
 
 
