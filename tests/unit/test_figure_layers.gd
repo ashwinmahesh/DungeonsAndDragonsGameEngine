@@ -270,3 +270,59 @@ func test_a_head_made_apart_sits_on_the_neck_sized_by_the_body_and_never_scaled_
 	assert_between(hold.basis.get_scale().x, 0.999, 1.001, "the body's own head shrunk away, this one not")
 	assert_between(hold.basis.get_euler().y, 0.599, 0.601, "turned as the head turns")
 	fig.free()
+
+
+static func _picture(colour: Color) -> ImageTexture:
+	var img := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	img.fill(colour)
+	return ImageTexture.create_from_image(img)
+
+
+func test_a_close_up_swaps_in_the_full_size_pictures_and_back() -> void:
+	var own := _picture(Color.RED)
+	var big := _picture(Color.BLUE)
+	var part_big := _picture(Color.GREEN)
+	var root := Node3D.new()
+	var sk := Skeleton3D.new()
+	sk.name = "Skeleton3D"
+	root.add_child(sk)
+	sk.owner = root
+	sk.add_bone("mixamorig_Hips")
+	sk.add_bone("mixamorig_Spine")
+	sk.set_bone_parent(1, 0)
+	var mi := MeshInstance3D.new()
+	mi.name = "Body"
+	var box := BoxMesh.new()
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = own
+	box.material = mat
+	mi.mesh = box
+	sk.add_child(mi)
+	mi.owner = root
+	var packed := PackedScene.new()
+	packed.pack(root)
+	root.free()
+	var lantern := _lantern().instantiate()
+	var lmat := StandardMaterial3D.new()
+	lmat.albedo_texture = own
+	((lantern.get_child(0) as MeshInstance3D).mesh as BoxMesh).material = lmat
+	var lp := PackedScene.new()
+	lp.pack(lantern)
+	lantern.free()
+	FigureModels.register_part(LANTERN, {"bone": "Spine", "size": 0.2, "close_up": {"albedo": part_big}}, lp)
+	FigureModels.register(ID, {"close_up": {"albedo": big}, "layers": [LANTERN]}, packed)
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	add_child(fig)
+	var body := fig._own_meshes[0]
+	var piece := (fig._layers[LANTERN] as Dictionary)["meshes"][0] as MeshInstance3D
+	var shown := func(m: MeshInstance3D) -> Texture2D:
+		return (m.get_surface_override_material(0) as ShaderMaterial).get_shader_parameter("albedo_tex") as Texture2D
+	assert_eq(shown.call(body), own, "its usual picture")
+	fig.set_close_up(true)
+	assert_true(fig.is_close_up(), "in close-up")
+	assert_eq(shown.call(body), big, "the full-size picture in a close-up")
+	assert_eq(shown.call(piece), part_big, "and the part's own")
+	fig.set_close_up(false)
+	assert_eq(shown.call(body), own, "its usual picture again after")
+	assert_eq(shown.call(piece), own, "the part's too")
+	fig.free()

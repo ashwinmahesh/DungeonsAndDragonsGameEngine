@@ -61,6 +61,8 @@ var _layers: Dictionary = {}
 var _worn: Array[String] = []
 ## The per-instance shader values set so far (tint, flash, glow, ghost), for meshes put on later.
 var _params: Dictionary = {}
+## Wearing its close-up look (set_close_up).
+var _close_up := false
 ## Pieces that follow a bone without being its child (a part's `follow` "place" or "turn", or `upright`): their
 ## holder -> [the bone, whether it turns with it], moved there each time the pose is set.
 var _upright: Dictionary = {}
@@ -265,6 +267,50 @@ func set_glow(amount: float) -> void:
 ## Washed toward a translucent grey (an Echo Knight's echo), 0 to 1.
 func set_ghost(amount: float) -> void:
 	_each_mesh("ghost", amount)
+
+
+## The figure's close-up look on or off (a conversation's close-up, TalkCamera.speaker): the entry's `close_up`
+## `albedo` picture in place of its own on the model's surfaces, and each worn part's own `close_up` on its, where they
+## have one. A figure's usual pictures are cut down for the play camera; the close-up ones are full size, loaded the
+## first time they are worn. Off, everything goes back to its usual look.
+func set_close_up(on: bool) -> void:
+	if on == _close_up or model == null:
+		return
+	_close_up = on
+	var own := _close_up_picture(_info) if on else null
+	_repaint(_own_meshes, own if own != null else FigureModels.albedo_of(art_id))
+	for id: Variant in _layers:
+		var part := FigureModels.part(str(id).trim_suffix(FigureModels.OFF_HAND))
+		var pic := _close_up_picture(part) if on else null
+		if on and pic == null:
+			continue
+		var meshes: Array[MeshInstance3D] = []
+		for mi: Variant in ((_layers[id] as Dictionary)["meshes"] as Array):
+			meshes.append(mi as MeshInstance3D)
+		_repaint(meshes, pic)
+
+
+func is_close_up() -> bool:
+	return _close_up
+
+
+## An entry's close-up picture: its `close_up` `albedo` (a path, or a texture for an entry added in code), or null.
+static func _close_up_picture(entry: Dictionary) -> Texture2D:
+	var pic: Variant = (entry.get("close_up") as Dictionary).get("albedo") if entry.get("close_up") is Dictionary else null
+	if pic is Texture2D:
+		return pic as Texture2D
+	var rel := str(pic) if pic != null else ""
+	return load(ArtPaths.of(rel)) as Texture2D if rel != "" and ArtPaths.exists(rel) else null
+
+
+## Each surface of `meshes` in the figure material again, painted with `paint` (null: their own pictures).
+func _repaint(meshes: Array[MeshInstance3D], paint: Texture2D) -> void:
+	var own_shader := _own_shader()
+	for mi in meshes:
+		if not is_instance_valid(mi) or mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			mi.set_surface_override_material(i, surface_material(mi.mesh.surface_get_material(i), paint, own_shader, _soft))
 
 
 ## The ink line drawn `px` pixels wide (at 1080 lines) on this figure alone: a close view (the creator's turntable)

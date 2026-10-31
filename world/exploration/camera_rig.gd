@@ -142,6 +142,12 @@ static func _camera_setting(key: String, default: Variant) -> Variant:
 	return (cam as Dictionary).get(key, default) if cam is Dictionary else default
 
 
+## Whether conversations come in close on whoever is speaking (data/campaign.json "camera" "talk_close_ups";
+## TalkCamera.speaker).
+static func talk_close_ups() -> bool:
+	return bool(_camera_setting("talk_close_ups", false))
+
+
 ## How far a fight's opening sweep turns the camera round the board (data/campaign.json "camera" "fight_sweep",
 ## degrees; 0 none).
 static func fight_sweep() -> float:
