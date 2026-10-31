@@ -149,12 +149,17 @@ static func cell_size(frames: SpriteFrames) -> int:
 ## The frames for sprite `art_id`: its walk sheet's walk_/idle_ animations plus, when it has an attack sheet,
 ## attack_<dir> (and the attack's hit frame as metadata). Null when the sprite has no sheet. Cached per id. A custom
 ## hero's art id (registered by CombatToken.art_for) gets the paper doll HeroLook puts together, and an art id with a 3D
-## model (FigureModels) its stand-in frames, which create() turns into the model's figure.
+## model (FigureModels) its stand-in frames, which create() turns into the model's figure. One whose model is still to
+## come wears the sprite its manifest entry names meanwhile (FigureModels.stand_in).
 static func frames_for(art_id: String) -> SpriteFrames:
 	if HeroLook.known(art_id):
 		return HeroLook.frames_for_art(art_id)
 	if FigureModels.has(art_id):
 		return FigureModels.frames(art_id)
+	var stand_in := FigureModels.stand_in(art_id)
+	if stand_in != "" and FigureModels.stand_in(stand_in) == "" \
+			and not ResourceLoader.exists(ArtPaths.of("art/sprites/%s/walk.tres" % art_id)):
+		return frames_for(stand_in)   # one step only: two stand-ins naming each other draw nothing
 	if _frames_cache.has(art_id):
 		var kept := (_frames_cache[art_id] as WeakRef).get_ref() as SpriteFrames
 		if kept != null:

@@ -11,8 +11,11 @@ extends DirectionalSprite
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
 ## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
 ## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
-## lies on its back; without a hurt clip it recoils. Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
-## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear.
+## lies on its back; without a hurt clip it recoils; without an idle it stirs on its walk (FigureModels.FALLBACKS).
+## Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
+## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear. An entry
+## can paint the model with a texture of its own (`albedo`, a dressing of a shared body), draw it with a game's shader
+## (`shader`), grow or shrink bones on top of every clip (`bones`, FigureBones) and show it as a ghost (`ghost`).
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/lit_figure.gdshader")
 const INK := preload("res://addons/dnd_core/shaders/world/figure_ink.gdshader")
@@ -101,7 +104,11 @@ func _build() -> void:
 		_skeleton = n as Skeleton3D
 		break
 	_dress()
+	_bones()
 	_read_clips()
+	var ghostly := _info.get("ghost", {}) as Dictionary
+	if not ghostly.is_empty():
+		set_ghost_look(ghostly)
 	_play_loop("idle", 1.0)
 	if _player != null and _player.current_animation != "":
 		# A crowd doesn't breathe in step: each figure starts its idle somewhere of its own.
@@ -133,30 +140,47 @@ static func rest_box(root: Node3D) -> AABB:
 ## Materials are shared by every copy of a model; what's a figure's own (its fade, flash, glow) is per instance.
 func _dress() -> void:
 	var shadows := Look.modern() and Graphics.sprite_shadows()
+	var paint := FigureModels.albedo_of(art_id)
+	var own_shader := _own_shader()
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		if mi.mesh == null:
 			continue
 		for i in mi.mesh.get_surface_count():
 			var src := mi.get_active_material(i)
-			mi.set_surface_override_material(i, surface_material(src))
+			mi.set_surface_override_material(i, surface_material(src, paint, own_shader))
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_meshes.append(mi)
 
 
+## The game's own shader the entry names (`shader`), or null for the engine's.
+func _own_shader() -> Shader:
+	var rel := str(_info.get("shader", ""))
+	if rel == "":
+		return null
+	if not ArtPaths.exists(rel):
+		push_warning("figure %s: no shader %s, drawn with the engine's" % [art_id, rel])
+		return null
+	return load(ArtPaths.of(rel)) as Shader
+
+
 ## The figure material standing in for a model's own `src` (its albedo texture and colour), made once per look.
-static func surface_material(src: Material) -> ShaderMaterial:
+## `paint` replaces a textured surface's texture (a dressing of a shared body); `own_shader` replaces lit_figure.
+static func surface_material(src: Material, paint: Texture2D = null, own_shader: Shader = null) -> ShaderMaterial:
 	var tex: Texture2D = null
 	var colour := Color.WHITE
 	if src is BaseMaterial3D:
 		tex = (src as BaseMaterial3D).albedo_texture
 		colour = (src as BaseMaterial3D).albedo_color
-	var key := "%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style()]
+	if paint != null and tex != null:
+		tex = paint
+	var key := "%s|%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style(),
+		own_shader.resource_path if own_shader != null else ""]
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var s := Look.figure_settings()
 	var m := ShaderMaterial.new()
-	m.shader = SHADER
+	m.shader = own_shader if own_shader != null else SHADER
 	m.render_priority = RENDER_PRIORITY   # after the screen pass, as the 2D figures
 	m.set_shader_parameter("use_texture", tex != null)
 	if tex != null:
@@ -193,9 +217,43 @@ func set_ghost(amount: float) -> void:
 	_each_mesh("ghost", amount)
 
 
+## A ghost's look, as a manifest entry's "ghost" gives it (each 0 to 1, any left out is none): `wash` toward its colour
+## (set_ghost), `colour` (a palette name; the material's grey without one), `glow` its own light (set_glow),
+## `see_through` the share of it the world shows through, `rim` a glow along its edges, `pulse` how far its glow
+## throbs. The ink pass leaves out the same pixels as the body, so a ghost seen through has no dark ghost of its line.
+func set_ghost_look(look: Dictionary) -> void:
+	set_ghost(float(look.get("wash", 0.0)))
+	set_glow(float(look.get("glow", 0.0)))
+	var colour := str(look.get("colour", ""))
+	var c := Look.color(colour) if colour != "" else Color(0, 0, 0, 0)
+	_each_mesh("ghost_colour", Vector4(c.r, c.g, c.b, c.a if colour != "" else 0.0))
+	_each_mesh("see_through", clampf(float(look.get("see_through", 0.0)), 0.0, 0.95))
+	_each_mesh("ghost_rim", float(look.get("rim", 0.0)))
+	_each_mesh("pulse", float(look.get("pulse", 0.0)))
+
+
 func _each_mesh(param: StringName, value: Variant) -> void:
 	for gi in _meshes:
 		gi.set_instance_shader_parameter(param, value)
+
+
+## The entry's `bones`: each grown or shrunk on top of every clip (FigureBones).
+func _bones() -> void:
+	var want := _info.get("bones", {}) as Dictionary
+	if want.is_empty() or _skeleton == null:
+		return
+	var fb := FigureBones.new()
+	fb.name = "FigureBones"
+	for bone: String in want:
+		var i := FigureBones.bone_named(_skeleton, bone)
+		if i < 0:
+			push_warning("figure %s: no bone %s to scale" % [art_id, bone])
+			continue
+		fb.scales[i] = float(want[bone])
+	if fb.scales.is_empty():
+		fb.free()
+		return
+	_skeleton.add_child(fb)
 
 
 # --- Clips ------------------------------------------------------------------------------------------------------------
@@ -221,6 +279,17 @@ func _read_clips() -> void:
 				break
 		if not specs.is_empty():
 			_roles[role] = specs
+	# A role without a clip of its own borrows another role's, at its speed (FigureModels.FALLBACKS).
+	for role: String in FigureModels.FALLBACKS:
+		var fb := FigureModels.FALLBACKS[role] as Dictionary
+		if _roles.has(role) or not _roles.has(str(fb["role"])):
+			continue
+		var borrowed: Array[Dictionary] = []
+		for spec: Dictionary in _roles[str(fb["role"])] as Array:
+			var b := spec.duplicate()
+			b["speed"] = float(spec.get("speed", 1.0)) * float(fb["speed"])
+			borrowed.append(b)
+		_roles[role] = borrowed
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add

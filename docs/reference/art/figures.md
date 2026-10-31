@@ -34,10 +34,34 @@ keeps its sprite, so a game moves to 3D one figure at a time, and a game with no
   `{"clip", "from", "to", "hit", "speed"}`: part of a long clip, the moment the blow lands, how fast it plays.
 - `defaults`: under every figure of the manifest (its `clips` merged role by role), for models made the same way.
 
+For creatures, and figures whose models are still to come:
+
+- `sprite`: the art id of the 8-direction sprite worn while the model's file isn't there (`FigureModels.stand_in`,
+  `DirectionalSprite.frames_for`). A game lists a figure before its model arrives, and it switches to 3D the moment the
+  file lands. One step only: a stand-in that has a stand-in of its own isn't followed.
+- `base`: another figure's art id. The entry is laid over that one's (file, clips, scale, height, everything it doesn't
+  say itself), so one rigged body can be worn by several creatures. A `base` entry has its model when its base does.
+- `albedo`: a texture painted on every textured surface in place of the model's own: with `base`, a dressing of the
+  shared body. It must be a retexture of the same mesh and UVs (Tripo's retexture of a rigged model keeps both).
+- `bones`: `{"Head": 1.18}`, bones grown or shrunk on top of every clip (`FigureBones`, a SkeletonModifier3D), so a
+  body shared by a grown-up and a child can still differ in build. Names ignore case and a rig's prefix (`Head` finds
+  `mixamorig_Head`).
+- `ghost`: `{"wash", "colour", "glow", "see_through", "rim", "pulse"}`, each 0 to 1 (`ModelFigure.set_ghost_look`):
+  washed toward `colour` (a palette name; the silver of an Echo Knight's echo without one), its own light, the share of
+  it the world shows through, a glow along its edges in its colour (its ink darkens to that colour too), and how far
+  its glow throbs. Seen-through is the screen-door dither the fades use, in both passes, so a ghost keeps its depth.
+- `shader`: a game's own spatial shader for the figure's surfaces in place of `lit_figure` (the hook for a look the
+  engine doesn't draw). It includes `figure.gdshaderinc` and takes the uniforms `ModelFigure.surface_material` sets.
+
 Roles and the names looked for when the manifest names none (`FigureModels.CLIPS`): idle, walk, run (loops); attack
 (`attack`, `slash`), cast, hurt, die (`die`, `death`, `fall`), talk (`talk`, `agree`, `complain_01`), greet (`greet`,
 `greet_01`, `wave`). Names are matched ignoring case, a library or armature prefix and an exporter's number
 (`idle.001`, `Armature|walk`, `preset:quadruped:walk`).
+
+A role a model has no clip for borrows another's (`FigureModels.FALLBACKS`): a model rigged with only a walk (Tripo's
+"Other" rig on a crawler or a hound) idles on its walk at 0.3x, a stir in place, rather than standing in its bind pose.
+The rest fall back as below: run to the walk sped up, attack to the token's lunge, hurt to the recoil, die to the
+tip-over, talk and greet to nothing.
 
 ## What the figure does with its clips
 

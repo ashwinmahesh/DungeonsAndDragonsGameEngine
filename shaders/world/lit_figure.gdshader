@@ -8,7 +8,10 @@
 // and its colours are pushed (`vivid`), as a painted cel figure's are. Its ink is the second pass (figure_ink).
 // Drawn as the 2D figures are, after the screen pass (ModelFigure sets DirectionalSprite.RENDER_PRIORITY): the place's
 // mist, grade, palette and depth blur are the world's, and the figure stays clear over them. It is fully opaque (ALPHA
-// 1) and writes depth, so it hides itself and other figures as a solid thing does; a fade is a screen-door dither.
+// 1) and writes depth, so it hides itself and other figures as a solid thing does; a fade is a screen-door dither, and
+// so is a ghost seen through (figure.gdshaderinc), whose edge can glow in its own colour.
+// A game can draw a figure with its own shader instead (a manifest entry's "shader"): include figure.gdshaderinc and
+// take the uniforms ModelFigure.surface_material sets.
 shader_type spatial;
 render_mode blend_mix, cull_back, depth_draw_always;
 #include "res://addons/dnd_core/shaders/world/figure.gdshaderinc"
@@ -51,12 +54,19 @@ void fragment() {
 		base = max(mix(vec3(l), base, vivid), vec3(0.0));
 	}
 	base *= tint.rgb;
+	vec3 spirit = figure_ghost_colour(ghost_tint);
 	if (ghost > 0.0) {
 		float lum = dot(base, vec3(0.299, 0.587, 0.114));
-		base = mix(base, clamp(vec3(lum) * ghost_tint * 1.35, 0.0, 1.0), ghost);
+		base = mix(base, clamp(vec3(lum) * spirit * 1.35, 0.0, 1.0), ghost);
 	}
 	ALBEDO = base * (1.0 - flash);
-	EMISSION = base * max(light_floor, glow) * (1.0 - flash) + vec3(flash);
+	EMISSION = base * max(light_floor, figure_glow(NODE_POSITION_WORLD)) * (1.0 - flash) + vec3(flash);
+	if (ghost_rim > 0.0) {
+		// A ghost's edge glows in its colour whatever the lights (in the Toon finish a hard band, as the rim light's).
+		float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.5);
+		edge = toon() ? smoothstep(0.3, 0.38, edge) : edge;
+		EMISSION += spirit * edge * ghost_rim * 1.6 * (1.0 + pulse * 0.5 * sin(TIME * 2.4)) * (1.0 - flash);
+	}
 	ROUGHNESS = roughness;
 	SPECULAR = 0.0;
 	METALLIC = 0.0;

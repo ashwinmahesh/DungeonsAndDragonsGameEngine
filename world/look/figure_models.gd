@@ -33,6 +33,14 @@ const CLIPS := {
 	"greet": ["greet", "greet_01", "wave"],
 }
 const LOOPS: Array[String] = ["idle", "walk", "run"]
+## A role with no clip of its own plays another role's, at this speed: a creature rigged with only a walk (a crawler, a
+## hound: Tripo's "Other" rig) idles on its walk, slowed to a stir, rather than standing in its bind pose. (A run falls
+## back to the walk, sped up, in ModelFigure.set_step_time.)
+const FALLBACKS := {
+	"idle": {"role": "walk", "speed": 0.3},
+}
+## How deep `base` entries may stack (a dressing of a dressing); past it the chain is taken for a loop.
+const MAX_BASES := 4
 
 static var _manifest: Dictionary = {}
 static var _defaults: Dictionary = {}
@@ -55,38 +63,82 @@ static func manifest() -> Dictionary:
 
 
 ## The entry for `art_id` over the manifests' defaults ({} when it has no model).
+## An entry with a `base` is laid over that figure's entry, its `clips` merged role by role.
 static func info(art_id: String) -> Dictionary:
 	if _registered.has(art_id):
-		return (_registered[art_id] as Array)[0] as Dictionary
+		return _resolved(art_id, 0)
 	if _entries.has(art_id):
 		return _entries[art_id] as Dictionary
-	var own := manifest().get(art_id, {}) as Dictionary
-	if own.is_empty() or _defaults.is_empty():
+	var out := _resolved(art_id, 0)
+	if not out.is_empty():
+		_entries[art_id] = out
+	return out
+
+
+## `art_id`'s own entry (one added in code as given, a manifest's over the defaults), laid over its `base`'s.
+static func _resolved(art_id: String, depth: int) -> Dictionary:
+	var registered := _registered.has(art_id)
+	var own := ((_registered[art_id] as Array)[0] if registered else manifest().get(art_id, {})) as Dictionary
+	if own.is_empty():
 		return own
-	var out := _defaults.duplicate(true)
-	for k: String in own:
-		if k == "clips" and out.get("clips") is Dictionary and own[k] is Dictionary:
-			(out["clips"] as Dictionary).merge(own[k] as Dictionary, true)
+	var base := str(own.get("base", ""))
+	if base != "" and base != art_id and depth < MAX_BASES:
+		return _laid_over(_resolved(base, depth + 1), own)
+	return own if registered else _laid_over(_defaults, own)
+
+
+## `top` laid over `under`: its keys replace under's, its `clips` merged role by role.
+static func _laid_over(under: Dictionary, top: Dictionary) -> Dictionary:
+	if under.is_empty():
+		return top
+	var out := under.duplicate(true)
+	for k: String in top:
+		if k == "clips" and out.get("clips") is Dictionary and top[k] is Dictionary:
+			(out["clips"] as Dictionary).merge(top[k] as Dictionary, true)
 		else:
-			out[k] = own[k]
-	_entries[art_id] = out
+			out[k] = top[k]
 	return out
 
 
 ## Whether `art_id` is drawn as a model: an entry whose file is there.
+## A `base` entry's file is its base's.
 static func has(art_id: String) -> bool:
 	if art_id == "":
 		return false
 	if _registered.has(art_id):
 		return true
-	var entry := manifest().get(art_id, {}) as Dictionary
-	return not entry.is_empty() and ResourceLoader.exists(ArtPaths.of(str(entry.get("file", ""))))
+	if not manifest().has(art_id):
+		return false
+	var file := str(info(art_id).get("file", ""))
+	return file != "" and ResourceLoader.exists(ArtPaths.of(file))
 
 
-## The model's scene, or null.
+## The sprite art id `art_id` wears while its model isn't there yet (its entry's `sprite`), or "" (it has its model, or
+## no entry, or names no stand-in).
+static func stand_in(art_id: String) -> String:
+	if art_id == "" or has(art_id):
+		return ""
+	var sprite := str(info(art_id).get("sprite", ""))
+	return sprite if sprite != art_id else ""
+
+
+## The texture an entry paints its surfaces with in place of the model's own (`albedo`), or null.
+static func albedo_of(art_id: String) -> Texture2D:
+	var rel := str(info(art_id).get("albedo", ""))
+	if rel == "" or not ArtPaths.exists(rel):
+		return null
+	return load(ArtPaths.of(rel)) as Texture2D
+
+
+## The model's scene (a `base` entry's is its base's), or null.
 static func scene(art_id: String) -> PackedScene:
-	if _registered.has(art_id) and (_registered[art_id] as Array)[1] != null:
-		return (_registered[art_id] as Array)[1] as PackedScene
+	if _registered.has(art_id):
+		var reg := _registered[art_id] as Array
+		if reg[1] != null:
+			return reg[1] as PackedScene
+		var base := str((reg[0] as Dictionary).get("base", ""))
+		if base != "" and base != art_id:
+			return scene(base)
 	var path := ArtPaths.of(str(info(art_id).get("file", "")))
 	return load(path) as PackedScene if ResourceLoader.exists(path) else null
 
