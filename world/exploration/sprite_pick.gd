@@ -24,8 +24,10 @@ static func hit(node: Node3D, camera: Camera3D, origin: Vector3, dir: Vector3) -
 			if g is SpriteBase3D:
 				sprites.append(g as SpriteBase3D)
 	for s in sprites:
-		# A reflection is only light on the floor: nothing to click (QA, 2026-10-09).
-		if s.is_visible_in_tree() and not s is SpriteReflection:
+		# A reflection is only light on the floor: nothing to click (QA, 2026-10-09). A 3D figure: a column down its middle.
+		if s is ModelFigure and s.is_visible_in_tree():
+			best = minf(best, (s as ModelFigure).ray_hit(origin, dir))
+		elif s.is_visible_in_tree() and not s is SpriteReflection:
 			best = minf(best, sprite_hit(s, camera, origin, dir))
 	return minf(best, ModelPiece.hit(node, origin, dir))   # 3D pieces: their surfaces as drawn
 

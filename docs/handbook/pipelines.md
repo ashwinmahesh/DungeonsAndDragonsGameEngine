@@ -70,6 +70,9 @@ coordinator; it does not override.
 - `make prop SRC=<png> ID=<id> HEIGHT=<units>` and `make props` make billboard and modelled props; the props catalog
   (`art/sprites/props/catalog.json`) names each by `model` or id, and set dressing places them. A new model needs its
   art in the catalog (a test checks). Real-world sizes.
+- **Characters and creatures as 3D figures** (rigged models with named clips, e.g. from Tripo Studio): a game lists them
+  in `art/figures/manifest.json` and they replace the art id's sprite wherever it is drawn; anything without one keeps
+  its sprite. See [the figures reference](../reference/art/figures.md).
 - `make textures`, `make plants`, `make vistas`, decals, surfaces: each from a recipe JSON in `tools/art/`. Modern
   surfaces are smooth `<surface>_hd.png` tiles with their own light response.
 - **Large binaries go to Git LFS** when added or changed: in the game, new or changed images under the generated,

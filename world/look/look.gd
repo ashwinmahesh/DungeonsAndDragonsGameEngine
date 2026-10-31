@@ -91,6 +91,35 @@ static func toon_settings() -> Dictionary:
 
 static func forget_toon_settings() -> void:
 	_toon = {}
+	_figures = {}
+
+
+## How 3D figures are drawn (ModelFigure, lit_figure.gdshader), each tunable by a game under data/campaign.json's
+## "figures" (Campaign.config); the defaults light them as the 2D figures are lit:
+##   floor: the light a figure keeps in the dark (sprite_crisp's light_floor); light_cap: the most one light gives it;
+##   rim: the rim a light behind it draws; ink: its outline, pixels at 1080 lines (0 none); ink_colour (a palette name).
+##   In the Toon finish only: bands (0 soft light; 2 lit and shade; 3 and a dark core), band_lit and band_dark where
+##   they break (0 to 1, the light wrapped round the body), band_mid the shade's brightness, band_edge how soft an edge
+##   is; flatten (0 to 1) how far its texture flattens toward its broad colours, read at mip flatten_mip; vivid how much
+##   more saturated its colours are.
+const FIGURES := {
+	"floor": 0.25, "light_cap": 0.85, "rim": 1.2, "ink": 1.6, "ink_colour": "void",
+	"bands": 0, "band_lit": 0.5, "band_dark": 0.22, "band_mid": 0.55, "band_edge": 0.04,
+	"flatten": 0.0, "flatten_mip": 4.0, "vivid": 1.0,
+}
+static var _figures: Dictionary = {}
+
+
+## FIGURES under the game's own "figures" settings, worked out once (forget_toon_settings forgets them too).
+static func figure_settings() -> Dictionary:
+	if _figures.is_empty():
+		_figures = FIGURES.duplicate()
+		var own: Variant = Campaign.config().get("figures", {})
+		if own is Dictionary:
+			for k: String in own as Dictionary:
+				if FIGURES.has(k):
+					_figures[k] = (own as Dictionary)[k]
+	return _figures
 
 
 ## HD-2D options (after Octopath Traveler 2) a game turns on under data/campaign.json's "hd2d", in the Modern and Toon

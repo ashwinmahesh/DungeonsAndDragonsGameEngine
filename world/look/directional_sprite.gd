@@ -105,8 +105,11 @@ static func nudge_for(n: int) -> float:
 	return (n % NUDGE_STEPS) * NUDGE
 
 
-## `cell_px` is the sheet's cell size; by default it's read from the frames.
+## `cell_px` is the sheet's cell size; by default it's read from the frames. A 3D figure's stand-in frames
+## (FigureModels.frames) make its ModelFigure instead.
 static func create(frames: SpriteFrames, height_units: float, cell_px: int = -1) -> DirectionalSprite:
+	if frames != null and frames.has_meta(FigureModels.META):
+		return ModelFigure.create_for(frames, height_units)
 	var s := DirectionalSprite.new()
 	s.sprite_frames = frames
 	s._hit_frame = int(frames.get_meta("hit_frame", 2))
@@ -145,10 +148,13 @@ static func cell_size(frames: SpriteFrames) -> int:
 
 ## The frames for sprite `art_id`: its walk sheet's walk_/idle_ animations plus, when it has an attack sheet,
 ## attack_<dir> (and the attack's hit frame as metadata). Null when the sprite has no sheet. Cached per id. A custom
-## hero's art id (registered by CombatToken.art_for) gets the paper doll HeroLook puts together.
+## hero's art id (registered by CombatToken.art_for) gets the paper doll HeroLook puts together, and an art id with a 3D
+## model (FigureModels) its stand-in frames, which create() turns into the model's figure.
 static func frames_for(art_id: String) -> SpriteFrames:
 	if HeroLook.known(art_id):
 		return HeroLook.frames_for_art(art_id)
+	if FigureModels.has(art_id):
+		return FigureModels.frames(art_id)
 	if _frames_cache.has(art_id):
 		var kept := (_frames_cache[art_id] as WeakRef).get_ref() as SpriteFrames
 		if kept != null:
@@ -251,6 +257,9 @@ static func setup_material(s: SpriteBase3D) -> void:
 ## A figure that is its own light (the Lantern Girl, CombatToken.OWN_LIGHT): the shader's `glow` is how much of its
 ## colours it shows whatever the scene's lights, so it stays bright in the dark and in the mist.
 static func glow(s: SpriteBase3D, amount: float) -> void:
+	if s is ModelFigure:
+		(s as ModelFigure).set_glow(amount)
+		return
 	var m := s.material_override as ShaderMaterial
 	if m != null:
 		m.set_shader_parameter("glow", amount)
@@ -346,6 +355,12 @@ func _play_once(base: String, lands_a_blow: bool) -> bool:
 	flip_h = bool(shown[1])
 	play(shown[0] as StringName)
 	return true
+
+
+## A talk or greet gesture while someone speaks (FigureTalk): a 3D figure's clip (ModelFigure.gesture); a sprite has
+## none, so nothing plays and it returns false.
+func gesture(_kind: String) -> bool:
+	return false
 
 
 ## Falling right now (the drawn fall is playing).

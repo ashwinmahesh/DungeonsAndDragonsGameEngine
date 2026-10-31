@@ -45,7 +45,7 @@ quests, flags) · [campaign](contracts/campaign.md) (the reading, travel, encoun
 
 [style_bible](art/style_bible.md) · [atmosphere](art/atmosphere.md) · [textures](art/textures.md) ·
 [plants](art/plants.md) · [set_dressing](art/set_dressing.md) · [building_kit](art/building_kit.md) ·
-[interiors](art/interiors.md) · [models](art/models.md) · [decals](art/decals.md) ·
+[interiors](art/interiors.md) · [models](art/models.md) · [figures](art/figures.md) · [decals](art/decals.md) ·
 [spell_effects](art/spell_effects.md) · [animation](art/animation.md) · [creator](art/creator.md).
 The overview for a new game is [design/hd2d_look.md](../design/hd2d_look.md).
 
