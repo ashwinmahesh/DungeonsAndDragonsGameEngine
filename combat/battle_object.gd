@@ -61,6 +61,14 @@ var bursts: Dictionary = {}
 var wreck: Array[Vector2i] = []
 ## The square it stood on when the fight began, when a shove has moved it since (BattleScenery puts it right after).
 var home: Vector2i = Vector2i(-1, -1)
+## Put down by the fight itself (an encounter's `objects`, BattleScenery.for_spec), not standing on the board before it:
+## the props catalog model the scene draws it with (ObjectView), "" for none.
+var model: String = ""
+## What a creature with `devours` eats (ObjectFuel): a word the stat block and the encounter share ("" for nothing).
+var fuel: String = ""
+## The creature that comes out when it breaks or is eaten (ObjectFuel.release): {monster, name, art, hp ("half" or a
+## number), side, minion_of}; {} for none.
+var releases: Dictionary = {}
 
 
 ## A new object of `kind_id` from the kinds table (data/objects/kinds.json).
@@ -137,6 +145,8 @@ func describe() -> Array[String]:
 		out.append("Hangs overhead: only ranged attacks and spells reach its chain")
 	if not vulnerable.is_empty():
 		out.append("Vulnerable to %s" % ", ".join(vulnerable.map(func(x: String) -> String: return x.capitalize())))
+	if not releases.is_empty():
+		out.append("Breaking it lets out %s" % str(releases.get("name", "what it holds")))
 	return out
 
 
@@ -147,7 +157,8 @@ func to_dict() -> Dictionary:
 		"vulnerable": vulnerable.duplicate(), "door_id": door_id, "prop_id": prop_id, "art": art, "fall": fall.duplicate(true),
 		"hangs": hangs, "holds": holds, "hold_source": hold_source, "oil_rounds": oil_rounds, "destroyed": destroyed,
 		"open": open, "locked": locked, "moves": moves, "move_dc": move_dc, "topple": topple.duplicate(true), "throwable": throwable,
-		"bursts": bursts.duplicate(true), "wreck": wreck.map(func(c: Vector2i) -> Array: return [c.x, c.y]), "home": [home.x, home.y]}
+		"bursts": bursts.duplicate(true), "wreck": wreck.map(func(c: Vector2i) -> Array: return [c.x, c.y]), "home": [home.x, home.y],
+		"model": model, "fuel": fuel, "releases": releases.duplicate(true)}
 
 
 static func from_dict(d: Dictionary) -> BattleObject:
@@ -190,4 +201,7 @@ static func from_dict(d: Dictionary) -> BattleObject:
 		o.wreck.append(Vector2i(int((c2 as Array)[0]), int((c2 as Array)[1])))
 	var h := d.get("home", [-1, -1]) as Array
 	o.home = Vector2i(int(h[0]), int(h[1]))
+	o.model = str(d.get("model", ""))
+	o.fuel = str(d.get("fuel", ""))
+	o.releases = (d.get("releases", {}) as Dictionary).duplicate(true)
 	return o

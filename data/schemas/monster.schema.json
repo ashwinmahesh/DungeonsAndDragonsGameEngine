@@ -1626,6 +1626,42 @@
     "minion_of": {
       "type": "string",
       "description": "The stat block id of the boss this creature serves (BossPhases.fell)."
+    },
+    "devours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fuel"
+      ],
+      "description": "ObjectFuel: at the start of its turn, within `within` feet of a standing object whose `fuel` is one of these words, it eats the nearest: `heal` Hit Points and, with `advantage`, Advantage on its attacks until its next turn starts. The AI walks it to food it can reach this turn ahead of a foe (and with `seeks`, toward food farther off).",
+      "properties": {
+        "fuel": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "within": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "heal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "advantage": {
+          "type": "boolean"
+        },
+        "seeks": {
+          "type": "boolean",
+          "description": "The AI walks it toward food out of this turn's reach too, when no foe is in reach where it stands."
+        },
+        "name": {
+          "type": "string",
+          "description": "What the log calls it (the trait's name)."
+        }
+      }
     }
   }
 }

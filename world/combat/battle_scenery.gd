@@ -148,6 +148,16 @@ static func for_location(view: LocationView, e: Encounter) -> void:
 					o.fall["type"] = str(trap.get("damage_type", "bludgeoning"))
 
 
+## What the fight `spec` puts down itself (its `objects`, docs/reference/contracts/locations.md): each entry whose
+## story `when` holds, on its square (EncounterObjects.put). After for_location, so a fight's own things are never
+## taken for the board's.
+static func for_spec(view: LocationView, e: Encounter, spec: Dictionary) -> void:
+	for x: Variant in spec.get("objects", []):
+		var entry := x as Dictionary
+		if StoryConditions.check(str(entry.get("when", "")), view.st):
+			e.objects.put(entry)
+
+
 ## The squares a prop stands on: its own, or all of those its `span` covers ([across, down], its cell the north-west
 ## one: a wagon over two squares by two, SetDressing.span_centre).
 static func span_cells(prop: Dictionary) -> Array[Vector2i]:

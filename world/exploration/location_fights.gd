@@ -164,6 +164,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	_light_the_fight(view, e)
 	_ward_the_fight(view, e)
 	BattleScenery.for_location(view, e)   # doors, furniture and chandeliers that can be broken (F5)
+	BattleScenery.for_spec(view, e, spec)   # what the fight puts down itself (a boss's food, a jar holding a ghost)
 	LocationTraps.into_fight(view, e)   # traps that haven't gone off go off under whoever steps on them
 	var surprised: Array[String] = []
 	var who := str(spec.get("surprise", ""))

@@ -930,6 +930,120 @@
             "type": "boolean",
             "description": "Lair actions on initiative count 20 for a monster that has them."
           },
+          "objects": {
+            "type": "array",
+            "description": "Things the fight puts down itself (BattleScenery.for_spec, EncounterObjects.put): a boss's food, a jar holding a ghost. Each on its square while its `when` holds.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "cell"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Its id in the fight (default thing_<n>)."
+                },
+                "kind": {
+                  "$ref": "common.schema.json#/$defs/id",
+                  "description": "Its kind in data/objects/kinds.json (default vessel)."
+                },
+                "cell": {
+                  "$ref": "#/$defs/cell"
+                },
+                "when": {
+                  "type": "string",
+                  "description": "A story condition: put down only while it holds."
+                },
+                "name": {
+                  "type": "string"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The props catalog model the scene draws it with."
+                },
+                "fuel": {
+                  "type": "string",
+                  "description": "What a creature whose stat block `devours` this word eats (ObjectFuel)."
+                },
+                "ac": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "hp": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "size": {
+                  "enum": [
+                    "tiny",
+                    "small",
+                    "medium",
+                    "large"
+                  ]
+                },
+                "immune": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "resist": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "vulnerable": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "releases": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "monster"
+                  ],
+                  "description": "The creature that comes out when it breaks or is eaten (ObjectFuel.release).",
+                  "properties": {
+                    "monster": {
+                      "$ref": "common.schema.json#/$defs/id"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "art": {
+                      "type": "string"
+                    },
+                    "hp": {
+                      "oneOf": [
+                        {
+                          "const": "half"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      ]
+                    },
+                    "side": {
+                      "enum": [
+                        "enemy",
+                        "neutral",
+                        "party"
+                      ]
+                    },
+                    "minion_of": {
+                      "type": "string",
+                      "description": "The stat block id of the boss it leaves with (BossPhases.fell)."
+                    }
+                  }
+                }
+              }
+            }
+          },
           "round_events": {
             "type": "array",
             "items": {

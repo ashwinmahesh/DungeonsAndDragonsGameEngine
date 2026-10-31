@@ -619,6 +619,16 @@
         "psychic"
       ],
       "summary": "A giant spider's webbing holding its prey (2025 MM: AC 10, 5 Hit Points, Vulnerability to Fire)."
+    },
+    "vessel": {
+      "name": "jar",
+      "substance": "glass",
+      "size": "tiny",
+      "resilience": "fragile",
+      "blocks": "none",
+      "flammable": false,
+      "leaves": "floor",
+      "summary": "A jar, flask or canister a fight puts down on its own square (an encounter's objects): a single blow breaks it."
     }
   }
 }
