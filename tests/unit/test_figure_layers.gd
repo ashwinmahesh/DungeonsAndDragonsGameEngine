@@ -206,3 +206,56 @@ func test_an_upright_piece_follows_its_bone_but_stands_as_the_figure_does() -> v
 	fig.wear([])
 	assert_true(fig._upright.is_empty(), "no longer followed once off")
 	fig.free()
+
+
+## A figure one unit tall with a neck and a head: Hips 0.5, Spine 0.7, Neck 0.8, Head 0.85, HeadTop_End 1.0.
+static func _headed() -> PackedScene:
+	var root := Node3D.new()
+	root.name = "Model"
+	var sk := Skeleton3D.new()
+	sk.name = "Skeleton3D"
+	root.add_child(sk)
+	sk.owner = root
+	var at := 0.0
+	for pair: Array in [["mixamorig_Hips", 0.5], ["mixamorig_Spine", 0.7], ["mixamorig_Neck", 0.8], ["mixamorig_Head", 0.85],
+			["mixamorig_HeadTop_End", 1.0]]:
+		var i := sk.get_bone_count()
+		sk.add_bone(str(pair[0]))
+		if i > 0:
+			sk.set_bone_parent(i, i - 1)
+		sk.set_bone_rest(i, Transform3D(Basis.IDENTITY, Vector3(0, float(pair[1]) - at, 0)))
+		at = float(pair[1])
+	var mi := MeshInstance3D.new()
+	mi.name = "Body"
+	var box := BoxMesh.new()
+	box.size = Vector3(0.4, 1.0, 0.2)
+	mi.mesh = box
+	mi.position.y = 0.5
+	sk.add_child(mi)
+	mi.owner = root
+	var packed := PackedScene.new()
+	packed.pack(root)
+	root.free()
+	return packed
+
+
+func test_a_head_made_apart_sits_on_the_neck_sized_by_the_body_and_never_scaled_with_its_bone() -> void:
+	FigureModels.register_part(LANTERN, {"bone": "Head", "follow": "turn", "fit": "head"}, _lantern())
+	FigureModels.register(ID, {}, _headed())
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	add_child(fig)
+	fig.wear([LANTERN])
+	var hold := fig._skeleton.find_children("Holds_*", "Node3D", false, false)[0] as Node3D
+	assert_false(hold is BoneAttachment3D, "follows the bone without being its child")
+	var piece := hold.get_child(0) as Node3D
+	# The piece is 2 units tall; the body's neck to the top of its head is 0.2, so it is scaled to 0.1.
+	assert_between(piece.scale.y, 0.099, 0.101, "as tall as the body's neck and head")
+	var foot := hold.transform * piece.transform * Vector3(0, -1.0, 0)
+	assert_between(foot.distance_to(Vector3(0, 0.8, 0)), 0.0, 0.001, "its foot on the Neck joint")
+	var head := FigureModels.bone(fig._skeleton, "Head")
+	fig._skeleton.set_bone_pose_scale(head, Vector3.ONE * 0.01)
+	fig._skeleton.set_bone_pose_rotation(head, Quaternion(Vector3.UP, 0.6))
+	fig._follow_bones()
+	assert_between(hold.basis.get_scale().x, 0.999, 1.001, "the body's own head shrunk away, this one not")
+	assert_between(hold.basis.get_euler().y, 0.599, 0.601, "turned as the head turns")
+	fig.free()

@@ -111,7 +111,14 @@ puts on what it wears now (taking off what it no longer does). `worn_parts()` li
   gives a bone a frame of its own first (where this model's palm is), so one part sits right on different bodies.
   `"upright": true` keeps the piece standing the way the figure stands while it follows the bone (a lantern hangs, a
   torch is held up): a hand's roll differs from rig to rig and clip to clip (Tripo's Mixamo rigs agree only on the
-  fingers' direction), so a piece that should stay level is placed this way.
+  fingers' direction), so a piece that should stay level is placed this way. `"follow"` says how a piece goes with its
+  bone: `"bone"` (the default: a child of the bone, turned and scaled with it), `"place"` (where the bone is, standing as
+  the figure does; `upright` is the same) or `"turn"` (where the bone is and turned as it is, never scaled with it).
+- **A head made apart from the body** is a rigid piece on the Head bone with `"follow": "turn"` and `"fit": "head"`:
+  it is sized from the body's own bones (from the Neck joint to the head's top, times `size` when given), its foot
+  (`grip`; the bottom middle of the piece by default) on the Neck joint, standing as the model stands at rest. The
+  body's own head is shrunk away with the entry's `"bones": {"Head": 0.01}` (FigureBones), which the head, following
+  without the bone's scale, ignores. A short neck stub on the head tucks inside the body's collar.
 - **A skinned layer** has no `bone`: its skinned meshes move onto the figure's skeleton and bind to it bone by bone by
   name, so it plays every clip the figure plays. Bones match ignoring an exporter's prefix and case (`RightHand`,
   `mixamorig:RightHand`, `mixamorig_RightHand`: `FigureModels.bone`). A layer fits the body it was weighted on: make
