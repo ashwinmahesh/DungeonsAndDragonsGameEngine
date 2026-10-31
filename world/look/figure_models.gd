@@ -14,6 +14,14 @@ extends RefCounted
 ## in seconds, the moment the blow lands (`hit`, seconds into the clip) and how fast it plays. A manifest's "defaults"
 ## entry is under every figure's (its `clips` merged role by role): models made one way share their preset clips.
 ## Other keys are the game's own (its import tool's `source`), never read here.
+##
+## Layers (docs/reference/art/figures.md, "Layers"): a figure can wear parts on its own skeleton. The manifest's "parts"
+## names them, `"<part id>": {"file": ..., "bone": ..., "size": ..., "offset": [...], "turn": [...], "grip": [...],
+## "hides": [...]}`: a part with a `bone` is a rigid piece held on that bone (a sword, a lantern, a helmet), sized to
+## `size` of the figure's height on its longest side; one without is a skinned layer (a coat, a cloak, boots) whose
+## meshes join the figure's skeleton, bound bone by bone by name, so it moves with every clip. `hides` names the
+## figure's own meshes the part covers. A figure entry's `layers` lists the parts it always wears, and
+## ModelFigure.wear adds what it wears now (its gear).
 
 const MANIFEST_JSON := "art/figures/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 ## The stand-in sprite frames' metadata naming the figure's art id (DirectionalSprite.create makes a ModelFigure for them).
@@ -40,6 +48,11 @@ static var _entries: Dictionary = {}
 static var _read := false
 ## Figures added in code (tests, a game's own at run time): art id -> [entry, PackedScene or null].
 static var _registered: Dictionary = {}
+## The manifests' parts (part id -> entry), and parts added in code: part id -> [entry, PackedScene or null].
+static var _parts: Dictionary = {}
+## The manifests' "gear": item id (or the mundane item under a magic one) -> the part it shows as.
+static var _gear: Dictionary = {}
+static var _registered_parts: Dictionary = {}
 static var _frames: Dictionary = {}
 static var _blank: ImageTexture
 
@@ -51,6 +64,8 @@ static func manifest() -> Dictionary:
 		var all := ArtPaths.json(MANIFEST_JSON)
 		_manifest = all.get("figures", {}) as Dictionary
 		_defaults = all.get("defaults", {}) as Dictionary
+		_parts = all.get("parts", {}) as Dictionary
+		_gear = all.get("gear", {}) as Dictionary
 	return _manifest
 
 
@@ -114,8 +129,124 @@ static func forget() -> void:
 	_read = false
 	_manifest = {}
 	_defaults = {}
+	_parts = {}
+	_gear = {}
 	_entries.clear()
 	_frames.clear()
+
+
+# --- Layers ----------------------------------------------------------------------------------------------------------
+
+## The entry of a part a figure can wear ({} when there is none).
+static func part(part_id: String) -> Dictionary:
+	if _registered_parts.has(part_id):
+		return (_registered_parts[part_id] as Array)[0] as Dictionary
+	manifest()
+	return _parts.get(part_id, {}) as Dictionary
+
+
+## Whether `part_id` is a part whose model is there.
+static func has_part(part_id: String) -> bool:
+	return part_scene(part_id) != null
+
+
+## The part's scene, or null.
+static func part_scene(part_id: String) -> PackedScene:
+	if _registered_parts.has(part_id) and (_registered_parts[part_id] as Array)[1] != null:
+		return (_registered_parts[part_id] as Array)[1] as PackedScene
+	var file := str(part(part_id).get("file", ""))
+	if file == "":
+		return null
+	var path := ArtPaths.of(file)
+	return load(path) as PackedScene if ResourceLoader.exists(path) else null
+
+
+## Adds a part in code: `entry` as a manifest part, `packed` its scene (else the entry's file). Tests use it.
+static func register_part(part_id: String, entry: Dictionary, packed: PackedScene = null) -> void:
+	_registered_parts[part_id] = [entry, packed]
+
+
+static func unregister_part(part_id: String) -> void:
+	_registered_parts.erase(part_id)
+
+
+## A part's id with this after it is the part held in the other hand (ModelFigure.wear).
+const OFF_HAND := "@off"
+## The slots a figure can show gear from, and for held things the hand: a part is made for the right hand, and the off
+## hand holds it mirrored.
+const HANDS := {"main_hand": "", "off_hand": OFF_HAND}
+
+
+## The parts `ch`'s figure (`art_id`) wears for what they have on and in hand: in each slot its entry's `gear` lists
+## ("main_hand", "off_hand", "armor", "cloak", "head"...), the part the item's data names (`look`), else the manifest's
+## "gear" for the item's id, else for the mundane item under it (a +1 Longsword shows as a longsword). A figure whose
+## entry lists no slots shows none: its model has its things drawn on.
+static func gear_for(art_id: String, ch: Character) -> Array[String]:
+	var out: Array[String] = []
+	var slots := info(art_id).get("gear", []) as Array
+	if slots.is_empty() or ch == null:
+		return out
+	manifest()
+	for e: Dictionary in ch.inventory:
+		var slot := str(e.get("slot", ""))
+		if slot == "" or not slot in slots or int(e.get("qty", 1)) <= 0:
+			continue
+		var data := (ch.compendium if ch.compendium != null else Compendium.shared()).item_data(str(e["id"]))
+		var p := str(data.get("look", ""))
+		if p == "":
+			p = str(_gear.get(str(e["id"]), _gear.get(MagicItems.base_id(data), "")))
+		if p == "" or not has_part(p):
+			continue
+		p += str(HANDS.get(slot, ""))
+		if not p in out:
+			out.append(p)
+	return out
+
+
+## A part's entry for the other hand: its bone's Left and Right swapped, and its offset, turn and grip mirrored across
+## the figure's middle.
+static func mirrored(entry: Dictionary) -> Dictionary:
+	var out := entry.duplicate(true)
+	var b := str(entry.get("bone", ""))
+	if b.contains("Right"):
+		out["bone"] = b.replace("Right", "Left")
+	elif b.contains("Left"):
+		out["bone"] = b.replace("Left", "Right")
+	for key: String in ["offset", "grip"]:
+		if entry.get(key) is Array and (entry[key] as Array).size() >= 3:
+			var v := (entry[key] as Array).duplicate()
+			v[0] = -float(v[0])
+			out[key] = v
+	if entry.get("turn") is Array and (entry["turn"] as Array).size() >= 3:
+		var t := (entry["turn"] as Array).duplicate()
+		t[1] = -float(t[1])
+		t[2] = -float(t[2])
+		out["turn"] = t
+	return out
+
+
+## The bone of `skeleton` that `name` means, or -1: the same name, else the same once an exporter's prefix is set aside
+## and case ignored ("RightHand", "mixamorig:RightHand" and "mixamorig_RightHand" are one bone), so a part made on one
+## rig finds its bones on another rig of the same kind.
+static func bone(skeleton: Skeleton3D, name: String) -> int:
+	var exact := skeleton.find_bone(name)
+	if exact >= 0:
+		return exact
+	var want := bone_key(name)
+	for i in skeleton.get_bone_count():
+		if bone_key(skeleton.get_bone_name(i)) == want:
+			return i
+	return -1
+
+
+## A bone's name without its rig's prefix, lower case: "mixamorig:LeftHand" and "mixamorig_LeftHand" are "lefthand".
+static func bone_key(name: String) -> String:
+	var n := name.get_slice(":", name.get_slice_count(":") - 1).get_slice("|", name.get_slice_count("|") - 1)
+	if n.to_lower().begins_with("mixamorig") and n.length() > 9:
+		n = n.substr(9)
+		while n != "" and (n[0].is_valid_int() or n[0] == "_"):   # "mixamorig1_Hips"
+			n = n.substr(1)
+	return n.to_lower()
 
 
 ## The stand-in frames for `art_id`: one blank frame per animation the sprite code asks after (idle, walk, attack,
