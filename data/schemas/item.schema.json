@@ -551,8 +551,8 @@
               },
               "per": {
                 "type": "string",
-                "pattern": "^(dawn|long|short|never|dawns:[0-9]+)$",
-                "description": "When uses come back: dawn, long, short, never, or dawns:N (N days after it's used)."
+                "pattern": "^(dawn|dusk|long|short|never|dawns:[0-9]+)$",
+                "description": "When uses come back: dawn, dusk, long, short, never, or dawns:N (N days after it's used)."
               }
             },
             "additionalProperties": false
@@ -629,6 +629,11 @@
           },
           "hidden": {
             "type": "boolean"
+          },
+          "min_level": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "A growing item's later power: its bearer's level from which it can be used (greyed out with the level below it)."
           },
           "requires": {
             "type": "string",

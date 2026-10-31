@@ -713,12 +713,13 @@ static func compact(b: Button) -> void:
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 
-## The one button that finishes a screen (Confirm, Begin the adventure): larger, on a blood-red ground.
+## The one button that finishes a screen (Confirm, Begin the adventure): larger, on the menus' primary colour (blood red
+## unless the game sets ui_primary).
 static func primary_button(text: String, on_press: Callable, icon_id: String = "") -> Button:
 	var b := UiKit.button(text, on_press, 20, icon_id)
 	for state: String in ["normal", "hover", "pressed"]:
 		var s := UiKit.button_style(state)
-		s.bg_color = Look.color("blood" if state == "normal" else ("crimson" if state == "hover" else "blood_deep"))
+		s.bg_color = Look.color(Look.ui_key("ui_primary", "blood") if state == "normal" else (Look.ui_key("ui_primary_lit", "crimson") if state == "hover" else Look.ui_key("ui_primary_deep", "blood_deep")))
 		s.border_color = Look.color("gilt_light")
 		s.set_border_width_all(2)
 		s.border_width_bottom = 3

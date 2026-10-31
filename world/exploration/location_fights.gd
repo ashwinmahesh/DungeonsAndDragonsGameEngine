@@ -193,8 +193,29 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	# The picture streaks toward the party and drains for a beat as the fight breaks out (Visual Polish Plan 3).
 	if ScreenPulse.on():
 		ScreenPulse.play(view, "engage", view.rig.global_position)
+	e.opening = _opening_for(view, e)
 	_run_combat(view, encounter_id, spec, e, ctokens, surprised)
 	return true
+
+
+## The opening the party chose from the menu (LocationView.opening: a flask thrown at the foe on `cell`) as the fight
+## reads it (Encounter.opening): {by, kind, item, target}, or {} for none. It is used once.
+static func _opening_for(view: LocationView, e: Encounter) -> Dictionary:
+	var o := view.opening
+	view.opening = {}
+	if o.is_empty() or int(o["member"]) < 0 or int(o["member"]) >= view.members.size():
+		return {}
+	var hero := view.members[int(o["member"])].creature
+	var by: Combatant = null
+	var target: Combatant = null
+	for c in e.combatants:
+		if c.creature == hero:
+			by = c
+		elif c.side != &"party" and o["cell"] in c.footprint():
+			target = c
+	if by == null or target == null:
+		return {}
+	return {"by": by.id, "kind": "flask", "item": str(o["item"]), "target": target.id}
 
 
 # --- Guests who keep out of fights (docs/contracts/campaign.md) ---------------------------------------------------------
@@ -368,6 +389,8 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 			mon.set_meta(&"steps_down", md["steps_down"])   # a person of the place stepping down into this foe (StepDown)
 		if md.has("catch"):
 			mon.set_meta(EncounterGrapples.CATCH, md["catch"])   # a loose creature the heroes can catch (EncounterGrapples)
+		if md.has("body"):
+			mon.set_meta(Legendary.BODY, md["body"])   # a body some damage ruins for good (Legendary._ruin)
 		if md.has("hp"):
 			# A tuned stat block for this fight (docs/contracts/locations.md).
 			mon.hp_max_base = int(md["hp"])
@@ -588,12 +611,14 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 			for c in e.combatants:
 				if c.side == &"enemy" and c.name() == str((md as Dictionary).get("name", "")):
 					c.creature.set_meta(&"steps_down", (md as Dictionary)["steps_down"])
-		# So is one the heroes can catch (by its name, else its stat block).
-		if (md as Dictionary).has("catch"):
+		# So is one the heroes can catch, or whose body some damage ruins (by its name, else its stat block).
+		for key: String in ["catch", "body"]:
+			if not (md as Dictionary).has(key):
+				continue
 			for c in e.combatants:
 				var named := str((md as Dictionary).get("name", ""))
 				if c.creature is Monster and (c.name() == named if named != "" else str((c.creature as Monster).data.get("id", "")) == str((md as Dictionary)["monster"])):
-					c.creature.set_meta(EncounterGrapples.CATCH, (md as Dictionary)["catch"])
+					c.creature.set_meta(EncounterGrapples.CATCH if key == "catch" else Legendary.BODY, (md as Dictionary)[key])
 	var ctokens := _fight_tokens(view, e, false)
 
 	view.combat_view = CombatView.new()
@@ -954,8 +979,7 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 			view.toast.emit("%s fades from the party: the one battle they stayed for is over." % who)
 	# What the fight hands back to the story, whatever the outcome (ADR 0014): Misty Escape's flag, a withdrawal's
 	# flag, Strahd destroyed and his quest's stage.
-	for f: String in e.legendary.story_flags:
-		view.st.set_flag(f, e.legendary.story_flags[f])
+	hand_back_flags(view.st, e.legendary.story_flags)
 	for qid: String in e.legendary.story_quests:
 		view.st.set_quest_stage(qid, str(e.legendary.story_quests[qid]))
 	# F13: cutting down a foe that surrendered costs the companions' regard (story/captives.gd).
@@ -978,6 +1002,17 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		view.dialogue_requested.emit(talk, "")
 	elif outcome == "victory":
 		_spoils(view, encounter_id, spec, not e.legendary.no_loot(), _left_behind(e))
+
+
+## A fight's story flags into the story: each set to its value, or for `{add: n}` (a count the fight adds to, a body
+## rule's `count`) n added to the number the story had.
+static func hand_back_flags(st: StoryState, flags: Dictionary) -> void:
+	for f: String in flags:
+		var v: Variant = flags[f]
+		if v is Dictionary and (v as Dictionary).has("add"):
+			st.set_flag(f, int(st.get_flag(f, 0)) + int((v as Dictionary)["add"]))
+		else:
+			st.set_flag(f, v)
 
 
 ## What the fallen foes still carried, and their weapons left lying on the ground (GroundItems).

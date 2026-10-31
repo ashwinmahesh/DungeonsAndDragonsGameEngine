@@ -76,7 +76,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   flag is set, e.g. by dialogue), `dialogue` (only started by a `combat` line). On victory the game sets `flag` and
   moves `quest: {id, stage}` along. A boss's monster entry (narrative/combat/bosses.json, or a foe with legendary actions) may carry `hp` to tune that stat block for this fight; every other foe fights at its stat block's Hit Points (owner, 2026-10-24: the Monster Manual's, no custom HP).
   `waiting: true` (an `enter_area` fight only) puts its foes in plain view before the fight: they show once the party
-  can see them, can notice the party, and can be attacked first (docs/rules/stealth.md, F7). A waiting monster's
+  can see them, can notice the party, and can be attacked first (docs/rules/stealth.md, F7): the right-click menu's
+  Attack, a spell at it, or a flask thrown at it (any item with a `damage` effect, within its range and in sight). A
+  throw opens the fight as an attack does, its surprise and `ends_when` as the entry says, and the thrower's first turn
+  begins with the throw (Encounter.opening, EncounterActions.throw_flask; one of their attacks, as in a fight). A waiting monster's
   `facing` (north, south, east, west or between) points its sight cone; unset, it faces the middle of its group. A foe
   with `unseen: true` isn't in plain view (a trap's, an ambush's): no figure, and it notices no one, until the fight puts
   it on its square. `make validate` asks every variant of a waiting fight to wait, to have a foe in view, and each foe in
@@ -91,7 +94,14 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   heroes can catch (a lamb in a wolf fight; often `side: "neutral"`): a hero within 5 ft spends one of their attacks, as
   for a grapple, and it makes a Strength or Dexterity save against 8 + their Strength modifier + Proficiency Bonus or is
   caught, carried out of the fight (`vanish`, left: `caught`), with `flag` set whatever the fight's outcome
-  (EncounterGrapples.catch_creature).
+  (EncounterGrapples.catch_creature). A stat block's own `catch` makes every creature of it catchable however it
+  arrived (a summon, a round event's arrivals, a phase's); an entry's `catch` wins over it. A game module summons near
+  a creature with `e.legendary.summon_near(by, monster_id, n, cell)`.
+  A monster's `body: {ruined_by: [damage types], flag, count, warn}` (or its stat block's) is a body some damage ruins
+  for good (a villager hollowed into a foe): when it drops to 0 Hit Points and the blow that dropped it had damage of a
+  type in `ruined_by` that landed (not one it is immune to), `flag` is set and 1 is added to the story flag `count`
+  (Legendary._ruin; a fight's story flag `{add: n}` adds to the flag's number instead of setting it). Its `warn` is a
+  warning line on its fight tooltip and its hover before the fight (Legendary.body_warning). Falls are bludgeoning.
   Its `boss: false` keeps a foe on a boss's stat block out of the game's bosses (Difficulty.boss_entry): no boss bar, no
   boss damage or to-hit step (the brides on the vampire's block).
   Its `states` (ids from the stat block's own `states`) join its traits for this fight: Sarkhaza chained or

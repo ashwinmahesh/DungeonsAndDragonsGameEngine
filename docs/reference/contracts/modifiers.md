@@ -12,7 +12,8 @@ later phase, e.g. reactions in Phase 2). Never invent a new `stat` in data: add 
 ## Values: formulas
 
 A value is an integer or a formula string: terms joined by `+`/`-`. A term is an integer, `pb`, `level`
-(character level), `class_level` (level in the class granting it), `slot_level`, `exhaustion`, `mod:<ability>`,
+(character level), `class_level` (level in the class granting it), `slot_level`, `exhaustion`, `tier` (a growing
+item's step by its bearer's level: 1 below 7, 2 from 7, 3 from 13; `"value": "tier"` grows with them), `mod:<ability>`,
 `score:<ability>`, optionally `N*term` or `term/N` (rounded down). `min` sets a floor.
 
     {"stat": "hp_max", "value": "2*level"}                        Tough

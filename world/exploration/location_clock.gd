@@ -3,7 +3,8 @@ extends Node
 ## The clock in a location (F2): when time passes while the party is here (a rest, a wait, a conversation that takes
 ## an hour), the day's scheduled events catch up (Schedule: their flags, and a Narrator line or a conversation if they
 ## happen here), and when the hour turns or an event changed the story, the people re-check who stands where (each NPC
-## entry's `hours` and `when`): the market empties at dusk, the lamplighter comes out. Out in the open it also says when
+## entry's `hours` and `when`): the market empties at dusk, the lamplighter comes out. A place's `recheck_minutes: n`
+## re-checks every n game minutes too (props and people whose `when` reads `minutes_since`). Out in the open it also says when
 ## the weather turns (Weather). One per LocationView, made by LocationNpcs; it looks only outside fights and
 ## conversations, and only when the clock has moved.
 
@@ -13,6 +14,16 @@ var _weather := ""
 ## The people need re-checking: done on a frame they weren't already rebuilt in (two rebuilds in one frame free the
 ## lights the first one's props just lit, before Atmosphere has dressed them).
 var _recheck := false
+
+
+## Whether the clock moving from `before` to `now` (game minutes) re-checks place `loc`'s people and props: the hour
+## turned, or a place that changes by the minute (`recheck_minutes`: a fire that spreads unless it's put out) passed
+## another of its marks.
+static func turns(loc: Dictionary, before: int, now: int) -> bool:
+	if floori(now / 60.0) != floori(before / 60.0):
+		return true
+	var every := int(loc.get("recheck_minutes", 0))
+	return every > 0 and floori(now / float(every)) != floori(before / float(every))
 
 
 static func of(v: LocationView) -> LocationClock:
@@ -36,7 +47,7 @@ func _process(_delta: float) -> void:
 	var now := view.st.total_minutes()
 	if now == _minute:
 		return
-	var turned := _minute >= 0 and floori(now / 60.0) != floori(_minute / 60.0)
+	var turned := _minute >= 0 and turns(view.loc, _minute, now)
 	if _minute >= 0 and now > _minute:
 		LocationNpcs.pass_minutes(view, now - _minute)   # spells on the people run down (Sleep's minute)
 	_minute = now

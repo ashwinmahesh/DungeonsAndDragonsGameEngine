@@ -210,6 +210,15 @@ func quest_days(quest_id: String) -> int:
 	return maxi(0, total_minutes() - int(entry["at"])) / DAY_MINUTES
 
 
+## Game minutes since a flag was stamped (`set <flag> = now`), for `minutes_since.<flag> >= 10`; -1 while it hasn't
+## been stamped.
+func minutes_since(flag_id: String) -> int:
+	var stamp: Variant = flags.get(flag_id)
+	if not (stamp is int or stamp is float):
+		return -1
+	return maxi(0, total_minutes() - int(stamp))
+
+
 ## Whole days since a flag was stamped (`set <flag> = now`, dialogue contract), for `days_since.<flag> >= 2`; -1 while
 ## it hasn't been stamped.
 func days_since(flag_id: String) -> int:

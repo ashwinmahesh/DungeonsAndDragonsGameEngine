@@ -399,7 +399,7 @@ func save_targets(c: Combatant, act: Dictionary) -> Array[Combatant]:
 					shares = true
 			if not shares and e.distance(c, t) > 0:
 				continue
-		elif e.distance(c, t) > int(tg.get("range", 5)):
+		elif e.distance(c, t) > int(tg.get("range", 5)) + (area_bonus(c) if _grows(act) else 0):
 			continue
 		if tg.has("max_size") and Creature.SIZES.find(t.creature.size) > Creature.SIZES.find(StringName(str(tg["max_size"]))):
 			continue
@@ -427,6 +427,56 @@ func save_targets(c: Combatant, act: Dictionary) -> Array[Combatant]:
 	return out
 
 
+## The meta that grows a creature's area actions (an int of feet, 0 when missing): its emanations, cones and lines,
+## its legendary options' areas with them, reach that much further (a boss swollen in a phase, a game's set piece).
+const AREA_BONUS := "area_bonus_ft"
+## The area shapes AREA_BONUS grows.
+const GROWING_SHAPES: Array[String] = ["emanation", "cone", "line"]
+
+
+## How many feet `c`'s area actions reach beyond their own size: its `area_bonus_ft`, never below 0.
+static func area_bonus(c: Combatant) -> int:
+	var v: Variant = c.get_meta(AREA_BONUS, 0)
+	return maxi(0, int(v) if v is int or v is float else 0)
+
+
+## Whether `act`'s area is one AREA_BONUS grows.
+static func _grows(act: Dictionary) -> bool:
+	return str((act.get("area", {}) as Dictionary).get("shape", "")) in GROWING_SHAPES
+
+
+## The size in feet `c`'s area `area` has now: its own, plus `c`'s area_bonus_ft for an emanation, cone or line (never
+## below its own).
+static func area_size(c: Combatant, area: Dictionary) -> int:
+	var base := int(area.get("size", 15))
+	return base + area_bonus(c) if str(area.get("shape", "")) in GROWING_SHAPES else base
+
+
+## The squares `c`'s area action `act` covers aimed at `t` (what it catches, and what a preview draws); [] for an
+## action without an area.
+func area_cells(c: Combatant, act: Dictionary, t: Combatant) -> Array[Vector2i]:
+	var e := enc()
+	var area := act.get("area", {}) as Dictionary
+	var cells: Array[Vector2i] = []
+	if not area.has("shape"):
+		return cells
+	var size := area_size(c, area)
+	if str(area["shape"]) == "space":
+		cells = c.footprint()
+	else:
+		var origin := e.center_of(c)
+		if str(area["shape"]) == "cone":
+			cells = e.grid.cone_from(c.cell, c.size_cells, e.center_of(t), size)
+		elif str(area["shape"]) == "line":
+			# Straight at the target, at whatever angle, from where that leaves the monster's space.
+			var dir := e.center_of(t) - origin
+			cells = e.grid.area_cells("line", size, CombatGrid.line_origin(c.cell, c.size_cells, dir,
+				int(area.get("width", 5))), dir, int(area.get("width", 5)))
+		else:
+			cells = e.grid.area_cells(str(area["shape"]), size, origin, e.center_of(t) - origin, 5, c.cell, c.size_cells)
+	return cells
+
+
 ## Everyone an area save action catches when aimed at `t` (a ghost's 60-ft cone of Horrific Visage, an air elemental's
 ## space): [t] for a single-target action.
 func save_victims(c: Combatant, act: Dictionary, t: Combatant) -> Array[Combatant]:
@@ -437,20 +487,7 @@ func save_victims(c: Combatant, act: Dictionary, t: Combatant) -> Array[Combatan
 		out.append(t)
 		return out
 	var tg := act.get("targets", {}) as Dictionary
-	var cells: Array[Vector2i] = []
-	if str(area["shape"]) == "space":
-		cells = c.footprint()
-	else:
-		var origin := e.center_of(c)
-		if str(area["shape"]) == "cone":
-			cells = e.grid.cone_from(c.cell, c.size_cells, e.center_of(t), int(area.get("size", 15)))
-		elif str(area["shape"]) == "line":
-			# Straight at the target, at whatever angle, from where that leaves the monster's space.
-			var dir := e.center_of(t) - origin
-			cells = e.grid.area_cells("line", int(area.get("size", 15)), CombatGrid.line_origin(c.cell, c.size_cells, dir,
-				int(area.get("width", 5))), dir, int(area.get("width", 5)))
-		else:
-			cells = e.grid.area_cells(str(area["shape"]), int(area.get("size", 15)), origin, e.center_of(t) - origin, 5, c.cell, c.size_cells)
+	var cells := area_cells(c, act, t)
 	for o in e.living():
 		if o == c or o.is_down() or not o.footprint().any(func(x: Vector2i) -> bool: return x in cells):
 			continue
@@ -1315,9 +1352,10 @@ func bonus_action(c: Combatant, plan: String = "") -> CombatResult:
 
 
 ## The `do`s of monsters' actions and Bonus Actions this engine runs itself; any other `do` is the game's
-## (GameFeatures.bonus_action and special_action).
+## (GameFeatures.bonus_action and special_action). `heal`, `save` and `teleport` are the summoned creatures' own
+## (SummonBlocks: Healing Touch, Fell Glare, Venomous Spew, Fey Step), run by FeatureActions._perform_creature.
 const ENGINE_DOS: Array[String] = ["dash_or_disengage", "hide_in_dim", "shape_shift", "cast", "cast_control", "fey_step",
-	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish"]
+	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish", "heal", "save", "teleport"]
 
 
 ## Whether `act` is one of the game's own (a `do` the engine doesn't run).

@@ -46,6 +46,9 @@ var outcome: String = ""   ## "victory", "defeat", or "ended": over with no winn
 ## where a hero who ends their turn up steps out of the fight, and it ends once no hero who is up is left on the board;
 ## `trigger_hero_down`, it ends when the first hero to hurt a foe in it is down. {} for neither.
 var ends_when: Dictionary = {}
+## An opening the party chose before the fight (LocationFights: a flask thrown from the exploration menu): {by, kind
+## ("flask"), item, target}. The `by` creature's first turn begins with it (EncounterTurns), then it is spent. {} none.
+var opening: Dictionary = {}
 var log := CombatLog.new()
 ## For the scene: {type: move|attack|damage|heal|condition|death|turn|round|spell|reaction|over, ...}
 var events: Array[Dictionary] = []

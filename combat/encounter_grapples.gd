@@ -73,8 +73,17 @@ func _spend_attack(c: Combatant) -> bool:
 
 
 ## The meta on a creature that can be caught and carried out of the fight (a location's monster entry's `catch`:
-## {flag}): a loose animal the heroes are trying to bring home.
+## {flag}): a loose animal the heroes are trying to bring home. A stat block's own `catch` makes every creature of it
+## catchable however it came (a summon, a round event's arrivals); the entry's wins.
 const CATCH := &"catch"
+
+
+## `t`'s catch ({flag}), or {} when it can't be caught.
+static func catch_of(t: Combatant) -> Dictionary:
+	if t.creature.has_meta(CATCH):
+		return t.creature.get_meta(CATCH) as Dictionary
+	var block := MonsterActions.data_of(t).get("catch", {})
+	return block as Dictionary if block is Dictionary else {}
 
 
 ## The creatures in the fight that `c` could try to catch now (catchable, on the board, not `c`).
@@ -82,7 +91,7 @@ func catchable(c: Combatant) -> Array[Combatant]:
 	var e := enc()
 	var out: Array[Combatant] = []
 	for t in e.combatants:
-		if t != c and t.creature.has_meta(CATCH) and t.is_alive() and not t.has_meta("left_fight"):
+		if t != c and not catch_of(t).is_empty() and t.is_alive() and not t.has_meta("left_fight"):
 			out.append(t)
 	return out
 
@@ -110,7 +119,7 @@ func catch_creature(c: Combatant, target: Combatant) -> CombatResult:
 	if s.success:
 		e.log.add("info", "%s slips out of %s's hands" % [target.name(), c.name()], c.id, [s.describe()])
 		return CombatResult.new()
-	var flag := str((target.creature.get_meta(CATCH, {}) as Dictionary).get("flag", ""))
+	var flag := str(catch_of(target).get("flag", ""))
 	if flag != "":
 		e.legendary.story_flags[flag] = true
 	e.log.add("info", "%s catches %s" % [c.name(), target.name()], c.id, [s.describe()])

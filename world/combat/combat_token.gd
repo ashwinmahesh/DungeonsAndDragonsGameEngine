@@ -145,8 +145,9 @@ static func portrait_id(c: Combatant) -> String:
 ## else its id.
 static func monster_art(data: Dictionary) -> String:
 	var id := str(data.get("id", ""))
-	if _looks.has(str(data.get("look_of", ""))):
-		return str(_looks[str(data["look_of"])])
+	var look_of := str(data.get("look_of", ""))
+	if look_of != "" and _looks.has(look_of):
+		return str(_looks[look_of])
 	return str(data.get("art", ART_ALIASES.get(id, id)))
 
 
@@ -226,7 +227,8 @@ func _build() -> void:
 	var c := combatant
 	built_cells = c.size_cells
 	var aid := art_override if art_override != "" else art_id(c)
-	if c.creature is Character:
+	# (Never under an empty id: a stat block with no `look_of` would find it and wear that hero's art.)
+	if c.creature is Character and c.id != "":
 		_looks[c.id] = aid
 	var frames := DirectionalSprite.frames_for(aid)
 	var size_units := float(c.size_cells)

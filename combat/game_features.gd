@@ -120,6 +120,23 @@ func owns(_id: String) -> bool:
 
 # --- The hotbar ---------------------------------------------------------------------------------------------------
 
+## Whether an item power's `custom` id is this game's own (its heirlooms' powers), answered by item_power_why and
+## item_power_use instead of the engine's. False for every id here.
+func handles_item_power(_custom: String) -> bool:
+	return false
+
+
+## Why the game's item power `p` ({item_id, data, power, entry}) can't be used now, or "". Charges, uses and
+## attunement are checked before it.
+func item_power_why(_c: Combatant, _p: Dictionary) -> String:
+	return "Not available"
+
+
+## Uses the game's item power `p`: it pays its action (enc().items._pay) and does what it does.
+func item_power_use(_c: Combatant, _p: Dictionary, _targets: Array, _point: Vector2, _opts: Dictionary) -> CombatResult:
+	return CombatResult.fail("Not available")
+
+
 ## Adds `c`'s actions to the hotbar (`aw` and `bw`: why the action or Bonus Action can't be taken now, or "").
 func list(_c: Combatant, _out: Array[Dictionary], _aw: String, _bw: String) -> void:
 	pass

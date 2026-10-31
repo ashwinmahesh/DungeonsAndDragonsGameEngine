@@ -20,7 +20,7 @@ ADR 0012. Schema: `data/schemas/item.schema.json`. Text and summaries are our ow
 | `icon`, `icon_fallback` | icon key; a template's fallback icon is its default base's, and the finished item uses its base's |
 | `focus` | "arcane", "druidic" or "holy": the item is a spellcasting focus of that kind (`Gear.focus_kind`; it goes in the doll's focus slot, `Gear.carry_slot`). A caster whose classes' `spellcasting.focus` names the kind has it to hand when it is in the focus slot or a hand (`Character.focus_item`, `has_focus`); others don't gain it. A held one (the Holy Symbol of Ravenkind) works from the focus slot as from a hand |
 | `modifiers` | as in docs/contracts/modifiers.md, plus `attuned_only` / `carried` (work without being worn or held), `requires_worn` (other items worn too), `requires_gem` (Helm of Brilliance), and `when.item` / `when.ammo: "@self"` (this weapon's or ammunition's attacks only), `when.base_item` |
-| `weapon_rules` | `extra`: [{dice, type, vs (creature types), not_vs, while (a toggle power on), nat20, crit, thrown, melee, vs_marked, spend_charge, ends_toggle}]; `on_hit`: [{save, dc, damage, save_success, conditions, rounds, until, repeat_save, push, max_size, slay, drain_half, debuff, ends_toggle, while, vs, melee}]; `returns` (thrown weapons fly back); `ignore_resistance` (types); `special` (ids for code: vorpal, sharpness, wounding, life_stealing, nine_lives, disruption, smiting, berserker, oathbow, warning, striking, displacement, missile_snaring, blackrazor, wave, ...) |
+| `weapon_rules` | `extra`: [{dice, type, vs (creature types), not_vs, while (a toggle power on), nat20, crit, thrown, melee, vs_marked, vs_condition (only against a creature with that condition: Frightened), spend_charge, ends_toggle}]; `on_hit`: [{save, dc, damage, save_success, conditions, rounds, until, repeat_save, push, max_size, slay, drain_half, debuff, ends_toggle, while, vs, melee}]; `returns` (thrown weapons fly back); `ignore_resistance` (types); `special` (ids for code: vorpal, sharpness, wounding, life_stealing, nine_lives, disruption, smiting, berserker, oathbow, warning, striking, displacement, missile_snaring, blackrazor, wave, ...) |
 | `armor_rules` | `no_crits` (Adamantine), `no_training` (Elven Chain), `ac_vs_ranged`, `catch_arrows`, `attract_missiles`, `resist_ranged_weapons`, `forced_move_reduction` |
 | `container` | `capacity_lb`, `weightless`, `extradimensional` (two of them meeting tear open), `only` (categories), `devours` |
 | `light` | `{bright, dim, when, toggle, dark_only, sunlight}`: light the item sheds in a fight while it's working; `when` "drawn" (lit when a fight starts with the item equipped and working, and burning to its end: a Sun Blade), "held" (lit while it is equipped and working, out when it is put away: a Flame Tongue) or "toggle" (as "held" while the item's toggle `toggle` is on: the Rod of Lordly Might's `form_blade`). `CombatItems.sync_held_lights` does it at a fight's start, each turn's start and when weapon sets are swapped |
@@ -38,13 +38,14 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
 | `id`, `name`, `text`, `sub` | |
 | `cost` | magic (a Magic action), action, utilize, bonus, reaction, attack (one attack of the Attack action), free; a spell power defaults to the spell's casting time |
 | `charges`, `upcast_charges`, `max_level` | charges spent; more per level above the spell's (a Wand of Fireballs' level pips) |
-| `uses` | `{count, per}`: per dawn, long, short, never, or `dawns:N` (once every N days, counted down at each dawn) |
+| `uses` | `{count, per}`: per dawn, dusk, long, short, never, or `dawns:N` (once every N days, counted down at each dawn) |
+| `min_level` | a growing item's later power: usable from its bearer's level N (greyed out below it, "From level N") |
 | `spell` / `recipe`, `level` | the spell it casts, or the item's recipe `<item>__<recipe>`; at this level |
 | `dc`, `attack` | a number, or "wielder" (the best of the user's spellcasting) |
 | `consume` | the item is used up |
 | `toggle`, `off_cost`, `minutes` / `hours` / `rounds`, `modifiers`, `conditions_on`, `custom_light`, `budget_rounds`, `budget_reset`, `needs_charges` | an on/off power (Flame Tongue, Boots of Speed): an Effect on the user while on |
 | `grants` | `{powers, hours / minutes}`: powers the user keeps for a while (Potion of Fire Breath) |
-| `custom`, `params` | bespoke code |
+| `custom`, `params` | bespoke code; a `custom` id the game module claims (GameFeatures.handles_item_power) is the game's own, checked and used by its item_power_why and item_power_use. Effects the game builds may set `data.pierce` (and `Creature.add_condition(c, source, true)`) to land a condition through immunity |
 | `gem`, `needs_gem`, `bead` | Helm of Brilliance gems; Necklace of Prayer Beads beads (each bead one use a day) |
 | `after` | code run after use (Horn of Blasting may explode) |
 | `field`, `combat`, `hidden`, `requires` | usable outside fights; not in fights; not on the hotbar (used automatically: Ring of Evasion, Luck Blade); `anyone` (no attunement or wearing needed) |
