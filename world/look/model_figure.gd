@@ -11,7 +11,8 @@ extends DirectionalSprite
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
 ## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
 ## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
-## lies on its back; without a hurt clip it recoils; without an idle it stirs on its walk (FigureModels.FALLBACKS).
+## lies on its back; without a hurt clip it recoils; without an idle it stands still and breathes, unless its manifest says
+## `idle_from_walk`, then it stirs on its walk.
 ## Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
 ## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear. An entry
 ## can paint the model with a texture of its own (`albedo`, a dressing of a shared body), draw it with a game's shader
@@ -37,6 +38,8 @@ const MAX_WALK_RATE := 2.2
 const RUN_FROM := MAX_WALK_RATE
 ## A walk clip that doesn't move the model (made in place) is taken to cover this many of the figure's heights a second.
 const IN_PLACE_PACE := 0.62
+## The speed of a walk-only model's idle when its manifest says `idle_from_walk`: its walk, slowed to a stir.
+const IDLE_STIR := 0.3
 ## Roles whose clips are all used, in turn, rather than the first found.
 const VARIED: Array[String] = ["talk", "greet"]
 
@@ -304,17 +307,15 @@ func _read_clips() -> void:
 				break
 		if not specs.is_empty():
 			_roles[role] = specs
-	# A role without a clip of its own borrows another role's, at its speed (FigureModels.FALLBACKS).
-	for role: String in FigureModels.FALLBACKS:
-		var fb := FigureModels.FALLBACKS[role] as Dictionary
-		if _roles.has(role) or not _roles.has(str(fb["role"])):
-			continue
-		var borrowed: Array[Dictionary] = []
-		for spec: Dictionary in _roles[str(fb["role"])] as Array:
+	# A walk-only rig stands still and breathes (_play_loop), unless its manifest says idle_from_walk: then it idles on its
+	# walk, slowed to a stir.
+	if not _roles.has("idle") and _roles.has("walk") and bool(_info.get("idle_from_walk", false)):
+		var stir: Array[Dictionary] = []
+		for spec: Dictionary in _roles["walk"] as Array:
 			var b := spec.duplicate()
-			b["speed"] = float(spec.get("speed", 1.0)) * float(fb["speed"])
-			borrowed.append(b)
-		_roles[role] = borrowed
+			b["speed"] = float(spec.get("speed", 1.0)) * IDLE_STIR
+			stir.append(b)
+		_roles["idle"] = stir
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add

@@ -33,12 +33,9 @@ const CLIPS := {
 	"greet": ["greet", "greet_01", "wave"],
 }
 const LOOPS: Array[String] = ["idle", "walk", "run"]
-## A role with no clip of its own plays another role's, at this speed: a creature rigged with only a walk (a crawler, a
-## hound: Tripo's "Other" rig) idles on its walk, slowed to a stir, rather than standing in its bind pose. (A run falls
-## back to the walk, sped up, in ModelFigure.set_step_time.)
-const FALLBACKS := {
-	"idle": {"role": "walk", "speed": 0.3},
-}
+## A rig with only a walk (a crawler, a hound: Tripo's "Other" rig) has no idle: it stands still and breathes. A manifest
+## entry with `idle_from_walk`: true idles on its walk instead, slowed to ModelFigure.IDLE_STIR. (A run falls back to the
+## walk, sped up, in ModelFigure.set_step_time.)
 ## How deep `base` entries may stack (a dressing of a dressing); past it the chain is taken for a loop.
 const MAX_BASES := 4
 
