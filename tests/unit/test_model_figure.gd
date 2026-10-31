@@ -13,8 +13,10 @@ func after_each() -> void:
 
 
 ## A model one unit tall: Armature > Skeleton3D (Hips > Spine) > a box mesh, and an AnimationPlayer with idle, walk (Hips
-## carried 1.2 units forward over its second, bobbing twice), and slash.
-static func model() -> PackedScene:
+## carried 1.2 units forward over its second, bobbing twice), and slash. `combat` adds Tripo's combat preset as Tripo
+## makes it: a run that starts half a unit ahead of the feet and carries the Hips 2.4 units in half a second, a fall
+## that carries them 0.7 to the side as they drop, and a hit.
+static func model(combat := false) -> PackedScene:
 	var root := Node3D.new()
 	root.name = "Model"
 	var arm := Node3D.new()
@@ -49,6 +51,10 @@ static func model() -> PackedScene:
 	lib.add_animation(&"idle.001", _clip(2.0, Vector3.ZERO, 0.0))
 	lib.add_animation(&"walk.001", _clip(1.0, Vector3(0, 0, 1.2), 0.04))
 	lib.add_animation(&"slash.001", _clip(1.0, Vector3.ZERO, 0.0))
+	if combat:
+		lib.add_animation(&"run.001", _clip(0.5, Vector3(0, 0, 2.4), 0.03, Vector3(0, 0, 0.5)))
+		lib.add_animation(&"fall.001", _clip(1.0, Vector3(0.7, -0.35, 0), 0.0))
+		lib.add_animation(&"hit_to_body_01.001", _clip(0.6, Vector3.ZERO, 0.02))
 	player.add_animation_library(&"", lib)
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -56,20 +62,20 @@ static func model() -> PackedScene:
 	return packed
 
 
-## A clip `length` seconds long whose Hips move by `drift` and bob `bob` units twice.
-static func _clip(length: float, drift: Vector3, bob: float) -> Animation:
+## A clip `length` seconds long whose Hips start `start` from their rest, move by `drift` and bob `bob` units twice.
+static func _clip(length: float, drift: Vector3, bob: float, start := Vector3.ZERO) -> Animation:
 	var a := Animation.new()
 	a.length = length
 	var t := a.add_track(Animation.TYPE_POSITION_3D)
 	a.track_set_path(t, NodePath("Armature/Skeleton3D:mixamorig_Hips"))
 	for k in 9:
 		var f := float(k) / 8.0
-		a.position_track_insert_key(t, f * length, Vector3(0, 0.5 - bob * (0.5 + 0.5 * cos(f * TAU * 2.0)), 0) + drift * f)
+		a.position_track_insert_key(t, f * length, Vector3(0, 0.5 - bob * (0.5 + 0.5 * cos(f * TAU * 2.0)), 0) + start + drift * f)
 	return a
 
 
-func _figure(height: float, entry: Dictionary = {}) -> ModelFigure:
-	FigureModels.register(ID, entry, model())
+func _figure(height: float, entry: Dictionary = {}, combat := false) -> ModelFigure:
+	FigureModels.register(ID, entry, model(combat))
 	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), height) as ModelFigure
 	add_child(fig)
 	return fig
@@ -192,6 +198,70 @@ func test_it_falls_and_lies_on_its_back_then_gets_up() -> void:
 		waited += 1
 	assert_between((fig._posture.basis * Vector3.UP).y, 0.99, 1.01, "standing again")
 	fig.free()
+
+
+func test_a_fast_figure_runs_over_its_own_square_and_a_slow_or_sneaking_one_walks() -> void:
+	var fig := _figure(1.0, {}, true)
+	var run := fig._player.get_animation(&"run.001")
+	var t := _hips_track(run)
+	var mid := Vector3.ZERO
+	for k in run.track_get_key_count(t):
+		mid += run.track_get_key_value(t, k) as Vector3
+	mid /= run.track_get_key_count(t)
+	assert_between(Vector2(mid.x, mid.z).length(), 0.0, 0.01, "the run's half-square start taken out: it runs over the feet's rest")
+	assert_between(float(run.get_meta("figure_stride")), 2.39, 2.41, "its stride kept")
+	# The walk covers 1.2 units a second and the run 4.8.
+	fig.set_step_time(1.0 / 2.4)
+	assert_eq(str(fig.get_meta("walk_role")), "walk", "walking while the walk keeps up with the ground")
+	assert_between(fig.walk_speed, 1.99, 2.01, "its legs at twice their pace")
+	fig.set_step_time(1.0 / 4.8)
+	assert_eq(str(fig.get_meta("walk_role")), "run", "running once the walk would skate")
+	assert_between(fig.walk_speed, 0.99, 1.01, "the run at its own pace")
+	fig.moving = true
+	await get_tree().process_frame
+	assert_eq(str(fig._player.current_animation), "run.001", "the run plays")
+	fig.pose = "sneak"
+	fig.set_step_time(1.0 / 4.8)
+	assert_eq(str(fig.get_meta("walk_role")), "walk", "never running while sneaking")
+	fig.free()
+
+
+func test_a_fall_clip_lays_it_down_on_its_own_square() -> void:
+	var fig := _figure(1.0, {"clips": {"die": {"clip": "fall", "speed": 2.0}}}, true)
+	var fall := fig._player.get_animation(&"fall.001")
+	var t := _hips_track(fall)
+	var last := fall.track_get_key_value(t, fall.track_get_key_count(t) - 1) as Vector3
+	assert_between(Vector2(last.x, last.z).length(), 0.0, 0.001, "the sideways slide taken out: the Hips stay over the square")
+	assert_between(last.y, 0.14, 0.16, "and still drop")
+	assert_true(fig.die(), "it falls")
+	assert_true(fig._fell_by_clip, "by its clip, not tipping over")
+	var waited := 0
+	while fig.is_dying() and waited < 120:
+		await get_tree().process_frame
+		waited += 1
+	assert_eq(fig.pose, "down", "lying")
+	assert_false(fig._player.is_playing(), "still, in the clip's last frame")
+	fig.free()
+
+
+func test_a_hit_clip_plays_in_place_of_the_lean() -> void:
+	var fig := _figure(1.0, {"clips": {"hurt": "hit_to_body_01"}}, true)
+	assert_true(fig.hurt(), "the hit clip plays")
+	assert_eq(str(fig._player.current_animation), "hit_to_body_01.001", "hit_to_body_01")
+	assert_eq(fig._tilt_v, 0.0, "no lean on top of it")
+	assert_true(fig._flash > 0.0, "still the flash")
+	fig.free()
+	var plain := _figure(1.0)
+	assert_false(plain.hurt(), "without a clip")
+	assert_true(plain._tilt_v < 0.0, "it leans back from the blow")
+	plain.free()
+
+
+func _hips_track(anim: Animation) -> int:
+	for i in anim.get_track_count():
+		if anim.track_get_type(i) == Animation.TYPE_POSITION_3D:
+			return i
+	return -1
 
 
 func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:

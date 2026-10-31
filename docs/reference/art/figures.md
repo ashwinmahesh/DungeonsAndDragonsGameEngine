@@ -44,14 +44,19 @@ Roles and the names looked for when the manifest names none (`FigureModels.CLIPS
 - **Walk in place.** A clip that carries the model forward (its root bone drifting across the ground, as Tripo's walk and
   greet do) has the drift taken out once, the first time the model is used. The distance it covered is its stride: the
   walk plays at the rate that covers the ground the figure moves, within 0.6x to 2.2x (`MIN_WALK_RATE`, `MAX_WALK_RATE`).
-  Faster than that, a `run` clip plays if the model has one; otherwise the feet skate. Footfalls (for footsteps) are
-  where the root bone is lowest.
+  Faster than that (`RUN_FROM`), a `run` clip plays if the model has one, paced to the ground by its own stride; otherwise
+  the feet skate. A sneaking figure (`pose` "sneak") always walks. A looping clip that carries the model is also centred
+  on the root bone's rest, so a run that starts mid-stride (Tripo's starts half a square on) runs over its own square.
+  Footfalls (for footsteps) are where the root bone is lowest.
 - **Facing.** It turns to `facing` the short way round (`TURN_RATE`), at once the first time.
 - **Attack and cast** play once, `struck` at `hit` (45% of the window when none is given), `attack_finished` at the end.
   Without a clip, `attack()` returns false and the token lunges, as for a sprite without an attack sheet.
-- **Hurt** recoils (a lean back from the feet, and the white flash a game's feel asks for); a hurt clip plays as well.
-- **Die** plays its die clip and lies in its last frame; without one it tips over backward and lies on its back, centred
-  on its square (`pose` "down"). Getting up reverses it.
+- **Hurt** plays its hurt clip with the white flash a game's feel asks for; without one (or while it swings) it recoils,
+  a lean back from the feet, with the flash.
+- **Die** plays its die clip and lies in its last frame. The clip's root is held over the square (a fall that slides the
+  body off to one side, as Tripo's does, lies across the square instead). Without one it tips over backward and lies on
+  its back, centred on its square (`pose` "down"); getting up reverses it. A figure whose die clip looks worse than the
+  tip-over names none: `"clips": {"die": []}`.
 - **Gestures.** `FigureTalk.opened(view, npc)` turns the one spoken to and the party's leader toward each other and plays
   the greet; `FigureTalk.spoke(view, speaker)` plays a talk clip on each line. A game calls them from its dialogue
   (DialogueUI's `spoke`). Sprites have no gestures and keep their facing.

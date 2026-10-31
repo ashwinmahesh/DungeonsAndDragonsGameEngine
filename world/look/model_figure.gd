@@ -9,8 +9,9 @@ extends DirectionalSprite
 ## Clips play by role (FigureModels.CLIPS): idle and walk (or run) loop, the walk paced to the ground it covers; attack,
 ## cast, hurt, talk and greet play once and blend back to the loop. A clip that walks the model forward (Tripo's walk
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
-## distance it covered paces the walk. Without a die clip the figure tips over backward and lies on its back; without
-## a hurt clip it recoils. Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
+## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
+## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
+## lies on its back; without a hurt clip it recoils. Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
 ## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear.
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/lit_figure.gdshader")
@@ -23,10 +24,11 @@ const TURN_RATE := 11.0
 const FALL_SECONDS := 0.5
 const RISE_SECONDS := 0.45
 ## A walk plays at the rate that matches its stride to the ground covered, within these: legs a little faster or
-## slower than the ground look fine, past them they skate. Over RUN_FROM the run clip plays instead, if there is one.
+## slower than the ground look fine, past them they skate. Over RUN_FROM the run clip plays instead, if there is one:
+## a figure walks for as long as its walk keeps up with the ground, and runs only past that (never when sneaking).
 const MIN_WALK_RATE := 0.6
 const MAX_WALK_RATE := 2.2
-const RUN_FROM := 1.6
+const RUN_FROM := MAX_WALK_RATE
 ## A walk clip that doesn't move the model (made in place) is taken to cover this many of the figure's heights a second.
 const IN_PLACE_PACE := 0.62
 ## Roles whose clips are all used, in turn, rather than the first found.
@@ -266,11 +268,27 @@ func _ready_clip(clip: String, role: String) -> void:
 		var first := anim.track_get_key_value(t, 0) as Vector3
 		var drift := anim.track_get_key_value(t, count - 1) as Vector3 - first
 		drift.y = 0.0
-		if drift.length() > 0.001:
-			stride = maxf(stride, drift.length() * _bone_space_scale())
+		if role == "die":
+			# A fall that carries the body off to one side (Tripo's falls end most of a square away): the root is held
+			# over the square throughout, so the figure goes down where it stood and lies across it.
 			for k in count:
 				var v := anim.track_get_key_value(t, k) as Vector3
-				anim.track_set_key_value(t, k, v - drift * (anim.track_get_key_time(t, k) / anim.length))
+				anim.track_set_key_value(t, k, Vector3(first.x, v.y, first.z))
+			continue
+		if drift.length() > 0.001:
+			stride = maxf(stride, drift.length() * _bone_space_scale())
+			var sum := Vector3.ZERO
+			for k in count:
+				var v := anim.track_get_key_value(t, k) as Vector3 - drift * (anim.track_get_key_time(t, k) / anim.length)
+				anim.track_set_key_value(t, k, v)
+				sum += v
+			if role in FigureModels.LOOPS:
+				# A loop can start mid-stride, the body well ahead of the feet's rest (Tripo's run starts half a square
+				# on): its middle is put where the model stands at rest, so the figure runs over its own square.
+				var off := sum / count - _rest_origin(_track_bone(anim.track_get_path(t)))
+				off.y = 0.0
+				for k in count:
+					anim.track_set_key_value(t, k, anim.track_get_key_value(t, k) as Vector3 - off)
 		if steps.is_empty():
 			steps = _low_points(anim, t)
 	anim.set_meta("figure_stride", stride)
@@ -279,10 +297,20 @@ func _ready_clip(clip: String, role: String) -> void:
 
 ## Whether an animation track's path is a bone with no parent (a skeleton's root: Hips, Root).
 func _is_root_bone(path: NodePath) -> bool:
-	if _skeleton == null or path.get_subname_count() == 0:
-		return false
-	var bone := _skeleton.find_bone(str(path.get_subname(path.get_subname_count() - 1)))
+	var bone := _track_bone(path)
 	return bone >= 0 and _skeleton.get_bone_parent(bone) < 0
+
+
+## The skeleton's bone an animation track's path names, or -1.
+func _track_bone(path: NodePath) -> int:
+	if _skeleton == null or path.get_subname_count() == 0:
+		return -1
+	return _skeleton.find_bone(str(path.get_subname(path.get_subname_count() - 1)))
+
+
+## Where bone `bone` sits in the model's rest pose (its parent's space, as its position track's keys are).
+func _rest_origin(bone: int) -> Vector3:
+	return _skeleton.get_bone_rest(bone).origin if bone >= 0 else Vector3.ZERO
 
 
 ## Model units per unit of the skeleton's own space (an Armature exported at 0.01 scale, say).
@@ -397,7 +425,7 @@ func set_step_time(seconds: float) -> void:
 		return
 	var role := "walk"
 	var rate := _rate_for("walk", 1.0 / seconds)
-	if rate > RUN_FROM and has_role("run"):
+	if rate > RUN_FROM and has_role("run") and pose != "sneak":
 		role = "run"
 		rate = _rate_for("run", 1.0 / seconds)
 	walk_speed = clampf(rate, MIN_WALK_RATE, MAX_WALK_RATE)
@@ -424,10 +452,12 @@ func cast() -> bool:
 	return _play_role("cast", true)
 
 
+## The hurt clip with a flash; the recoil's lean instead when there is no clip, or the figure is busy swinging.
 func hurt() -> bool:
-	recoil()
 	if pose == "down" or _attacking or _one_shot == "die" or not has_role("hurt"):
+		recoil()
 		return false
+	_flash = 1.0
 	return _play_role("hurt", false)
 
 
