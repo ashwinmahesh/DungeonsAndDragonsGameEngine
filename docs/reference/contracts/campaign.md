@@ -285,6 +285,14 @@ Slide topics read: `vallaki_backed`, `abbot_fate`, `ilya_fate`/`ilya_heard`, `or
   `when` that the reading's room (or the roam pick) is that room, `strahds_lair` is at `foretold` or later and Strahd
   isn't destroyed; it plays `strahd/final:parley` first and fights only if `strahd_parley` is `fight` or unset. The
   condition `final_room:<room id>` is true for the room he waits in.
+- **Faction standing (E11, story/factions.gd):** an NPC belongs to the faction its `faction_<id>` tag names
+  (`faction_none`: none). A faction's standing is a number kept in the story flag `standing_<id>` (0 at first), moved
+  by the dialogue's `standing <id> +n` and by one point down for each crime a witness sees against a member
+  (Crime.offence). At the campaign's `standing.friendly_at` or more (default 3) every member is friendly, at
+  `standing.hostile_at` or less (-3) hostile, unless the member has an attitude of their own from the story (an
+  `attitude` statement, a crime against them); it stays within `standing.min`..`standing.max` (-10..10). The campaign's
+  `factions.<id>.name` names it for the player. Conditions read `standing.<id>`, so the hub's variants key on it through
+  any placement's `when`: who stands where, which props and doors show, which encounter or conversation node runs.
 - **Withdrawing foes:** a location or visit encounter may carry `"withdraw": {"who", "at_hp_below", "after_rounds",
   "flag"}`; the foe leaves (no loot, no death) and the flag is set.
 - **Strahd's coffin:** 0 Hit Points outside his tomb is Misty Escape: `strahd_in_coffin` is set and he leaves. The

@@ -502,6 +502,9 @@ func resume_encounter(snapshot: Dictionary) -> bool:
 
 
 func check_flag_encounters() -> bool:
+	var freed := Jail.settle(st)   # a stay in a cell whose `until` now holds ends (story/jail.gd)
+	if freed != "":
+		toast.emit(freed)
 	return LocationFights.check_flag_encounters(self)
 
 

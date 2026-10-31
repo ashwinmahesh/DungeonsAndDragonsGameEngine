@@ -204,6 +204,11 @@ func next() -> Dictionary:
 				if bool(s.get("each", false)):
 					said += " (%d each)" % absi(roundi(amount))
 				return {"kind": "notice", "text": said}
+			"standing":
+				pc += 1
+				var faction := str(s["faction"])
+				var now := Factions.change(st, faction, int(s["delta"]))
+				return {"kind": "notice", "text": "%s: standing %+d (now %d)" % [Factions.name_of(faction), int(s["delta"]), now]}
 			"attitude":
 				pc += 1
 				st.attitudes[str(s["npc"])] = str(s["value"])
@@ -240,6 +245,16 @@ func next() -> Dictionary:
 				# Ends the conversation like a fight does; the party goes as through an exit (GameRoot._dialogue_ended).
 				move_to = {"location": str(s["location"]), "spawn": str(s["spawn"])}
 				finished = true
+			"jail":
+				# Locked up (story/jail.gd): the party goes to the cell as `move` takes it, its gear kept by the jailers.
+				Jail.lock_up(st, str(s["location"]), str(s["spawn"]), str(s["until"]), bool(s["keep_gear"]))
+				move_to = {"location": str(s["location"]), "spawn": str(s["spawn"])}
+				finished = true
+			"jail_release":
+				pc += 1
+				var freed := Jail.release(st)
+				if freed != "":
+					return {"kind": "notice", "text": freed}
 			"time":
 				pc += 1
 				st.advance_minutes(int(s["minutes"]))
