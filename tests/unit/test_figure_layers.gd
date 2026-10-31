@@ -185,3 +185,24 @@ func test_a_characters_figure_wears_what_they_hold_and_changes_with_it() -> void
 	FigureModels.register(ID + "_drawn", {}, Figure.model())
 	assert_eq(FigureModels.gear_for(ID + "_drawn", ch), [], "a figure with its things drawn on shows no gear")
 	FigureModels.unregister(ID + "_drawn")
+
+
+func test_an_upright_piece_follows_its_bone_but_stands_as_the_figure_does() -> void:
+	FigureModels.register_part(LANTERN, {"bone": "Spine", "size": 0.25, "upright": true, "grip": [0, 1, 0]}, _lantern())
+	var fig := _figure()
+	fig.wear([LANTERN])
+	var holds := fig._skeleton.find_children("Holds_*", "Node3D", false, false)
+	assert_eq(holds.size(), 1, "held")
+	assert_false(holds[0] is BoneAttachment3D, "not turned by the bone")
+	var hold := holds[0] as Node3D
+	var piece := hold.get_child(0) as Node3D
+	assert_between(piece.position.y, -0.126, -0.124, "hung from its grip, the top of it")
+	fig._skeleton.set_bone_pose_rotation(1, Quaternion(Vector3.FORWARD, 1.2))
+	fig._skeleton.set_bone_pose_position(1, Vector3(0.3, 0.2, 0))
+	fig._follow_bones()
+	var at := fig._skeleton.get_bone_global_pose(1).origin
+	assert_between(hold.position.distance_to(at), 0.0, 0.0001, "where the bone is")
+	assert_between(hold.basis.get_euler().length(), 0.0, 0.0001, "standing as the figure stands, whatever the bone's turn")
+	fig.wear([])
+	assert_true(fig._upright.is_empty(), "no longer followed once off")
+	fig.free()

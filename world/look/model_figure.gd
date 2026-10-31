@@ -52,6 +52,8 @@ var _layers: Dictionary = {}
 var _worn: Array[String] = []
 ## The per-instance shader values set so far (tint, flash, glow, ghost), for meshes put on later.
 var _params: Dictionary = {}
+## Upright pieces (a part's `upright`): their holder -> the bone they follow, moved there each time the pose is set.
+var _upright: Dictionary = {}
 var _info: Dictionary = {}
 ## role -> the clips that play it: [{"name", "from", "to", "hit", "speed"}]
 var _roles: Dictionary = {}
@@ -281,12 +283,24 @@ func _put_on(id: String) -> void:
 		if b < 0:
 			piece.free()
 			return
-		var hold := BoneAttachment3D.new()
+		var hold: Node3D
+		if bool(entry.get("upright", false)):
+			# Upright: where the hand is, but standing the way the figure stands, as a lantern hangs or a torch is held
+			# up whatever the hand's roll, which differs from rig to rig and clip to clip.
+			hold = Node3D.new()
+			_upright[hold] = b
+			if not _skeleton.skeleton_updated.is_connected(_follow_bones):
+				_skeleton.skeleton_updated.connect(_follow_bones)
+		else:
+			hold = BoneAttachment3D.new()
 		hold.name = "Holds_" + id.validate_node_name()
 		_skeleton.add_child(hold)
-		hold.bone_name = _skeleton.get_bone_name(b)
+		if hold is BoneAttachment3D:
+			(hold as BoneAttachment3D).bone_name = _skeleton.get_bone_name(b)
+		else:
+			hold.position = _skeleton.get_bone_global_pose(b).origin
 		hold.add_child(piece)
-		piece.transform = _hold_at(piece, entry, hold.bone_name)
+		piece.transform = _hold_at(piece, entry, _skeleton.get_bone_name(b), hold is BoneAttachment3D)
 		nodes.append(hold)
 	else:
 		for n in piece.find_children("*", "MeshInstance3D", true, false):
@@ -320,6 +334,7 @@ func _take_off(id: String) -> void:
 	for mi: Variant in (rec["meshes"] as Array):
 		_meshes.erase(mi)
 	for node: Variant in (rec["nodes"] as Array):
+		_upright.erase(node)
 		if is_instance_valid(node):
 			(node as Node).queue_free()
 	_layers.erase(id)
@@ -345,7 +360,7 @@ func _bound_skin(skin: Skin, own: Skeleton3D) -> Skin:
 ## hand, say), then the part's own `offset` and `turn`, its `grip` (the point held, in the piece's own units; its middle
 ## when none is given) on the bone, and the piece scaled so its longest side is `size` of the figure's height.
 ## Offsets are in figure heights, so a part sits the same on a tall figure as on a short one.
-func _hold_at(piece: Node3D, entry: Dictionary, bone_name: String) -> Transform3D:
+func _hold_at(piece: Node3D, entry: Dictionary, bone_name: String, turns_with_bone := true) -> Transform3D:
 	var h := _rest_height / _skeleton_scale()
 	var box := rest_box(piece)
 	var longest := maxf(box.size.x, maxf(box.size.y, box.size.z))
@@ -356,10 +371,17 @@ func _hold_at(piece: Node3D, entry: Dictionary, bone_name: String) -> Transform3
 	for key: Variant in sockets:
 		if FigureModels.bone_key(str(key)) == FigureModels.bone_key(bone_name):
 			var sock := sockets[key] as Dictionary
-			frame = Transform3D(_euler(sock.get("turn")), _vec(sock.get("offset")) * h)
+			frame = Transform3D(_euler(sock.get("turn")) if turns_with_bone else Basis.IDENTITY, _vec(sock.get("offset")) * h)
 	var basis := _euler(entry.get("turn")) * Basis.from_scale(Vector3.ONE * s)
 	var grip := _vec(entry.get("grip"), box.get_center())
 	return frame * Transform3D(basis, _vec(entry.get("offset")) * h - basis * grip)
+
+
+## Upright pieces to their bones, once the clip has set the pose.
+func _follow_bones() -> void:
+	for hold: Variant in _upright:
+		if is_instance_valid(hold):
+			(hold as Node3D).position = _skeleton.get_bone_global_pose(int(_upright[hold])).origin
 
 
 ## How much the model's own units are scaled on the way down to its skeleton (an exporter's armature scale).

@@ -83,6 +83,9 @@ puts on what it wears now (taking off what it no longer does). `worn_parts()` li
   side as a share of the figure's height, `grip` the point held (in the piece's own units; its middle when none is
   given), `offset` (figure heights) and `turn` (degrees about x, y, z) place it on the bone. A figure entry's `sockets`
   gives a bone a frame of its own first (where this model's palm is), so one part sits right on different bodies.
+  `"upright": true` keeps the piece standing the way the figure stands while it follows the bone (a lantern hangs, a
+  torch is held up): a hand's roll differs from rig to rig and clip to clip (Tripo's Mixamo rigs agree only on the
+  fingers' direction), so a piece that should stay level is placed this way.
 - **A skinned layer** has no `bone`: its skinned meshes move onto the figure's skeleton and bind to it bone by bone by
   name, so it plays every clip the figure plays. Bones match ignoring an exporter's prefix and case (`RightHand`,
   `mixamorig:RightHand`, `mixamorig_RightHand`: `FigureModels.bone`). A layer fits the body it was weighted on: make
