@@ -99,6 +99,9 @@ var _tall := 0.0
 var _ghost := 1.0
 var _ghost_to := 1.0
 var _ghost_look := 0.0
+## A character's 3D figure that shows their gear (its entry lists `gear` slots): what they had on when it was last
+## dressed, so a change of weapon or armour, by whatever means, redresses it (_dress_gear).
+var _gear_key := ""
 
 
 static func art_id(c: Combatant) -> String:
@@ -242,6 +245,7 @@ func _build() -> void:
 		elif _is_echo() and sprite is ModelFigure:
 			(sprite as ModelFigure).set_ghost(1.0)
 		add_child(sprite)
+		_dress_gear()
 		body = sprite
 		_lying = Sprite3D.new()
 		_lying.texture = frames.get_frame_texture(&"idle_s", 0)
@@ -368,6 +372,25 @@ static func slowed(cr: Creature) -> bool:
 					if str(v) == "slowed":
 						return true
 	return false
+
+
+## A character's 3D figure wears what they have on and in hand (FigureModels.gear_for), when its entry shows gear;
+## again whenever that changes.
+func _dress_gear() -> void:
+	if not (sprite is ModelFigure and combatant.creature is Character):
+		return
+	var fig := sprite as ModelFigure
+	if (FigureModels.info(fig.art_id).get("gear", []) as Array).is_empty():
+		return
+	var ch := combatant.creature as Character
+	var key := "|"
+	for e: Dictionary in ch.inventory:
+		if str(e.get("slot", "")) != "":
+			key += "%s:%s:%d|" % [e["slot"], e["id"], int(e.get("qty", 1))]
+	if key == _gear_key:
+		return
+	_gear_key = key
+	fig.wear(FigureModels.gear_for(fig.art_id, ch))
 
 
 ## Re-reads the creature: health bar, conditions, down or dead.
@@ -848,6 +871,8 @@ func _bar_wanted() -> bool:
 func _process(delta: float) -> void:
 	if _bar_back != null and _bar_back.visible != _bar_wanted():
 		_show_fade()
+	if _gear_key != "":
+		_dress_gear()
 	_aura_state()
 	_lie_on_ground()
 	if _tall > 0.0:
