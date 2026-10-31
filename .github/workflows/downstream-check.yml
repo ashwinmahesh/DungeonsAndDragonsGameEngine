@@ -1,5 +1,6 @@
 # Downstream check: a game that uses this engine as its addons/dnd_core runs its quick check (TEST_SLOTS=1 make check)
-# against the engine at the commit pushed, on GitHub's runners, so nobody keeps a local copy of the game to test it.
+# against the engine at the commit pushed to main, at a pull request's head, or when run by hand (Actions tab, with an
+# optional game_ref), on GitHub's runners, so nobody keeps a local copy of the game to test it.
 # The game's own code and data stay as they are on its branch; only the engine moves, so the check is the game's
 # "engine changed" plan (lint, validate, every script compiling, the engine's changed test files).
 #
@@ -14,8 +15,10 @@
 # and LFS objects (keyed by the game's and the engine's commits, falling back to the newest).
 name: Downstream check
 
+# Not on every branch push: an uncached run pulls about 11 GB of Git LFS, which costs LFS bandwidth and Actions minutes.
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -27,8 +30,9 @@ on:
 permissions:
   contents: read
 
+# A newer run for the same branch or pull request cancels the one it supersedes.
 concurrency:
-  group: downstream-check-${{ github.ref }}
+  group: downstream-check-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
