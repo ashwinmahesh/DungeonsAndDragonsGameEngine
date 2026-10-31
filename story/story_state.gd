@@ -230,10 +230,12 @@ func quest_stage_index(quest_id: String, stage: String) -> int:
 	return -1
 
 
+## An NPC's attitude: their own opinion if the story gave them one (`attitudes`), else their data's as their faction's
+## standing makes it (Factions.attitude).
 func attitude(npc_id: String) -> String:
 	if attitudes.has(npc_id):
 		return str(attitudes[npc_id])
-	return str(Compendium.shared().get_entry("npcs", npc_id).get("attitude", "indifferent"))
+	return Factions.attitude(self, npc_id, str(Compendium.shared().get_entry("npcs", npc_id).get("attitude", "indifferent")))
 
 
 # --- Party ----------------------------------------------------------------------------------------

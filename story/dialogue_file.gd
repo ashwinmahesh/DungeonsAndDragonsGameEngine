@@ -195,6 +195,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				return {"t": "gold", "amount": float(parts[1]), "each": false}
 			if parts.size() == 3 and parts[2] == "each":
 				return {"t": "gold", "amount": float(parts[1]), "each": true}
+		"standing":
+			# `standing <faction> +2` / `-1` (story/factions.gd).
+			if parts.size() == 3 and RegEx.create_from_string("^[+-]\\d+$").search(parts[2]) != null:
+				return {"t": "standing", "faction": parts[1], "delta": int(parts[2])}
 		"attitude":
 			if parts.size() == 3:
 				return {"t": "attitude", "npc": parts[1], "value": parts[2]}
@@ -267,6 +271,14 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 		"combat":
 			if parts.size() == 2:
 				return {"t": "combat", "encounter": parts[1]}
+		"jail":
+			# `jail <location>[:<spawn>] [keep_gear] [until <condition>]` and `jail release` (story/jail.gd).
+			if parts.size() == 2 and parts[1] == "release":
+				return {"t": "jail_release"}
+			var mj := RegEx.create_from_string("^jail\\s+([a-z0-9_]+)(?::([a-z0-9_]+))?(\\s+keep_gear)?(?:\\s+until\\s+(.+))?$").search(line)
+			if mj != null:
+				return {"t": "jail", "location": mj.get_string(1), "spawn": mj.get_string(2) if mj.get_string(2) != "" else "default",
+					"keep_gear": mj.get_string(3) != "", "until": mj.get_string(4).strip_edges()}
 		"move":
 			# `move location[:spawn]` (docs/contracts/dialogue.md): no spawn is the location's default one, as for an exit.
 			if parts.size() == 2:

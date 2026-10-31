@@ -190,6 +190,8 @@ func _term() -> bool:
 		return st.is_night()
 	if t == "day":
 		return not st.is_night()
+	if t == "jailed":
+		return Jail.held(st)   # the party is locked up (story/jail.gd)
 	if t == "indoors":
 		return st.location != "" and CampSite.setting(Compendium.shared().get_entry("locations", st.location)) == CampSite.INDOORS
 	if t == "hour":
@@ -275,6 +277,9 @@ func _term() -> bool:
 		if op in ["==", "!="]:
 			return (stage == rhs) == (op == "==")
 		return _compare(st.quest_stage_index(qid, stage), op, st.quest_stage_index(qid, rhs)) and stage != ""
+	if t.begins_with("standing."):
+		# A faction's standing with the party (story/factions.gd): `standing.old_ways >= 3`; bare, above 0.
+		return _compare(Factions.standing(st, t.substr(9)), op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("attitude."):
 		var att := st.attitude(t.substr(9))
 		if op == "":

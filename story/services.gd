@@ -15,6 +15,11 @@ extends RefCounted
 ## A room is booked for the night (the `_room` flag): the party sleeps on the rest screen as usual, and a Long Rest
 ## there under a booked roof gives the room's comforts on waking (after_long_rest). Better rooms are our addition:
 ## the 2024 rules give a night's lodging no effect.
+##
+## A stable hires out mounts (`mounts`): a riding horse for every hero for the hire's `days` (the NPC's entry may set
+## its own, and its `price` per hero for the whole hire). While the hire lasts, journeys on the roads go `travel` times as
+## fast (FieldItems.travel_mult: the best of the party's ways to speed up, never several at once); the stable takes the
+## horses back when it is up.
 
 const KINDS := {
 	"cure_wounds": {"name": "Cure Wounds", "for": "hurt", "price": 50.0, "spell": "cure_wounds", "heal": "2d8",
@@ -29,6 +34,8 @@ const KINDS := {
 		"text": "A bed each behind a door that locks. Sleep here, and everyone wakes with temporary Hit Points equal to their level."},
 	"room_wealthy": {"name": "The best room, with a hot bath", "for": "party", "each": 2.0, "comfort": 2,
 		"text": "Clean linen, a fire and a copper bath. Sleep here, and everyone wakes with temporary Hit Points equal to twice their level and one more level of Exhaustion gone."},
+	"mounts": {"name": "Riding horses", "for": "party", "each": 2.0, "days": 1, "travel": 1.5,
+		"text": "A riding horse for every hero: journeys on the roads go half again as fast until the hire is up."},
 }
 ## How long a hero can be dead and still be raised, and how long the ordeal lasts, in minutes (10 days).
 const RAISE_LIMIT := 10 * 24 * 60
@@ -55,6 +62,8 @@ static func offered(st: StoryState, npc_id: String) -> Array[Dictionary]:
 		else:
 			line["price"] = Trade.buy_price(st, npc_id, float(s.get("price", kind["price"])))
 		line["material"] = float(kind.get("material", 0.0))
+		if kind.has("days"):
+			line["days"] = int(s.get("days", kind["days"]))
 		out.append(line)
 	return out
 
@@ -91,6 +100,8 @@ static func why_not(st: StoryState, line: Dictionary, ch: Character) -> String:
 		"party":
 			if booked(st) == str(line["id"]):
 				return "Already yours for tonight"
+			if line.has("travel") and not hired_mounts(st).is_empty():
+				return "Already hired"
 	if st.gold < cost(line):
 		return "Not enough gold"
 	return ""
@@ -132,6 +143,10 @@ static func buy(st: StoryState, npc_id: String, line: Dictionary, ch: Character,
 			raise(st, ch)
 			st.advance_minutes(60)
 			said = "%s reads the scroll over %s for an hour, and the diamond crumbles to dust. %s breathes again." % [reader, who, who]
+		"mounts":
+			var days := int(line.get("days", 1))
+			st.set_flag(MOUNTS, {"until": st.total_minutes() + days * 24 * 60, "travel": float(line["travel"]), "name": str(line["name"])})
+			said = "%s for %d day%s: the roads go faster until the hire is up." % [str(line["name"]), days, "" if days == 1 else "s"]
 		_:
 			st.set_flag("_room", {"id": str(line["id"]), "location": st.location, "day": st.day})
 			said = "%s is yours for the night. Take a Long Rest to sleep in it." % str(line["name"])
@@ -278,3 +293,22 @@ static func after_long_rest(st: StoryState) -> String:
 		if comfort >= 2 and ch.exhaustion > 0:
 			ch.exhaustion -= 1
 	return "%s: everyone wakes with temporary Hit Points%s." % [kind["name"], " and one more level of Exhaustion gone" if comfort >= 2 else ""]
+
+
+# --- Mounts --------------------------------------------------------------------------------------
+
+## The flag holding the party's hire of mounts: {until (StoryState.total_minutes), travel, name}.
+const MOUNTS := "_mounts"
+
+
+## The party's hire of mounts while it lasts, else {}.
+static func hired_mounts(st: StoryState) -> Dictionary:
+	var hire := st.flags.get(MOUNTS, {}) as Dictionary
+	if hire.is_empty() or st.total_minutes() >= int(hire.get("until", 0)):
+		return {}
+	return hire
+
+
+## How many times as fast hired mounts make the roads (1.0 without a hire).
+static func mount_travel_mult(st: StoryState) -> float:
+	return float(hired_mounts(st).get("travel", 1.0))

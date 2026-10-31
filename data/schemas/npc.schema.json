@@ -340,13 +340,19 @@
               "remove_curse",
               "raise_dead",
               "room_modest",
-              "room_wealthy"
+              "room_wealthy",
+              "mounts"
             ]
           },
           "price": {
             "type": "number",
             "minimum": 0,
-            "description": "Overrides the kind's price (for one hero, or each for a room)."
+            "description": "Overrides the kind's price (for one hero, or each for a room or a hire of mounts)."
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "How many days a hire of mounts lasts (default 1)."
           },
           "scroll": {
             "type": "boolean",

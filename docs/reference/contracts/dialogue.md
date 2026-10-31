@@ -105,6 +105,8 @@ inspiration [party]                Heroic Inspiration for the hero in the conver
                                    who lacks it, each time it runs (unlike `inspire`, which rewards playing in character
                                    once a playthrough).
 attitude npc_id friendly           Sets an NPC's attitude (hostile, indifferent, friendly; 2024 Influence).
+standing old_ways +2               Moves a faction's standing (story/factions.gd; docs/contracts/campaign.md). A notice
+                                   says by how much and where it stands now.
 xp milestone                       Milestone advancement: every party member may level up (plan §5.6). In XP levelling it
                                    also pays the High award, lifts the party to the story's level and pays what the ceiling
                                    held back (story/xp.gd).
@@ -124,7 +126,9 @@ reading give <place>               Hands the party the treasures the campaign's 
                                    dnd_core: the engine names no campaign, the module decides what a reading is.)
 shop                               Opens the shop of the NPC being spoken to; the conversation resumes after.
 services                           Opens the services of the NPC being spoken to (a temple's spells, an inn's
-                                   rooms; story/services.gd); the conversation resumes after.
+                                   rooms, a stable's horses for hire; story/services.gd); the conversation resumes
+                                   after. Hired horses (`mounts`, `days` and a `price` per hero on the NPC's entry) make
+                                   road journeys 1.5 times as fast until the hire is up.
 join ireena / leave ireena         A story ally joins or leaves the party as a guest (ADR 0010).
 time +60 / time until 12           Time passes in the scene (minutes), or until the given hour comes round.
 respec                             The player picks a party member to rebuild from level 1 in the creator (they
@@ -140,6 +144,14 @@ interject <selector>: Text         A party member matching the selector says Tex
                                    class/species lines so any such character could say them; use name: for a
                                    pregen's own voice.
 combat encounter_id                Ends the conversation and starts a fight from the location's encounters.
+jail cells:block [keep_gear] [until flag.fine_paid]
+                                   The party is locked up (story/jail.gd): it ends the conversation and goes to the
+                                   location's spawn as `move` does, and the jailers keep every living hero's gear, worn
+                                   and held included, unless `keep_gear`. While held, `jailed` holds (give the cell door
+                                   and the jail's exits `when: "not jailed"`) and `days_since.jailed` counts the days.
+                                   `jail release` lets the party out; with `until`, so does that condition coming true
+                                   (checked after each conversation and interaction). The gear comes back as it was,
+                                   worn and held again, with a notice. An NPC in a cell is a placement with its own `when`.
 move location[:spawn]             The party goes to a location's spawn ("move vault" is its default spawn, as for an exit
                                    that names none), also another spawn of the map it is in: a trap's drop from cell to
                                    cell. Like `combat` it ends the conversation, so `time +n` and the Narrator's lines
@@ -184,7 +196,7 @@ inspire name:thistle: spoke her mind
 member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
 `quest_days.<id> >= 3` (whole days since the quest last moved to its current stage; false before the quest begins),
 `days_since.<flag> >= 2` (whole days since the flag was stamped with `set <flag> = now`; false while it hasn't been),
-`attitude.<npc> == friendly`, `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
+`attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `jailed` (the party is locked up, `jail`), `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
 a dungeon; a night's line written for sleeping behind walls carries it, so a camp out of doors skips it), `hour >= 20`,
 `tarokka.drawn`,
 `tarokka.sword == swords_3`, `tarokka.sword.region == vallaki`, `tarokka.ally.npc == ezmerelda`, `guest:ireena`,
