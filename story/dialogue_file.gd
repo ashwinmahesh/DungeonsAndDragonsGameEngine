@@ -52,9 +52,9 @@ static func parse(text: String, file_key: String = "") -> DialogueFile:
 	var re_line := RegEx.create_from_string("^([A-Za-z][A-Za-z_ ]*?)(?:\\s*\\[([a-z:]+(?:\\s*,\\s*[a-z:]+)*)\\])?:\\s+(.+)$")
 	var re_option := RegEx.create_from_string("^\\*\\s+(.*?)\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?\\s*$")
 	var re_tag := RegEx.create_from_string("^\\[([^\\]]+)\\]\\s*")
-	var re_check_tag := RegEx.create_from_string("^([A-Za-z][A-Za-z ]*?)\\s+DC\\s+(\\d+)$")
+	var re_check_tag := RegEx.create_from_string("^([A-Za-z][A-Za-z ]*?)\\s+DC\\s+(\\d+)(?:\\s+(adv|dis))?$")
 	var re_set := RegEx.create_from_string("^set\\s+([a-z][a-z0-9_]*)(?:\\s*(=|\\+=|-=)\\s*(.+))?$")
-	var re_check := RegEx.create_from_string("^check\\s+([A-Za-z][A-Za-z ]*?)\\s+DC\\s+(\\d+)\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?$")
+	var re_check := RegEx.create_from_string("^check\\s+([A-Za-z][A-Za-z ]*?)\\s+DC\\s+(\\d+)(?:\\s+(adv|dis))?\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?$")
 	var re_interject := RegEx.create_from_string("^interject\\s+([a-z]+:[a-z0-9_]+):\\s+(.+)$")
 	var re_variant := RegEx.create_from_string("^\\|\\s*(?:\\[([^\\]]+)\\]\\s*)?(.+)$")
 	var n := 0
@@ -102,6 +102,11 @@ static func _approve(line: String) -> Dictionary:
 	return {"t": "approve", "changes": changes, "why": why}
 
 
+## The damage types a `damage` statement takes.
+const DAMAGE_TYPES: Array[String] = ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison",
+	"psychic", "radiant", "slashing", "thunder"]
+
+
 ## Whether `words` are only `allowed` ones, each at most once.
 static func _words_of(words: Array, allowed: Array) -> bool:
 	var seen := {}
@@ -145,7 +150,8 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			label = label.substr(mt.get_end())
 			var mc := re_check_tag.search(tag)
 			if mc != null:
-				opt["check"] = {"skill": mc.get_string(1).strip_edges().to_lower().replace(" ", "_"), "dc": int(mc.get_string(2)), "label": tag}
+				opt["check"] = {"skill": mc.get_string(1).strip_edges().to_lower().replace(" ", "_"), "dc": int(mc.get_string(2)), "label": tag,
+					"edge": mc.get_string(3)}
 			elif tag.begins_with("if "):
 				opt["cond"] = tag.substr(3)
 			elif tag.begins_with("ends:"):
@@ -213,6 +219,23 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			var words := Array(parts.slice(2))
 			if parts.size() >= 2 and _words_of(words, ["party", "temp"]) and _is_dice(parts[1]):
 				return {"t": "heal", "dice": parts[1], "party": "party" in words, "temp": "temp" in words}
+		"damage":
+			# `damage <dice> <type> [party]`: never below 1 Hit Point (docs/contracts/dialogue.md).
+			if parts.size() >= 3 and _is_dice(parts[1]) and parts[2] in DAMAGE_TYPES and _words_of(Array(parts.slice(3)), ["party"]):
+				return {"t": "damage", "dice": parts[1], "type": parts[2], "party": parts.size() == 4}
+		"advantage", "disadvantage":
+			# `advantage <skill|checks> [next|<n>m|<n>h][: why]` (story/check_edges.gd).
+			var me := RegEx.create_from_string("^(?:dis)?advantage\\s+([a-z_]+)(?:\\s+(next|\\d+[mh]))?(?::\\s*(.+))?$").search(line)
+			if me != null and (me.get_string(1) == CheckEdges.ANY or Abilities.SKILLS.has(StringName(me.get_string(1)))):
+				var span := me.get_string(2)
+				var mins := 0 if span in ["", "next"] else int(span.left(-1)) * (60 if span.ends_with("h") else 1)
+				return {"t": "edge", "kind": "dis" if parts[0] == "disadvantage" else "adv", "skill": me.get_string(1), "minutes": mins,
+					"why": me.get_string(3).strip_edges()}
+		"hit_dice":
+			# `hit_dice restore <n|all> [party]` / `hit_dice grant <n> [party]`.
+			if parts.size() >= 3 and parts[1] in ["restore", "grant"] and (parts[2].is_valid_int() and int(parts[2]) > 0 or (parts[2] == "all" and parts[1] == "restore")) \
+					and _words_of(Array(parts.slice(3)), ["party"]):
+				return {"t": "hit_dice", "how": parts[1], "count": -1 if parts[2] == "all" else int(parts[2]), "party": parts.size() == 4}
 		"temp_hp":
 			# `temp_hp <dice> [party]`.
 			if parts.size() >= 2 and _words_of(Array(parts.slice(2)), ["party"]) and _is_dice(parts[1]):
@@ -306,7 +329,7 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 	var mc2 := re_check.search(line)
 	if mc2 != null:
 		return {"t": "check", "skill": mc2.get_string(1).strip_edges().to_lower().replace(" ", "_"), "dc": int(mc2.get_string(2)),
-			"ok": mc2.get_string(3), "fail": mc2.get_string(4)}
+			"edge": mc2.get_string(3), "ok": mc2.get_string(4), "fail": mc2.get_string(5)}
 	var mi := re_interject.search(line)
 	if mi != null:
 		return {"t": "interject", "selector": mi.get_string(1), "text": mi.get_string(2)}

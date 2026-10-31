@@ -237,7 +237,7 @@ func next() -> Dictionary:
 					_check_jumps = [ok, fail]
 					_pending_jump = ok if bool(beat["success"]) or fail == "" else fail
 					_pay_check(beat, line_key)
-					return beat)
+					return beat, str(s.get("edge", "")))
 			"combat":
 				combat = str(s["encounter"])
 				finished = true
@@ -285,6 +285,19 @@ func next() -> Dictionary:
 				var healed := _heal(s)
 				if healed != "":
 					return {"kind": "notice", "text": healed}
+			"damage":
+				pc += 1
+				var hurt := _damage(s)
+				if hurt != "":
+					return {"kind": "notice", "text": hurt}
+			"edge":
+				pc += 1
+				CheckEdges.grant(st, str(s["kind"]), str(s["skill"]), int(s["minutes"]), str(s["why"]))
+			"hit_dice":
+				pc += 1
+				var dice_said := _hit_dice(s)
+				if dice_said != "":
+					return {"kind": "notice", "text": dice_said}
 			"temp_hp":
 				pc += 1
 				var shielded := _temp_hp(s)
@@ -465,6 +478,65 @@ func _receivers(party: bool) -> Array[Character]:
 	return out
 
 
+## `damage <dice> <type> [party]`: one roll of damage to the hero in the conversation or every living hero, through
+## their Resistances and Immunities, taken from Temporary Hit Points first. It never drops a hero below 1 Hit Point: out
+## of a fight nothing would make their Death Saving Throws, so a story's hurt wounds but never fells. Returns the
+## notice, or "".
+func _damage(s: Dictionary) -> String:
+	var who := _receivers(bool(s["party"]))
+	if who.is_empty():
+		return ""
+	var rolled := int(dice.roll_expr(str(s["dice"]), "Damage")["total"])
+	var kind := str(s["type"])
+	var hurt: Array[String] = []
+	for ch in who:
+		var r := ch.preview_damage_parts([{"amount": rolled, "type": kind}])
+		var dealt := mini(r.final, maxi(0, ch.hp + ch.temp_hp - 1))
+		if dealt <= 0:
+			continue
+		var absorbed := mini(ch.temp_hp, dealt)
+		ch.temp_hp -= absorbed
+		ch.hp -= dealt - absorbed
+		hurt.append(_first(ch))
+	if hurt.is_empty():
+		return ""
+	var what := "%d %s damage" % [rolled, kind.capitalize()]
+	return ("Each hero takes %s" % what) if bool(s["party"]) and hurt.size() == who.size() else "%s %s %s" % [_names(hurt), "takes" if hurt.size() == 1 else "take", what]
+
+
+## `hit_dice restore <n|all> [party]` gives back spent Hit Point Dice (the biggest first, never past a hero's own);
+## `hit_dice grant <n> [party]` gives Hit Point Dice of the hero's biggest kind beyond them, kept until their next
+## Long Rest. Returns the notice, or "".
+func _hit_dice(s: Dictionary) -> String:
+	var n := int(s["count"])
+	var got: Array[String] = []
+	for ch in _receivers(bool(s["party"])):
+		var pool := ch.hit_dice()
+		var dies := pool.keys()
+		dies.sort_custom(func(a: Variant, b: Variant) -> bool: return int(a) > int(b))
+		if dies.is_empty():
+			continue
+		var moved := 0
+		if str(s["how"]) == "grant":
+			var top := str(dies[0])
+			ch.hit_dice_spent[top] = int(ch.hit_dice_spent.get(top, 0)) - n
+			moved = n
+		else:
+			for die: Variant in dies:
+				var spent := int(ch.hit_dice_spent.get(str(die), 0))
+				var back := spent if n < 0 else mini(spent, n - moved)
+				if back <= 0:
+					continue
+				ch.hit_dice_spent[str(die)] = spent - back
+				moved += back
+		if moved > 0:
+			got.append(_first(ch))
+	if got.is_empty():
+		return ""
+	var count := "their spent Hit Point Dice" if n < 0 else ("%d Hit Point Di%s" % [n, "e" if n == 1 else "ce"])
+	return "%s %s %s" % [_names(got), ("regains" if got.size() == 1 else "regain") if str(s["how"]) == "restore" else ("gains" if got.size() == 1 else "gain"), count]
+
+
 ## `temp_hp <dice> [party]`: one roll of Temporary Hit Points for the hero in the conversation or every living hero (a
 ## hero who already has more keeps theirs). Returns the notice, or "".
 func _temp_hp(s: Dictionary) -> String:
@@ -602,7 +674,7 @@ func choose(i: int) -> Dictionary:
 			_last_option_key = _spent_key(str(opt["text"])) if _social(str(check["skill"])) else ""
 			if _last_option_key != "" and not bool(beat["success"]):
 				st.flags[_last_option_key] = true
-			return beat)
+			return beat, str(check.get("edge", "")))
 	_pending_jump = str(opt["ok"])
 	return next()
 
@@ -643,7 +715,8 @@ func _collect_options() -> void:
 			var tags := ""
 			for tag: String in s["tags"]:
 				tags += "[%s] " % tag
-			var label := "%s%s" % ["[%s DC %d] " % [str(check["skill"]).replace("_", " ").capitalize(), int(check["dc"])] if not check.is_empty() else "", tags]
+			var edge_word := {"adv": ", Advantage", "dis": ", Disadvantage"}.get(str(check.get("edge", "")), "") as String
+			var label := "%s%s" % ["[%s DC %d%s] " % [str(check["skill"]).replace("_", " ").capitalize(), int(check["dc"]), edge_word] if not check.is_empty() else "", tags]
 			# A purchase: an option whose node starts by paying is greyed out when the purse can't cover it.
 			var price := _price_of(str(s["ok"]))
 			var enabled := price <= 0.0 or st.gold >= price
@@ -964,15 +1037,16 @@ func _best_for(skill: String) -> Character:
 ## A check about to be rolled: Guidance first when someone could cast it and the screen asks (offer_guidance), as a
 ## `guidance` beat that answer_guidance() follows up; otherwise it's rolled now, with Guidance from a caster whose rule
 ## is Automatic. `then` takes the check's beat, does what follows the roll (the branch to take) and returns the beat.
-func _check(who: Character, skill: String, dc: int, said: String, then: Callable) -> Dictionary:
+## `edge`: the check's own "adv" or "dis" (`[Persuasion DC 12 adv]`), or "".
+func _check(who: Character, skill: String, dc: int, said: String, then: Callable, edge: String = "") -> Dictionary:
 	var extra: Array = []
 	if offer_guidance and who != null:
 		var offer := GuidanceOffer.offer(st, who, _skill_key(skill), dc)
 		if GuidanceOffer.asks(offer):
-			_guidance_wait = {"offer": offer, "who": who, "skill": skill, "dc": dc, "said": said, "then": then}
+			_guidance_wait = {"offer": offer, "who": who, "skill": skill, "dc": dc, "said": said, "then": then, "edge": edge}
 			return {"kind": "guidance", "offer": offer}
 		extra = GuidanceOffer.automatic(offer)
-	return then.call(_roll(who, skill, dc, said, extra))
+	return then.call(_roll(who, skill, dc, said, extra, edge))
 
 
 ## The Guidance prompt's answer: the offer's caster `index` casts it (-1: nobody), and `rule` is the casters' answer
@@ -983,14 +1057,24 @@ func answer_guidance(index: int, rule: String = "") -> Dictionary:
 	var w := _guidance_wait
 	_guidance_wait = {}
 	var extra := GuidanceOffer.answer(w["offer"] as Dictionary, index, rule)
-	return (w["then"] as Callable).call(_roll(w["who"] as Character, str(w["skill"]), int(w["dc"]), str(w["said"]), extra))
+	return (w["then"] as Callable).call(_roll(w["who"] as Character, str(w["skill"]), int(w["dc"]), str(w["said"]), extra, str(w.get("edge", ""))))
 
 
-func _roll(who: Character, skill: String, dc: int, said: String, extra: Array = []) -> Dictionary:
+## `edge`: the check's own Advantage ("adv") or Disadvantage ("dis"); the story's granted ones (CheckEdges) count too.
+func _roll(who: Character, skill: String, dc: int, said: String, extra: Array = [], edge: String = "") -> Dictionary:
 	if who == null:
 		st.last_check = false
 		return {"kind": "check", "who": "Nobody", "skill": skill, "dc": dc, "total": 0, "success": false, "detail": "", "said": said}
-	var test := who.roll_check(dice, _skill_key(skill), dc, CheckAids.before_check(who, _skill_key(skill)), [], "", [], extra)
+	var adv := CheckAids.before_check(who, _skill_key(skill))
+	var dis: Array[String] = []
+	var granted := CheckEdges.take(st, skill)
+	adv.append_array(granted["adv"] as Array[String])
+	dis.append_array(granted["dis"] as Array[String])
+	if edge == "adv":
+		adv.append("The moment favours it")
+	elif edge == "dis":
+		dis.append("The odds are against it")
+	var test := who.roll_check(dice, _skill_key(skill), dc, adv, dis, "", [], extra)
 	st.last_check = test.success
 	_last_check = {"who": who, "test": test, "skill": skill, "said": said}
 	return _check_beat()

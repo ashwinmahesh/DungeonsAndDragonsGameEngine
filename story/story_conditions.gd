@@ -190,6 +190,8 @@ func _term() -> bool:
 		return st.is_night()
 	if t == "day":
 		return not st.is_night()
+	if t == "graphic":
+		return Cutscenes.graphic_ok(st)   # the player shows graphic scenes (option graphic_scenes, on by default)
 	if t == "jailed":
 		return Jail.held(st)   # the party is locked up (story/jail.gd)
 	if t == "indoors":

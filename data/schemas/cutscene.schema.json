@@ -42,6 +42,10 @@
           "when": {
             "type": "string",
             "description": "A dialogue condition (docs/contracts/dialogue.md); empty is always."
+          },
+          "graphic": {
+            "type": "boolean",
+            "description": "A gory take: passed over when the player's graphic_scenes is off (put a tamer take after it)."
           }
         }
       }
@@ -60,6 +64,14 @@
     "once": {
       "type": "boolean",
       "description": "The picture plays only the first time: its trigger's first firing (an area you walk into again and again), or the first time a conversation's `cutscene` statement reaches it."
+    },
+    "graphic": {
+      "type": "boolean",
+      "description": "A gory cutscene: with the player's graphic_scenes off it shows its `tame` cutscene's picture instead, or is skipped."
+    },
+    "tame": {
+      "$ref": "common.schema.json#/$defs/id",
+      "description": "The cutscene whose picture shows in place of this graphic one when graphic_scenes is off."
     },
     "trigger": {
       "type": "string",
