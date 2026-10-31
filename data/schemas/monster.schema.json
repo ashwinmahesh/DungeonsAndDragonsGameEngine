@@ -793,7 +793,7 @@
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,
-          "description": "bloodied: true (half its Hit Points or fewer); hp_below: N; at_zero: true (a second life: it stays at the phase's `hp`); allies_down: [stat block ids], all down; round: N (from that round's turn on); flag: a flag this fight set.",
+          "description": "bloodied: true (half its Hit Points or fewer); hp_below: N; at_zero: true (a second life: it stays at the phase's `hp`); allies_down: [stat block ids], all down; gone: {monster, at_least}, so many of a stat block dead, caught or gone; round: N (from that round's turn on); flag: a flag this fight set.",
           "properties": {
             "bloodied": {
               "type": "boolean"
@@ -808,6 +808,23 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            },
+            "gone": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "monster"
+              ],
+              "description": "So many creatures of stat block `monster` dead, down or off the board (caught, vanished, withdrawn), on any side.",
+              "properties": {
+                "monster": {
+                  "type": "string"
+                },
+                "at_least": {
+                  "type": "integer",
+                  "minimum": 1
+                }
               }
             },
             "round": {
@@ -888,7 +905,11 @@
         },
         "say": {
           "type": "string",
-          "description": "A Narrator key or cutscene sting the view plays as it begins."
+          "description": "A Narrator key whose line the view speaks as it begins."
+        },
+        "cutscene": {
+          "type": "string",
+          "description": "A cutscene played over the fight as it begins, with `say`'s line as its caption."
         },
         "traits_add": {
           "type": "array",
@@ -1607,6 +1628,41 @@
         "$ref": "#/$defs/phase"
       },
       "description": "Boss phases (combat/boss_phases.gd)."
+    },
+    "catch": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Every creature of this stat block can be caught and carried out of a fight, however it came (a summon, a round event's arrivals): as a location monster entry's `catch`, which wins over it.",
+      "properties": {
+        "flag": {
+          "type": "string",
+          "description": "The story flag set when one is caught."
+        }
+      }
+    },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A body some damage ruins for good (a villager hollowed into a foe): when it drops to 0 Hit Points and any damage of a type in `ruined_by` landed in that blow, `flag` is set and 1 is added to the story flag `count`; `warn` shows on its tooltip and hover.",
+      "properties": {
+        "ruined_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flag": {
+          "type": "string"
+        },
+        "count": {
+          "type": "string",
+          "description": "A story flag the fight adds 1 to for each body ruined."
+        },
+        "warn": {
+          "type": "string",
+          "description": "The warning its tooltip and hover show (whose body it is, and what ends it)."
+        }
+      }
     },
     "minions": {
       "type": "object",

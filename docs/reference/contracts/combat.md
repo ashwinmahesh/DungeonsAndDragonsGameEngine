@@ -81,6 +81,7 @@ in the helper whose job it is; a function other files call gets a one-line forwa
 | `reaction_move(c, cell)` | the move a hit offers an ally (Maneuvering Attack, `movement.offer_reaction_move`): `c` spends its Reaction and walks up to half its Speed, the creature hit making no Opportunity Attack; `movement.open_reaction_move()` is the open offer (it lapses when the turn moves on), `movement.reaction_mover_why(c)` who can take it, `movement.decline_reaction_move()` passes |
 | `undo_move(c)`, `can_undo_move(c)` | Takes back `c`'s last move (`move`, `free_move`, `jump`, with the mount or rider that went along) while nothing came of it: no die rolled, no reaction offered (even one declined or passed up), nothing queued, no other creature, zone, spell object, mark or grapple changed, no log line but the move's own, and nothing new seen (the mover not spotted, no foe the party couldn't see in sight now). Moves come back one by one, to the last thing that wasn't a move; anything else ends them. Player-controlled creatures on their own turn only; not saved |
 | `escape_effect(c, effect_id)`, `wake(c, t)`, `haste_action_use(c, what, t, option_id)`, `use_item(c, item_id, t)` | breaking free of Web/Entangle, shaking a sleeper awake, Haste's extra action, potions and Goodberries |
+| `actions.throw_flask(c, item_id, t)` | a flask thrown as one of the hero's attacks (the hotbar's "Throw <item>", `flask:<id>`): an item whose `effects` has `damage` {dice, damage_type, range, `save` + `dc` (a formula of the thrower's, "8+mod:dex+pb") or `attack` (a ranged roll, Dex + Proficiency, against AC), `creature_types`}. The damage lands on a failed save or a hit, and only on a creature of one of `creature_types` when the item lists them (Holy Water: Fiends and Undead; anyone else is unharmed); an effect `custom` `{id: burning}` beside it sets the target burning (Alchemist's Fire). The flask is used up either way |
 | `unready(c)` | Lets a readied attack or spell go (nothing given back); the hotbar's Unready slot (`ActionCatalog._readied`) calls it while anything is readied |
 | `drop_concentration(c)` | Ends the Concentration `c` keeps, at will and for nothing (any time while the fight runs and no prompt is open): the spell ends with what it keeps going, the log says so. The hotbar's Drop Concentration slot (`ActionCatalog._concentration`) calls it on `c`'s own turn |
 | `pick_up(c, gid)` | picks up the pile `gid` (`ground.items`) from within 5 ft: the free object interaction, else a Bonus Action (Fast Hands) or the Utilize action |
@@ -314,6 +315,17 @@ that many Hit Points, or at the start of its turn once `after_rounds` rounds hav
 withdraw; no loot). On an Encounter: `lair`, `location_id`, `places` (the location's Tarokka places and the final
 battle's room), `outdoors`, `legendary.withdraws`; all are kept in a round's save.
 
+`ends_when: {party_left_map, trigger_hero_down, flag, clear_flags}` ends a fight with no winner (outcome `"ended"`), as a
+sleeper that wakes, fights a while and goes back to sleep: with `party_left_map`, a hero who ends their turn up on one of
+the place's open exits steps out of the fight (`vanish`, left: `exit`) and stands there once it is over, and the fight
+ends once no hero who is up is left on the board (before a defeat: one who got out is enough); with
+`trigger_hero_down`, it ends when the first hero to hurt a foe in it (meta `first_to_hurt`) is down. Ended, the fight
+isn't done: no `flag`, no `quest`, no loot, the fallen are stabilized, the Narrator says `combat:ended` if it has a line,
+the entry's own `flag` is set and its `clear_flags` cleared (the flag that woke the sleeper, so it can be woken again),
+and a waiting foe waits again on its square as its entry says (asleep with `surprise: enemies`), at full Hit Points. The
+Encounter holds what the fight reads (`Encounter.ends_when`: `exits` as squares, `trigger_hero_down`); a fight picked
+up from a round's save reads it from the entry again.
+
 What a fight hands back to the story (`Encounter.legendary`): `story_flags` (flag -> value: Misty Escape's flag, a
 withdrawal's flag, `strahd_destroyed`), `story_quests` (quest -> stage), `departed` (creature id -> `mist` or
 `withdraw`). LocationView applies them when the fight ends, whatever the outcome; a creature that departed leaves no
@@ -334,17 +346,21 @@ The Tarokka (story/tarokka.gd): the card `mists` (room `castle_ravenloft`, `Taro
 ### Boss phases (combat/boss_phases.gd)
 
 A stat block's `phases` change the creature mid-fight, once each, in the block's order (`$defs/phase` in the monster
-schema). `when` is one trigger: `bloodied: true`, `hp_below: N`, `at_zero: true` (a second life: instead of dying it
-stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down), `round: N` (from that round's turn
-on), or `flag` (one this fight set: a game module's set piece, another phase). What begins with it: `hp` ("full",
+schema). `when` is a trigger: `bloodied: true`, `hp_below: N`, `at_zero: true` (a second life: instead of dying it
+stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down), `gone: {monster, at_least}` (that
+many creatures of a stat block dead, down or off the board, caught or vanished or withdrawn, on any side; checked as
+each falls or leaves), `round: N` (from that round's turn on), or `flag` (one this fight set: a game module's set
+piece, another phase, a catch's flag). With two triggers it begins on whichever is met first. What begins with it: `hp` ("full",
 "half" or a number) or `heal`; `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
 actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
-`summon: {monster, count}`; `say` (a Narrator key or sting for the view); `traits_add`/`_remove`, `actions_add`/
+`summon: {monster, count}`; `say` (a Narrator key: the fight's view speaks its line as it begins, as any Narrator line in
+a fight) and `cutscene` (a cutscene id played over the fight with that line as its caption; without it, a cutscene whose
+`trigger` is the key plays); `traits_add`/`_remove`, `actions_add`/
 `_remove` (and bonus actions, reactions), `legendary_actions` and `lair_actions` replaced, and `art`, `ai_profile`, `ac`,
 `speed`, defences and `legendary_resistance_max`. An action or trait marked `"phase": "<id>"` is held back until that
 phase begins (a Multiattack gained when Bloodied). The block is rebuilt from its data at the fight's start plus the
 phases begun (`Monster.set_block`; the shared compendium entry is never changed), and `Legendary.to_dict` keeps both, so
-a loaded round comes back the same. Each phase sends `{type: "phase", id, phase, name, say}`. A game module or the
+a loaded round comes back the same. Each phase sends `{type: "phase", id, phase, name, say, cutscene}`. A game module or the
 story can begin one with `e.legendary.phases.enter(c, id)`.
 
 `minions: {when_it_falls: "vanish", narration}`: when the creature dies, everything on its side it brought into the
@@ -355,7 +371,8 @@ fight (its summons, `summoner` meta) or that names it as `minion_of` (block fiel
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
 storm's gusts, a breach letting the mist in, reinforcements. Each acts on `at` (default 20, losing ties, like a lair),
-in the rounds `from_round`, `every`, `until_round` and `times` allow, as itself or as one entry of its `table` (`pick`:
+in the rounds `from_round`, `every`, `until_round`, `times` and `until_flag` (it stops once the fight sets that flag)
+allow, as itself or as one entry of its `table` (`pick`:
 "cycle" in turn, else at random, never the one used last). An outcome is a `save` (whoever it reaches, `affects` party,
 enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
 for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and
@@ -373,7 +390,7 @@ legendary strikes otherwise; below a quarter of his Hit Points with Regeneration
 away until he is back over half. Withdrawing turns him to mist (or a bat) as he goes.
 
 Events: `legendary` (id, option, name, left), `lair` (id, action, name, targets), `form` (id, form, art: the token wears the
-shape's sprite when it exists, kind: how the change looks and sounds), `vanish` (id, left: mist or withdraw, narration)
+shape's sprite when it exists, kind: how the change looks and sounds), `vanish` (id, left: mist, withdraw, fell or exit, narration)
 for a creature leaving the fight. A change of shape (`form`, and `shape` for Polymorph and Wild Shape: id, art, kind)
 is shown the same way whoever changes: FxShapeshift and its sound (docs/art/spell_effects.md, "A change of shape"). A
 `vanish` and `summon_creature` carrying `becomes` (a kind) are one creature turning into another (the lycanthropy curse).

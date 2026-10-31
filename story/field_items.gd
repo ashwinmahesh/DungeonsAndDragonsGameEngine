@@ -614,14 +614,15 @@ static func _bean(st: StoryState, ch: Character, dice: DiceRoller) -> Dictionary
 
 
 
-## How much faster the party travels with the magic it carries (the best item counts once): a Carpet of Flying or a
-## Feather Token's roc halves journeys, Horseshoes of a Zephyr or of Speed shorten them.
+## How much faster the party travels with the magic it carries or the mounts it hired (the best counts once): a Carpet
+## of Flying or a Feather Token's roc halves journeys, Horseshoes of a Zephyr or of Speed and a stable's horses
+## (Services.mount_travel_mult) shorten them.
 static func travel_mult(st: StoryState) -> float:
 	if st == null:
 		return 1.0
-	var best := 1.0
+	var best := Services.mount_travel_mult(st)   # horses hired at a stable
 	if int(st.flags.get("travel_speed_today", -1)) == st.day:
-		best = 2.0
+		best = maxf(best, 2.0)
 	for ch in st.party:
 		for e in ch.inventory:
 			var d := Compendium.shared().item_data(str(e["id"]))

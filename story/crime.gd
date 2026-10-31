@@ -42,6 +42,8 @@ static func owner_of(spec: Dictionary) -> String:
 static func offence(st: StoryState, location: Dictionary, victim: String) -> int:
 	if victim != "":
 		lower_attitude(st, victim)
+		if Factions.of_npc(victim) != "":
+			Factions.change(st, Factions.of_npc(victim), -1)   # word gets round the victim's faction (E11)
 	if watch_for(location) == "":
 		return 0
 	var flag := flag_for(str(location.get("region", "")))

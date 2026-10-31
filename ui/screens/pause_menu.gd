@@ -473,6 +473,24 @@ func _game_rows() -> void:
 	_row_item(respec)
 	respec.reset_size()
 	respec.position = Vector2((_u(W_U, 0).x - respec.size.x) / 2.0, _u(0, y).y - respec.size.y / 2.0) - _row_origin
+	y += ROW_PITCH
+	# Content (the playthrough's `graphic_scenes`): gory pictures and lines tagged graphic are skipped or shown tamer.
+	var graphic := CheckBox.new()
+	graphic.name = "GraphicScenes"
+	graphic.text = "Show graphic scenes"
+	graphic.add_theme_font_override("font", serif())
+	graphic.add_theme_font_size_override("font_size", roundi(10.5 * K))
+	for k: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		graphic.add_theme_color_override(k, Color(_c("arch_text"), 0.8))
+	graphic.button_pressed = Cutscenes.graphic_ok(st)
+	graphic.tooltip_text = "Off: cutscenes, pictures and lines marked graphic are skipped or shown in a tamer version."
+	graphic.toggled.connect(func(on: bool) -> void:
+		if st != null:
+			st.options["graphic_scenes"] = on)
+	graphic.focus_mode = Control.FOCUS_NONE
+	_row_item(graphic)
+	graphic.reset_size()
+	graphic.position = Vector2((_u(W_U, 0).x - graphic.size.x) / 2.0, _u(0, y).y - graphic.size.y / 2.0) - _row_origin
 	_close_scroll(y + 14.0)
 
 

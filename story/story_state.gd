@@ -96,7 +96,7 @@ func quest_stage(quest_id: String) -> String:
 
 
 ## A quest has just moved into a stage that ends it ("success" or "failure"). The world marks a failure with a sting
-## (GameRoot); the notice itself is quest_notice.
+## (GameRoot); the notice itself is quest_notice. The campaign hears of it too (CampaignModule.quest_finished).
 signal quest_finished(quest_id: String, ending: String)
 
 ## What the player should be told about the last set_quest_stage that took (quest_notice). Not saved.
@@ -147,6 +147,10 @@ func set_quest_stage(quest_id: String, stage: String) -> bool:
 			_quest_says = xp_said if xp_said != "" else "Quest complete: %s" % quest_name
 	if moved and ends != "":
 		quest_finished.emit(quest_id, ends)
+		var dice := DiceRoller.new(hash("%d:%d:quest:%s:%s" % [playthrough_seed, total_minutes(), quest_id, ends]))
+		var said := Campaign.module().quest_finished(self, quest_id, ends, dice)
+		if said != "":
+			_quest_says = "%s%s %s" % [_quest_says, "" if _quest_says.ends_with(".") else ".", said]
 	if quest_id == "find_the_ally":
 		_settle_ally()
 	return true
@@ -206,6 +210,15 @@ func quest_days(quest_id: String) -> int:
 	return maxi(0, total_minutes() - int(entry["at"])) / DAY_MINUTES
 
 
+## Game minutes since a flag was stamped (`set <flag> = now`), for `minutes_since.<flag> >= 10`; -1 while it hasn't
+## been stamped.
+func minutes_since(flag_id: String) -> int:
+	var stamp: Variant = flags.get(flag_id)
+	if not (stamp is int or stamp is float):
+		return -1
+	return maxi(0, total_minutes() - int(stamp))
+
+
 ## Whole days since a flag was stamped (`set <flag> = now`, dialogue contract), for `days_since.<flag> >= 2`; -1 while
 ## it hasn't been stamped.
 func days_since(flag_id: String) -> int:
@@ -226,10 +239,12 @@ func quest_stage_index(quest_id: String, stage: String) -> int:
 	return -1
 
 
+## An NPC's attitude: their own opinion if the story gave them one (`attitudes`), else their data's as their faction's
+## standing makes it (Factions.attitude).
 func attitude(npc_id: String) -> String:
 	if attitudes.has(npc_id):
 		return str(attitudes[npc_id])
-	return str(Compendium.shared().get_entry("npcs", npc_id).get("attitude", "indifferent"))
+	return Factions.attitude(self, npc_id, str(Compendium.shared().get_entry("npcs", npc_id).get("attitude", "indifferent")))
 
 
 # --- Party ----------------------------------------------------------------------------------------

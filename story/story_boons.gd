@@ -20,3 +20,29 @@ static func raise_ability(ch: Character, ability: String, amount: int, source: S
 		"source": source})
 	ch.refresh()
 	return ch.ability_score(StringName(ability)) - before
+
+
+## A spell's own bonus given by the story (a blessing from a reading, a shrine, a priest): the `modifiers` of spell
+## `spell_id` (Bless's 1d4 on attack rolls and saving throws) on `ch` for `minutes` of exploring and fighting time, not
+## kept up by Concentration and costing no one a slot. A second one of the same spell replaces the first. False for the
+## dead, or a spell with no modifiers to give.
+static func spell_boon(ch: Character, spell_id: String, minutes: int) -> bool:
+	var data := Compendium.shared().spell_data(spell_id)
+	if ch.dead or data.is_empty():
+		return false
+	var fx := Effect.new(str(data.get("name", spell_id)), &"spell", spell_id)
+	for f: Variant in data.get("effects", []):
+		if str((f as Dictionary).get("effect", "")) != "modifiers":
+			continue
+		for md: Variant in ((f as Dictionary).get("params", {}) as Dictionary).get("modifiers", []):
+			fx.modifiers.append(Modifier.make((md as Dictionary).duplicate(true), fx.name, &"spell", spell_id))
+	if fx.modifiers.is_empty():
+		return false
+	fx.caster_id = ch.id
+	fx.ends = Effect.Ends.MINUTES
+	fx.minutes_left = minutes
+	for old: Effect in ch.effects.duplicate():
+		if old.key() == fx.key():
+			ch.remove_effect(old)
+	ch.add_effect(fx)
+	return true

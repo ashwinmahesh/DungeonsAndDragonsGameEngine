@@ -27,13 +27,7 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 		return CombatResult.fail("Target must be within 5 ft")
 	if Creature.SIZES.find(target.creature.size) > Creature.SIZES.find(c.creature.size) + 1:
 		return CombatResult.fail("Target is more than one size larger")
-	if c.attacks_left > 0:
-		c.attacks_left -= 1
-	elif c.action_available:
-		e.spend_action(c)
-		c.took_attack_action = true
-		c.attacks_left = e.attacks_per_action(c) - 1
-	else:
+	if not _spend_attack(c):
 		return CombatResult.fail("No attacks left this turn")
 	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
 	var ab := &"str" if target.creature.save_bonus(&"str").total() >= target.creature.save_bonus(&"dex").total() else &"dex"
@@ -61,6 +55,76 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 			var moved := e.forced_move(target, e.center_of(c), 5)
 			e.log.add("info", "%s shoves %s %d ft" % [c.name(), target.name(), moved * 5], c.id, [s.describe()])
 	return r
+
+
+## One of `c`'s attacks for an Unarmed Strike's grapple or shove (or a catch): one left in its Attack action, or the
+## Attack action begun. False when it has neither.
+func _spend_attack(c: Combatant) -> bool:
+	var e := enc()
+	if c.attacks_left > 0:
+		c.attacks_left -= 1
+	elif c.action_available:
+		e.spend_action(c)
+		c.took_attack_action = true
+		c.attacks_left = e.attacks_per_action(c) - 1
+	else:
+		return false
+	return true
+
+
+## The meta on a creature that can be caught and carried out of the fight (a location's monster entry's `catch`:
+## {flag}): a loose animal the heroes are trying to bring home. A stat block's own `catch` makes every creature of it
+## catchable however it came (a summon, a round event's arrivals); the entry's wins.
+const CATCH := &"catch"
+
+
+## `t`'s catch ({flag}), or {} when it can't be caught.
+static func catch_of(t: Combatant) -> Dictionary:
+	if t.creature.has_meta(CATCH):
+		return t.creature.get_meta(CATCH) as Dictionary
+	var block := MonsterActions.data_of(t).get("catch", {})
+	return block as Dictionary if block is Dictionary else {}
+
+
+## The creatures in the fight that `c` could try to catch now (catchable, on the board, not `c`).
+func catchable(c: Combatant) -> Array[Combatant]:
+	var e := enc()
+	var out: Array[Combatant] = []
+	for t in e.combatants:
+		if t != c and not catch_of(t).is_empty() and t.is_alive() and not t.has_meta("left_fight"):
+			out.append(t)
+	return out
+
+
+## Catching `target` (one of `c`'s attacks, as a grapple is): it makes a Strength or Dexterity save against 8 + `c`'s
+## Strength modifier + Proficiency Bonus, and on a failure `c` has it: it is carried out of the fight (vanish, left:
+## caught) and its `catch.flag` goes to the story whatever the fight's outcome.
+func catch_creature(c: Combatant, target: Combatant) -> CombatResult:
+	var e := enc()
+	var why := e._turn_check(c)
+	if why != "":
+		return CombatResult.fail(why)
+	if not c.can_act():
+		return CombatResult.fail("%s can't act" % c.name())
+	if target == null or not target in catchable(c):
+		return CombatResult.fail("Nothing to catch")
+	if e.distance(c, target) > 5:
+		return CombatResult.fail("Target must be within 5 ft")
+	if not _spend_attack(c):
+		return CombatResult.fail("No attacks left this turn")
+	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
+	var ab := &"str" if target.creature.save_bonus(&"str").total() >= target.creature.save_bonus(&"dex").total() else &"dex"
+	var s := target.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs being caught (%s)" % [Creature.ABILITY_NAMES[ab], target.name()],
+		["save_vs:grappled"] as Array[String])
+	if s.success:
+		e.log.add("info", "%s slips out of %s's hands" % [target.name(), c.name()], c.id, [s.describe()])
+		return CombatResult.new()
+	var flag := str(catch_of(target).get("flag", ""))
+	if flag != "":
+		e.legendary.story_flags[flag] = true
+	e.log.add("info", "%s catches %s" % [c.name(), target.name()], c.id, [s.describe()])
+	e.movement.leave_grid(target, "caught")
+	return CombatResult.new()
 
 
 ## Escaping a grapple (2024): an action and a Strength (Athletics) or Dexterity (Acrobatics) check against the

@@ -1223,7 +1223,7 @@ func _refresh_hotbar() -> void:
 	_move_label.text = "%d / %d ft" % [c.movement_left if mine else spd, spd]
 	_turn_note.tooltip_text = ""
 	if e.state == Encounter.State.OVER:
-		_turn_note.text = "Victory!" if e.outcome == "victory" else "The party has fallen"
+		_turn_note.text = {"victory": "Victory!", "ended": "The fight is over"}.get(e.outcome, "The party has fallen") as String
 	elif cur != null and not cur.is_player_controlled():
 		_turn_note.text = "%s's turn" % cur.name()
 	elif not mine:

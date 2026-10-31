@@ -74,6 +74,10 @@ one conversation that plays a single picture (test_cutscenes `ONE_PICTURE`).
   tools/data/story_reach.py walks it).
 - `more`: further Narrator keys whose lines read one after another over the same picture, a click each (the trigger's
   line or `caption` first, then these).
+- `graphic` (the player's `graphic_scenes` option, on by default, switched off in the pause menu): a cutscene marked
+  `graphic: true` shows its `tame` cutscene's picture instead when it's off, or is skipped when it has none; a take
+  marked `graphic: true` is passed over for the next take that fits (put the tamer picture after it). Lines read over
+  it can follow suit with the `graphic` condition (docs/contracts/dialogue.md).
 - `once`: the picture shows only the first time its trigger fires (`_cutscene/<id>` in the story's flags). Every
   `enter:` and `find:` trigger has it.
 - `then`, `caption`: the scene after this one (owner rule, 2026-10-14: every cutscene is at least two scenes). `then`

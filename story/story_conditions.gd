@@ -190,6 +190,10 @@ func _term() -> bool:
 		return st.is_night()
 	if t == "day":
 		return not st.is_night()
+	if t == "graphic":
+		return Cutscenes.graphic_ok(st)   # the player shows graphic scenes (option graphic_scenes, on by default)
+	if t == "jailed":
+		return Jail.held(st)   # the party is locked up (story/jail.gd)
 	if t == "indoors":
 		return st.location != "" and CampSite.setting(Compendium.shared().get_entry("locations", st.location)) == CampSite.INDOORS
 	if t == "hour":
@@ -264,6 +268,9 @@ func _term() -> bool:
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)
+	if t.begins_with("minutes_since."):
+		var mins := st.minutes_since(t.substr(14))
+		return mins >= 0 and _compare(mins, op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("days_since."):
 		var gone := st.days_since(t.substr(11))
 		return gone >= 0 and _compare(gone, op if op != "" else ">", _literal(rhs) if op != "" else 0)
@@ -275,6 +282,9 @@ func _term() -> bool:
 		if op in ["==", "!="]:
 			return (stage == rhs) == (op == "==")
 		return _compare(st.quest_stage_index(qid, stage), op, st.quest_stage_index(qid, rhs)) and stage != ""
+	if t.begins_with("standing."):
+		# A faction's standing with the party (story/factions.gd): `standing.old_ways >= 3`; bare, above 0.
+		return _compare(Factions.standing(st, t.substr(9)), op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("attitude."):
 		var att := st.attitude(t.substr(9))
 		if op == "":

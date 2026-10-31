@@ -240,7 +240,12 @@ func has_flag(flag: String) -> bool:
 ## Values formulas can use, without ability terms (used while computing ability scores).
 func _base_ctx() -> Dictionary:
 	return {"pb": proficiency_bonus(), "level": character_level(), "class_level": 0, "slot_level": 0,
-		"exhaustion": exhaustion}
+		"exhaustion": exhaustion, "tier": tier_for(character_level())}
+
+
+## A growing item's step by its bearer's level (the formula term `tier`): 1 below level 7, 2 from 7, 3 from 13.
+static func tier_for(level: int) -> int:
+	return 1 if level < 7 else (2 if level < 13 else 3)
 
 
 func formula_context(slot_level: int = 0) -> Dictionary:
@@ -945,10 +950,11 @@ func is_condition_immune(c: StringName) -> bool:
 const GRAPPLE_RESTRAINT := "held fast"
 
 
-func add_condition(c: StringName, source: String = "") -> bool:
+## `pierce`: it lands even on a creature immune to it (a power made to reach through a demon's immunity).
+func add_condition(c: StringName, source: String = "", pierce: bool = false) -> bool:
 	if c == &"exhaustion":
 		return add_exhaustion(1)
-	if is_condition_immune(c):
+	if is_condition_immune(c) and not pierce:
 		log_event({"type": "condition_immune", "creature": id, "condition": str(c)})
 		_turned_away(c, source)
 		return false
@@ -1072,7 +1078,8 @@ func add_effect(e: Effect) -> bool:
 	var kept: Array[StringName] = []
 	var had_conditions := not e.conditions.is_empty()
 	for c in e.conditions:
-		if is_condition_immune(c):
+		# An effect whose data says `pierce` lands its conditions even on a creature immune to them.
+		if is_condition_immune(c) and not bool(e.data.get("pierce", false)):
 			log_event({"type": "condition_immune", "creature": id, "condition": str(c), "source": e.name})
 			_turned_away(c, e.name)
 		else:

@@ -31,7 +31,9 @@ Speaker [away]: Text               The speaker turns their back on the other sid
 * Option text -> node              A player option. Options collected after the last line form one menu.
 * [Persuasion DC 14] Text -> ok_node | fail_node
                                    A skill check option. It rolls in the open with the speaking character's
-                                   bonus (Advantage and Heroic Inspiration apply). Skills: any of the 18, or an
+                                   bonus (Advantage and Heroic Inspiration apply). `[Persuasion DC 14 adv]` rolls it
+                                   with Advantage, `dis` with Disadvantage (the option shows it); so does `check`
+                                   (`check Insight DC 12 dis -> ok | fail`), and the story's grants (`advantage`). Skills: any of the 18, or an
                                    ability (Strength ... Charisma). "| fail_node" may be left out (then failure
                                    goes to ok_node with check.last = false). Before a skill's roll, whoever in the
                                    party can cast Guidance is offered it (a `guidance` beat the game's screen
@@ -91,8 +93,33 @@ quest quest_id stage_id            Moves a quest to a stage (data/quests/<id>.js
 give item_id [qty]                 Puts items in the speaking character's pack (or the party stash if full).
                                    "give item_id to name:thistle" puts it in that party member's pack instead.
 take item_id [qty]                 Removes items.
-gold +25 / gold -10                Party money in gp.
+gold +25 / gold -10                Party money in gp. `gold +5 each` is that much for every hero who isn't dead (the party
+                                   keeps one purse).
+heal 1d6 [party] [temp]            One roll heals the hero in the conversation, or with `party` every hero who isn't dead
+                                   (dice like 2d4+2, or a number); with `temp` the part past a hero's Hit Point maximum
+                                   becomes Temporary Hit Points. A notice says how much.
+damage 1d6 psychic [party]         One roll of damage to the hero in the conversation, or with `party` every hero who
+                                   isn't dead, through Resistance and Immunity, from Temporary Hit Points first. It never
+                                   drops a hero below 1 Hit Point (out of a fight nothing would make their Death Saving
+                                   Throws: a story's hurt wounds, it doesn't fell). A notice says how much.
+advantage persuasion [next|30m|2h][: why]
+disadvantage checks 1h: the fog   Advantage (or Disadvantage) the story grants on the party's checks in conversations:
+                                   a skill, or `checks` for any. For the next such check (the default; used up), or every
+                                   one for that long (story/check_edges.gd). `why` names it in the roll's breakdown.
+hit_dice restore 2 [party]         Spent Hit Point Dice back to the hero in the conversation or every living hero (the
+hit_dice restore all [party]       biggest first, never past their own); `grant n` gives n of the hero's biggest kind
+hit_dice grant 1 [party]           beyond them, kept until their next Long Rest. A notice says who.
+temp_hp 1d6 [party]                One roll of Temporary Hit Points for the hero in the conversation, or with `party` every
+                                   hero who isn't dead; a hero who already has more keeps theirs (they don't stack).
+bless [party] [30m|2h]             Bless's bonus (1d4 on attack rolls and saving throws) from the story: on the hero in the
+                                   conversation or with `party` every living hero, for an hour unless it says, with no
+                                   Concentration and no slot (StoryBoons.spell_boon). Another one replaces it.
+inspiration [party]                Heroic Inspiration for the hero in the conversation, or with `party` every living hero
+                                   who lacks it, each time it runs (unlike `inspire`, which rewards playing in character
+                                   once a playthrough).
 attitude npc_id friendly           Sets an NPC's attitude (hostile, indifferent, friendly; 2024 Influence).
+standing old_ways +2               Moves a faction's standing (story/factions.gd; docs/contracts/campaign.md). A notice
+                                   says by how much and where it stands now.
 xp milestone                       Milestone advancement: every party member may level up (plan §5.6). In XP levelling it
                                    also pays the High award, lifts the party to the story's level and pays what the ceiling
                                    held back (story/xp.gd).
@@ -112,7 +139,9 @@ reading give <place>               Hands the party the treasures the campaign's 
                                    dnd_core: the engine names no campaign, the module decides what a reading is.)
 shop                               Opens the shop of the NPC being spoken to; the conversation resumes after.
 services                           Opens the services of the NPC being spoken to (a temple's spells, an inn's
-                                   rooms; story/services.gd); the conversation resumes after.
+                                   rooms, a stable's horses for hire; story/services.gd); the conversation resumes
+                                   after. Hired horses (`mounts`, `days` and a `price` per hero on the NPC's entry) make
+                                   road journeys 1.5 times as fast until the hire is up.
 join ireena / leave ireena         A story ally joins or leaves the party as a guest (ADR 0010).
 time +60 / time until 12           Time passes in the scene (minutes), or until the given hour comes round.
 respec                             The player picks a party member to rebuild from level 1 in the creator (they
@@ -128,6 +157,14 @@ interject <selector>: Text         A party member matching the selector says Tex
                                    class/species lines so any such character could say them; use name: for a
                                    pregen's own voice.
 combat encounter_id                Ends the conversation and starts a fight from the location's encounters.
+jail cells:block [keep_gear] [until flag.fine_paid]
+                                   The party is locked up (story/jail.gd): it ends the conversation and goes to the
+                                   location's spawn as `move` does, and the jailers keep every living hero's gear, worn
+                                   and held included, unless `keep_gear`. While held, `jailed` holds (give the cell door
+                                   and the jail's exits `when: "not jailed"`) and `days_since.jailed` counts the days.
+                                   `jail release` lets the party out; with `until`, so does that condition coming true
+                                   (checked after each conversation and interaction). The gear comes back as it was,
+                                   worn and held again, with a notice. An NPC in a cell is a placement with its own `when`.
 move location[:spawn]             The party goes to a location's spawn ("move vault" is its default spawn, as for an exit
                                    that names none), also another spawn of the map it is in: a trap's drop from cell to
                                    cell. Like `combat` it ends the conversation, so `time +n` and the Narrator's lines
@@ -172,7 +209,11 @@ inspire name:thistle: spoke her mind
 member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
 `quest_days.<id> >= 3` (whole days since the quest last moved to its current stage; false before the quest begins),
 `days_since.<flag> >= 2` (whole days since the flag was stamped with `set <flag> = now`; false while it hasn't been),
-`attitude.<npc> == friendly`, `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
+`minutes_since.<flag> >= 10` (game minutes since the same stamp; a place with `recheck_minutes` re-checks its
+placements that often, so a `when` on it flips while the party stands there),
+`attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `graphic` (the player shows graphic scenes: the
+playthrough option `graphic_scenes`, on unless switched off in the pause menu; put a gory line in `if graphic` with a
+tamer one under `else`, or prefix a Narrator variant with `[graphic]`), `jailed` (the party is locked up, `jail`), `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
 a dungeon; a night's line written for sleeping behind walls carries it, so a camp out of doors skips it), `hour >= 20`,
 `tarokka.drawn`,
 `tarokka.sword == swords_3`, `tarokka.sword.region == vallaki`, `tarokka.ally.npc == ezmerelda`, `guest:ireena`,

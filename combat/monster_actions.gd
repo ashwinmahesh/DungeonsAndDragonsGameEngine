@@ -1315,9 +1315,10 @@ func bonus_action(c: Combatant, plan: String = "") -> CombatResult:
 
 
 ## The `do`s of monsters' actions and Bonus Actions this engine runs itself; any other `do` is the game's
-## (GameFeatures.bonus_action and special_action).
+## (GameFeatures.bonus_action and special_action). `heal`, `save` and `teleport` are the summoned creatures' own
+## (SummonBlocks: Healing Touch, Fell Glare, Venomous Spew, Fey Step), run by FeatureActions._perform_creature.
 const ENGINE_DOS: Array[String] = ["dash_or_disengage", "hide_in_dim", "shape_shift", "cast", "cast_control", "fey_step",
-	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish"]
+	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish", "heal", "save", "teleport"]
 
 
 ## Whether `act` is one of the game's own (a `do` the engine doesn't run).

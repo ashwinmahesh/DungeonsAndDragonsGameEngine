@@ -13,6 +13,9 @@ extends RefCounted
 ## `giver` is the NPC who gave the quest (its id, "" for none) and `giver_name` their name.
 ## `kind` is the journal tab it's under; `region` is the heading the Other tab files it under (QuestRegions); `tracked` is
 ## true for the open quest the party follows (track); `at` is when it last moved.
+## `waiting` is the line an open quest shows while its stage waits on a later part of the story (the stage's `waits`:
+## {until, text}, until `until` holds), "" otherwise: meanwhile it has no objectives, hint, warning or Track, so the HUD
+## passes it by.
 static func journal(st: StoryState) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for qid: String in st.quests:
@@ -25,6 +28,7 @@ static func journal(st: StoryState) -> Array[Dictionary]:
 		var objectives: Array[String] = []
 		var status := "active"
 		var hint := ""   # what to do next (the stage's `hint`): the journal shows it only when asked
+		var waiting := ""
 		for s: Variant in q.get("stages", []):
 			var stage := s as Dictionary
 			if str(stage["id"]) in hist:
@@ -35,14 +39,19 @@ static func journal(st: StoryState) -> Array[Dictionary]:
 				hint = Campaign.module().fill(str(stage.get("hint", "")), st)
 				if str(stage.get("ends", "")) != "":
 					status = str(stage["ends"])
+				waiting = waits(stage, st)
+		if waiting != "":
+			objectives.clear()
+			hint = ""
 		var giver := str(q.get("giver", ""))
 		var giver_name := str(Compendium.shared().get_entry("npcs", giver).get("name", "")) if giver != "" else ""
 		out.append({"id": qid, "name": str(q["name"]), "summary": str(q.get("summary", "")), "giver": giver, "giver_name": giver_name,
 			"entries": entries,
 			"objectives": objectives, "hint": hint if status == "active" else "", "status": status,
-			"warn": QuestClosures.warning(st, qid) if status == "active" else "",
-			"kind": kind(qid), "region": QuestRegions.of(qid), "tracked": status == "active" and bool(entry.get("tracked", false)),
-			"at": float(entry.get("at", 0))})
+			"warn": QuestClosures.warning(st, qid) if status == "active" and waiting == "" else "",
+			"kind": kind(qid), "region": QuestRegions.of(qid),
+			"tracked": status == "active" and waiting == "" and bool(entry.get("tracked", false)),
+			"at": float(entry.get("at", 0)), "waiting": waiting if status == "active" else ""})
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var a_open := str(a["status"]) == "active"
 		if a_open != (str(b["status"]) == "active"):
@@ -51,6 +60,15 @@ static func journal(st: StoryState) -> Array[Dictionary]:
 			return float(a["at"]) < float(b["at"])
 		return str(a["id"]) < str(b["id"]))
 	return out
+
+
+## The line `stage` shows while it waits on a later part of the story (its `waits`: {until, text}), or "" once `until`
+## holds or when it doesn't wait.
+static func waits(stage: Dictionary, st: StoryState) -> String:
+	var w := stage.get("waits", {}) as Dictionary
+	if w.is_empty() or StoryConditions.check(str(w.get("until", "")), st):
+		return ""
+	return Campaign.module().fill(str(w.get("text", "")), st)
 
 
 ## The journal tab a quest is under: "main" for the story's spine (the quest's `kind`), "other" for side quests and

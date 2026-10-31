@@ -140,6 +140,72 @@ func use_item(c: Combatant, item_id: String, target: Combatant) -> CombatResult:
 	return CombatResult.new()
 
 
+## The `damage` effect's params of a flask to throw (Holy Water, Alchemist's Fire, Acid), or {} for an item that has
+## none.
+static func flask_damage(item: Dictionary) -> Dictionary:
+	for fx: Variant in item.get("effects", []):
+		if str((fx as Dictionary).get("effect", "")) == "damage":
+			return (fx as Dictionary).get("params", {}) as Dictionary
+	return {}
+
+
+## Throwing a flask at `target` (an item with a `damage` effect: {dice, damage_type, range, save + dc or attack,
+## creature_types?}): one of `c`'s attacks (2024: it replaces one), and the flask is used up. With `save` the target makes
+## that save against `dc` (a formula of the thrower's, "8+mod:dex+pb") and takes the damage on a failure; with `attack`
+## the thrower makes a ranged attack roll (Dexterity + Proficiency Bonus) against its AC. `creature_types` says whom the
+## damage hurts (Holy Water: Fiends and Undead); anyone else is unharmed. An effect `custom: burning` beside it sets the
+## target alight when the damage lands (Alchemist's Fire).
+func throw_flask(c: Combatant, item_id: String, target: Combatant) -> CombatResult:
+	var e := enc()
+	var item := Compendium.shared().item_data(item_id)
+	var p := flask_damage(item)
+	if p.is_empty():
+		return CombatResult.fail("Nothing to throw")
+	var why := e._turn_check(c)
+	if why != "":
+		return CombatResult.fail(why)
+	if not c.can_act():
+		return CombatResult.fail("%s can't act" % c.name())
+	if e.item_count(c, item_id) <= 0:
+		return CombatResult.fail("None left")
+	if target == null or e.distance(c, target) > int(p.get("range", 20)):
+		return CombatResult.fail("Out of range (%d ft)" % int(p.get("range", 20)))
+	if not e.grappling._spend_attack(c):
+		return CombatResult.fail("No attacks left this turn")
+	e.weapons._spend_item(c, item_id)
+	var label := str(item.get("name", item_id))
+	var landed := false
+	var details: Array = []
+	if p.has("save"):
+		var ab := StringName(str(p["save"]))
+		var dc := Formula.evaluate(p.get("dc", "8+mod:dex+pb"), c.creature.formula_context())
+		var s := target.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES.get(ab, str(ab)), label, target.name()])
+		landed = not s.success
+		details.append(s.describe())
+	else:
+		var bonus := Breakdown.new("Thrown flask").add("Dexterity", c.creature.ability_mod(&"dex")).add("Proficiency", c.creature.proficiency_bonus())
+		var hit := c.creature.roll_d20(e.dice, D20Test.Kind.ATTACK_ROLL, bonus, target.creature.armor_class().total(), [] as Array[String],
+			[] as Array[String], [] as Array[String], "%s throws %s at %s" % [c.name(), label, target.name()])
+		landed = hit.success
+		details.append(hit.describe())
+	var kinds := p.get("creature_types", []) as Array
+	if landed and not kinds.is_empty() and not str(target.creature.creature_type) in kinds:
+		e.log.add("info", "%s splashes %s, unharmed" % [label, target.name()], c.id, details)
+		return CombatResult.new()
+	if not landed:
+		e.log.add("info", "%s's %s misses %s" % [c.name(), label, target.name()] if not p.has("save") else "%s avoids %s's %s" % [target.name(), c.name(), label], c.id, details)
+		return CombatResult.new()
+	var rolled := e._roll_damage_dice(str(p.get("dice", "1d4")), false, 0, label)
+	details.append(str(rolled["text"]))
+	e.deal_damage(c, target, [{"amount": int(rolled["total"]), "type": str(p.get("damage_type", "fire"))}], false, label, details)
+	for fx: Variant in item.get("effects", []):
+		if str((fx as Dictionary).get("effect", "")) == "custom" and str(((fx as Dictionary).get("params", {}) as Dictionary).get("id", "")) == "burning" \
+				and target.is_alive():
+			e.monster_actions.set_burning(c, target)
+	e._check_over()
+	return CombatResult.new()
+
+
 func has_kit(c: Combatant) -> bool:
 	if not c.creature is Character:
 		return false

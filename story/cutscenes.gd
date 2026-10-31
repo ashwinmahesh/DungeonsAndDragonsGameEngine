@@ -46,13 +46,26 @@ static func register(cutscene: Dictionary) -> void:
 
 
 ## The picture to show for `id` now (a res:// path): its first take whose `when` holds, or "" (no such cutscene, or no
-## take fits, so it's skipped).
+## take fits, so it's skipped). With the player's `graphic_scenes` off (graphic_ok), a cutscene marked `graphic: true`
+## shows its `tame` cutscene's picture instead (none: it's skipped), and a take marked `graphic: true` is passed over
+## for the next that fits.
 static func image(id: String, st: StoryState) -> String:
-	for take: Variant in get_cutscene(id).get("images", []):
+	var c := get_cutscene(id)
+	if bool(c.get("graphic", false)) and not graphic_ok(st):
+		var tame := str(c.get("tame", ""))
+		return image(tame, st) if tame != "" and tame != id and not bool(get_cutscene(tame).get("graphic", false)) else ""
+	for take: Variant in c.get("images", []):
 		var t := take as Dictionary
+		if bool(t.get("graphic", false)) and not graphic_ok(st):
+			continue
 		if StoryConditions.check(str(t.get("when", "")), st):
 			return ART % str(t["image"])
 	return ""
+
+
+## Whether the player shows graphic scenes (the playthrough option `graphic_scenes`, on unless switched off).
+static func graphic_ok(st: StoryState) -> bool:
+	return st == null or bool(st.options.get("graphic_scenes", true))
 
 
 ## Where the slow push-in closes on, as a share of the picture's size.
@@ -69,6 +82,14 @@ static func for_trigger(key: String, st: StoryState) -> String:
 		if str(c.get("trigger", "")) == key and image(id, st) != "" and not (bool(c.get("once", false)) and played(id, st)):
 			return id
 	return ""
+
+
+## The cutscene to play for Narrator key `key` now: `named` (a phase's `cutscene`) when it has a picture for this story
+## and isn't a `once` one already shown, else the one `key` triggers (for_trigger), else "".
+static func for_moment(key: String, named: String, st: StoryState) -> String:
+	if named != "" and image(named, st) != "" and not (bool(get_cutscene(named).get("once", false)) and played(named, st)):
+		return named
+	return for_trigger(key, st)
 
 
 ## The scene that follows `id` (data `then`: a cutscene with its own picture and a `caption` Narrator key), or "".

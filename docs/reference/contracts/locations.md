@@ -87,7 +87,18 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   stat block's (Vasilka fights on a flesh golem's block in her own look); a round-start save keeps it. Its `steps_down:
   {npc}` says the foe is that person of the place (the Amber Sentinel on its dais): however the fight starts, their figure
   leaves the board and the foe's takes their place and strides to its start square (StepDown, addons/dnd_core/world/combat/step_down.gd;
-  motion off cuts to it), its stat block's size untouched.
+  motion off cuts to it), its stat block's size untouched. A monster's `catch: {flag}` makes it a loose creature the
+  heroes can catch (a lamb in a wolf fight; often `side: "neutral"`): a hero within 5 ft spends one of their attacks, as
+  for a grapple, and it makes a Strength or Dexterity save against 8 + their Strength modifier + Proficiency Bonus or is
+  caught, carried out of the fight (`vanish`, left: `caught`), with `flag` set whatever the fight's outcome
+  (EncounterGrapples.catch_creature). A stat block's own `catch` makes every creature of it catchable however it
+  arrived (a summon, a round event's arrivals, a phase's); an entry's `catch` wins over it. A game module summons near
+  a creature with `e.legendary.summon_near(by, monster_id, n, cell)`.
+  A monster's `body: {ruined_by: [damage types], flag, count, warn}` (or its stat block's) is a body some damage ruins
+  for good (a villager hollowed into a foe): when it drops to 0 Hit Points and the blow that dropped it had damage of a
+  type in `ruined_by` that landed (not one it is immune to), `flag` is set and 1 is added to the story flag `count`
+  (Legendary._ruin; a fight's story flag `{add: n}` adds to the flag's number instead of setting it). Its `warn` is a
+  warning line on its fight tooltip and its hover before the fight (Legendary.body_warning). Falls are bludgeoning.
   Its `boss: false` keeps a foe on a boss's stat block out of the game's bosses (Difficulty.boss_entry): no boss bar, no
   boss damage or to-hit step (the brides on the vampire's block).
   Its `states` (ids from the stat block's own `states`) join its traits for this fight: Sarkhaza chained or
@@ -194,6 +205,10 @@ last; open quests come first under each heading, the finished ones after. A ques
 The journal shows each reached stage's text in order. `hint` says what to do next at that stage, behind the journal's
 Hint button: the place and the person or action, never the twist (`{tarokka.<slot>.hint}` fills in the party's
 reading). Every stage that doesn't end its quest has one; `make validate` fails without it.
+A stage's `waits: {until, text}` parks a thread that picks up in a later chapter (a Connection whose next part is in
+another place of the story): until the condition `until` holds, the journal shows `text` in place of the stage's
+objectives and hint, with no warning, no Track and no one to talk to, and the HUD's objective passes it by
+(QuestLog.journal's `waiting`). Once it holds, the stage reads as any other.
 
 ## data/flags/<region>.json (the flag registry, one file per region so writers don't collide)
 
