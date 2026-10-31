@@ -76,7 +76,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   flag is set, e.g. by dialogue), `dialogue` (only started by a `combat` line). On victory the game sets `flag` and
   moves `quest: {id, stage}` along. A boss's monster entry (narrative/combat/bosses.json, or a foe with legendary actions) may carry `hp` to tune that stat block for this fight; every other foe fights at its stat block's Hit Points (owner, 2026-10-24: the Monster Manual's, no custom HP).
   `waiting: true` (an `enter_area` fight only) puts its foes in plain view before the fight: they show once the party
-  can see them, can notice the party, and can be attacked first (docs/rules/stealth.md, F7). A waiting monster's
+  can see them, can notice the party, and can be attacked first (docs/rules/stealth.md, F7): the right-click menu's
+  Attack, a spell at it, or a flask thrown at it (any item with a `damage` effect, within its range and in sight). A
+  throw opens the fight as an attack does, its surprise and `ends_when` as the entry says, and the thrower's first turn
+  begins with the throw (Encounter.opening, EncounterActions.throw_flask; one of their attacks, as in a fight). A waiting monster's
   `facing` (north, south, east, west or between) points its sight cone; unset, it faces the middle of its group. A foe
   with `unseen: true` isn't in plain view (a trap's, an ambush's): no figure, and it notices no one, until the fight puts
   it on its square. `make validate` asks every variant of a waiting fight to wait, to have a foe in view, and each foe in

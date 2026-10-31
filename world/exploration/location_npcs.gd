@@ -301,6 +301,46 @@ static func cast_actions_at_foe(view: LocationView, thing: Dictionary) -> Array[
 	return out
 
 
+## The right-click menu's flasks to throw at a foe in plain view (any item with a `damage` effect: Holy Water, Alchemist's
+## Fire): throwing one opens the fight as an attack does, and the thrower's first turn begins with the throw
+## (Encounter.opening, EncounterActions.throw_flask). [{id: "strike_throw:<member>:<item>:<fight>", ...}]
+static func throw_actions_at_foe(view: LocationView, thing: Dictionary) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var at := LocationView._cell((thing["spec"] as Dictionary)["cell"])
+	for i in view.members.size():
+		var m := view.members[i]
+		if not (m.creature is Character) or m.creature.hp <= 0:
+			continue
+		var seen := {}
+		for entry in (m.creature as Character).inventory:
+			var iid := str(entry["id"])
+			var item := Compendium.shared().item_data(iid)
+			var dmg := EncounterActions.flask_damage(item)
+			if seen.has(iid) or int(entry["qty"]) <= 0 or dmg.is_empty():
+				continue
+			seen[iid] = true
+			var why := ""
+			if view.grid.distance_ft(m.cell, 1, at, 1) > int(dmg.get("range", 20)):
+				why = "Out of range (%d ft)" % int(dmg.get("range", 20))
+			elif not view.grid.can_see(m.cell, 1, at, 1):
+				why = "%s can't see them" % m.name().get_slice(" ", 0)
+			out.append({"id": "strike_throw:%d:%s:%s" % [i, iid, thing["id"]], "enabled": why == "", "why": why,
+				"label": "Throw %s (%s): start the fight" % [str(item.get("name", iid)), m.name().get_slice(" ", 0)]})
+	return out
+
+
+## A flask thrown at a foe from the menu: the fight opens as an attack opens it (its surprise and its `ends_when` as
+## the encounter says), and the thrower's first turn begins with the throw.
+static func throw_at_foe(view: LocationView, cell: Vector2i, action_id: String) -> void:
+	var parts := action_id.split(":", true, 3)
+	var i := int(parts[1])
+	if i < 0 or i >= view.members.size():
+		return
+	view.opening = {"member": i, "item": parts[2], "cell": cell}
+	if not view.strike(parts[3]):
+		view.opening = {}
+
+
 ## A spell at a foe from the menu: the fight opens with the party striking first, and the caster is told to cast it.
 static func strike_with_spell(view: LocationView, _cell: Vector2i, action_id: String) -> void:
 	var parts := action_id.split(":", true, 3)

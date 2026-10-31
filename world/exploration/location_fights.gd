@@ -193,8 +193,29 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	# The picture streaks toward the party and drains for a beat as the fight breaks out (Visual Polish Plan 3).
 	if ScreenPulse.on():
 		ScreenPulse.play(view, "engage", view.rig.global_position)
+	e.opening = _opening_for(view, e)
 	_run_combat(view, encounter_id, spec, e, ctokens, surprised)
 	return true
+
+
+## The opening the party chose from the menu (LocationView.opening: a flask thrown at the foe on `cell`) as the fight
+## reads it (Encounter.opening): {by, kind, item, target}, or {} for none. It is used once.
+static func _opening_for(view: LocationView, e: Encounter) -> Dictionary:
+	var o := view.opening
+	view.opening = {}
+	if o.is_empty() or int(o["member"]) < 0 or int(o["member"]) >= view.members.size():
+		return {}
+	var hero := view.members[int(o["member"])].creature
+	var by: Combatant = null
+	var target: Combatant = null
+	for c in e.combatants:
+		if c.creature == hero:
+			by = c
+		elif c.side != &"party" and o["cell"] in c.footprint():
+			target = c
+	if by == null or target == null:
+		return {}
+	return {"by": by.id, "kind": "flask", "item": str(o["item"]), "target": target.id}
 
 
 # --- Guests who keep out of fights (docs/contracts/campaign.md) ---------------------------------------------------------

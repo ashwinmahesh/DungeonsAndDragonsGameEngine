@@ -88,7 +88,7 @@ func _draw() -> void:
 			var a := lerpf(a0, a1, k / 8.0)
 			pts.append(c + Vector2(cos(a), sin(a)) * RADIUS)
 		var on := items.is_empty() or bool(items[i].get("enabled", true))
-		draw_colored_polygon(pts, Look.color("blood") if i == selected else (Look.color("ui_oxblood") if on else Look.color("ui_black")))
+		draw_colored_polygon(pts, Look.color(Look.ui_key("ui_primary", "blood")) if i == selected else (Look.color("ui_oxblood") if on else Look.color("ui_black")))
 		draw_polyline(pts + PackedVector2Array([c]), Look.color("gilt_dark"), 2.0)
 	for i in n:
 		var mid := -PI / 2.0 + i * TAU / n
