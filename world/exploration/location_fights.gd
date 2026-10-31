@@ -140,6 +140,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		e.weather_id = Weather.now(view.st, view.loc_id)
 		e.weather = Weather.kind(e.weather_id)
 	e.legendary.set_withdraw(spec.get("withdraw", {}))
+	e.ends_when = ends_when_for(view, spec)
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
@@ -444,6 +445,35 @@ static func _fewer_attacks(actions: Array, n: int) -> Array:
 	return out
 
 
+## The encounter's `ends_when` (docs/contracts/combat.md) as the fight reads it (Encounter.ends_when): with
+## `party_left_map`, the squares of the place's exits that are open now; `trigger_hero_down` as it is. {} for none.
+static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
+	var ends := spec.get("ends_when", {}) as Dictionary
+	if ends.is_empty():
+		return {}
+	var out := {"trigger_hero_down": bool(ends.get("trigger_hero_down", false)), "exits": []}
+	if bool(ends.get("party_left_map", false)):
+		for ex: Variant in view.loc.get("exits", []):
+			var exit := ex as Dictionary
+			if StoryConditions.check(str(exit.get("when", "")), view.st):
+				var cell := LocationView._cell(exit["cell"])
+				(out["exits"] as Array).append([cell.x, cell.y])
+	return out
+
+
+## A fight that ended with no winner (`ends_when`): it isn't done, so a foe waiting in plain view waits again as its
+## entry says (asleep, with `surprise: enemies`); its `flag` is set and its `clear_flags` cleared (the flag that woke a
+## sleeper, so it can be woken again).
+static func _ended_without_winner(view: LocationView, encounter_id: String, spec: Dictionary) -> void:
+	(view.st.loc_state(view.loc_id)["encounters"] as Dictionary).erase(encounter_id)
+	var ends := spec.get("ends_when", {}) as Dictionary
+	if ends.has("flag"):
+		view.st.set_flag(str(ends["flag"]))
+	for f: Variant in ends.get("clear_flags", []):
+		view.st.flags.erase(str(f))
+	LocationStealth.refresh_waiting(view)
+
+
 ## The encounter entry a fight with `encounter_id` uses now: of the entries sharing the id, the first whose `when`
 ## holds (else the last). {} if there's none.
 static func spec_for(view: LocationView, encounter_id: String) -> Dictionary:
@@ -549,6 +579,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		ModeController.force(ModeController.Mode.EXPLORATION)
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
+	e.ends_when = ends_when_for(view, spec)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):
@@ -820,9 +851,13 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 	for c in e.combatants:
 		if c.side in [&"party", &"guest"]:
 			for m: Combatant in view.members + view.guest_members:
-				# One that fell out of the fight (a chasm) climbs back to where it stood before it.
+				# One that fell out of the fight (a chasm) climbs back to where it stood before it; one that stepped out by
+				# an exit (`ends_when`) stands there.
 				if m.creature == c.creature and not c.has_meta("left_fight"):
 					m.cell = c.cell
+				elif m.creature == c.creature and c.has_meta(EncounterTurns.LEFT_AT):
+					var at := c.get_meta(EncounterTurns.LEFT_AT) as Array
+					m.cell = Vector2i(int(at[0]), int(at[1]))
 		elif c.creature.dead and not e.legendary.departed.has(c.id):
 			var stain := LocationBuilder._box(view, Vector3(0.6, 0.02, 0.4), view.board.cell_center(c.cell, c.size_cells) + Vector3(0, 0.015, 0), "blood_deep")
 			stain.name = "Remains"
@@ -865,6 +900,8 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		view.create_tween().tween_property(tok, "position", view.board.cell_center(m.cell), 0.25)
 	# A familiar lost in the fight (or sent away) leaves the line; one still with its caster walks on.
 	LocationParty.refresh_familiars(view)
+	if outcome == "ended":
+		_ended_without_winner(view, encounter_id, spec)
 	if outcome == "victory":
 		(view.st.loc_state(view.loc_id)["encounters"] as Dictionary)[encounter_id] = true
 		# XP levelling: the foes overcome are worth XP, a road meeting, a night at camp or Strahd's visit (custom) every time
@@ -887,6 +924,13 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		for key in Campaign.module().fight_victory_keys():
 			view._say(key)
 		view._fight_bark_due = true   # a guest may have a word as the party walks on (LocationWalk._guest_chatter)
+	elif outcome == "ended":
+		# Over with no winner: the fallen are stabilized by their friends, as after a won fight.
+		for m in view.members:
+			var cr := m.creature
+			if cr.hp <= 0 and not cr.dead and not cr.stable:
+				cr.stabilize()
+		view._say("combat:ended")
 	# A guest who fell isn't left for dead: carried home to heal, or patched up if they can't leave, and the player is
 	# told (StoryState.see_to_fallen_guests; Ashwin, 2026-10-12: Adrian's figure walked on after he fell).
 	var carried := view.st.see_to_fallen_guests()

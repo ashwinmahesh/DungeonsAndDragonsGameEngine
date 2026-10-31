@@ -1374,6 +1374,32 @@
               }
             }
           },
+          "ends_when": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Ways the fight ends with no winner (outcome \"ended\": no victory flag, no loot, the fight not done, so a waiting foe waits again as its entry says, asleep with `surprise: enemies`). Any one that holds ends it.",
+            "properties": {
+              "party_left_map": {
+                "type": "boolean",
+                "description": "A hero who ends their turn on one of the place's open exits steps out of the fight; once no hero who is up is left on the board, it ends."
+              },
+              "trigger_hero_down": {
+                "type": "boolean",
+                "description": "It ends when the first hero to hurt a foe in it drops to 0 Hit Points."
+              },
+              "flag": {
+                "type": "string",
+                "description": "A story flag set when it ends this way."
+              },
+              "clear_flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Story flags cleared when it ends this way (the flag that woke a sleeper, so it can be woken again)."
+              }
+            }
+          },
           "allies_block": {
             "type": "boolean",
             "description": "In this fight, party members can't move through each other's spaces (default: they can, as Difficult Terrain)."

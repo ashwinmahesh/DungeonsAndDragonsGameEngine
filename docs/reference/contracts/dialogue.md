@@ -91,7 +91,19 @@ quest quest_id stage_id            Moves a quest to a stage (data/quests/<id>.js
 give item_id [qty]                 Puts items in the speaking character's pack (or the party stash if full).
                                    "give item_id to name:thistle" puts it in that party member's pack instead.
 take item_id [qty]                 Removes items.
-gold +25 / gold -10                Party money in gp.
+gold +25 / gold -10                Party money in gp. `gold +5 each` is that much for every hero who isn't dead (the party
+                                   keeps one purse).
+heal 1d6 [party] [temp]            One roll heals the hero in the conversation, or with `party` every hero who isn't dead
+                                   (dice like 2d4+2, or a number); with `temp` the part past a hero's Hit Point maximum
+                                   becomes Temporary Hit Points. A notice says how much.
+temp_hp 1d6 [party]                One roll of Temporary Hit Points for the hero in the conversation, or with `party` every
+                                   hero who isn't dead; a hero who already has more keeps theirs (they don't stack).
+bless [party] [30m|2h]             Bless's bonus (1d4 on attack rolls and saving throws) from the story: on the hero in the
+                                   conversation or with `party` every living hero, for an hour unless it says, with no
+                                   Concentration and no slot (StoryBoons.spell_boon). Another one replaces it.
+inspiration [party]                Heroic Inspiration for the hero in the conversation, or with `party` every living hero
+                                   who lacks it, each time it runs (unlike `inspire`, which rewards playing in character
+                                   once a playthrough).
 attitude npc_id friendly           Sets an NPC's attitude (hostile, indifferent, friendly; 2024 Influence).
 xp milestone                       Milestone advancement: every party member may level up (plan §5.6). In XP levelling it
                                    also pays the High award, lifts the party to the story's level and pays what the ceiling

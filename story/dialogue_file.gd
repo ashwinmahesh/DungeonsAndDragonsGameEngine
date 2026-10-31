@@ -102,6 +102,21 @@ static func _approve(line: String) -> Dictionary:
 	return {"t": "approve", "changes": changes, "why": why}
 
 
+## Whether `words` are only `allowed` ones, each at most once.
+static func _words_of(words: Array, allowed: Array) -> bool:
+	var seen := {}
+	for w: Variant in words:
+		if not str(w) in allowed or seen.has(str(w)):
+			return false
+		seen[str(w)] = true
+	return true
+
+
+## Whether `text` is a dice expression a statement takes: 1d6, 2d4+2, d8-1 or a plain number.
+static func _is_dice(text: String) -> bool:
+	return RegEx.create_from_string("^(\\d*d\\d+([+-]\\d+)?|\\d+)$").search(text) != null
+
+
 static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: RegEx, re_check_tag: RegEx, re_set: RegEx,
 		re_check: RegEx, re_interject: RegEx, re_variant: RegEx) -> Dictionary:
 	if line == "once":
@@ -177,7 +192,9 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				return {"t": parts[0], "item": parts[1], "qty": int(parts[2]) if parts.size() > 2 else 1, "to": to}
 		"gold":
 			if parts.size() == 2:
-				return {"t": "gold", "amount": float(parts[1])}
+				return {"t": "gold", "amount": float(parts[1]), "each": false}
+			if parts.size() == 3 and parts[2] == "each":
+				return {"t": "gold", "amount": float(parts[1]), "each": true}
 		"attitude":
 			if parts.size() == 3:
 				return {"t": "attitude", "npc": parts[1], "value": parts[2]}
@@ -187,6 +204,28 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			return {"t": "xp"}
 		"sacrifice":
 			return {"t": "sacrifice"}
+		"heal":
+			# `heal <dice> [party] [temp]` (docs/contracts/dialogue.md).
+			var words := Array(parts.slice(2))
+			if parts.size() >= 2 and _words_of(words, ["party", "temp"]) and _is_dice(parts[1]):
+				return {"t": "heal", "dice": parts[1], "party": "party" in words, "temp": "temp" in words}
+		"temp_hp":
+			# `temp_hp <dice> [party]`.
+			if parts.size() >= 2 and _words_of(Array(parts.slice(2)), ["party"]) and _is_dice(parts[1]):
+				return {"t": "temp_hp", "dice": parts[1], "party": parts.size() == 3}
+		"bless":
+			# `bless [party] [<n>m|<n>h]`: an hour unless it says.
+			var minutes := 60
+			var rest := Array(parts.slice(1))
+			if not rest.is_empty() and RegEx.create_from_string("^\\d+[mh]$").search(str(rest[-1])) != null:
+				var last := str(rest.pop_back())
+				minutes = int(last.left(-1)) * (60 if last.ends_with("h") else 1)
+			if _words_of(rest, ["party"]) and minutes > 0:
+				return {"t": "bless", "party": rest.size() == 1, "minutes": minutes}
+		"inspiration":
+			# `inspiration [party]`.
+			if _words_of(Array(parts.slice(1)), ["party"]):
+				return {"t": "inspiration", "party": parts.size() == 2}
 		"reading":
 			if parts.size() >= 2 and parts[1] == "draw":
 				return {"t": "reading_draw"}

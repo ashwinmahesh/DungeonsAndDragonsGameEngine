@@ -87,6 +87,13 @@ reading read <slot> [who] The reader (`who`, else the campaign's `reading.reader
 reading give <place>      Hands the party's leader what the reading hid at <place>.
 ```
 
+When a conversation has read every slot the reading dealt (each `reading read` at least once in it), the module's
+`reading_finished(st)` is called once, after the last card's `reading(slot)`: for what taking part gives, starting when
+the last card is turned. A quest moving into a stage that ends it calls the module's `quest_finished(st, quest_id,
+ending, dice)` (`ending` "success" or "failure", after `StoryState.quest_finished` is emitted); the text it returns, if
+any, is added to the journal's notice (`StoryState.quest_notice`), and `dice` is seeded from the playthrough and the
+moment.
+
 Conditions: `tarokka.drawn`, `tarokka.sword == swords_3` (the card), `tarokka.sword.region == vallaki`,
 `tarokka.ally.npc == ezmerelda`. Quest journal text may use `{tarokka.tome.hint}` and the like.
 

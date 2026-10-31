@@ -231,6 +231,7 @@ func _turn_end_rest(c: Combatant) -> CombatResult:
 		e.objects.turn_end(c)
 		e.spells.zones.prune()
 		e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
+		_step_out(c)
 		_check_over()
 		if e.state != Encounter.State.ACTIVE:
 			return CombatResult.new()
@@ -493,9 +494,17 @@ func _check_over() -> void:
 	if not enemies_up:
 		e.state = Encounter.State.OVER
 		e.outcome = "victory"
+	elif _party_left():
+		e.state = Encounter.State.OVER
+		e.outcome = "ended"
+		e.log.add("info", "The party has left the fight", "")
 	elif not party_up:
 		e.state = Encounter.State.OVER
 		e.outcome = "defeat"
+	elif _first_to_hurt_down() != null:
+		e.state = Encounter.State.OVER
+		e.outcome = "ended"
+		e.log.add("info", "%s is down, and the fight goes out of the foes" % _first_to_hurt_down().name(), "")
 	if e.state == Encounter.State.OVER:
 		# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
 		e.ground.fight_over()
@@ -506,8 +515,72 @@ func _check_over() -> void:
 			for who: Creature in [c.creature, e.shapes.original(c)]:
 				if who is Character:
 					(who as Character).magic_suppressed = false
-		e.log.add("info", "Victory!" if e.outcome == "victory" else "The party has fallen.", "")
+		e.log.add("info", {"victory": "Victory!", "ended": "The fight is over."}.get(e.outcome, "The party has fallen.") as String, "")
 		e.events.append({"type": "over", "outcome": e.outcome})
+
+
+# --- Fights that end with no winner (Encounter.ends_when) -----------------------------------------------------------
+
+## The meta on the first hero to hurt a foe in a fight that ends when they drop (`trigger_hero_down`).
+const FIRST_TO_HURT := "first_to_hurt"
+## The meta holding where a hero who stepped out by an exit stood ([x, y]): they are there once the fight is over.
+const LEFT_AT := "left_at"
+
+
+## Whether `c` is one of the heroes: the party and guests, not what they summoned.
+static func _hero(c: Combatant) -> bool:
+	return c.side in [&"party", &"guest"] and not c.has_meta("summoner")
+
+
+## `source` hurt `target`: the first hero to hurt a foe is marked, in a fight that ends when they drop.
+func note_hurt(source: Combatant, target: Combatant) -> void:
+	var e := enc()
+	if not bool(e.ends_when.get("trigger_hero_down", false)) or not _hero(source) or target.side != &"enemy":
+		return
+	if e.combatants.any(func(o: Combatant) -> bool: return o.has_meta(FIRST_TO_HURT)):
+		return
+	source.set_meta(FIRST_TO_HURT, true)
+
+
+## The first hero to hurt a foe, if they are down now (`trigger_hero_down`), else null.
+func _first_to_hurt_down() -> Combatant:
+	var e := enc()
+	if not bool(e.ends_when.get("trigger_hero_down", false)):
+		return null
+	for c in e.combatants:
+		if c.has_meta(FIRST_TO_HURT):
+			return c if c.is_down() else null
+	return null
+
+
+## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there.
+func _step_out(c: Combatant) -> void:
+	var e := enc()
+	var exits := e.ends_when.get("exits", []) as Array
+	if exits.is_empty() or not _hero(c) or c.is_down() or c.has_meta("left_fight"):
+		return
+	for x: Variant in exits:
+		if Vector2i(int((x as Array)[0]), int((x as Array)[1])) in c.footprint():
+			c.set_meta(LEFT_AT, [c.cell.x, c.cell.y])
+			e.log.add("move", "%s leaves the fight" % c.name(), c.id)
+			e.movement.leave_grid(c, "exit")
+			return
+
+
+## Whether the party has left: a hero stepped out by an exit, and no hero who is up is still on the board.
+func _party_left() -> bool:
+	var e := enc()
+	if (e.ends_when.get("exits", []) as Array).is_empty():
+		return false
+	var out := false
+	for c in e.combatants:
+		if not _hero(c):
+			continue
+		if str(c.get_meta("left_fight", "")) == "exit":
+			out = true
+		elif not c.has_meta("left_fight") and not c.is_down() and not c.creature.has_flag("knocked_out"):
+			return false
+	return out
 
 
 ## True if something takes this creature's turn out of its controller's hands (Command, Fear, Turn Undead, Crown of
