@@ -208,8 +208,9 @@ func test_an_upright_piece_follows_its_bone_but_stands_as_the_figure_does() -> v
 	fig.free()
 
 
-## A figure one unit tall with a neck and a head: Hips 0.5, Spine 0.7, Neck 0.8, Head 0.85, HeadTop_End 1.0.
-static func _headed() -> PackedScene:
+## A figure one unit tall with a neck and a head: Hips 0.5, Spine 0.7, Neck 0.8, Head 0.85, HeadTop_End 1.0. Its body
+## mesh reaches `top` (a headless body stops at its neck).
+static func _headed(top := 1.0) -> PackedScene:
 	var root := Node3D.new()
 	root.name = "Model"
 	var sk := Skeleton3D.new()
@@ -228,15 +229,25 @@ static func _headed() -> PackedScene:
 	var mi := MeshInstance3D.new()
 	mi.name = "Body"
 	var box := BoxMesh.new()
-	box.size = Vector3(0.4, 1.0, 0.2)
+	box.size = Vector3(0.4, top, 0.2)
 	mi.mesh = box
-	mi.position.y = 0.5
+	mi.position.y = top / 2.0
 	sk.add_child(mi)
 	mi.owner = root
 	var packed := PackedScene.new()
 	packed.pack(root)
 	root.free()
 	return packed
+
+
+func test_a_headless_body_is_measured_with_its_head_on() -> void:
+	FigureModels.register_part(LANTERN, {"bone": "Head", "follow": "turn", "fit": "head"}, _lantern())
+	FigureModels.register(ID, {"layers": [LANTERN], "bones": {"Head": 0.01}}, _headed(0.8))
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.2) as ModelFigure
+	add_child(fig)
+	# The body stops at 0.8; its head, 0.2 tall on the Neck joint, takes it to 1.0: drawn 1.2 tall, scaled 1.2.
+	assert_between(fig.model.scale.y, 1.19, 1.21, "as tall as the body with its head, not the headless body")
+	fig.free()
 
 
 func test_a_head_made_apart_sits_on_the_neck_sized_by_the_body_and_never_scaled_with_its_bone() -> void:

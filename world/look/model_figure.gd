@@ -116,12 +116,6 @@ func _build() -> void:
 	model = packed.instantiate() as Node3D
 	model.name = "Model"
 	_posture.add_child(model)
-	var box := rest_box(model)
-	_rest_height = maxf(box.size.y, 0.001)
-	_scale = _height / _rest_height * float(_info.get("scale", 1.0))
-	model.scale = Vector3.ONE * _scale
-	model.rotation.y = deg_to_rad(float(_info.get("turn", 0.0)))
-	model.position.y = -box.position.y * _scale + float(_info.get("lift", 0.0))
 	for n in model.find_children("*", "AnimationPlayer", true, false):
 		_player = n as AnimationPlayer
 		break
@@ -131,6 +125,15 @@ func _build() -> void:
 	var ghostly := _info.get("ghost", {}) as Dictionary
 	_soft = float(ghostly.get("see_through", 0.0)) > 0.0
 	_dress()
+	_rest_height = maxf(rest_box(model).size.y, 0.001)
+	# A head made apart from its body counts in the figure's height: it goes on first, then the figure is measured.
+	_fit_layers(true)
+	var box := rest_box(model)
+	_rest_height = maxf(box.size.y, 0.001)
+	_scale = _height / _rest_height * float(_info.get("scale", 1.0))
+	model.scale = Vector3.ONE * _scale
+	model.rotation.y = deg_to_rad(float(_info.get("turn", 0.0)))
+	model.position.y = -box.position.y * _scale + float(_info.get("lift", 0.0))
 	_fit_layers()
 	_bones()
 	_read_clips()
@@ -334,18 +337,21 @@ func worn_parts() -> Array[String]:
 	return out
 
 
-func _fit_layers() -> void:
+## `heads_only`: just the entry's heads made apart from the body (`fit` "head"), put on before the figure is measured.
+func _fit_layers(heads_only := false) -> void:
 	if model == null or _skeleton == null:
 		return
 	var wanted: Array[String] = []
 	for p: Variant in (_info.get("layers", []) as Array):
-		wanted.append(str(p))
-	for p in _worn:
-		if not p in wanted:
-			wanted.append(p)
-	for id: Variant in _layers.keys():
-		if not str(id) in wanted:
-			_take_off(str(id))
+		if not heads_only or str(FigureModels.part(str(p)).get("fit", "")) == "head":
+			wanted.append(str(p))
+	if not heads_only:
+		for p in _worn:
+			if not p in wanted:
+				wanted.append(p)
+		for id: Variant in _layers.keys():
+			if not str(id) in wanted:
+				_take_off(str(id))
 	for id in wanted:
 		if not _layers.has(id):
 			_put_on(id)
