@@ -101,6 +101,7 @@ static func actions_at(view: LocationView, cell: Vector2i) -> Dictionary:
 			title = str(thing["name"])
 			out.append({"id": "strike", "label": "Attack: start the fight%s" % (" (sneaking: Surprise)" if view.sneaking else "")})
 			out.append_array(LocationNpcs.cast_actions_at_foe(view, thing))   # a spell at a foe opens the fight too
+			out.append_array(LocationNpcs.throw_actions_at_foe(view, thing))   # and so does a flask thrown at it
 		"exit":
 			title = str(spec.get("label", "The way on"))
 			var open := StoryConditions.check(str(spec.get("when", "")), view.st)
@@ -124,6 +125,9 @@ static func act(view: LocationView, cell: Vector2i, action_id: String) -> void:
 		return
 	if action_id.begins_with("strike_cast:"):
 		LocationNpcs.strike_with_spell(view, cell, action_id)
+		return
+	if action_id.begins_with("strike_throw:"):
+		LocationNpcs.throw_at_foe(view, cell, action_id)
 		return
 	if action_id.begins_with("loh:"):
 		LocationCare._lay_on_hands_out(view, cell, action_id.substr(4))
