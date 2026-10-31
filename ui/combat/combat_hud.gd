@@ -575,9 +575,9 @@ func _build_hotbar() -> void:
 	_end_turn.text = "End\nTurn"
 	_end_turn.custom_minimum_size = Vector2(108, 108)
 	_end_turn.add_theme_font_size_override("font_size", 20)
-	_end_turn.add_theme_stylebox_override("normal", _round_style("blood"))
-	_end_turn.add_theme_stylebox_override("hover", _round_style("crimson", "gilt_light"))
-	_end_turn.add_theme_stylebox_override("pressed", _round_style("blood_deep", "gilt_light"))
+	_end_turn.add_theme_stylebox_override("normal", _round_style(Look.ui_key("ui_primary", "blood")))
+	_end_turn.add_theme_stylebox_override("hover", _round_style(Look.ui_key("ui_primary_lit", "crimson"), "gilt_light"))
+	_end_turn.add_theme_stylebox_override("pressed", _round_style(Look.ui_key("ui_primary_deep", "blood_deep"), "gilt_light"))
 	_end_turn.add_theme_stylebox_override("disabled", _round_style("ui_oxblood", "gilt_dark"))
 	_end_turn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	_end_turn.add_theme_font_override("font", UiKit.display_font())
@@ -1361,7 +1361,7 @@ func _add_slot(grid: GridContainer, a: Dictionary, i: int, c: Combatant, mine: b
 		focused = true
 	b.add_theme_stylebox_override("normal", _slot_style("ui_wine" if bool(a.get("armed", false)) else "ui_oxblood", "gilt_light" if focused else "gilt_dark", focused))
 	b.add_theme_stylebox_override("hover", _slot_style("ui_wine", "gilt_light", true))
-	b.add_theme_stylebox_override("pressed", _slot_style("blood", "gilt_light", true))
+	b.add_theme_stylebox_override("pressed", _slot_style(Look.ui_key("ui_primary", "blood"), "gilt_light", true))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.add_theme_stylebox_override("disabled", _slot_style("ui_black", "gilt_light" if focused else "ui_oxblood", focused))
 	var stripe := ColorRect.new()
@@ -1574,7 +1574,7 @@ func _refresh_weapons(c: Combatant, mine: bool) -> void:
 		b.focus_mode = Control.FOCUS_NONE
 		b.add_theme_stylebox_override("normal", _style("ui_black", "gilt_light" if k == 0 else "gilt_dark", 1))
 		b.add_theme_stylebox_override("hover", _style("ui_wine", "gilt_light", 2))
-		b.add_theme_stylebox_override("pressed", _style("blood", "gilt_light", 2))
+		b.add_theme_stylebox_override("pressed", _style(Look.ui_key("ui_primary", "blood"), "gilt_light", 2))
 		b.add_theme_stylebox_override("disabled", _style("ui_black", "gilt_light" if k == 0 else "gilt_dark", 1))
 		if id != "":
 			UiParts.texture_on_button(b, UiParts.icon_texture("item", id), 24 if k == 0 else 18)
