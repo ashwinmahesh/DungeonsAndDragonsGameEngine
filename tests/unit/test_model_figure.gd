@@ -10,13 +10,18 @@ const ID := "test_figure"
 func after_each() -> void:
 	FigureModels.unregister(ID)
 	FigureModels.unregister(ID + "_still")
+	FigureModels.unregister(ID + "_dressed")
+	for id: String in [ID + "_coming", ID + "_coming_dressed"]:
+		FigureModels.manifest().erase(id)
+	FigureModels._entries.clear()
 
 
 ## A model one unit tall: Armature > Skeleton3D (Hips > Spine) > a box mesh, and an AnimationPlayer with idle, walk (Hips
 ## carried 1.2 units forward over its second, bobbing twice), and slash. `combat` adds Tripo's combat preset as Tripo
 ## makes it: a run that starts half a unit ahead of the feet and carries the Hips 2.4 units in half a second, a fall
-## that carries them 0.7 to the side as they drop, and a hit.
-static func model(combat := false) -> PackedScene:
+## that carries them 0.7 to the side as they drop, and a hit. `only_walk`: a walk and nothing else (Tripo's "Other" rig on
+## a crawler). The body is painted with a small texture of its own.
+static func model(combat := false, only_walk := false) -> PackedScene:
 	var root := Node3D.new()
 	root.name = "Model"
 	var arm := Node3D.new()
@@ -40,6 +45,7 @@ static func model(combat := false) -> PackedScene:
 	mi.position.y = 0.5
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.8, 0.3, 0.2)
+	mat.albedo_texture = ImageTexture.create_from_image(Image.create(2, 2, false, Image.FORMAT_RGBA8))
 	mi.set_surface_override_material(0, mat)
 	sk.add_child(mi)
 	mi.owner = root
@@ -48,9 +54,10 @@ static func model(combat := false) -> PackedScene:
 	root.add_child(player)
 	player.owner = root
 	var lib := AnimationLibrary.new()
-	lib.add_animation(&"idle.001", _clip(2.0, Vector3.ZERO, 0.0))
 	lib.add_animation(&"walk.001", _clip(1.0, Vector3(0, 0, 1.2), 0.04))
-	lib.add_animation(&"slash.001", _clip(1.0, Vector3.ZERO, 0.0))
+	if not only_walk:
+		lib.add_animation(&"idle.001", _clip(2.0, Vector3.ZERO, 0.0))
+		lib.add_animation(&"slash.001", _clip(1.0, Vector3.ZERO, 0.0))
 	if combat:
 		lib.add_animation(&"run.001", _clip(0.5, Vector3(0, 0, 2.4), 0.03, Vector3(0, 0, 0.5)))
 		lib.add_animation(&"fall.001", _clip(1.0, Vector3(0.7, -0.35, 0), 0.0))
@@ -267,6 +274,7 @@ func _hips_track(anim: Animation) -> int:
 func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:
 	FigureModels.register(ID, {}, model())
 	var ch := Character.new()
+	ch.id = "test_figure_hero"   # not "": CombatToken keeps the art it wears by id, for every later test
 	ch.name = "Test Figure"
 	var tok := CombatToken.create(Combatant.new(ch, &"party", Vector2i.ZERO), ID)
 	add_child(tok)
@@ -277,4 +285,105 @@ func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:
 	await get_tree().process_frame
 	var fig := tok.sprite as ModelFigure
 	assert_eq(fig._meshes[0].get_instance_shader_parameter(&"tint"), Vector4(1, 1, 1, 0.5), "a fade reaches the surfaces")
+	CombatToken._looks.erase(tok.combatant.id)
 	tok.free()
+
+
+func test_a_creature_with_only_a_walk_stirs_on_it_when_standing() -> void:
+	FigureModels.register(ID, {}, model(false, true))
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 0.5) as ModelFigure
+	add_child(fig)
+	await get_tree().process_frame
+	assert_true(fig.has_role("idle"), "the walk stands in for the idle")
+	assert_eq(str(fig._player.current_animation), "walk.001", "so it isn't left in its bind pose")
+	assert_between(fig._player.speed_scale, 0.29, 0.31, "slowed to a stir (FigureModels.FALLBACKS)")
+	fig.set_step_time(1.0 / 0.6)   # half a unit tall: its 1.2-unit stride is 0.6 at this size
+	fig.moving = true
+	await get_tree().process_frame
+	assert_between(fig._player.speed_scale, 0.99, 1.01, "walking, at its own pace")
+	assert_false(fig.attack(), "no attack clip: the token lunges")
+	fig.free()
+
+
+func test_a_dressing_wears_its_base_body_and_its_own_paint() -> void:
+	FigureModels.register(ID, {"scale": 1.1, "clips": {"attack": {"clip": "slash", "hit": 0.3}}}, model())
+	FigureModels.register(ID + "_dressed", {"base": ID, "albedo": "art/ui/corner.png", "clips": {"talk": ["slash"]}})
+	var info := FigureModels.info(ID + "_dressed")
+	assert_eq(float(info.get("scale", 0.0)), 1.1, "its base's size")
+	assert_true((info["clips"] as Dictionary).has("attack") and (info["clips"] as Dictionary).has("talk"),
+		"its base's clips with its own merged in")
+	assert_true(FigureModels.has(ID + "_dressed"), "drawn as a model")
+	assert_eq(FigureModels.scene(ID + "_dressed"), FigureModels.scene(ID), "the same body")
+	var plain := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	var dressed := DirectionalSprite.create(DirectionalSprite.frames_for(ID + "_dressed"), 1.0) as ModelFigure
+	add_child(plain)
+	add_child(dressed)
+	var paint := (dressed._meshes[0].get_surface_override_material(0) as ShaderMaterial).get_shader_parameter("albedo_tex") as Texture2D
+	assert_eq(paint.resource_path, ArtPaths.of("art/ui/corner.png"), "painted with its own texture")
+	assert_ne(plain._meshes[0].get_surface_override_material(0), dressed._meshes[0].get_surface_override_material(0),
+		"its own material; the plain body keeps the model's")
+	plain.free()
+	dressed.free()
+
+
+func test_a_figure_still_to_come_wears_its_stand_in_sprite() -> void:
+	FigureModels.manifest()[ID + "_coming"] = {"file": "art/figures/no_such_model.glb", "sprite": "specter"}
+	FigureModels.manifest()[ID + "_coming_dressed"] = {"base": ID + "_coming", "albedo": "art/ui/corner.png"}
+	assert_false(FigureModels.has(ID + "_coming"), "no model yet")
+	assert_eq(FigureModels.stand_in(ID + "_coming"), "specter", "its stand-in")
+	assert_eq(DirectionalSprite.frames_for(ID + "_coming"), DirectionalSprite.frames_for("specter"), "wears the sprite meanwhile")
+	assert_eq(DirectionalSprite.frames_for(ID + "_coming_dressed"), DirectionalSprite.frames_for("specter"),
+		"and so do its dressings, by their base")
+	assert_eq(FigureModels.stand_in("specter"), "", "a sprite with no entry stands in for nothing")
+
+
+func test_bones_grow_on_top_of_the_clip() -> void:
+	var fig := _figure(1.0, {"bones": {"spine": 1.3, "no_such_bone": 2.0}})
+	var fb: FigureBones = null
+	for c in fig._skeleton.get_children():
+		if c is FigureBones:
+			fb = c as FigureBones
+	assert_true(fb != null, "a bone modifier on the skeleton")
+	assert_eq(fb.scales, {1: 1.3}, "Spine found by its plain name (mixamorig_Spine); an unknown bone left out")
+	assert_eq(FigureBones.bone_named(fig._skeleton, "HIPS"), 0, "names ignore case")
+	fig._skeleton.set_bone_pose_scale(1, Vector3.ONE)
+	fb._process_modification_with_delta(0.016)
+	assert_between(fig._skeleton.get_bone_pose_scale(1).x, 1.29, 1.31, "grown on top of the pose")
+	fig.free()
+	var plain := _figure(1.0)
+	assert_true(plain._skeleton.get_children().all(func(c: Node) -> bool: return not c is FigureBones), "none without bones")
+	plain.free()
+
+
+func test_a_ghost_look_reaches_its_surfaces() -> void:
+	var fig := _figure(1.0, {"ghost": {"wash": 0.5, "colour": "silver", "glow": 0.3, "see_through": 0.4, "rim": 0.6, "pulse": 0.2}})
+	var mi := fig._meshes[0]
+	var silver := Look.color("silver")
+	assert_eq(mi.get_instance_shader_parameter(&"ghost"), 0.5, "washed")
+	assert_eq(mi.get_instance_shader_parameter(&"ghost_colour"), Vector4(silver.r, silver.g, silver.b, silver.a), "in its colour")
+	assert_eq(mi.get_instance_shader_parameter(&"glow"), 0.3, "its own light")
+	assert_eq(mi.get_instance_shader_parameter(&"see_through"), 0.4, "seen through")
+	assert_eq(mi.get_instance_shader_parameter(&"ghost_rim"), 0.6, "its edge glowing")
+	assert_eq(mi.get_instance_shader_parameter(&"pulse"), 0.2, "throbbing")
+	var depth := mi.get_surface_override_material(0) as ShaderMaterial
+	assert_eq(depth.shader, ModelFigure.DEPTH, "seen through softly: its depth first")
+	assert_eq(depth.render_priority, DirectionalSprite.RENDER_PRIORITY, "at the figures' priority")
+	var body := depth.next_pass as ShaderMaterial
+	assert_eq(body.shader, ModelFigure.SHADER, "then its surfaces")
+	assert_true(bool(body.get_shader_parameter("soft_through")), "blended, not dithered")
+	assert_eq(body.render_priority, DirectionalSprite.RENDER_PRIORITY + 1, "after every figure's depth")
+	fig.free()
+	var glow_only := _figure(1.0, {"ghost": {"glow": 0.8, "rim": 0.5}})
+	assert_eq((glow_only._meshes[0].get_surface_override_material(0) as ShaderMaterial).shader, ModelFigure.SHADER,
+		"a ghost nobody sees through keeps the solid material")
+	glow_only.free()
+
+
+func test_a_game_can_draw_a_figure_with_its_own_shader() -> void:
+	var fig := _figure(1.0, {"shader": "shaders/world/figure_ink.gdshader"})
+	var m := fig._meshes[0].get_surface_override_material(0) as ShaderMaterial
+	assert_eq(m.shader, ModelFigure.INK, "the entry's shader in place of lit_figure")
+	fig.free()
+	var plain := _figure(1.0)
+	assert_eq((plain._meshes[0].get_surface_override_material(0) as ShaderMaterial).shader, ModelFigure.SHADER, "else the engine's")
+	plain.free()

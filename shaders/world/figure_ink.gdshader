@@ -25,6 +25,9 @@ void fragment() {
 	if (figure_hidden(FRAGCOORD.xy)) {
 		discard;
 	}
-	ALBEDO = ink * (1.0 - ghost * 0.6);
-	ALPHA = 1.0;
+	// A ghost with an edge glow is lined in a darker shade of its own colour.
+	vec3 line = mix(ink, figure_ghost_colour(ink) * 0.5, ghost_colour.a > 0.0 ? clamp(ghost_rim, 0.0, 1.0) : 0.0);
+	ALBEDO = line * (1.0 - ghost * 0.6);
+	// A soft ghost's line fades less than its body, so its shape still reads.
+	ALPHA = soft_through ? sqrt(figure_shown()) : 1.0;
 }

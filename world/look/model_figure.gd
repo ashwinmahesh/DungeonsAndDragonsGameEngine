@@ -11,13 +11,17 @@ extends DirectionalSprite
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
 ## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
 ## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
-## lies on its back; without a hurt clip it recoils. Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
-## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear.
+## lies on its back; without a hurt clip it recoils; without an idle it stirs on its walk (FigureModels.FALLBACKS).
+## Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
+## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear. An entry
+## can paint the model with a texture of its own (`albedo`, a dressing of a shared body), draw it with a game's shader
+## (`shader`), grow or shrink bones on top of every clip (`bones`, FigureBones) and show it as a ghost (`ghost`).
 ## Layers (FigureModels parts): the entry's `layers` and what `wear` puts on, rigid pieces held on bones and skinned
 ## layers bound to the model's own skeleton, so a figure's gear and clothes move with every clip.
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/lit_figure.gdshader")
 const INK := preload("res://addons/dnd_core/shaders/world/figure_ink.gdshader")
+const DEPTH := preload("res://addons/dnd_core/shaders/world/figure_depth.gdshader")
 ## Seconds to blend from one clip into the next.
 const BLEND := 0.22
 ## How fast a figure turns to a new facing, radians a second.
@@ -54,6 +58,8 @@ var _worn: Array[String] = []
 var _params: Dictionary = {}
 ## Upright pieces (a part's `upright`): their holder -> the bone they follow, moved there each time the pose is set.
 var _upright: Dictionary = {}
+## Drawn as a soft ghost: its surfaces blended, after a depth pass of their own (set_ghost_look with see_through).
+var _soft := false
 var _info: Dictionary = {}
 ## role -> the clips that play it: [{"name", "from", "to", "hit", "speed"}]
 var _roles: Dictionary = {}
@@ -114,9 +120,14 @@ func _build() -> void:
 	for n in model.find_children("*", "Skeleton3D", true, false):
 		_skeleton = n as Skeleton3D
 		break
+	var ghostly := _info.get("ghost", {}) as Dictionary
+	_soft = float(ghostly.get("see_through", 0.0)) > 0.0
 	_dress()
 	_fit_layers()
+	_bones()
 	_read_clips()
+	if not ghostly.is_empty():
+		set_ghost_look(ghostly)
 	_play_loop("idle", 1.0)
 	if _player != null and _player.current_animation != "":
 		# A crowd doesn't breathe in step: each figure starts its idle somewhere of its own.
@@ -147,38 +158,58 @@ static func rest_box(root: Node3D) -> AABB:
 ## Every surface in the figure's material: its own texture (or colour), lit and inked as figures are in this finish.
 ## Materials are shared by every copy of a model; what's a figure's own (its fade, flash, glow) is per instance.
 func _dress() -> void:
+	var paint := FigureModels.albedo_of(art_id)
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		if mi.mesh == null:
 			continue
-		_dress_mesh(mi)
+		_dress_mesh(mi, paint)
 		_own_meshes.append(mi)
 
 
-## One mesh, the model's own or a layer's, in the figure material, with the figure's state so far.
-func _dress_mesh(mi: MeshInstance3D) -> void:
+## One mesh, the model's own or a layer's, in the figure material, with the figure's state so far. `paint` is the
+## entry's own texture for the model's surfaces (a layer keeps its own).
+func _dress_mesh(mi: MeshInstance3D, paint: Texture2D = null) -> void:
 	var shadows := Look.modern() and Graphics.sprite_shadows()
+	var own_shader := _own_shader()
 	for i in mi.mesh.get_surface_count():
-		mi.set_surface_override_material(i, surface_material(mi.get_active_material(i)))
+		mi.set_surface_override_material(i, surface_material(mi.get_active_material(i), paint, own_shader, _soft))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for param: StringName in _params:
 		mi.set_instance_shader_parameter(param, _params[param])
 	_meshes.append(mi)
 
 
+## The game's own shader the entry names (`shader`), or null for the engine's.
+func _own_shader() -> Shader:
+	var rel := str(_info.get("shader", ""))
+	if rel == "":
+		return null
+	if not ArtPaths.exists(rel):
+		push_warning("figure %s: no shader %s, drawn with the engine's" % [art_id, rel])
+		return null
+	return load(ArtPaths.of(rel)) as Shader
+
+
 ## The figure material standing in for a model's own `src` (its albedo texture and colour), made once per look.
-static func surface_material(src: Material) -> ShaderMaterial:
+## `paint` replaces a textured surface's texture (a dressing of a shared body); `own_shader` replaces lit_figure.
+## `soft`: a ghost seen through, blended rather than dithered: a depth pass (figure_depth) at RENDER_PRIORITY first, then
+## its surfaces and ink one priority later, so they show only the nearest surface.
+static func surface_material(src: Material, paint: Texture2D = null, own_shader: Shader = null, soft := false) -> ShaderMaterial:
 	var tex: Texture2D = null
 	var colour := Color.WHITE
 	if src is BaseMaterial3D:
 		tex = (src as BaseMaterial3D).albedo_texture
 		colour = (src as BaseMaterial3D).albedo_color
-	var key := "%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style()]
+	if paint != null and tex != null:
+		tex = paint
+	var key := "%s|%s|%s|%s|%s" % [str(tex.get_rid().get_id()) if tex != null else "-", colour.to_html(), Look.style(),
+		own_shader.resource_path if own_shader != null else "", "soft" if soft else ""]
 	if _materials.has(key):
 		return _materials[key] as ShaderMaterial
 	var s := Look.figure_settings()
 	var m := ShaderMaterial.new()
-	m.shader = SHADER
+	m.shader = own_shader if own_shader != null else SHADER
 	m.render_priority = RENDER_PRIORITY   # after the screen pass, as the 2D figures
 	m.set_shader_parameter("use_texture", tex != null)
 	if tex != null:
@@ -201,6 +232,16 @@ static func surface_material(src: Material) -> ShaderMaterial:
 		ink.set_shader_parameter("ink", Look.color(str(s["ink_colour"])))
 		ink.set_shader_parameter("width", float(s["ink"]))
 		m.next_pass = ink
+	if soft:
+		for each: ShaderMaterial in [m, m.next_pass as ShaderMaterial]:
+			if each != null:
+				each.set_shader_parameter("soft_through", true)
+				each.render_priority = RENDER_PRIORITY + 1
+		var depth := ShaderMaterial.new()
+		depth.shader = DEPTH
+		depth.render_priority = RENDER_PRIORITY
+		depth.next_pass = m
+		m = depth
 	_materials[key] = m
 	return m
 
@@ -213,6 +254,30 @@ func set_glow(amount: float) -> void:
 ## Washed toward a translucent grey (an Echo Knight's echo), 0 to 1.
 func set_ghost(amount: float) -> void:
 	_each_mesh("ghost", amount)
+
+
+## A ghost's look, as a manifest entry's "ghost" gives it (each 0 to 1, any left out is none): `wash` toward its colour
+## (set_ghost), `colour` (a palette name; the material's grey without one), `glow` its own light (set_glow),
+## `see_through` the share of it the world shows through, `rim` a glow along its edges, `pulse` how far its glow
+## throbs. A ghost seen through is blended softly (surface_material's `soft`), its line fading less than its body.
+func set_ghost_look(look: Dictionary) -> void:
+	var soft := float(look.get("see_through", 0.0)) > 0.0
+	if soft != _soft and model != null:
+		_soft = soft
+		_meshes.clear()
+		_own_meshes.clear()
+		_dress()   # seen through or not changes the surfaces' materials (surface_material's `soft`)
+		for id: Variant in _layers:
+			for mi: Variant in ((_layers[id] as Dictionary)["meshes"] as Array):
+				_dress_mesh(mi as MeshInstance3D)
+	set_ghost(float(look.get("wash", 0.0)))
+	set_glow(float(look.get("glow", 0.0)))
+	var colour := str(look.get("colour", ""))
+	var c := Look.color(colour) if colour != "" else Color(0, 0, 0, 0)
+	_each_mesh("ghost_colour", Vector4(c.r, c.g, c.b, c.a if colour != "" else 0.0))
+	_each_mesh("see_through", clampf(float(look.get("see_through", 0.0)), 0.0, 0.95))
+	_each_mesh("ghost_rim", float(look.get("rim", 0.0)))
+	_each_mesh("pulse", float(look.get("pulse", 0.0)))
 
 
 func _each_mesh(param: StringName, value: Variant) -> void:
@@ -406,6 +471,25 @@ static func _euler(v: Variant) -> Basis:
 	return Basis.from_euler(Vector3(deg_to_rad(d.x), deg_to_rad(d.y), deg_to_rad(d.z)))
 
 
+## The entry's `bones`: each grown or shrunk on top of every clip (FigureBones).
+func _bones() -> void:
+	var want := _info.get("bones", {}) as Dictionary
+	if want.is_empty() or _skeleton == null:
+		return
+	var fb := FigureBones.new()
+	fb.name = "FigureBones"
+	for bone: String in want:
+		var i := FigureBones.bone_named(_skeleton, bone)
+		if i < 0:
+			push_warning("figure %s: no bone %s to scale" % [art_id, bone])
+			continue
+		fb.scales[i] = float(want[bone])
+	if fb.scales.is_empty():
+		fb.free()
+		return
+	_skeleton.add_child(fb)
+
+
 # --- Clips ------------------------------------------------------------------------------------------------------------
 
 ## The model's clips for each role: the manifest's names where it gives them, else the usual names (FigureModels.CLIPS).
@@ -429,6 +513,17 @@ func _read_clips() -> void:
 				break
 		if not specs.is_empty():
 			_roles[role] = specs
+	# A role without a clip of its own borrows another role's, at its speed (FigureModels.FALLBACKS).
+	for role: String in FigureModels.FALLBACKS:
+		var fb := FigureModels.FALLBACKS[role] as Dictionary
+		if _roles.has(role) or not _roles.has(str(fb["role"])):
+			continue
+		var borrowed: Array[Dictionary] = []
+		for spec: Dictionary in _roles[str(fb["role"])] as Array:
+			var b := spec.duplicate()
+			b["speed"] = float(spec.get("speed", 1.0)) * float(fb["speed"])
+			borrowed.append(b)
+		_roles[role] = borrowed
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add
