@@ -66,6 +66,11 @@ var _close_up := false
 ## Pieces that follow a bone without being its child (a part's `follow` "place" or "turn", or `upright`): their
 ## holder -> [the bone, whether it turns with it], moved there each time the pose is set.
 var _upright: Dictionary = {}
+## Upright pieces that hover (a part's `hover`): hold -> [height (model units), seconds a bob, phase].
+var _hover: Dictionary = {}
+## A ghostly part's meshes (_ghost_part), which keep their own ghost look.
+var _ghostly: Dictionary = {}
+const GHOST_KEYS: Array[StringName] = [&"ghost", &"glow", &"ghost_colour", &"see_through", &"ghost_rim", &"pulse"]
 ## Drawn as a soft ghost: its surfaces blended, after a depth pass of their own (set_ghost_look with see_through).
 var _soft := false
 var _info: Dictionary = {}
@@ -307,8 +312,8 @@ static func _close_up_picture(entry: Dictionary) -> Texture2D:
 func _repaint(meshes: Array[MeshInstance3D], paint: Texture2D) -> void:
 	var own_shader := _own_shader()
 	for mi in meshes:
-		if not is_instance_valid(mi) or mi.mesh == null:
-			continue
+		if not is_instance_valid(mi) or mi.mesh == null or _ghostly.has(mi):
+			continue   # a part that is a ghost of its own keeps its look (_ghost_part)
 		for i in mi.mesh.get_surface_count():
 			mi.set_surface_override_material(i, surface_material(mi.mesh.surface_get_material(i), paint, own_shader, _soft))
 
@@ -359,7 +364,8 @@ func set_ghost_look(look: Dictionary) -> void:
 func _each_mesh(param: StringName, value: Variant) -> void:
 	_params[param] = value
 	for gi in _meshes:
-		gi.set_instance_shader_parameter(param, value)
+		if not (_ghostly.has(gi) and param in GHOST_KEYS):
+			gi.set_instance_shader_parameter(param, value)
 
 
 # --- Layers -----------------------------------------------------------------------------------------------------------
@@ -428,13 +434,18 @@ func _put_on(id: String) -> void:
 			piece.free()
 			return
 		var hold: Node3D
-		var follow := str(entry.get("follow", "place" if bool(entry.get("upright", false)) else "bone"))
+		var follow := str(entry.get("follow", "place" if bool(entry.get("upright", false)) or entry.has("hover") else "bone"))
 		if follow in ["place", "turn"]:
 			# "place" (upright): where the hand is, but standing the way the figure stands, as a lantern hangs or a
-			# torch is held up whatever the hand's roll, which differs from rig to rig and clip to clip. "turn": where
-			# the bone is and turned as it is, but never scaled with it (a head on a body whose own head is shrunk away).
+			# torch is held up whatever the hand's roll, which differs from rig to rig and clip to clip; a hovering piece
+			# is placed so too. "turn": where the bone is and turned as it is, but never scaled with it (a head on a body
+			# whose own head is shrunk away).
 			hold = Node3D.new()
 			_upright[hold] = [b, follow == "turn"]
+			if entry.has("hover"):
+				var hv := entry["hover"] as Array
+				_hover[hold] = [float(hv[0]) * _rest_height / _skeleton_scale(), maxf(float(hv[1]) if hv.size() > 1 else 2.4, 0.1),
+					DirectionalSprite._rng.randf() * TAU]
 			if not _skeleton.skeleton_updated.is_connected(_follow_bones):
 				_skeleton.skeleton_updated.connect(_follow_bones)
 		else:
@@ -472,6 +483,8 @@ func _put_on(id: String) -> void:
 			if n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
 				_dress_mesh(n as MeshInstance3D)
 				meshes.append(n as MeshInstance3D)
+	if entry.get("ghost") is Dictionary:
+		_ghost_part(meshes, entry["ghost"] as Dictionary)
 	_layers[id] = {"nodes": nodes, "meshes": meshes, "hides": entry.get("hides", []) as Array}
 
 
@@ -479,8 +492,10 @@ func _take_off(id: String) -> void:
 	var rec := _layers[id] as Dictionary
 	for mi: Variant in (rec["meshes"] as Array):
 		_meshes.erase(mi)
+		_ghostly.erase(mi)
 	for node: Variant in (rec["nodes"] as Array):
 		_upright.erase(node)
+		_hover.erase(node)
 		if is_instance_valid(node):
 			(node as Node).queue_free()
 	_layers.erase(id)
@@ -549,12 +564,15 @@ func _head_fit(piece: Node3D, box: AABB, entry: Dictionary, bone_name: String, h
 	return Transform3D(basis, to_head * neck_at + to_head.basis * (_vec(entry.get("offset")) * h) - basis * grip)
 
 
-## Pieces that follow a bone to it, once the clip has set the pose.
+## Pieces that follow a bone to it, once the clip has set the pose; a hovering one bobs over its place.
 func _follow_bones() -> void:
 	for hold: Variant in _upright:
 		if is_instance_valid(hold):
 			var spec := _upright[hold] as Array
 			_place_holder(hold as Node3D, int(spec[0]), bool(spec[1]))
+			if _hover.has(hold):
+				var hv := _hover[hold] as Array
+				(hold as Node3D).position.y += float(hv[0]) * sin(_time * TAU / float(hv[1]) + float(hv[2]))
 
 
 ## A holder to its bone's pose (`at_rest`: its rest, before the clip has set a pose): where it is, and turned as it is
@@ -565,6 +583,27 @@ func _place_holder(hold: Node3D, bone: int, turns: bool, at_rest := false) -> vo
 		hold.transform = Transform3D(pose.basis.orthonormalized(), pose.origin)
 	else:
 		hold.position = pose.origin
+
+
+## A part that is a ghost of its own (a part's `ghost`, a look as set_ghost_look takes it: a familiar's spirit beside a
+## figure that isn't one): its meshes alone are drawn see-through and washed, the figure's own stay as they are.
+func _ghost_part(meshes: Array[MeshInstance3D], look: Dictionary) -> void:
+	var soft := float(look.get("see_through", 0.0)) > 0.0
+	var colour := str(look.get("colour", ""))
+	var c := Look.color(colour) if colour != "" else Color(0, 0, 0, 0)
+	for mi in meshes:
+		if soft and not _soft:
+			for i in mi.mesh.get_surface_count():
+				var own := mi.get_surface_override_material(i)
+				var src := mi.mesh.surface_get_material(i)
+				mi.set_surface_override_material(i, surface_material(src if src != null else own, null, _own_shader(), true))
+		mi.set_instance_shader_parameter(&"ghost", float(look.get("wash", 0.0)))
+		mi.set_instance_shader_parameter(&"glow", float(look.get("glow", 0.0)))
+		mi.set_instance_shader_parameter(&"ghost_colour", Vector4(c.r, c.g, c.b, c.a if colour != "" else 0.0))
+		mi.set_instance_shader_parameter(&"see_through", clampf(float(look.get("see_through", 0.0)), 0.0, 0.95))
+		mi.set_instance_shader_parameter(&"ghost_rim", float(look.get("rim", 0.0)))
+		mi.set_instance_shader_parameter(&"pulse", float(look.get("pulse", 0.0)))
+		_ghostly[mi] = true   # the figure's own look (set_ghost_look, set_glow) leaves it as it is; fades and flashes reach it
 
 
 ## How much the model's own units are scaled on the way down to its skeleton (an exporter's armature scale).
@@ -1031,7 +1070,8 @@ func _pose_step(dt: float) -> void:
 	# ground; the recoil leans it back from its feet.
 	var f := _lie * _lie if _lie_to >= _lie else 1.0 - (1.0 - _lie) * (1.0 - _lie)
 	var c := _height * 0.5
-	var back := Basis(Vector3.RIGHT, -PI * 0.5 * f)
+	# On its back, or on its side for a figure whose entry says so (`lie`: "side": a cart or a locomotive overturned).
+	var back := Basis(Vector3.BACK, PI * 0.5 * f) if _lies_on_side() else Basis(Vector3.RIGHT, -PI * 0.5 * f)
 	var pivot := Vector3(0.0, c, 0.0)
 	var lie := Transform3D(back, pivot - back * pivot + Vector3(0.0, (_back_depth() - c) * f, 0.0))
 	var lean := Basis(Vector3.RIGHT, clampf(_tilt, -1.0, 1.0) * 0.18 * (1.0 - f))
@@ -1072,9 +1112,13 @@ func _back_depth() -> float:
 	if model == null:
 		return 0.0
 	if not has_meta("back_depth"):
-		var box := rest_box(model)
-		set_meta("back_depth", maxf(0.0, -box.position.z) * _scale)
+		var box := model.transform * rest_box(model)   # in the posture's space: scaled and turned as the figure stands
+		set_meta("back_depth", maxf(0.0, -box.position.x if _lies_on_side() else -box.position.z))
 	return float(get_meta("back_depth"))
+
+
+func _lies_on_side() -> bool:
+	return str(_info.get("lie", "")) == "side"
 
 
 ## The one-shot clip: its blow lands at `hit`; it ends at `to` (or when the clip runs out).

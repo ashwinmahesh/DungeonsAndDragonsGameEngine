@@ -15,6 +15,10 @@ uniform float seed = 0.0;
 uniform float shaft_length = 8.0;
 // The patch of light where the beam lands (a flat quad on the ground) instead of the beam.
 uniform bool pool = false;
+// A game's own look (SunShafts.settings): how strongly the streaks show (0 none, 1 as drawn), and how sharply the
+// beam's light gathers to its middle (3 as drawn; higher fades its sides further in, a softer edge).
+uniform float ray_amount = 1.0;
+uniform float core_power = 3.0;
 
 varying float along;   // 0 at the top of the beam, 1 where it meets the ground
 varying vec3 world_pos;
@@ -45,17 +49,17 @@ void fragment() {
 		// The light where the beam lands: a soft patch, brightest in its middle, with the beam's streaks across it.
 		float r = length(UV * 2.0 - 1.0);
 		float soft = 1.0 - smoothstep(0.25, 1.0, r);
-		float bands = 0.7 + 0.3 * noise1(UV.x * 7.0 + seed * 17.0 + TIME * 0.12);
+		float bands = mix(1.0, 0.7 + 0.3 * noise1(UV.x * 7.0 + seed * 17.0 + TIME * 0.12), ray_amount);
 		float edge = 1.0 - smoothstep(0.6, 1.25, length((SCREEN_UV - 0.5) * 2.0));
 		ALBEDO = colour * strength * soft * soft * bands * edge;
 	} else {
 		float facing = abs(dot(normalize(NORMAL), normalize(VIEW)));
-		float core = pow(facing, 3.0);
+		float core = pow(facing, core_power);
 		float ends = smoothstep(0.0, 0.4, along) * (1.0 - smoothstep(0.75, 1.0, along));
 		// Rays: thin bands round the beam drifting slowly, as light breaks through moving leaves and cloud.
 		float round_ = UV.x * 14.0 + seed * 17.0;
 		float rays = smoothstep(0.25, 0.85, noise1(round_ + TIME * 0.1) * 0.6 + noise1(round_ * 2.3 - TIME * 0.06 + 5.0) * 0.4);
-		float streak = 0.3 + 1.3 * rays;
+		float streak = mix(1.0, 0.3 + 1.3 * rays, ray_amount);
 		// Motes: sparse specks drifting down and across the beam, each twinkling as it turns.
 		vec3 q = world_pos * 12.0 + vec3(TIME * 0.25, -TIME * 0.4, TIME * 0.15);
 		float speck = step(0.993, hash(floor(q)));

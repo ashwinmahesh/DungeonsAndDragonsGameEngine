@@ -158,3 +158,8 @@ the pelvis (it has no tail), so `_dragon_tail` builds one: 25 tapering vertebrae
 first dozen), drawn through the same fit as the bones, curling from the pelvis along the floor.
 
 **Baba Lysaga's hut** (2026-10-25) is the third sourced model: Pelilasdis's "The Hut On Fowl's Legs" (CC BY 4.0, art/sourced/sketchfab_hut_on_fowls_legs_pelilasdis/) stands as the `hut_lysaga` prop in Berez before the fight (5.4 high, 17.5k triangles). `hut_lysaga` in blender/models_3d.py leaves out the download's diorama (ground disc, pines, yard fence, stakes) by name, thins the rest to 20%, and gives each face the palette colour nearest what its material's texture shows there (the materials multiply the texture by a grey, which is applied, and the result is lifted two stops and a gamma of 1.5, since the palette is dark). In combat the hut is the 2D creeping-hut sprite (art/sprites/baba_lysagas_creeping_hut), drawn at 5.4.
+
+A generated model painted in one texture of its own (a Tripo export) rather than Blender's named palette materials says
+`"textured": true` in its manifest entry: its surfaces keep the texture by their UVs, drawn in cel light
+(shaders/cel_sprite.gdshader, its shade lifted a little) instead of falling back to a flat palette colour.
+

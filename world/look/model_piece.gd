@@ -183,10 +183,28 @@ static func _read_parts(id: String) -> Array:
 		var mats: Array = []
 		for i in mi.mesh.get_surface_count():
 			var src := mi.mesh.surface_get_material(i)
-			mats.append(material(src.resource_name if src != null else ""))
+			if bool(info.get("textured", false)) and src is BaseMaterial3D and (src as BaseMaterial3D).albedo_texture != null:
+				mats.append(textured((src as BaseMaterial3D).albedo_texture))   # a model painted in its own texture
+			else:
+				mats.append(material(src.resource_name if src != null else ""))
 		out.append([mi.mesh, xf, mats, mi.name])
 	scene.free()
 	return out
+
+
+## A model painted in its own texture (a manifest entry's `textured`: a generated model, Tripo's, whose surfaces carry
+## one painted texture rather than Blender's named palette materials): the texture by its UVs in cel_sprite's cel light.
+static func textured(tex: Texture2D) -> Material:
+	var key := "tex:%d|%s" % [tex.get_rid().get_id(), Look.style()]
+	if _materials.has(key):
+		return _materials[key] as Material
+	var sm := ShaderMaterial.new()
+	sm.shader = SPRITE_SHADER
+	sm.set_shader_parameter("albedo_tex", tex)
+	sm.set_shader_parameter("alpha_cut", 0.0)
+	sm.set_shader_parameter("shadow_floor", 0.35)   # a painted texture is darker than a palette colour: its shade lifted
+	_materials[key] = sm
+	return sm
 
 
 ## The game material for a model surface named in Blender.

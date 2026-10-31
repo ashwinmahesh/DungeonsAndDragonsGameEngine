@@ -30,6 +30,7 @@ keeps its sprite, so a game moves to 3D one figure at a time, and a game with no
 - `file`: the model (a GLB, or any scene with a Skeleton3D, its meshes and an AnimationPlayer).
 - `scale`: times the height the figure is drawn at (the model is fitted so its feet are on the ground and its top at that
   height). `lift` raises it (world units). `turn` turns it (degrees) to face +z, south, the way a figure faces the camera.
+  `lie`: "side" lays it on its side rather than its back when it falls or lies (a locomotive, a cart).
 - `clips`: role to clip, where a model's names aren't the usual ones. A name, a list (played in turn), or
   `{"clip", "from", "to", "hit", "speed"}`: part of a long clip, the moment the blow lands, how fast it plays.
 - `defaults`: under every figure of the manifest (its `clips` merged role by role), for models made the same way.
@@ -124,6 +125,10 @@ puts on what it wears now (taking off what it no longer does). `worn_parts()` li
   `mixamorig:RightHand`, `mixamorig_RightHand`: `FigureModels.bone`). A layer fits the body it was weighted on: make
   layers on the body they are worn over, in that body's rest pose, and export them with the armature (a mesh exported
   without one loses its bind names).
+- **`hover`** `[height, seconds]` makes a piece on a bone float there, bobbing by `height` (figure heights) once every
+  `seconds`, upright: a familiar over a shoulder. **`ghost`** gives a part a ghost's look of its own (the keys of a
+  figure entry's `ghost`: `see_through`, `wash`, `colour`, `glow`, `rim`, `pulse`), so a spirit beside a figure that isn't
+  one is drawn see-through while the figure isn't; fades and flashes still reach it.
 - **`hides`** names the figure's own meshes the part covers (`"*"` for all of them), so a body under a coat doesn't
   poke through. Split a body into region meshes for that.
 - Layers go through the figure's material, ink and state (fade, flash, glow, ghost) like its own meshes.

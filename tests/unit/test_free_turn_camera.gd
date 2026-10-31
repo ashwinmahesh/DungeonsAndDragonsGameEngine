@@ -141,3 +141,24 @@ func test_the_tilt_keys_are_in_the_keys_page() -> void:
 	for a: StringName in [&"camera_tilt_up", &"camera_tilt_down", &"camera_reset"]:
 		assert_true(a in listed, "%s can be rebound" % a)
 		assert_true(InputMap.has_action(a), "%s is registered" % a)
+
+
+func test_a_trackpad_pinches_to_zoom_and_swipes_to_turn() -> void:
+	Campaign.use_config({"camera": {"free_turn": true}})
+	var rig := _rig()
+	var start := rig.distance
+	var pinch := InputEventMagnifyGesture.new()
+	pinch.factor = 1.25
+	rig._unhandled_input(pinch)
+	assert_between(rig.distance, start / 1.25 - 0.01, start / 1.25 + 0.01, "pinching out zooms in")
+	var swipe := InputEventPanGesture.new()
+	swipe.delta = Vector2(5, 0)
+	rig._unhandled_input(swipe)
+	rig.snap_to_target()
+	assert_between(rad_to_deg(rig.rotation.y), 45.0 + 5 * CameraRig.PAN_TURN - 0.1, 45.0 + 5 * CameraRig.PAN_TURN + 0.1,
+		"a swipe across turns it")
+	var before := rig.distance
+	swipe.delta = Vector2(0, 2)
+	rig._unhandled_input(swipe)
+	assert_between(rig.distance, before + 2 * CameraRig.PAN_ZOOM - 0.01, before + 2 * CameraRig.PAN_ZOOM + 0.01, "a swipe down zooms out")
+	rig.free()
