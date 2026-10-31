@@ -340,14 +340,14 @@ func test_a_token_draws_the_model_and_its_fade_reaches_it() -> void:
 	tok.free()
 
 
-func test_a_creature_with_only_a_walk_stirs_on_it_when_standing() -> void:
-	FigureModels.register(ID, {}, model(false, true))
+func test_a_creature_with_only_a_walk_that_idles_from_it_stirs_on_it_when_standing() -> void:
+	FigureModels.register(ID, {"idle_from_walk": true}, model(false, true))
 	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 0.5) as ModelFigure
 	add_child(fig)
 	await get_tree().process_frame
 	assert_true(fig.has_role("idle"), "the walk stands in for the idle")
 	assert_eq(str(fig._player.current_animation), "walk.001", "so it isn't left in its bind pose")
-	assert_between(fig._player.speed_scale, 0.29, 0.31, "slowed to a stir (FigureModels.FALLBACKS)")
+	assert_between(fig._player.speed_scale, 0.29, 0.31, "slowed to a stir (ModelFigure.IDLE_STIR)")
 	fig.set_step_time(1.0 / 0.6)   # half a unit tall: its 1.2-unit stride is 0.6 at this size
 	fig.moving = true
 	await get_tree().process_frame

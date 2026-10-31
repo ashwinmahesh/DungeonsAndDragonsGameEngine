@@ -87,6 +87,47 @@ tip-over, talk and greet to nothing.
   the greet; `FigureTalk.spoke(view, speaker)` plays a talk clip on each line. A game calls them from its dialogue
   (DialogueUI's `spoke`). Sprites have no gestures and keep their facing.
 
+## Layers: gear and clothes on the figure
+
+A figure can wear parts on its own skeleton, so what a hero holds and wears shows and moves with every clip. The
+manifest's `parts` names them; a figure entry's `layers` lists the parts it always wears, and `ModelFigure.wear(ids)`
+puts on what it wears now (taking off what it no longer does). `worn_parts()` lists them.
+
+```json
+{
+  "parts": {
+    "lantern": {"file": "art/props/lantern.glb", "bone": "RightHand", "size": 0.2, "grip": [0, 0.88, 0], "turn": [180, 0, 0]},
+    "long_cloak": {"file": "art/figures/layers/long_cloak.glb", "hides": ["body_back"]}
+  },
+  "gear": {"hooded_lantern": "lantern", "torch": "torch"},
+  "figures": {"silas": {"file": "art/figures/silas.glb", "gear": ["main_hand", "off_hand"], "layers": ["long_cloak"],
+    "sockets": {"RightHand": {"offset": [0, 0.02, 0], "turn": [0, 0, 10]}}}}
+}
+```
+
+- **A rigid piece** has a `bone`: it is held there (a `BoneAttachment3D` on the figure's skeleton). `size` is its longest
+  side as a share of the figure's height, `grip` the point held (in the piece's own units; its middle when none is
+  given), `offset` (figure heights) and `turn` (degrees about x, y, z) place it on the bone. A figure entry's `sockets`
+  gives a bone a frame of its own first (where this model's palm is), so one part sits right on different bodies.
+  `"upright": true` keeps the piece standing the way the figure stands while it follows the bone (a lantern hangs, a
+  torch is held up): a hand's roll differs from rig to rig and clip to clip (Tripo's Mixamo rigs agree only on the
+  fingers' direction), so a piece that should stay level is placed this way.
+- **A skinned layer** has no `bone`: its skinned meshes move onto the figure's skeleton and bind to it bone by bone by
+  name, so it plays every clip the figure plays. Bones match ignoring an exporter's prefix and case (`RightHand`,
+  `mixamorig:RightHand`, `mixamorig_RightHand`: `FigureModels.bone`). A layer fits the body it was weighted on: make
+  layers on the body they are worn over, in that body's rest pose, and export them with the armature (a mesh exported
+  without one loses its bind names).
+- **`hides`** names the figure's own meshes the part covers (`"*"` for all of them), so a body under a coat doesn't
+  poke through. Split a body into region meshes for that.
+- Layers go through the figure's material, ink and state (fade, flash, glow, ghost) like its own meshes.
+
+**Gear.** `FigureModels.gear_for(art_id, character)` turns what a character has in the slots their figure's entry
+lists under `gear` (`main_hand`, `off_hand`, `armor`, `cloak`, `head`...) into parts: the item's own `look`, else the
+manifest's `gear` for its id, else for the mundane item under a magic one. Parts are made for the right hand; one in
+the off hand is mirrored (`FigureModels.mirrored`, the id with `@off`). A figure whose entry lists no `gear` slots
+shows none, since its model has its things drawn on. `CombatToken` dresses a character's figure when it is made and
+again whenever what they have on changes, whatever changed it.
+
 ## The look
 
 `shaders/world/lit_figure.gdshader` and its ink pass `figure_ink.gdshader` light a figure the way the 2D figures are lit:
@@ -105,4 +146,5 @@ core), `band_lit`, `band_dark`, `band_mid`, `band_edge`, `flatten` with `flatten
 - An exporter's texture is often 4K or 8K. A figure fills a few hundred pixels: keep the game's copy at 2K.
 - A capture window draws slowly; shoot an action when its clip reaches a time, not after a count of frames.
 - Picking (`SpritePick`) tests a column down the figure's middle and its meshes.
-- Tests make a model in code (tests/unit/test_model_figure.gd) and add it with `FigureModels.register`.
+- Tests make a model in code (tests/unit/test_model_figure.gd) and add it with `FigureModels.register`; parts with
+  `FigureModels.register_part` (tests/unit/test_figure_layers.gd).

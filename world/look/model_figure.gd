@@ -11,11 +11,14 @@ extends DirectionalSprite
 ## and greet) is held in place: its root bone's drift is taken out once, the first time the model is used, and the
 ## distance it covered paces the walk; a looping one (a run) is also centred over the model's feet, and a die clip's
 ## root is held over its square so the figure lies where it stood. Without a die clip the figure tips over backward and
-## lies on its back; without a hurt clip it recoils; without an idle it stirs on its walk (FigureModels.FALLBACKS).
+## lies on its back; without a hurt clip it recoils; without an idle it stands still and breathes, unless its manifest says
+## `idle_from_walk`, then it stirs on its walk.
 ## Surfaces: lit_figure.gdshader with figure_ink.gdshader as their ink (Look.figure_settings),
 ## drawn after the screen pass as the 2D figures are, so the place's mist, grade and depth blur leave it clear. An entry
 ## can paint the model with a texture of its own (`albedo`, a dressing of a shared body), draw it with a game's shader
 ## (`shader`), grow or shrink bones on top of every clip (`bones`, FigureBones) and show it as a ghost (`ghost`).
+## Layers (FigureModels parts): the entry's `layers` and what `wear` puts on, rigid pieces held on bones and skinned
+## layers bound to the model's own skeleton, so a figure's gear and clothes move with every clip.
 
 const SHADER := preload("res://addons/dnd_core/shaders/world/lit_figure.gdshader")
 const INK := preload("res://addons/dnd_core/shaders/world/figure_ink.gdshader")
@@ -37,6 +40,8 @@ const MAX_WALK_RATE := 2.2
 const RUN_FROM := MAX_WALK_RATE
 ## A walk clip that doesn't move the model (made in place) is taken to cover this many of the figure's heights a second.
 const IN_PLACE_PACE := 0.62
+## The speed of a walk-only model's idle when its manifest says `idle_from_walk`: its walk, slowed to a stir.
+const IDLE_STIR := 0.3
 ## Roles whose clips are all used, in turn, rather than the first found.
 const VARIED: Array[String] = ["talk", "greet"]
 
@@ -47,6 +52,17 @@ var _posture: Node3D
 var _player: AnimationPlayer
 var _skeleton: Skeleton3D
 var _meshes: Array[GeometryInstance3D] = []
+## The model's own meshes (a layer can hide them), and its height at rest in the model's units.
+var _own_meshes: Array[MeshInstance3D] = []
+var _rest_height := 1.0
+## Part id -> what it put on the figure: {"nodes": [the attachment or the bound meshes], "meshes": [...], "hides": [...]}.
+var _layers: Dictionary = {}
+## The parts `wear` asked for (the entry's own `layers` are always on).
+var _worn: Array[String] = []
+## The per-instance shader values set so far (tint, flash, glow, ghost), for meshes put on later.
+var _params: Dictionary = {}
+## Upright pieces (a part's `upright`): their holder -> the bone they follow, moved there each time the pose is set.
+var _upright: Dictionary = {}
 ## Drawn as a soft ghost: its surfaces blended, after a depth pass of their own (set_ghost_look with see_through).
 var _soft := false
 var _info: Dictionary = {}
@@ -100,7 +116,8 @@ func _build() -> void:
 	model.name = "Model"
 	_posture.add_child(model)
 	var box := rest_box(model)
-	_scale = _height / maxf(box.size.y, 0.001) * float(_info.get("scale", 1.0))
+	_rest_height = maxf(box.size.y, 0.001)
+	_scale = _height / _rest_height * float(_info.get("scale", 1.0))
 	model.scale = Vector3.ONE * _scale
 	model.rotation.y = deg_to_rad(float(_info.get("turn", 0.0)))
 	model.position.y = -box.position.y * _scale + float(_info.get("lift", 0.0))
@@ -113,6 +130,7 @@ func _build() -> void:
 	var ghostly := _info.get("ghost", {}) as Dictionary
 	_soft = float(ghostly.get("see_through", 0.0)) > 0.0
 	_dress()
+	_fit_layers()
 	_bones()
 	_read_clips()
 	if not ghostly.is_empty():
@@ -147,18 +165,26 @@ static func rest_box(root: Node3D) -> AABB:
 ## Every surface in the figure's material: its own texture (or colour), lit and inked as figures are in this finish.
 ## Materials are shared by every copy of a model; what's a figure's own (its fade, flash, glow) is per instance.
 func _dress() -> void:
-	var shadows := Look.modern() and Graphics.sprite_shadows()
 	var paint := FigureModels.albedo_of(art_id)
-	var own_shader := _own_shader()
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		if mi.mesh == null:
 			continue
-		for i in mi.mesh.get_surface_count():
-			var src := mi.get_active_material(i)
-			mi.set_surface_override_material(i, surface_material(src, paint, own_shader, _soft))
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_meshes.append(mi)
+		_dress_mesh(mi, paint)
+		_own_meshes.append(mi)
+
+
+## One mesh, the model's own or a layer's, in the figure material, with the figure's state so far. `paint` is the
+## entry's own texture for the model's surfaces (a layer keeps its own).
+func _dress_mesh(mi: MeshInstance3D, paint: Texture2D = null) -> void:
+	var shadows := Look.modern() and Graphics.sprite_shadows()
+	var own_shader := _own_shader()
+	for i in mi.mesh.get_surface_count():
+		mi.set_surface_override_material(i, surface_material(mi.get_active_material(i), paint, own_shader, _soft))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for param: StringName in _params:
+		mi.set_instance_shader_parameter(param, _params[param])
+	_meshes.append(mi)
 
 
 ## The game's own shader the entry names (`shader`), or null for the engine's.
@@ -246,7 +272,11 @@ func set_ghost_look(look: Dictionary) -> void:
 	if soft != _soft and model != null:
 		_soft = soft
 		_meshes.clear()
+		_own_meshes.clear()
 		_dress()   # seen through or not changes the surfaces' materials (surface_material's `soft`)
+		for id: Variant in _layers:
+			for mi: Variant in ((_layers[id] as Dictionary)["meshes"] as Array):
+				_dress_mesh(mi as MeshInstance3D)
 	set_ghost(float(look.get("wash", 0.0)))
 	set_glow(float(look.get("glow", 0.0)))
 	var colour := str(look.get("colour", ""))
@@ -258,8 +288,194 @@ func set_ghost_look(look: Dictionary) -> void:
 
 
 func _each_mesh(param: StringName, value: Variant) -> void:
+	_params[param] = value
 	for gi in _meshes:
 		gi.set_instance_shader_parameter(param, value)
+
+
+# --- Layers -----------------------------------------------------------------------------------------------------------
+
+## Wears `parts` (FigureModels part ids: the hero's gear, FigureModels.gear_for) over the layers its entry always has.
+## A part id ending "@off" is the part in the other hand, mirrored (FigureModels.mirrored). Parts no longer asked for
+## come off, new ones go on, the rest stay as they are; a part with no model, or whose bone the skeleton lacks, is
+## left off.
+func wear(parts: Array) -> void:
+	_worn.clear()
+	for p: Variant in parts:
+		_worn.append(str(p))
+	_fit_layers()
+
+
+## The parts on the figure now, in the order they went on.
+func worn_parts() -> Array[String]:
+	var out: Array[String] = []
+	for id: Variant in _layers:
+		out.append(str(id))
+	return out
+
+
+func _fit_layers() -> void:
+	if model == null or _skeleton == null:
+		return
+	var wanted: Array[String] = []
+	for p: Variant in (_info.get("layers", []) as Array):
+		wanted.append(str(p))
+	for p in _worn:
+		if not p in wanted:
+			wanted.append(p)
+	for id: Variant in _layers.keys():
+		if not str(id) in wanted:
+			_take_off(str(id))
+	for id in wanted:
+		if not _layers.has(id):
+			_put_on(id)
+	var hidden := {}
+	for id: Variant in _layers:
+		for h: Variant in ((_layers[id] as Dictionary)["hides"] as Array):
+			hidden[str(h)] = true
+	for mi in _own_meshes:
+		mi.visible = not (hidden.has("*") or hidden.has(str(mi.name)))
+
+
+## Puts part `id` on: a rigid piece on its bone, or a skinned layer's meshes onto the figure's skeleton.
+func _put_on(id: String) -> void:
+	var entry := FigureModels.part(id.trim_suffix(FigureModels.OFF_HAND))
+	if id.ends_with(FigureModels.OFF_HAND):
+		entry = FigureModels.mirrored(entry)
+	var packed := FigureModels.part_scene(id.trim_suffix(FigureModels.OFF_HAND))
+	if packed == null:
+		return
+	var piece := packed.instantiate() as Node3D
+	if piece == null:
+		return
+	var nodes: Array[Node3D] = []
+	var bone_name := str(entry.get("bone", ""))
+	if bone_name != "":
+		var b := FigureModels.bone(_skeleton, bone_name)
+		if b < 0:
+			piece.free()
+			return
+		var hold: Node3D
+		if bool(entry.get("upright", false)):
+			# Upright: where the hand is, but standing the way the figure stands, as a lantern hangs or a torch is held
+			# up whatever the hand's roll, which differs from rig to rig and clip to clip.
+			hold = Node3D.new()
+			_upright[hold] = b
+			if not _skeleton.skeleton_updated.is_connected(_follow_bones):
+				_skeleton.skeleton_updated.connect(_follow_bones)
+		else:
+			hold = BoneAttachment3D.new()
+		hold.name = "Holds_" + id.validate_node_name()
+		_skeleton.add_child(hold)
+		if hold is BoneAttachment3D:
+			(hold as BoneAttachment3D).bone_name = _skeleton.get_bone_name(b)
+		else:
+			hold.position = _skeleton.get_bone_global_pose(b).origin
+		hold.add_child(piece)
+		piece.transform = _hold_at(piece, entry, _skeleton.get_bone_name(b), hold is BoneAttachment3D)
+		nodes.append(hold)
+	else:
+		for n in piece.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if mi.mesh == null or mi.skin == null:
+				continue
+			var own := mi.get_node_or_null(mi.skeleton) as Skeleton3D
+			var keep := mi.transform
+			mi.owner = null
+			mi.get_parent().remove_child(mi)
+			mi.name = "Wears_%s_%d" % [id.validate_node_name(), nodes.size()]
+			_skeleton.add_child(mi)
+			mi.transform = keep
+			mi.skeleton = NodePath("..")
+			mi.skin = _bound_skin(mi.skin, own)
+			nodes.append(mi)
+		piece.free()
+	var meshes: Array[MeshInstance3D] = []
+	for node in nodes:
+		var found: Array[Node] = node.find_children("*", "MeshInstance3D", true, false)
+		found.push_front(node)
+		for n in found:
+			if n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
+				_dress_mesh(n as MeshInstance3D)
+				meshes.append(n as MeshInstance3D)
+	_layers[id] = {"nodes": nodes, "meshes": meshes, "hides": entry.get("hides", []) as Array}
+
+
+func _take_off(id: String) -> void:
+	var rec := _layers[id] as Dictionary
+	for mi: Variant in (rec["meshes"] as Array):
+		_meshes.erase(mi)
+	for node: Variant in (rec["nodes"] as Array):
+		_upright.erase(node)
+		if is_instance_valid(node):
+			(node as Node).queue_free()
+	_layers.erase(id)
+
+
+## A skinned layer's binds named by the figure's own bones: a bind that names a bone the way the layer's rig did
+## ("mixamorig:Hips") is renamed to the figure's ("mixamorig_Hips"); one that only gives a bone index takes its name
+## from the layer's own skeleton. The skin is copied, so the layer's model keeps its own.
+func _bound_skin(skin: Skin, own: Skeleton3D) -> Skin:
+	var out := skin.duplicate() as Skin
+	for i in out.get_bind_count():
+		var name := str(out.get_bind_name(i))
+		if name == "" and own != null and out.get_bind_bone(i) >= 0 and out.get_bind_bone(i) < own.get_bone_count():
+			name = own.get_bone_name(out.get_bind_bone(i))
+		var b := FigureModels.bone(_skeleton, name) if name != "" else -1
+		if b >= 0:
+			out.set_bind_name(i, _skeleton.get_bone_name(b))
+			out.set_bind_bone(i, -1)
+	return out
+
+
+## Where a rigid piece sits on its bone: the figure entry's frame for that bone (`sockets`, the palm of this model's
+## hand, say), then the part's own `offset` and `turn`, its `grip` (the point held, in the piece's own units; its middle
+## when none is given) on the bone, and the piece scaled so its longest side is `size` of the figure's height.
+## Offsets are in figure heights, so a part sits the same on a tall figure as on a short one.
+func _hold_at(piece: Node3D, entry: Dictionary, bone_name: String, turns_with_bone := true) -> Transform3D:
+	var h := _rest_height / _skeleton_scale()
+	var box := rest_box(piece)
+	var longest := maxf(box.size.x, maxf(box.size.y, box.size.z))
+	var size := float(entry.get("size", 0.0))
+	var s := size * h / longest if size > 0.0 and longest > 0.0001 else 1.0
+	var frame := Transform3D.IDENTITY
+	var sockets := _info.get("sockets", {}) as Dictionary
+	for key: Variant in sockets:
+		if FigureModels.bone_key(str(key)) == FigureModels.bone_key(bone_name):
+			var sock := sockets[key] as Dictionary
+			frame = Transform3D(_euler(sock.get("turn")) if turns_with_bone else Basis.IDENTITY, _vec(sock.get("offset")) * h)
+	var basis := _euler(entry.get("turn")) * Basis.from_scale(Vector3.ONE * s)
+	var grip := _vec(entry.get("grip"), box.get_center())
+	return frame * Transform3D(basis, _vec(entry.get("offset")) * h - basis * grip)
+
+
+## Upright pieces to their bones, once the clip has set the pose.
+func _follow_bones() -> void:
+	for hold: Variant in _upright:
+		if is_instance_valid(hold):
+			(hold as Node3D).position = _skeleton.get_bone_global_pose(int(_upright[hold])).origin
+
+
+## How much the model's own units are scaled on the way down to its skeleton (an exporter's armature scale).
+func _skeleton_scale() -> float:
+	var sc := 1.0
+	var p: Node = _skeleton.get_parent()
+	while p != null and p != model and p is Node3D:
+		sc *= (p as Node3D).transform.basis.get_scale().y
+		p = p.get_parent()
+	return maxf(sc, 0.0001)
+
+
+static func _vec(v: Variant, fallback := Vector3.ZERO) -> Vector3:
+	if v is Array and (v as Array).size() >= 3:
+		return Vector3(float((v as Array)[0]), float((v as Array)[1]), float((v as Array)[2]))
+	return fallback
+
+
+## Degrees about x, y and z as a basis.
+static func _euler(v: Variant) -> Basis:
+	var d := _vec(v)
+	return Basis.from_euler(Vector3(deg_to_rad(d.x), deg_to_rad(d.y), deg_to_rad(d.z)))
 
 
 ## The entry's `bones`: each grown or shrunk on top of every clip (FigureBones).
@@ -304,17 +520,15 @@ func _read_clips() -> void:
 				break
 		if not specs.is_empty():
 			_roles[role] = specs
-	# A role without a clip of its own borrows another role's, at its speed (FigureModels.FALLBACKS).
-	for role: String in FigureModels.FALLBACKS:
-		var fb := FigureModels.FALLBACKS[role] as Dictionary
-		if _roles.has(role) or not _roles.has(str(fb["role"])):
-			continue
-		var borrowed: Array[Dictionary] = []
-		for spec: Dictionary in _roles[str(fb["role"])] as Array:
+	# A walk-only rig stands still and breathes (_play_loop), unless its manifest says idle_from_walk: then it idles on its
+	# walk, slowed to a stir.
+	if not _roles.has("idle") and _roles.has("walk") and bool(_info.get("idle_from_walk", false)):
+		var stir: Array[Dictionary] = []
+		for spec: Dictionary in _roles["walk"] as Array:
 			var b := spec.duplicate()
-			b["speed"] = float(spec.get("speed", 1.0)) * float(fb["speed"])
-			borrowed.append(b)
-		_roles[role] = borrowed
+			b["speed"] = float(spec.get("speed", 1.0)) * IDLE_STIR
+			stir.append(b)
+		_roles["idle"] = stir
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add
