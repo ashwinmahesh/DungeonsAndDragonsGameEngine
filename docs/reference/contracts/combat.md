@@ -237,7 +237,23 @@ critical, action}, `object_damage` {id, amount}, `object_broken` {id}, `object_f
 `object_fire` {cell, out?, poured?}, `object_throw` {by, cell, item}; the scene plays them with ObjectView
 (addons/dnd_core/world/combat/object_view.gd). BattleScenery (addons/dnd_core/world/combat/battle_scenery.gd) places the objects: `from_board(e, board)`
 for any board's '=' squares (CombatView.begin, once: `objects.placed`), `for_location(view, e)` for a location's closed
-doors, '=' squares and props that `hang` (chandeliers), and `after_fight(view, e)`.
+doors, '=' squares and props that `hang` (chandeliers), `for_spec(view, e, spec)` for what the encounter puts down
+itself (its `objects`, `EncounterObjects.put(entry)`: a kind, the entry's own Armor Class, Hit Points and defences, a
+`model` ObjectView draws from the props catalog while it stands), and `after_fight(view, e)`.
+
+### Fuel and what breaks open (`ObjectFuel`, `e.objects.fuel`)
+
+A BattleObject's `fuel` (a word) is food for a creature whose stat block `devours` {fuel: [words], within (ft, 10),
+heal, advantage, seeks, name}: as its turn starts (EncounterObjects.turn_start) it eats the nearest standing one within
+`within` feet, one a turn: the object is gone (no wreckage), it regains `heal` Hit Points, and `advantage` gives its
+attacks Advantage until its next turn starts (an Effect, source `devour`). Its `releases` {monster, name, art, hp
+("half" or a number), side, minion_of} is the creature that comes out, once, when it is eaten, broken (`_break`) or
+smashed: on its square or the nearest free one, right after the creature whose block is `minion_of` in the order (else
+after the one whose turn it is), with `minion_of` meta so a boss's `minions: vanish` takes it along. The AI
+(`AiBrain._fuel_turn`, before the plan) ends its move within reach of food it can walk to this turn, staying put when
+it already is, then strikes whoever is in reach; with `seeks`, food out of this turn's reach draws it as near as its
+move goes when no foe is in reach where it stands. A released creature carries `released_from` meta (the object's id).
+Events: `object_eaten` {id, by}, then `heal` and `summon_creature`.
 
 What creatures do with them (`ObjectActions`, `e.objects.actions`): `toggle_door(c, oid)` (the free object interaction,
 else Utilize or Fast Hands; `door_why`; `set_door(o, open)` flips the WALL flag), `shove(c, oid)` (one attack of the

@@ -20,6 +20,7 @@ var _flames: Dictionary = {}     ## object id or square key -> Node3D
 var _webs: Dictionary = {}       ## object id -> Node3D (its squares in meta "cells")
 var _hung: Dictionary = {}       ## object id -> the chandelier drawn here (no location prop draws it)
 var _moved_to: Dictionary = {}   ## object id -> the square its art stands on, once a shove has moved it
+var _placed: Dictionary = {}     ## object id -> the piece drawn for something the fight put down (its `model`)
 var _rng := RandomNumberGenerator.new()
 
 
@@ -37,6 +38,8 @@ func sync(objects: EncounterObjects) -> void:
 		# Shoved since the board was built (a fight resumed from a save): its art goes where it is now.
 		if o.home.x >= 0 and o.cells.size() == 1 and (_moved_to.get(o.id, o.home) as Vector2i) != o.cells[0]:
 			_slide_now(o, _moved_to.get(o.id, o.home) as Vector2i, o.cells[0])
+		if o.model != "" and not o.destroyed and not _placed.has(o.id) and not o.cells.is_empty():
+			_placed[o.id] = _place_model(o)
 		if o.door_id != "" and not o.destroyed:
 			var leaf := board.get_node_or_null("Door_" + o.door_id) as Node3D
 			if leaf != null:
@@ -113,6 +116,16 @@ func play(ev: Dictionary, objects: EncounterObjects, tokens: Dictionary, fx: Spe
 			if o != null and not _broken.has(o.id):
 				_show_broken(o, objects, true)
 				await get_tree().create_timer(0.35).timeout
+		"object_eaten":
+			# Eaten whole (ObjectFuel.devour): it shrinks into the eater, leaving no wreckage.
+			if o != null and not _broken.has(o.id):
+				_broken[o.id] = true
+				var piece := _placed.get(o.id) as Node3D
+				if piece != null and is_instance_valid(piece):
+					var tw := create_tween()
+					tw.tween_property(piece, "scale", Vector3.ONE * 0.05, 0.35)
+					await tw.finished
+					piece.visible = false
 		"object_door":
 			if o != null and o.door_id != "":
 				var leaf := board.get_node_or_null("Door_" + o.door_id) as Node3D
@@ -173,6 +186,9 @@ func _show_broken(o: BattleObject, objects: EncounterObjects, animate: bool) -> 
 	var prop := _prop_piece(o)
 	if prop != null:
 		prop.visible = false
+	var placed := _placed.get(o.id) as Node3D
+	if placed != null and is_instance_valid(placed):
+		placed.visible = false
 	for cell in o.cells:
 		for n: Variant in board.dressing.get(cell, []):
 			if is_instance_valid(n) and n is Node3D:
@@ -333,6 +349,28 @@ func _burst(o: BattleObject, fx: SpellFx) -> void:
 
 
 ## The location prop that dresses `o` (SetDressing.place names it Dressing_<id>), or null.
+## The piece for something the fight put down (its `model`, from the props catalog), drawn here so it goes when the
+## fight's scene does; a plain marker when the catalog has no such art.
+func _place_model(o: BattleObject) -> Node3D:
+	var spec := {"id": "fight_" + o.id, "cell": [o.cells[0].x, o.cells[0].y], "model": o.model}
+	var piece := SetDressing.place(board, spec)
+	if piece == null:
+		piece = Node3D.new()
+		piece.name = "Dressing_" + str(spec["id"])
+		var mesh := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 0.12
+		cyl.bottom_radius = 0.12
+		cyl.height = 0.3
+		mesh.mesh = cyl
+		mesh.position.y = 0.15
+		piece.add_child(mesh)
+		piece.position = board.cell_center(o.cells[0])
+		board.add_child(piece)
+	piece.reparent(self)
+	return piece
+
+
 func _prop_piece(o: BattleObject) -> Node3D:
 	if o.prop_id == "" or board == null:
 		return null

@@ -214,6 +214,9 @@ func begin_turn(c: Combatant) -> CombatResult:
 				var sr: Variant = e.game.special_action(c, sa, null, Vector2i(-1, -1))
 				if sr != null:
 					return sr as CombatResult
+	var fed := _fuel_turn(c)
+	if fed != null:
+		return fed
 	if str(c.ai_profile) == "strahd":
 		var bt: Variant = boss.play_turn(c)
 		if bt != null:
@@ -270,6 +273,91 @@ func begin_turn(c: Combatant) -> CombatResult:
 			last_plan = {"kind": "flee", "why": "Bloodied coward"}
 			return _flee(c, near, true)
 	return null
+
+
+## A creature that eats things on the battlefield (a stat block's `devours`, ObjectFuel) goes for food it can reach this
+## turn ahead of a foe it could strike: it ends its move within reach of the nearest (it eats as its next turn starts),
+## the square nearest a foe of those, and strikes whoever it can from there. One already beside food stays. With
+## `seeks`, food farther off draws it as near as its move takes it, unless a foe is in reach where it stands. Null when
+## it goes for no food this turn.
+func _fuel_turn(c: Combatant) -> CombatResult:
+	var e := enc()
+	if c.side == &"party" or c.is_player_controlled():
+		return null
+	var food := e.objects.fuel.food_for(c)
+	if food.is_empty():
+		return null
+	var within := ObjectFuel.within_ft(c)
+	var reach := e.reachable_for(c)
+	var crowd := crowd_map(c)
+	var foes: Array[Combatant] = []
+	for h in e.hostiles_of(c):
+		if not h.is_down() and e.can_see(c, h):
+			foes.append(h)
+	var best_cell := Vector2i(-1, -1)
+	var best: Array[float] = []
+	var aim: BattleObject = null
+	var cells: Array[Vector2i] = [c.cell]
+	for cell0: Vector2i in reach:
+		if cell0 != c.cell:
+			cells.append(cell0)
+	for cell: Vector2i in cells:
+		var info := reach.get(cell, {"occupied": false, "cost": 0}) as Dictionary
+		if cell != c.cell and (bool(info["occupied"]) or int(crowd.get(cell, 0)) > 0):
+			continue
+		var near: BattleObject = null
+		for o in food:
+			if e.grid.distance_ft(cell, c.size_cells, o.cells[0], 1) <= within:
+				near = o
+				break
+		if near == null:
+			continue
+		var to_foe := 1e6
+		for h in foes:
+			to_foe = minf(to_foe, float(e.grid.distance_ft(cell, c.size_cells, h.cell, h.size_cells)))
+		# Staying beside food it already reaches beats walking to other food; then the nearer food, then a foe nearby.
+		var score: Array[float] = [0.0 if cell == c.cell else 1.0, float(e.objects.distance_ft(c, near)), to_foe, float(info["cost"])]
+		if best.is_empty() or _before(score, best):
+			best = score
+			best_cell = cell
+			aim = near
+	if aim == null:
+		if not bool(ObjectFuel.devours_of(c).get("seeks", false)) or not _best_in_reach(c).is_empty():
+			return null
+		# Nothing in reach this turn: as near the nearest food as its move goes (walking distance, round walls).
+		aim = food[0]
+		var walk := _walk_from(aim.cells[0])
+		var best_d := 1 << 30
+		for cell: Vector2i in reach:
+			var info2 := reach[cell] as Dictionary
+			if bool(info2["occupied"]) or int(crowd.get(cell, 0)) > 0:
+				continue
+			var d := int((walk[cell] as Dictionary)["cost"]) if walk.has(cell) else 1000 + e.grid.distance_ft(cell, c.size_cells, aim.cells[0], 1)
+			if d < best_d or (d == best_d and int(info2["cost"]) < int((reach[best_cell] as Dictionary)["cost"])):
+				best_d = d
+				best_cell = cell
+		if best_cell.x < 0:
+			return null
+	last_plan = {"kind": "fuel", "why": "going for %s" % aim.the()}
+	var strike := func() -> CombatResult:
+		var alt := _best_in_reach(c)
+		if alt.is_empty() or not c.action_available:
+			return CombatResult.new()
+		return e.then(_attack_step(c, alt["target"] as Combatant, str(alt["option"])), func() -> CombatResult: return _after_main(c))
+	if best_cell == c.cell:
+		return strike.call() as CombatResult
+	var moved := e.move(c, best_cell)
+	if not moved.ok:
+		return null
+	return e.then(moved, strike)
+
+
+## Whether score `a` comes before `b`, each number in turn (lower wins).
+static func _before(a: Array[float], b: Array[float]) -> bool:
+	for i in mini(a.size(), b.size()):
+		if not is_equal_approx(a[i], b[i]):
+			return a[i] < b[i]
+	return false
 
 
 ## The turn's plan: {plan: plan_turn's, cast: when the mode's casters weigh their spells (Difficulty.spells: Balanced,

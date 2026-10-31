@@ -40,12 +40,15 @@ var _fires_dirty := true
 ## Doors, shoving, toppling and throwing (combat/object_actions.gd); fire spreading and bursting (combat/object_fire.gd).
 var actions: ObjectActions
 var fire: ObjectFire
+## What creatures eat and what breaks open to let a creature out (combat/object_fuel.gd).
+var fuel: ObjectFuel
 
 
 func _init(encounter: Encounter) -> void:
 	_enc = weakref(encounter)
 	actions = ObjectActions.new(encounter)
 	fire = ObjectFire.new(encounter)
+	fuel = ObjectFuel.new(encounter)
 
 
 func enc() -> Encounter:
@@ -72,6 +75,37 @@ func add(kind_id: String, cells: Array[Vector2i], extra: Dictionary = {}) -> Bat
 	if o.cells.size() == 1:
 		o.home = o.cells[0]
 	fill_squares(o)
+	return o
+
+
+## An object the fight itself puts down (an encounter's `objects`, BattleScenery.for_spec): {kind, cell, id, name,
+## model, fuel, releases, and the kind's numbers to change: ac, hp, size, immune, resist, vulnerable}.
+func put(entry: Dictionary) -> BattleObject:
+	var cells: Array[Vector2i] = [Vector2i(int((entry["cell"] as Array)[0]), int((entry["cell"] as Array)[1]))]
+	var extra := {}
+	for k: String in ["name", "model", "fuel", "size"]:
+		if entry.has(k):
+			extra[k] = str(entry[k])
+	if entry.has("releases"):
+		extra["releases"] = (entry["releases"] as Dictionary).duplicate(true)
+	var o := add(str(entry.get("kind", "vessel")), cells, extra)
+	if entry.has("id"):
+		o.id = str(entry["id"])
+	if entry.has("ac"):
+		o.ac = int(entry["ac"])
+	if entry.has("hp"):
+		o.hp_max = int(entry["hp"])
+		o.hp = o.hp_max
+	for k2: String in ["immune", "resist", "vulnerable"]:
+		if entry.has(k2):
+			var to: Array[String] = []
+			to.assign((entry[k2] as Array).map(func(x: Variant) -> String: return str(x)))
+			# Every object takes no Poison or Psychic damage, whatever the entry lists.
+			if k2 == "immune":
+				for ty: String in ["poison", "psychic"]:
+					if not ty in to:
+						to.append(ty)
+			o.set(k2, to)
 	return o
 
 
@@ -128,6 +162,7 @@ func smash(o: BattleObject, how: String) -> void:
 			e.grid.set_flag(cell, CombatGrid.DIFFICULT, true)
 		e._cover_cache.clear()
 	e.log.add("info", "%s breaks to pieces (%s)" % [o.title(), how], "")
+	fuel.release(o)
 
 
 ## The creature standing on the floor of `cell` (not one flying or floating over it), or null.
@@ -282,6 +317,7 @@ func _break(o: BattleObject) -> void:
 	var how := {"doorway": "the way through is open", "rubble": "leaving rubble (Difficult Terrain)"}.get(o.leaves, "") as String
 	e.log.add("info", "%s breaks%s" % [o.title(), (", " + how) if how != "" and o.holds == "" else ""], "")
 	e.events.append({"type": "object_broken", "id": o.id})
+	fuel.release(o)
 
 
 ## A chandelier's chain breaks: everyone under it makes the save (data `fall`) or takes the damage and falls Prone
@@ -771,9 +807,11 @@ func _stands_in(c: Combatant, sq: Dictionary) -> bool:
 	return sq["cell"] in c.footprint() and (bool(sq.get("web", false)) or c.altitude <= 0)
 
 
-## EncounterTurns, the start of `c`'s turn: a burning web burns whoever starts its turn in it; webs whose prey is gone go.
+## EncounterTurns, the start of `c`'s turn: it eats food in reach (ObjectFuel); a burning web burns whoever starts its turn
+## in it; webs whose prey is gone go.
 func turn_start(c: Combatant) -> void:
 	_tidy()
+	fuel.turn_start(c)
 	for sq: Dictionary in squares.duplicate():
 		if bool(sq.get("lit", false)) and "start" in (sq.get("on", []) as Array) and _stands_in(c, sq):
 			_burn(c, sq, "The burning web")
