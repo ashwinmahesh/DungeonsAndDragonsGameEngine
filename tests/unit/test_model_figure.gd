@@ -244,6 +244,57 @@ func test_a_fall_clip_lays_it_down_on_its_own_square() -> void:
 	fig.free()
 
 
+func test_after_a_fall_clip_it_gets_up_by_playing_the_fall_back() -> void:
+	var fig := _figure(1.0, {"clips": {"die": {"clip": "fall", "from": 0.2, "speed": 4.0}}}, true)
+	assert_true(fig.die(), "it falls")
+	var waited := 0
+	while fig.is_dying() and waited < 120:
+		await get_tree().process_frame
+		waited += 1
+	fig.pose = ""
+	await get_tree().process_frame
+	assert_eq(str(fig._player.current_animation), "fall.001", "getting up is the fall")
+	assert_true(fig._player.get_playing_speed() < 0.0, "played backwards")
+	assert_eq(fig._rise_to, 0.2, "to where the fall began")
+	assert_false(fig.gesture("talk"), "busy getting up")
+	waited = 0
+	while fig._rise_to >= 0.0 and waited < 240:
+		await get_tree().process_frame
+		waited += 1
+	assert_true(waited < 240, "it gets up")
+	assert_eq(str(fig._player.current_animation), "idle.001", "then the idle")
+	fig.free()
+
+
+func test_a_model_without_an_idle_stands_still_and_breathes() -> void:
+	var packed := model()
+	var scene := packed.instantiate()
+	var player := scene.get_node("AnimationPlayer") as AnimationPlayer
+	player.get_animation_library(&"").remove_animation(&"idle.001")
+	var walk_only := PackedScene.new()
+	walk_only.pack(scene)
+	scene.free()
+	FigureModels.register(ID, {}, walk_only)
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	add_child(fig)
+	assert_false(fig.has_role("idle"), "a walk-only rig")
+	fig.moving = true
+	await get_tree().process_frame
+	assert_eq(str(fig._player.current_animation), "walk.001", "it walks")
+	fig.moving = false
+	await get_tree().process_frame
+	assert_false(fig._player.is_playing(), "standing, it doesn't walk on the spot")
+	var heights := {}
+	for i in 40:
+		fig._time += ModelFigure.BREATH_PERIOD / 40.0
+		heights[snappedf(fig._breath().y.y, 0.0001)] = true
+	assert_true(heights.size() > 5, "it breathes")
+	fig.free()
+	var with_idle := _figure(1.0)
+	assert_eq(with_idle._breath(), Basis.IDENTITY, "a model with an idle clip breathes in its clip")
+	with_idle.free()
+
+
 func test_a_hit_clip_plays_in_place_of_the_lean() -> void:
 	var fig := _figure(1.0, {"clips": {"hurt": "hit_to_body_01"}}, true)
 	assert_true(fig.hurt(), "the hit clip plays")
