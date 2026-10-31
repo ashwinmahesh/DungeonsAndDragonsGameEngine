@@ -352,6 +352,16 @@ func legendary_plan(c: Combatant) -> Dictionary:
 		return best
 	if move_opt.is_empty():
 		return {}
+	# A creature that eats things on the battlefield (a block's `devours`, ObjectFuel) spends its moves on its food: it
+	# stays beside food it will eat as its turn starts, and otherwise moves as near the nearest as the move goes.
+	var food := e.objects.fuel.food_for(c)
+	if not food.is_empty():
+		if e.objects.distance_ft(c, food[0]) <= ObjectFuel.within_ft(c):
+			return {}
+		var to_food := _cell_toward(c, food[0].cells[0], budget)
+		if to_food != c.cell and L.use_why(c, move_opt, null, to_food) == "":
+			return {"option": str(move_opt["id"]), "cell": to_food}
+		return {}
 	var target := _best_target(c)
 	if not threatened and left - Legendary.cost(move_opt) >= _cheapest_strike(c) and target != null and e.distance(c, target) > 5:
 		var cell := _cell_beside(c, target, budget)
@@ -607,6 +617,23 @@ func _cell_beside(c: Combatant, t: Combatant, budget: int = -1) -> Vector2i:
 		if cost < best_cost:
 			best_cost = cost
 			best = cell
+	return best
+
+
+## The free square within `budget` feet of `c` nearest `cell` (its own square if none is nearer).
+func _cell_toward(c: Combatant, cell: Vector2i, budget: int) -> Vector2i:
+	var e := enc()
+	var reach := e.reachable_for(c, budget)
+	var crowd := e.ai.crowd_map(c)
+	var best := c.cell
+	var best_d := e.grid.distance_ft(c.cell, c.size_cells, cell, 1)
+	for to: Vector2i in reach:
+		if bool((reach[to] as Dictionary)["occupied"]) or int(crowd.get(to, 0)) > 0:
+			continue
+		var d := e.grid.distance_ft(to, c.size_cells, cell, 1)
+		if d < best_d:
+			best_d = d
+			best = to
 	return best
 
 

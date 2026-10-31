@@ -252,7 +252,8 @@ smashed: on its square or the nearest free one, right after the creature whose b
 after the one whose turn it is), with `minion_of` meta so a boss's `minions: vanish` takes it along. The AI
 (`AiBrain._fuel_turn`, before the plan) ends its move within reach of food it can walk to this turn, staying put when
 it already is, then strikes whoever is in reach; with `seeks`, food out of this turn's reach draws it as near as its
-move goes when no foe is in reach where it stands. A released creature carries `released_from` meta (the object's id).
+move goes when no foe is in reach where it stands. Its legendary moves (BossBrain.legendary_plan) go to food too, after
+any strike: none while it stands beside food, else as near the nearest as the move goes. A released creature carries `released_from` meta (the object's id).
 Events: `object_eaten` {id, by}, then `heal` and `summon_creature`.
 
 What creatures do with them (`ObjectActions`, `e.objects.actions`): `toggle_door(c, oid)` (the free object interaction,
