@@ -268,6 +268,9 @@ func _term() -> bool:
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)
+	if t.begins_with("minutes_since."):
+		var mins := st.minutes_since(t.substr(14))
+		return mins >= 0 and _compare(mins, op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("days_since."):
 		var gone := st.days_since(t.substr(11))
 		return gone >= 0 and _compare(gone, op if op != "" else ">", _literal(rhs) if op != "" else 0)

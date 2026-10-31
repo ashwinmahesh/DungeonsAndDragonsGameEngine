@@ -51,6 +51,9 @@ func _in_round(ev: Dictionary, round_no: int) -> bool:
 		return false
 	if ev.has("times") and int((done.get(str(ev["id"]), {}) as Dictionary).get("times", 0)) >= int(ev["times"]):
 		return false
+	# `until_flag`: it stops once the fight has set that flag (the fire put out by the buckets thrown in the fight).
+	if ev.has("until_flag") and bool(leg().story_flags.get(str(ev["until_flag"]), false)):
+		return false
 	return (round_no - first) % maxi(1, int(ev.get("every", 1))) == 0
 
 

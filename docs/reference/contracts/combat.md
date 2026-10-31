@@ -371,7 +371,8 @@ fight (its summons, `summoner` meta) or that names it as `minion_of` (block fiel
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
 storm's gusts, a breach letting the mist in, reinforcements. Each acts on `at` (default 20, losing ties, like a lair),
-in the rounds `from_round`, `every`, `until_round` and `times` allow, as itself or as one entry of its `table` (`pick`:
+in the rounds `from_round`, `every`, `until_round`, `times` and `until_flag` (it stops once the fight sets that flag)
+allow, as itself or as one entry of its `table` (`pick`:
 "cycle" in turn, else at random, never the one used last). An outcome is a `save` (whoever it reaches, `affects` party,
 enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
 for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and
