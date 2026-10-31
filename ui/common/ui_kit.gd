@@ -244,7 +244,7 @@ static func button_style(state: String) -> StyleBoxFlat:
 		"hover":
 			s = style("ui_wine", "gilt", 2)
 		"pressed":
-			s = style("blood", "gilt_light", 2)
+			s = style(Look.ui_key("ui_primary", "blood"), "gilt_light", 2)
 		"focus":
 			s = style("ui_wine", "gilt_light", 2)
 			s.draw_center = false
