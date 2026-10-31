@@ -5,7 +5,8 @@
 # "engine changed" plan (lint, validate, every script compiling, the engine's changed test files).
 #
 # Setup (Settings → Secrets and variables → Actions):
-#   Variables tab: DOWNSTREAM_GAME_REPO = owner/name of the game repo (required; without it the run skips with a notice).
+#   Variables tab: DOWNSTREAM_GAME_REPO = owner/name of another game repo to check (optional; GAME_REPO below names the
+#                  default).
 #                  DOWNSTREAM_GAME_REF = the game branch to check (optional, default: its default branch).
 #                  DOWNSTREAM_GODOT_VERSION and DOWNSTREAM_GODOT_SHA512 (optional, default 4.7.2 and its checksum).
 #   Secrets tab:   DOWNSTREAM_GAME_TOKEN, a fine-grained token with read-only Contents on the game repo (needed only when
@@ -36,7 +37,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GAME_REPO: ${{ vars.DOWNSTREAM_GAME_REPO }}
+  # The game checked by default (owner, 2026-10-31); the DOWNSTREAM_GAME_REPO variable checks another instead.
+  GAME_REPO: ${{ vars.DOWNSTREAM_GAME_REPO || 'ashwinmahesh/CurseOfStrahd' }}
   GAME_REF: ${{ inputs.game_ref || vars.DOWNSTREAM_GAME_REF }}
   GODOT_VERSION: ${{ vars.DOWNSTREAM_GODOT_VERSION || '4.7.2' }}
   GODOT_ZIP_SHA512: ${{ vars.DOWNSTREAM_GODOT_SHA512 || '9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65' }}
