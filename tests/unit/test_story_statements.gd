@@ -54,6 +54,15 @@ func test_a_party_save_names_each_roll_and_the_failed_take_the_rest() -> void:
 	assert_eq([st.party[0].exhaustion, st.party[1].exhaustion], [1, 1], "the ok branch: nobody failed")
 
 
+func test_a_hero_who_resists_the_damage_passes_the_save() -> void:
+	var st := _st()
+	var fx := Effect.new("Test Fire Ward", &"feature", "test_fire_ward").with_modifier("resistance", {"value": "fire"})
+	st.party[0].add_effect(fx)
+	var beats := _beats(_run(st, "~ start\nsave Constitution DC 30 party unless resists fire -> ok | bad\n~ ok\n| Fine.\n~ bad\nexhaust +1 failed\n"))
+	assert_true(str(beats[0]["text"]).contains("passes (Fire Resistance)"), str(beats[0]))
+	assert_eq([st.party[0].exhaustion, st.party[1].exhaustion], [0, 1], "only the one without it failed")
+
+
 func test_an_attack_roll_check() -> void:
 	var st := _st()
 	var ch := st.party[0]
