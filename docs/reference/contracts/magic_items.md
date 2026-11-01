@@ -101,3 +101,9 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Marks on a weapon
+
+A power with `custom: "weapon_mark"` and `params: {mark, minutes}` marks the user's weapon (salt wiped on a blade) for
+`minutes` or until a weapon hit uses it up. A creature with a trait `vulnerable_to_mark: <mark>` takes double the
+weapon's damage from that hit (EncounterAttacks, ItemSpecials.weapon_mark).

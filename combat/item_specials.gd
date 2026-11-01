@@ -47,6 +47,32 @@ func why(c: Combatant, p: Dictionary) -> String:
 	return w if w != "" else _arcana_why(c, p)
 
 
+## A mark wiped on a weapon (`weapon_mark`: params {mark, minutes}): the wielder's weapon carries it for `minutes` or
+## until a weapon hit, and a creature whose trait says `vulnerable_to_mark: <mark>` takes double from it.
+static func mark_effect(p: Dictionary) -> Effect:
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	var fx := Effect.new(str((p["data"] as Dictionary).get("name", "Mark")), &"item", "weapon_mark")
+	fx.lasting({"kind": "minutes", "amount": int(params.get("minutes", 1))})
+	fx.modifiers.append(Modifier.of("flag", {"value": "weapon_mark:%s" % str(params.get("mark", "mark"))}, fx.name, &"item"))
+	return fx
+
+
+## The mark on `c`'s weapon now, or "".
+func weapon_mark(c: Combatant) -> String:
+	for fx: Effect in c.creature.effects:
+		if fx.source_id == "weapon_mark":
+			for m in fx.modifiers:
+				if m.text("value").begins_with("weapon_mark:"):
+					return m.text("value").substr(12)
+	return ""
+
+
+func spend_weapon_mark(c: Combatant) -> void:
+	for fx: Effect in c.creature.effects.duplicate():
+		if fx.source_id == "weapon_mark":
+			c.creature.remove_effect(fx)
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -59,6 +85,11 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return _drink(c, p, t, id)
 		"end_granted_effect":
 			return _end_granted(c, p)
+		"weapon_mark":
+			_pay(c, p)
+			c.creature.add_effect(mark_effect(p))
+			enc().log.add("info", "%s wipes a weapon with %s" % [c.name(), str((p["data"] as Dictionary).get("name", ""))], c.id)
+			return CombatResult.new()
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)

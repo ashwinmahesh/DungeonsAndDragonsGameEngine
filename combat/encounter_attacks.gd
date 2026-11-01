@@ -772,6 +772,14 @@ func _after_hit(st: Dictionary) -> CombatResult:
 	var primary := str(p.damage_type)
 	if not replaced:
 		parts[primary] = maxi(0, int(parts.get(primary, 0)) + bonus)
+	# A mark wiped on the weapon (salt; ItemSpecials `weapon_mark`): a creature whose trait names it (`vulnerable_to_mark`)
+	# takes the weapon's damage twice over, and any weapon hit uses the mark up.
+	var mark := e.items.specials.weapon_mark(c)
+	if mark != "" and p.item_id != "":
+		if e.monster_actions.traits(target).any(func(tr: Variant) -> bool: return str((tr as Dictionary).get("vulnerable_to_mark", "")) == mark):
+			parts[primary] = int(parts.get(primary, 0)) * 2
+			dmg_text.append("Vulnerable to the %s on the weapon: double" % mark)
+		e.items.specials.spend_weapon_mark(c)
 	if bonus != 0:
 		dmg_text.append(p.damage_bonus.describe())
 	var details := st["details"] as Array[String]
