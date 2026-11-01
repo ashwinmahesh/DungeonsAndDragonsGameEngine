@@ -451,6 +451,9 @@ func _advance_index() -> void:
 			e.legendary.round_ending()
 			if e.state != Encounter.State.ACTIVE:
 				return
+			_clock_runs_out()
+			if e.state != Encounter.State.ACTIVE:
+				return
 			e.turn_index = 0
 			e.round_no += 1
 			_drop_reflex_turns()
@@ -508,7 +511,11 @@ func _check_over() -> void:
 			party_up = true
 		elif c.side == &"enemy":
 			enemies_up = true
-	if not enemies_up:
+	if _ward_fallen() != null:
+		e.state = Encounter.State.OVER
+		e.outcome = "ended" if str(e.ends_when.get("ward_lost", "defeat")) == "ended" else "defeat"
+		e.log.add("info", "%s is lost" % _ward_fallen().name(), "")
+	elif not enemies_up or _wards_out():
 		e.state = Encounter.State.OVER
 		e.outcome = "victory"
 	elif _party_left():
@@ -602,9 +609,73 @@ func objects_gone_check() -> void:
 	_finish("ended" if str(e.ends_when.get("objects_outcome", "victory")) == "ended" else "victory")
 
 
+## The meta on a creature the party must keep alive in this fight (a location monster entry's `ward: true`): its fall
+## loses the fight, and with `ends_when.ward_exits` getting every ward out by one wins it.
+const WARD := &"ward"
+
+
+static func is_ward(c: Combatant) -> bool:
+	return bool(c.creature.get_meta(WARD, false))
+
+
+## A ward that has fallen (dead or at 0 Hit Points, still on the board), or null.
+func _ward_fallen() -> Combatant:
+	for c in enc().combatants:
+		if is_ward(c) and not c.has_meta("left_fight") and (not c.is_alive() or c.creature.hp <= 0):
+			return c
+	return null
+
+
+## Whether every ward has left by a ward exit (and there is one).
+func _wards_out() -> bool:
+	var e := enc()
+	if (e.ends_when.get("ward_exits", []) as Array).is_empty():
+		return false
+	var wards := e.combatants.filter(func(c: Combatant) -> bool: return is_ward(c))
+	return not wards.is_empty() and wards.all(func(c: Combatant) -> bool: return str(c.get_meta("left_fight", "")) == "exit")
+
+
+## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there; so does a ward on one of
+## `ends_when.ward_exits`.
+
+
+## The rounds left on the fight's clock (`ends_when.rounds`), this one counted; -1 when it has none.
+func clock_left() -> int:
+	var e := enc()
+	var rounds := int(e.ends_when.get("rounds", 0))
+	return maxi(0, rounds - maxi(1, e.round_no) + 1) if rounds > 0 else -1
+
+
+## As a round ends: the clock's last round is over, so the fight ends as the clock says (the mill falls, the rite is
+## done, the party held out), its flag set for the story; a countdown only (`none`) sets the flag and goes on.
+func _clock_runs_out() -> void:
+	var e := enc()
+	var rounds := int(e.ends_when.get("rounds", 0))
+	if rounds <= 0 or e.round_no != rounds:
+		return
+	var outcome := str(e.ends_when.get("rounds_outcome", "ended"))
+	if not outcome in ["victory", "defeat", "ended", "none"]:
+		outcome = "ended"
+	var flag := str(e.ends_when.get("rounds_flag", ""))
+	if flag != "":
+		e.legendary.story_flags[flag] = true
+	var label := str(e.ends_when.get("rounds_label", ""))
+	e.log.add("info", "Time is up%s" % ((": " + label) if label != "" else ""), "")
+	e.events.append({"type": "clock", "outcome": outcome, "label": label, "rounds": rounds})
+	if outcome != "none":   # a countdown only: what it counted down to happens in the fight itself (a round event)
+		_finish(outcome)
+
+
 ## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there.
 func _step_out(c: Combatant) -> void:
 	var e := enc()
+	if is_ward(c) and not c.is_down() and not c.has_meta("left_fight"):
+		for x: Variant in e.ends_when.get("ward_exits", []):
+			if Vector2i(int((x as Array)[0]), int((x as Array)[1])) in c.footprint():
+				c.set_meta(LEFT_AT, [c.cell.x, c.cell.y])
+				e.log.add("move", "%s gets out" % c.name(), c.id)
+				e.movement.leave_grid(c, "exit")
+				return
 	var exits := e.ends_when.get("exits", []) as Array
 	if exits.is_empty() or not _hero(c) or c.is_down() or c.has_meta("left_fight"):
 		return
