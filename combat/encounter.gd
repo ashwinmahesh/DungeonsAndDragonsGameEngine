@@ -93,6 +93,8 @@ var game: GameFeatures
 var echo_knight: EchoKnight
 ## Illusory decoy bodies (combat/decoy_images.gd).
 var images: DecoyImages
+## Ground that harms whoever stays in it: a place's areas with a `hazard` (combat/area_hazards.gd).
+var zones: AreaHazards
 ## The attack whose damage is being dealt right now: {attacker, target, melee} (Zhentarim Tactics answers a melee hit).
 var hit_context: Dictionary = {}
 ## Magic items: the Items tab, item powers and the hooks below (combat/combat_items.gd, ADR 0012).
@@ -187,6 +189,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	game = GameFeatures.make(self)
 	echo_knight = EchoKnight.new(self)
 	images = DecoyImages.new(self)
+	zones = AreaHazards.new(self)
 	triggered_features = TriggeredFeatures.new(self)
 	items = CombatItems.new(self)
 	legendary = Legendary.new(self)
