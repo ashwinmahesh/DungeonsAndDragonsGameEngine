@@ -245,9 +245,9 @@ itself (its `objects`, `EncounterObjects.put(entry)`: a kind, the entry's own Ar
 ### Fuel and what breaks open (`ObjectFuel`, `e.objects.fuel`)
 
 A BattleObject's `fuel` (a word) is food for a creature whose stat block `devours` {fuel: [words], within (ft, 10),
-heal, hungry_at, advantage, seeks, name}: only when it would gain (ObjectFuel.hungry: with `heal`, once it has lost at
-least `hungry_at` x `heal` Hit Points, half the heal by default; always when it heals nothing; the AI makes for food
-only then too), as its turn starts (EncounterObjects.turn_start) it eats the nearest standing one within
+heal, hungry_at, advantage, seeks, name}: with `hungry_at` only once it has lost at least `hungry_at` x `heal` Hit
+Points (ObjectFuel.hungry: a heal it saves for when it's hurt; the AI makes for food only then too), and without it
+whenever it can (fuel, a locomotive's Soul Cans), as its turn starts (EncounterObjects.turn_start) it eats the nearest standing one within
 `within` feet, one a turn: the object is gone (no wreckage), it regains `heal` Hit Points, and `advantage` gives its
 attacks Advantage until its next turn starts (an Effect, source `devour`). Its `releases` {monster, name, art, hp
 ("half" or a number), side, minion_of} is the creature that comes out, once, when it is eaten, broken (`_break`) or
