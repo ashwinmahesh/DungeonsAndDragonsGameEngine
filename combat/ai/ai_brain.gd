@@ -108,6 +108,25 @@ func play_turn(c: Combatant) -> CombatResult:
 	return finish_turn(c, think(c))
 
 
+## A leap as its turn starts (MonsterActions.leap_ft): beside the foe it would strike, or clear of foes when its blows
+## reach farther than 10 ft; nothing when it is where it wants to be already.
+func _leap(c: Combatant) -> CombatResult:
+	var e := enc()
+	var ft := e.monster_actions.leap_ft(c)
+	if ft <= 0 or e.hostiles_of(c).is_empty():
+		return null
+	var t := boss._best_target(c)
+	var cell := c.cell
+	if t != null and boss._strike_ft(c) <= 10:
+		if e.distance(c, t) > boss._strike_ft(c):
+			cell = boss._cell_beside(c, t, ft)
+	else:
+		cell = boss._safe_cell(c, ft)
+	if cell == c.cell:
+		return null
+	return e.monster_actions.leap(c, cell)
+
+
 ## Hex or Hunter's Mark on a creature that dropped (owner, 2026-10-12): moved with a Bonus Action, no slot, to the
 ## nearest foe it can see within range, the way the hotbar's Move Hex does for a hero.
 func _move_mark(c: Combatant) -> void:
@@ -191,6 +210,9 @@ func begin_turn(c: Combatant) -> CombatResult:
 	# A weapon it dropped lying within reach: back in hand with its free object interaction.
 	e.ground.ai_pick_up(c)
 	_move_mark(c)
+	var leapt := _leap(c)
+	if leapt != null and leapt.is_paused():
+		return leapt
 	# The difficulty's kit and morale: a Bloodied foe drinks its potion; a broken side flees (combat/ai/ai_tactics.gd).
 	if c.side == &"enemy":
 		# F13: a Bloodied talker whose side broke gives up, in every mode (story/captives.gd takes it from there).

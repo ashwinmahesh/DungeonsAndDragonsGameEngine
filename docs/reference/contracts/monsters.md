@@ -34,6 +34,13 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Leaping as its turn starts
+
+A trait's `turn_start_leap` ({`ft`: its Speed when unset, `when`: "bloodied" for only while it is Bloodied}): once at the
+start of each of its turns it may move up to `ft` to an open square without provoking Opportunity Attacks, keeping its
+own movement for the turn. The AI leaps beside the foe it would strike when that foe is out of its reach, or clear of
+foes when its blows reach farther than 10 ft (MonsterActions.leap_ft and leap, AiBrain._leap).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
