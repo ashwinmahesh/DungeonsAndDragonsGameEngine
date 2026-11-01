@@ -13,7 +13,7 @@ in the helper whose job it is; a function other files call gets a one-line forwa
 | Initiative, turns and rounds, the end of the fight, AI turns, the action economy's checks | `encounter_turns.gd` (`turns`) |
 | Sight, light, obscurement, invisibility, cover | `encounter_sight.gd` (`sight`) |
 | Reachable squares, moving and what each step sets off, forced movement, Jump | `encounter_movement.gd` (`movement`) |
-| Mounted combat | `encounter_mounts.gd` (`mounts`) |
+| Mounted combat | `encounter_mounts.gd` (`mounts`); `mounts.seat(rider, steed)` puts a creature in the saddle as a fight begins (a location monster entry's `rides`: another entry's `name`), the two on one Initiative count (`initiative_group`), each with its own turn |
 | Grapple and Shove | `encounter_grapples.gd` (`grappling`) |
 | Attack options, legality, ammunition, thrown weapons | `encounter_weapons.gd` (`weapons`) |
 | Attacks: Advantage and cover, the roll and its stages, hits and misses, Opportunity and readied attacks | `encounter_attacks.gd` (`attacks`) |

@@ -864,6 +864,9 @@
                 "ward": {
                   "type": "boolean",
                   "description": "A creature the party must keep alive: if it falls, the fight is lost (ends_when.ward_lost); with ends_when.wards_out, getting every ward out by an open exit wins it. Usually on the guest side, so the player moves it."
+                "rides": {
+                  "type": "string",
+                  "description": "The `name` of another monster in this fight it starts the fight riding: it sits in that creature's space, carried when it moves, and the two act on the same Initiative count (each still takes its own turn). The rider needs a `name` too."
                 },
                 "catch": {
                   "type": "object",
