@@ -139,6 +139,8 @@ var objects: EncounterObjects
 var undo: EncounterUndo
 ## The location's traps, which go off under whoever moves onto them (combat/encounter_traps.gd).
 var traps: EncounterTraps
+## Actions a monster's trait offers everyone else in the fight (combat/trait_offers.gd).
+var trait_offers: TraitOffers
 
 
 func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
@@ -157,6 +159,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	ground = GroundItems.new(self)
 	objects = EncounterObjects.new(self)
 	traps = EncounterTraps.new(self)
+	trait_offers = TraitOffers.new(self)
 	spells = SpellCaster.new(self)
 	features = CombatFeatures.new(self)
 	reactions = Reactions.new(self)

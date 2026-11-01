@@ -402,6 +402,9 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 				cwhy = "Get within 5 ft first"
 			out.append(_entry("catch:" + t.id, COMMON, "Catch %s" % t.name(), "DC %d" % cdc, "attack" if c.attacks_left > 0 else "action", cwhy, "none",
 				"One of your attacks: %s makes a Str or Dex save or you have it, out of the fight." % t.name()))
+	# What a monster's trait lets anyone else try against it (TraitOffers): a dance it can't bear to watch.
+	for o in e.trait_offers.entries(c):
+		out.append(_entry(str(o["id"]), COMMON, str(o["label"]), str(o["sub"]), str(o["cost"]), str(o["why"]), "none", str(o["help"])))
 	if e.grapples.has(c.id):
 		out.append(_entry("escape", COMMON, "Escape Grapple", "Athletics or Acrobatics", "action", why, "none"))
 	# Whoever it holds: it drags them as it moves (1 extra foot per foot), or lets go for free.
@@ -1429,6 +1432,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
 		"catch":
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
+		"offer":
+			return e.trait_offers.take(c, e.get_c(id.get_slice(":", 1)), id.get_slice(":", 2))
 		"flask":
 			return e.actions.throw_flask(c, id.substr(6), t)
 		"fly":
