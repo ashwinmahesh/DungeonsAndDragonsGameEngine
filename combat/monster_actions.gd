@@ -220,7 +220,7 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 		"drain_max_hp":
 			var amount := int(by_type.get(str(rd.get("type", "necrotic")), 0))
 			if amount > 0:
-				drain_max_hp(t, amount, act_name, int(rd.get("floor", 0)), str(rd.get("until", "long_rest")))
+				drain_max_hp(t, amount, act_name, int(rd.get("floor", 0)), str(rd.get("until", "long_rest")), float(rd.get("keep", 0.0)))
 		"heal_self":
 			var amount2 := int(by_type.get(str(rd.get("type", "necrotic")), 0))
 			if amount2 > 0:
@@ -418,14 +418,17 @@ func release_engulf(t: Combatant) -> void:
 
 ## Hit Point maximum reduction (Life Drain, the Spawn's Bite): lasts until a Long Rest; 0 means death.
 ## A rider can soften both (a campaign's own monster, not the 2024 block): `floor` keeps the maximum from dropping below that
-## many Hit Points (so the drain alone can't kill), and `until` ("long_rest", the default; "short_rest"; "fight": gone when the
-## fight is, EncounterSetup.clear_fight_effects) says when it comes back.
-func drain_max_hp(t: Combatant, amount: int, label: String, floor_hp: int = 0, until: String = "long_rest") -> void:
+## many Hit Points (so the drain alone can't kill), `keep` (0 to 1) from dropping below that share of the maximum before any
+## drain (so a downed hero's maximum isn't so low that the next hit is Massive Damage), and `until` ("long_rest", the default;
+## "short_rest"; "fight": gone when the fight is, EncounterSetup.clear_fight_effects) says when it comes back.
+func drain_max_hp(t: Combatant, amount: int, label: String, floor_hp: int = 0, until: String = "long_rest", keep: float = 0.0) -> void:
 	var e := enc()
 	# Aura of Life: Hit Point maximums can't be reduced inside it.
 	if t.creature.has_flag("no_max_hp_reduction"):
 		e.log.add("info", "%s's Hit Point maximum holds (%s)" % [t.name(), label], t.id)
 		return
+	if keep > 0.0:
+		floor_hp = maxi(floor_hp, ceili(_undrained_max_hp(t.creature) * clampf(keep, 0.0, 1.0)))
 	if floor_hp > 0:
 		amount = mini(amount, maxi(0, t.creature.max_hp() - floor_hp))
 		if amount <= 0:
@@ -461,6 +464,17 @@ func ability_drain(t: Combatant, ab: StringName, amount: int, label: String, flo
 	if t.creature.ability_score(ab) <= 0:
 		t.creature._die("%s drained to 0" % Creature.ABILITY_NAMES[ab])
 		e.events.append({"type": "death", "id": t.id})
+
+
+## The Hit Point maximum `cr` would have without the drains on it now.
+static func _undrained_max_hp(cr: Creature) -> int:
+	var drained := 0
+	for fx: Effect in cr.effects:
+		if fx.source_id == "drain_max_hp":
+			for m: Modifier in fx.modifiers:
+				if m.stat == &"hp_max":
+					drained -= int(m.data.get("value", 0))
+	return cr.max_hp() + drained
 
 
 ## When a drain comes back: `until` from the rider (see drain_max_hp).
