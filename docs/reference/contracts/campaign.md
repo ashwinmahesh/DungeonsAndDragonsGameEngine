@@ -217,6 +217,12 @@ Each ally card's NPC (outcomes.json `ally.<card>.npc`) has `"guest": true`, a `g
 region that reaches `join <npc>` when `tarokka.ally.npc == <npc>`. The darklord card has no ally; the marionette
 (Pidlwick II) waits in the castle (Phase 6).
 
+## Given up for good (Character.given_up)
+
+A hero's build may list `given_up`: ids of class, subclass, species or background features and of feats the hero gave
+up (a campaign's ritual price). Character.refresh leaves each out, with what it grants (its modifiers, resources and
+spells); `give_up(id)` adds one and refreshes. The build is saved as it is, so a save keeps the loss.
+
 ## Dark gifts (Phase 5)
 
 `data/dark_gifts/<id>.json`:

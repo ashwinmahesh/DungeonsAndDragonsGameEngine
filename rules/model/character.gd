@@ -192,6 +192,24 @@ func intrinsic_modifiers() -> Array[Modifier]:
 
 # --- Dark gifts (the Amber Temple, ADR 0011): accepted for good, kept in the build ------------------------------
 
+## What the hero has given up for good (the build's `given_up`: class, subclass, species or background feature ids and
+## feat ids, a campaign's ritual price): refresh leaves each of them out.
+func given_up() -> Array[String]:
+	var out: Array[String] = []
+	for id: Variant in build.get("given_up", []):
+		out.append(str(id))
+	return out
+
+
+## Gives up feature or feat `id` for good (given_up) and refreshes.
+func give_up(id: String) -> void:
+	var list := build.get("given_up", []) as Array
+	if not list.has(id):
+		list.append(id)
+	build["given_up"] = list
+	refresh()
+
+
 ## The dark gifts this character carries (data/dark_gifts/ ids).
 func dark_gifts() -> Array[String]:
 	var out: Array[String] = []
@@ -845,6 +863,9 @@ func _walk_feature(f: Dictionary, key: String, src: Dictionary, scope: Dictionar
 	var at := int(f.get("at_level", 0))
 	if at > 0 and at > character_level():
 		return
+	# Given up for good (a ritual's price: the build's `given_up`, feature or feat ids): it's no longer the hero's.
+	if str(f.get("id", "")) in given_up():
+		return
 	features.append({"id": str(f.get("id", "")), "name": str(f.get("name", "")), "summary": str(f.get("summary", "")),
 		"text": str(f.get("text", "")), "source": src["label"], "source_kind": src["kind"],
 		"class_id": src["class_id"], "level": src["level"], "action": str(f.get("action", "passive")),
@@ -921,6 +942,8 @@ func _resolve_ref(ref: String, scope: Dictionary) -> Array:
 
 
 func _walk_feat(feat_id: String, key: String, parent: Dictionary, params: Dictionary = {}) -> void:
+	if feat_id in given_up():
+		return
 	var feat := compendium.feat_data(feat_id)
 	var label := "%s (%s)" % [feat.get("name", feat_id), parent["label"]]
 	feats_taken.append({"id": feat_id, "name": str(feat.get("name", feat_id)), "source": parent["label"], "key": key})
