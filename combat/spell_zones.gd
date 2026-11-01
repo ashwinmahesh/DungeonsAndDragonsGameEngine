@@ -151,6 +151,10 @@ func _follow(c: Combatant) -> void:
 			var before := o.cells.duplicate()
 			o.cells = enc().grid.area_cells("emanation", int(o.rule("size", 15)), enc().center_of(c), Vector2.RIGHT, 5,
 				c.cell, c.size_cells)
+			if bool(o.rule("caster_square", false)):   # an area worn round the creature (a drink's silence) covers it too
+				for f in c.footprint():
+					if not f in o.cells:
+						o.cells.append(f)
 			o.cell = c.cell
 			if before != o.cells:
 				enc().events.append({"type": "object", "id": o.id, "kind": "zone", "cell": o.cell})

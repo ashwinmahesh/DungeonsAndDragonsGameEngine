@@ -123,3 +123,9 @@ Action; ItemSpecials._drink_cast). SpellCasting.cast_free takes the same `level`
 A power with `custom: "drink_shape"` and `params: {form, minutes}` turns whoever drinks it (or is given it within 5 ft)
 into the stat block `form`, Polymorph's way with no Concentration: the form's own Hit Points as Temporary Hit Points,
 back to themselves when those are gone or `minutes` have passed on their own turns (ItemSpecials._drink_shape).
+
+## Drinks that wrap the drinker in an area
+
+A power with `custom: "drink_zone"` and `params: {spell, minutes}` casts the spell's area round the drinker for
+`minutes`, with no Concentration, and the area moves with them (a 20-ft Silence that goes where they go;
+ItemSpecials._drink_zone).
