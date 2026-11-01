@@ -90,3 +90,72 @@ func test_a_creature_without_the_trait_offers_nothing() -> void:
 	TestCombat.start_with(e, hero)
 	assert_true(e.trait_offers.entries(hero).is_empty())
 	assert_false(e.trait_offers.take(hero, foe, "test_waltz").ok)
+
+
+# --- A contest: the user's check sets the holder's save DC ------------------------------------------
+
+const CONTEST := {"key": "test_tune_duel", "label": "Tune Duel", "influence": true, "range": 60, "needs": "musical_instrument",
+	"check": {"skill": "performance"}, "contest": {"save": "cha"}, "damage": [{"amount": 20, "type": "psychic"}],
+	"on_success": [{"do": "condition", "condition": "stunned", "until": "source_turn_end"}]}
+
+
+func _contest_fight(cha: int) -> Array:
+	var e := TestCombat.open_field(3)
+	e.default_player_reaction = "never"
+	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(2, 3), 3)
+	var m := TestChars.dummy(100, false, {"name": "Test Fiddler", "abilities": {"str": 10, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": cha},
+		"traits": [{"id": "test_duel", "name": "Tune Duel", "action": "special", "summary": "It can't refuse a contest.", "offers": CONTEST.duplicate(true)}]})
+	var holder := e.add(m, &"enemy", Vector2i(6, 3))
+	TestCombat.start_with(e, hero)
+	return [e, hero, holder]
+
+
+func test_a_contest_needs_an_instrument_and_files_under_influence() -> void:
+	var got := _contest_fight(1)
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var holder := got[2] as Combatant
+	var cat := ActionCatalog.new(e)
+	var act := cat.find(hero, "offer:%s:test_duel" % holder.id)
+	assert_true(str(act["label"]).begins_with("Influence: Tune Duel"), "an Influence variant")
+	assert_eq(str(act["cost"]), "action")
+	assert_false(bool(act["legal"]), "no instrument, no contest")
+	(hero.creature as Character).add_item("lyre", 1)
+	assert_true(bool(cat.find(hero, "offer:%s:test_duel" % holder.id)["legal"]), "with a lyre it can")
+	assert_eq(TraitOffers.tool_for(hero, "musical_instrument"), "lyre")
+
+
+func test_a_lost_contest_hurts_and_stuns_the_holder_until_the_end_of_the_users_next_turn() -> void:
+	var got := _contest_fight(1)
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var holder := got[2] as Combatant
+	(hero.creature as Character).add_item("lyre", 1)
+	var mark := e.events.size()
+	var hp := holder.creature.hp
+	TestCombat.next_d20(e, 20)
+	assert_true(e.trait_offers.take(hero, holder, "test_duel").ok)
+	assert_eq(holder.creature.hp, hp - 20, "20 Psychic on the failed save")
+	assert_true(holder.creature.has_condition(&"stunned"), "and Stunned")
+	var fx: Effect = null
+	for x in holder.creature.effects:
+		if &"stunned" in x.conditions:
+			fx = x
+	assert_eq(fx.ends, Effect.Ends.END_OF_TURN)
+	assert_eq(fx.turn_owner_id, hero.id)
+	assert_eq(fx.skip_turn_ends, 1, "not this turn's end: the end of the user's next turn")
+	assert_false(hero.action_available, "it took the action")
+	assert_true(e.events.slice(mark).any(func(ev: Dictionary) -> bool: return str(ev["type"]) == "ability" and str(ev["key"]) == "test_tune_duel"))
+
+
+func test_a_matched_contest_does_nothing() -> void:
+	var got := _contest_fight(30)
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var holder := got[2] as Combatant
+	(hero.creature as Character).add_item("lyre", 1)
+	var hp := holder.creature.hp
+	TestCombat.next_d20(e, 1)
+	assert_true(e.trait_offers.take(hero, holder, "test_duel").ok)
+	assert_eq(holder.creature.hp, hp, "its save beat the check")
+	assert_false(holder.creature.has_condition(&"stunned"))

@@ -43,6 +43,10 @@ the trait's id when missing), `label` the trait's name when missing, `cost` `act
 by default, `check` `{skill, dc}` the user's ability check, `damage` `[{amount or dice, type}]` dealt to the holder on
 a success, `on_success` riders (above) landing on the holder with the user as their source (so `until:
 source_turn_start` means the start of the user's next turn). The event is sent whether the check succeeds or not.
+A contest instead of a set DC: `contest: {save}` makes the check's total the DC of the holder's saving throw, and the
+damage and riders land when the holder fails it. `needs` (a tool kind, such as `musical_instrument`): the user must
+carry one, and has Advantage on the check when proficient with the one they play. `influence: true` labels it
+"Influence: <label>", a variant of the Influence action.
 
 ## Spellcasting
 
