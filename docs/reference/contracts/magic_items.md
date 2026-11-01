@@ -101,3 +101,10 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Drinks that cast a spell
+
+A power with `custom: "drink_cast"` and `params: {spell, level, minutes, sustain_cost}` casts `spell` through the
+drinker at `level`, with no slot and no Concentration, lasting `minutes`; the power's own `targeting` and `range` pick
+the target. With `sustain_cost` the spell's repeated actions cost that instead (Vampiric Touch's touch as a Bonus
+Action; ItemSpecials._drink_cast). SpellCasting.cast_free takes the same `level` and `sustain_cost` options.

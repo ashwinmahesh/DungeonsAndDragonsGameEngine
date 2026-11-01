@@ -47,6 +47,23 @@ func why(c: Combatant, p: Dictionary) -> String:
 	return w if w != "" else _arcana_why(c, p)
 
 
+## A drink that casts a spell through the drinker (`drink_cast`: params {spell, level, minutes, sustain_cost}): cast at
+## `level` with no slot and no Concentration, lasting `minutes`, its repeated actions costing `sustain_cost` if set
+## (Vampiric Touch at 6th level, the touch again as a Bonus Action). The power's own targeting picks the target.
+func _drink_cast(c: Combatant, p: Dictionary, targets: Array, point: Vector2) -> CombatResult:
+	var e := enc()
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	var spell_id := str(params.get("spell", ""))
+	if Compendium.shared().spell_data(spell_id).is_empty():
+		return CombatResult.fail("No such spell")
+	_pay(c, p)
+	e.log.add("info", "%s drinks %s" % [c.name(), str((p["data"] as Dictionary).get("name", ""))], c.id)
+	var opts := {"no_concentration": true, "minutes": int(params.get("minutes", 1)), "level": int(params.get("level", 0))}
+	if params.has("sustain_cost"):
+		opts["sustain_cost"] = str(params["sustain_cost"])
+	return e.spells.cast_free(c, spell_id, targets, point, opts)
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -59,6 +76,8 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return _drink(c, p, t, id)
 		"end_granted_effect":
 			return _end_granted(c, p)
+		"drink_cast":
+			return _drink_cast(c, p, targets, point)
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)

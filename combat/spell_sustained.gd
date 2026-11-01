@@ -41,6 +41,8 @@ func _grant_sustained(ctx: Dictionary, tgt: Array[Combatant]) -> void:
 	var conc := ctx["conc"] as Concentration
 	for raw: Variant in s.get("sustain", []):
 		var d := (raw as Dictionary).duplicate(true)
+		if (ctx.get("opts", {}) as Dictionary).has("sustain_cost"):
+			d["cost"] = str((ctx["opts"] as Dictionary)["sustain_cost"])   # a drink's touch repeated as a Bonus Action
 		var owner := c
 		if str(d.get("owner", "caster")) == "target" and not tgt.is_empty():
 			owner = tgt[0]
