@@ -625,6 +625,14 @@
           "custom": {
             "type": "string"
           },
+          "no_concentration": {
+            "type": "boolean",
+            "description": "Its spell needs no Concentration (an elixir's Fog Cloud)."
+          },
+          "in_zone": {
+            "type": "string",
+            "description": "A spell id: the power works only from inside a zone of that spell or into one (Misty Step into or out of fog)."
+          },
           "field": {
             "type": "boolean"
           },
@@ -686,8 +694,13 @@
           },
           "grants": {
             "type": "object",
-            "description": "Powers the user (or whoever drinks it) gains for a while: {powers: [...], hours|minutes}.",
+            "description": "Powers the user (or whoever drinks it) gains for a while: {powers: [...], modifiers: [...], hours|minutes}.",
             "properties": {
+              "modifiers": {
+                "type": "array",
+                "items": {"$ref": "common.schema.json#/$defs/modifier"},
+                "description": "What it gives besides its powers for the same time."
+              },
               "powers": {
                 "type": "array",
                 "items": {

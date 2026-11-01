@@ -135,3 +135,11 @@ ItemSpecials._drink_zone).
 A power with `custom: "throw_lure"` and `params: {range, radius, lures, rounds}` throws a lure to a square within `range`
 ft: each creature named in `lures` (names, stat block ids or creature types) within `radius` ft of it goes to it and is
 busy over it (Incapacitated) for `rounds` (dice) of its turns or until something harms it (ItemSpecials._throw_lure).
+
+## Spell powers without Concentration, or only from a zone
+
+A spell power with `no_concentration: true` casts its spell without Concentration (an elixir's Fog Cloud lasts its full
+time). One with `in_zone: <spell id>` works only when its user stands in a live zone of that spell or aims into one
+(Misty Step into or out of fog). The flag `sees_through_fog` lets a creature see through Heavily Obscured zones that
+aren't magical darkness (EncounterSight.can_see). A power's `grants` can carry `modifiers` too: they last as long as
+the granted powers.
