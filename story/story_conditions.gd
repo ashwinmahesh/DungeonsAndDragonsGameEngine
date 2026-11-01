@@ -260,11 +260,23 @@ func _term() -> bool:
 		for ch in st.party:
 			lowest = mini(lowest, ch.character_level())
 		return _compare(lowest, op if op != "" else ">", _literal(rhs) if op != "" else 0)
+	if t == "party_alive":
+		# The heroes still travelling (a hero lost for good is in `fallen`): `party_alive == 0` for an empty car.
+		return _compare(st.party.size(), op if op != "" else ">", _literal(rhs) if op != "" else 0)
+	if t == "party_size":
+		# Everyone who set out: the living and the fallen.
+		return _compare(st.party.size() + st.fallen.size(), op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("flag."):
 		var value: Variant = st.get_flag(t.substr(5), false)
 		if op == "":
 			return _truthy(value)
-		return _compare(value, op, _literal(rhs))
+		# A flag can be held against the size of the company (`flag.horned_bargains >= party_size`).
+		var want: Variant = _literal(rhs)
+		if rhs == "party_size":
+			want = st.party.size() + st.fallen.size()
+		elif rhs == "party_alive":
+			want = st.party.size()
+		return _compare(value, op, want)
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)

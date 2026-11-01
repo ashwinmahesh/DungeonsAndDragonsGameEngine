@@ -211,7 +211,7 @@ member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone 
 `days_since.<flag> >= 2` (whole days since the flag was stamped with `set <flag> = now`; false while it hasn't been),
 `minutes_since.<flag> >= 10` (game minutes since the same stamp; a place with `recheck_minutes` re-checks its
 placements that often, so a `when` on it flips while the party stands there),
-`attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `graphic` (the player shows graphic scenes: the
+`party_alive` / `party_size` (heroes still travelling / everyone who set out, the fallen included; `party_alive == 0`, and a flag held against the company: `flag.horned_bargains >= party_size`), `attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `graphic` (the player shows graphic scenes: the
 playthrough option `graphic_scenes`, on unless switched off in the pause menu; put a gory line in `if graphic` with a
 tamer one under `else`, or prefix a Narrator variant with `[graphic]`), `jailed` (the party is locked up, `jail`), `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
 a dungeon; a night's line written for sleeping behind walls carries it, so a camp out of doors skips it), `hour >= 20`,
