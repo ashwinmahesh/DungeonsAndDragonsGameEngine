@@ -469,7 +469,54 @@ func entries(c: Combatant) -> Array[Dictionary]:
 	for o in objs().list:
 		if o.is_door() and not o.destroyed and objs().distance_ft(c, o) <= REACH:
 			out.append(_door_entry(c, o))
+		elif not o.undo.is_empty() and not o.destroyed:
+			out.append(_undo_entry(c, o))
 	return out
+
+
+# --- Undoing: a check instead of force ---------------------------------------------------------------------
+
+## "" if `c` can try to undo `o` (a captive's chains slipped, a lock picked) now: the Utilize action, within 5 ft.
+func undo_why(c: Combatant, o: BattleObject) -> String:
+	var e := enc()
+	var why := e._action_check(c)
+	if why != "":
+		return why
+	if o == null or o.destroyed or o.undo.is_empty():
+		return "Nothing to undo there"
+	if objs().distance_ft(c, o) > REACH:
+		return "Out of reach: move within 5 ft"
+	return ""
+
+
+func _undo_entry(c: Combatant, o: BattleObject) -> Dictionary:
+	var skill := str(o.undo.get("skill", "athletics"))
+	var a := objs()._entry("undo:" + o.id, "%s %s" % [str(o.undo.get("label", "Free")), o.the()],
+		"%s DC %d" % [skill.capitalize(), int(o.undo.get("dc", 10))], "action", undo_why(c, o), "none",
+		"The Utilize action: a %s check, and on a success it is gone without breaking it." % skill.capitalize())
+	a["tab"] = ActionCatalog.COMMON
+	a["range"] = REACH
+	return a
+
+
+## The Utilize action and `o`'s check; on a success it is gone (as broken: its flag, what it held let go).
+func undo(c: Combatant, oid: String) -> CombatResult:
+	var e := enc()
+	var o := objs().get_object(oid)
+	var why := undo_why(c, o)
+	if why != "":
+		return CombatResult.fail(why)
+	e.spend_action(c)
+	var skill := StringName(str(o.undo.get("skill", "athletics")))
+	var t := c.creature.roll_check(e.dice, skill, int(o.undo.get("dc", 10)), [], [], "%s %s (%s)" % [str(o.undo.get("label", "Free")),
+		o.the(), c.name()])
+	if not t.success:
+		e.log.add("info", "%s can't get %s off" % [c.name(), o.the()], c.id, [t.describe()])
+		return CombatResult.new()
+	e.log.add("info", "%s gets %s off" % [c.name(), o.the()], c.id, [t.describe()])
+	objs()._break(o)
+	e.game.object_broken(o, c)
+	return CombatResult.new()
 
 
 func _door_entry(c: Combatant, o: BattleObject) -> Dictionary:
@@ -505,4 +552,6 @@ func perform(c: Combatant, id: String) -> CombatResult:
 		return shove(c, id.substr(6))
 	if id.begins_with("topple:"):
 		return topple(c, id.substr(7))
+	if id.begins_with("undo:"):
+		return undo(c, id.substr(5))
 	return null

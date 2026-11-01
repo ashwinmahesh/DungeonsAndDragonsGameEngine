@@ -593,6 +593,22 @@ func _first_to_hurt_down() -> Combatant:
 	return null
 
 
+## An object the fight is about is gone: with every one of `ends_when.objects_gone` (object ids) broken or undone, the
+## fight ends (`objects_outcome`: victory, the default, or ended). EncounterObjects calls it as each breaks.
+func objects_gone_check() -> void:
+	var e := enc()
+	var ids := e.ends_when.get("objects_gone", []) as Array
+	if ids.is_empty() or e.state != Encounter.State.ACTIVE:
+		return
+	for id: Variant in ids:
+		var o := e.objects.get_object(str(id))
+		if o != null and not o.destroyed:
+			return
+	e.log.add("info", "Everything the fight was for is done", "")
+	e.events.append({"type": "objects_gone"})
+	_finish("ended" if str(e.ends_when.get("objects_outcome", "victory")) == "ended" else "victory")
+
+
 ## The meta on a creature the party must keep alive in this fight (a location monster entry's `ward: true`): its fall
 ## loses the fight, and with `ends_when.ward_exits` getting every ward out by one wins it.
 const WARD := &"ward"

@@ -496,6 +496,10 @@ static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 		out["ward_exits"] = open.duplicate(true)
 	if ends.has("ward_lost"):
 		out["ward_lost"] = str(ends["ward_lost"])
+	# The objects the fight is about (its `objects` by id): getting rid of them all ends it.
+	if ends.has("objects_gone"):
+		out["objects_gone"] = (ends["objects_gone"] as Array).duplicate()
+		out["objects_outcome"] = str(ends.get("objects_outcome", "victory"))
 	return out
 
 

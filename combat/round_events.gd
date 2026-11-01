@@ -118,7 +118,33 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 				return _save(outcome, t, dc, label, pausable), done_fn)
 		"summon":
 			_summon(outcome, int(ev.get("at", 20)))
+		"take":
+			_take(outcome)
 	return done_fn.call() as CombatResult
+
+
+## A `take` outcome: the first creature still on the board whose name or stat block is in `who` is taken out of the
+## fight (a captive vanishing in mist: `vanish`, left: `taken`, with the outcome's `narration`), and `flag` is set for
+## the story with each one taken (`flag` as given, then `flag`_2, _3...).
+func _take(o: Dictionary) -> void:
+	var e := enc()
+	var who := (o.get("who", []) as Array).map(func(x: Variant) -> String: return str(x))
+	for c in e.combatants:
+		if c.has_meta("left_fight") or not c.is_alive():
+			continue
+		var block := str((c.creature as Monster).data.get("id", "")) if c.creature is Monster else ""
+		if not (c.name() in who or (block != "" and block in who)):
+			continue
+		var flag := str(o.get("flag", ""))
+		if flag != "":
+			var n := 1
+			while e.legendary.story_flags.has(flag if n == 1 else "%s_%d" % [flag, n]):
+				n += 1
+			e.legendary.story_flags[flag if n == 1 else "%s_%d" % [flag, n]] = true
+		leg()._log("info", "%s is taken" % c.name(), c)
+		e.movement.leave_grid(c, "taken")
+		(e.events[-1] as Dictionary)["narration"] = str(o.get("narration", ""))
+		return
 
 
 ## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn, else at random and
