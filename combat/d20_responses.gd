@@ -63,6 +63,7 @@ func collected(col: Dictionary) -> Array:
 ## are settled now.
 func after_d20(c: Combatant, t: D20Test, keys: Array[String]) -> void:
 	mark_save(c, t)
+	enc().meters.saw_save(c, t)   # a failed save that moves a fight's meter (`on`: failed_save)
 	var offers := offers_for(c, t, keys)
 	if not _open.is_empty():
 		var top := _open.back() as Dictionary

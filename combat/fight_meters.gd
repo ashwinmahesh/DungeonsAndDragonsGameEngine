@@ -243,23 +243,28 @@ func scan() -> void:
 				if bool(ev.get("critical", false)):
 					kind = "crit"
 					who = e.get_c(str(ev.get("attacker", "")))
-			"save":
-				var t := ev.get("test") as D20Test
-				if t != null and not t.success:
-					kind = "failed_save"
-					who = e.get_c(str(ev.get("id", "")))
 		if kind == "" or who == null:
 			continue
-		for id: String in defs.keys():
-			for rv: Variant in (defs[id] as Dictionary).get("on", []):
-				var rule := rv as Dictionary
-				if str(rule.get("event", "")) != kind:
-					continue
-				if rule.has("who") and not _named(who, rule["who"] as Array):
-					continue
-				if rule.has("side") and _side(who) != str(rule["side"]):
-					continue
-				change(id, int(rule.get("delta", 1)))
+		_moved_by(kind, who)
+
+
+## A saving throw as it's rolled (D20Responses.after_d20, every creature's): a failure moves the meters' `failed_save`.
+func saw_save(c: Combatant, t: D20Test) -> void:
+	if not defs.is_empty() and t.kind == D20Test.Kind.SAVING_THROW and not t.success:
+		_moved_by("failed_save", c)
+
+
+func _moved_by(kind: String, who: Combatant) -> void:
+	for id: String in defs.keys():
+		for rv: Variant in (defs[id] as Dictionary).get("on", []):
+			var rule := rv as Dictionary
+			if str(rule.get("event", "")) != kind:
+				continue
+			if rule.has("who") and not _named(who, rule["who"] as Array):
+				continue
+			if rule.has("side") and _side(who) != str(rule["side"]):
+				continue
+			change(id, int(rule.get("delta", 1)))
 
 
 ## The view has taken the events: the next scan starts from the top.

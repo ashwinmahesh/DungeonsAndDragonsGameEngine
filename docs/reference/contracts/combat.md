@@ -409,9 +409,9 @@ catches the captive costs a round (FightMeters.shift_clock, event `clock_shift` 
 as the round its rounds left reach 0 ends; both are kept in a round's save with the meters.
 
 A meter's `on` ([{event, who, side, delta}]) moves it on what happens in the fight: `defeat` (a creature falls or dies,
-once each), `crit` (an attacker's Critical Hit), `failed_save` (a failed saving throw), each for the creature named in
-`who` (names or stat blocks) or on `side` (party, enemy), by `delta` (1). FightMeters.scan reads the encounter's events
-as each turn ends and before the view drains them. A mark's `take` (names or stat blocks) frees those creatures: out of
+once each), `crit` (an attacker's Critical Hit), `failed_save` (a saving throw failed as it's rolled, any creature's: FightMeters.saw_save), each for the creature
+named in `who` (names or stat blocks) or on `side` (party, enemy), by `delta` (1). FightMeters.scan reads the
+encounter's events for the falls and crits as each turn ends and before the view drains them. A mark's `take` (names or stat blocks) frees those creatures: out of
 the fight (`vanish`, left: `rescued`). `ends_when.foes_end_it: false` keeps a fight going with no foes standing (or
 none at all): it ends only by its clock, objects, wards or meters, or the party falling.
 

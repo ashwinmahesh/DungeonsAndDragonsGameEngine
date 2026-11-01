@@ -33,10 +33,8 @@ func test_a_foe_falling_moves_the_meter_and_the_mark_frees_the_captive() -> void
 	assert_true(bool(e.legendary.story_flags.get("test_freed", false)))
 	var hero := got[1] as Combatant
 	TestCombat.next_d20(e, 1)
-	var t := hero.creature.roll_save(e.dice, &"wis", 30, [], [], "test")
-	e.events.append({"type": "save", "id": hero.id, "test": t})
-	e.drain_events()
-	assert_eq(e.meters.value("test_hope"), 1, "a hero's failed save: -1, read before the view takes the events")
+	hero.creature.roll_save(e.dice, &"wis", 30, [], [], "test")
+	assert_eq(e.meters.value("test_hope"), 1, "a hero's failed save: -1, as it's rolled")
 
 
 func test_a_fight_the_foes_dont_end() -> void:
@@ -60,7 +58,7 @@ func test_a_possession_turns_a_hero_and_lets_go() -> void:
 	TestCombat.hero(e, "thistle", Vector2i(3, 3), 5)
 	TestCombat.punching_bag(e, Vector2i(9, 6), 500)
 	e.legendary.set_round_events([{"id": "test_souls", "name": "Test Souls", "kind": "possess", "affects": "party", "one": true,
-		"save": {"ability": "cha", "dc": 40}, "rounds": 2, "at": 20, "every": 1}])
+		"save": {"ability": "cha", "dc": 40}, "rounds": 2, "at": 20, "every": 1, "times": 1}])
 	TestCombat.start_with(e, hero)
 	var possessed: Combatant = null
 	for i in 10:
