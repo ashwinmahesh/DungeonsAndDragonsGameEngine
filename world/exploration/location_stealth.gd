@@ -146,8 +146,12 @@ static func refresh_waiting(view: LocationView) -> void:
 			var mo := monsters[i]
 			var foe := Combatant.new(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
 			foe.id = "waiting_%s_%d" % [id, i]
+			# A patrol (`path` on the entry, as a townsperson's): it walks its round, its sight cone turning with it.
+			var route: Array[Dictionary] = []
+			if (entries[i] as Dictionary).has("path"):
+				route = NpcRoutes.route_for(view, entries[i] as Dictionary)
 			view.waiting.append({"encounter": id, "foe": foe, "token": null, "low": [],
-				"facing": waiting_facing(view, ids[id] as Dictionary, i, monsters)})
+				"facing": waiting_facing(view, ids[id] as Dictionary, i, monsters), "route": route, "at": 0, "wait": 0.0, "clock": 0.0})
 	if view.waiting.is_empty() or view.members.is_empty() or view.waiting.all(func(w: Dictionary) -> bool: return w["token"] != null):
 		return
 	# Sight is costly to work out for a character, so only when something that changes it has: where the party
@@ -167,6 +171,65 @@ static func refresh_waiting(view: LocationView) -> void:
 			if sees(e, m, foe):
 				_show(view, w)
 				break
+
+
+## Patrols (LocationView._process): each waiting foe with a route steps on a square every NpcRoutes.STEP_TIME seconds
+## (standing at a waypoint for its pause), turning to face the way it goes; it holds while a party member or guest is
+## in its next square, and doesn't walk in a fight, while the party plans its turns or while it is asleep. After anyone
+## moves the notice rules run as after a party step: a patrol that sees the party starts its fight there.
+static func tick_patrols(view: LocationView, delta: float) -> void:
+	if view.in_combat or view.planning or view.members.is_empty() or view.waiting.is_empty():
+		return
+	if advance_patrols(view, delta):
+		after_step(view)
+
+
+## Walks the patrols on by `delta` seconds; true when any of them moved.
+static func advance_patrols(view: LocationView, delta: float) -> bool:
+	var moved := false
+	for w in view.waiting:
+		var route := w.get("route", []) as Array
+		if route.is_empty() or is_asleep(view, w):
+			continue
+		if float(w["wait"]) > 0.0:
+			w["wait"] = float(w["wait"]) - delta
+			continue
+		w["clock"] = float(w["clock"]) + delta
+		if float(w["clock"]) < NpcRoutes.STEP_TIME:
+			continue
+		w["clock"] = 0.0
+		var step := route[int(w["at"])] as Dictionary
+		var to := step["cell"] as Vector2i
+		var foe := w["foe"] as Combatant
+		if view.members.any(func(m: Combatant) -> bool: return m.cell == to) or view.guest_members.any(func(g: Combatant) -> bool: return g.cell == to):
+			continue
+		_patrol_step(view, w, foe.cell, to)
+		w["at"] = (int(w["at"]) + 1) % route.size()
+		if float(step.get("pause", 0.0)) > 0.0:
+			w["wait"] = float(step["pause"])
+		moved = true
+	return moved
+
+
+static func _patrol_step(view: LocationView, w: Dictionary, from: Vector2i, to: Vector2i) -> void:
+	var foe := w["foe"] as Combatant
+	var dir := Vector2(to - from)
+	if dir.length() > 0.01:
+		w["facing"] = dir.normalized()
+	foe.cell = to
+	var tok := w["token"] as CombatToken
+	if tok == null or not is_instance_valid(tok):
+		return
+	for c: Vector2i in w["low"]:
+		view.grid.set_flag(c, CombatGrid.LOW, false)
+	var low: Array[Vector2i] = []
+	for c in foe.footprint():
+		if not view.grid.has_flag(c, CombatGrid.LOW):
+			view.grid.set_flag(c, CombatGrid.LOW, true)
+			low.append(c)
+	w["low"] = low
+	tok.position = view.board.cell_center(foe.cell, foe.size_cells)
+	tok.face(w["facing"] as Vector2, false)
 
 
 ## Whether `a` sees `b` in `e`: the fight's sight rules, after the cheap line-of-sight test that rules most pairs out.

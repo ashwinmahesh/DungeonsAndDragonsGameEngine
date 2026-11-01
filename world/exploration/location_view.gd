@@ -244,6 +244,7 @@ func _process(delta: float) -> void:
 		board.cut_buildings(rig.camera.global_position, focus, delta)
 	LocationWalk._update_glides(self, delta)
 	LocationWalk.tick(self, delta)
+	LocationStealth.tick_patrols(self, delta)   # waiting foes on a round (`path`) walk it
 
 
 ## Where the rest of the party stands while exploring (SeeThrough keeps them in sight too); in a fight the camera is on the

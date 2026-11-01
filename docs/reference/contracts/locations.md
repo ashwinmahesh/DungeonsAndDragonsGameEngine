@@ -85,6 +85,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   it on its square. `make validate` asks every variant of a waiting fight to wait, to have a foe in view, and each foe in
   view to say its `facing` (the nine fights that waited before facings, tools/data/validate_data.py LEGACY_WAITING,
   keep facing the middle of their group).
+  A waiting foe with a `path` (the waypoints an NPC's `path` takes) is a patrol: before its fight it walks the round a
+  square at a time, standing at each waypoint for its pause, turning its sight cone the way it goes; the notice rules run
+  as it moves, and a patrol that spots the party starts its fight where it stands (LocationStealth.tick_patrols). It
+  holds while the party plans its turns, while it's asleep, and while a hero stands in its next square.
   A monster's `lying` lays it down before its fight (as an NPC entry's, below) and it gets up as the fight opens: the
   dead sitting up on their pallets, Vasilka coming down off her bier. Its `art` dresses it in another sprite than its
   stat block's (Vasilka fights on a flesh golem's block in her own look); a round-start save keeps it. Its `steps_down:
