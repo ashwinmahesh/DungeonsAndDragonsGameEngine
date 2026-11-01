@@ -154,6 +154,13 @@ chance. The leg test quiets the stretches of a journey to somewhere new that run
 cut is made in `Travel.roll` before Strahd's attention and the weather are added, so his patrols and a storm still
 count; a first visit, Strahd's own visits on the road, story fights and a place's walk-in fights are never touched.
 
+A table with `when` (a story condition) is rolled only while it holds. A table with `every_road: true` belongs to no
+road: on every leg its own road's table left quiet (or a road with none), each such table whose `when` holds rolls on
+its own `chance_day`/`chance_night`, by id, and the first fight or meeting wins (a hunted villain's minions on whatever
+road the party takes). Familiarity, Strahd's attention and the weather don't touch its chance. `per_night: true` rolls
+it at night only, once a night at most (noted in the save's `_random_nights` flag: table id -> the day the night began;
+in a land of endless night, noon to noon), whether or not it comes up. Find the Path quiets these too.
+
 `grounds` (Ashwin, 2026-10-12: "a variety of these to randomly pick from"; story/road_grounds.gd) lists the battle maps
 the table's fights may play out on, its own `map` among them if it is to be one: the land of its roads (a fork in the
 road, a clearing, a ravine, a ford, a ruined shrine, graves by the road, a moor, a lake inlet, a mountain pass). Each
