@@ -262,21 +262,16 @@ func _term() -> bool:
 		return _compare(lowest, op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t == "party_alive":
 		# The heroes still travelling (a hero lost for good is in `fallen`): `party_alive == 0` for an empty car.
-		return _compare(st.party.size(), op if op != "" else ">", _literal(rhs) if op != "" else 0)
+		return _compare(st.party.size(), op if op != "" else ">", _company(rhs) if op != "" else 0)
 	if t == "party_size":
-		# Everyone who set out: the living and the fallen.
-		return _compare(st.party.size() + st.fallen.size(), op if op != "" else ">", _literal(rhs) if op != "" else 0)
+		# Everyone who set out: the living and the fallen (`party_size > party_alive`: somebody fell).
+		return _compare(st.party.size() + st.fallen.size(), op if op != "" else ">", _company(rhs) if op != "" else 0)
 	if t.begins_with("flag."):
 		var value: Variant = st.get_flag(t.substr(5), false)
 		if op == "":
 			return _truthy(value)
 		# A flag can be held against the size of the company (`flag.horned_bargains >= party_size`).
-		var want: Variant = _literal(rhs)
-		if rhs == "party_size":
-			want = st.party.size() + st.fallen.size()
-		elif rhs == "party_alive":
-			want = st.party.size()
-		return _compare(value, op, want)
+		return _compare(value, op, _company(rhs))
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)
@@ -334,6 +329,15 @@ static func hero_named(state: StoryState, wanted: String) -> bool:
 		if full == want or full.get_slice(" ", 0) == want:
 			return true
 	return false
+
+
+## A right-hand side: `party_size` and `party_alive` read the company, anything else is a literal.
+func _company(rhs: String) -> Variant:
+	if rhs == "party_size":
+		return st.party.size() + st.fallen.size()
+	if rhs == "party_alive":
+		return st.party.size()
+	return _literal(rhs)
 
 
 static func _truthy(v: Variant) -> bool:
