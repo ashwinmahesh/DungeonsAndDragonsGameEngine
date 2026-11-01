@@ -19,7 +19,10 @@ var _preview: Character = null
 
 func _init(compendium_: Compendium = null, existing: Dictionary = {}) -> void:
 	compendium = compendium_ if compendium_ != null else Compendium.shared()
-	build = existing.duplicate(true) if not existing.is_empty() else Character.empty_build()
+	# A partial start (the hero creator's: a look and pronouns alone) keeps every other field at its empty default, so each
+	# step's picks have somewhere to go (an equipment option, say).
+	build = Character.empty_build()
+	build.merge(existing.duplicate(true), true)
 	_changed()
 
 
