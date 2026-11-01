@@ -559,6 +559,8 @@ func _walk(c: Combatant, path: Array[Vector2i], i: int, r: CombatResult, handled
 			e.events.append({"type": "move", "id": carried.id, "from": rfrom, "to": to, "mounted": true})
 		e.grappling.drag_along(c, from)
 		_after_step(c, from)
+		if e.portals.step(c):
+			return _halt(c, path, i + 1, r)   # through a window onto the one opposite (FightPortals): the move ends there
 		# Booming Blade: 5 ft moved of the creature's own will (`handled.willing`, set by move, free_move, jump and a
 		# legendary move) sets off the energy around it.
 		if handled.has("willing"):
@@ -1084,6 +1086,8 @@ func forced_move(target: Combatant, origin: Vector2, feet: int, toward: bool = f
 			fall_away(target, over)
 			return moved
 		_after_step(target, was)
+		if e.portals.step(target):
+			break   # pushed through a window: out of the one opposite (FightPortals)
 		if falls:
 			fall(target, -rise)
 			break

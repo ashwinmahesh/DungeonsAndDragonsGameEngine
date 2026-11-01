@@ -965,6 +965,21 @@
             "type": "boolean",
             "description": "Lair actions on initiative count 20 for a monster that has them."
           },
+          "portals": {
+            "type": "array",
+            "description": "Paired squares that lead into each other (FightPortals): a creature stepping onto one, walking or pushed, comes out on the other and its move ends.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cells"],
+              "properties": {
+                "name": {"type": "string"},
+                "cells": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/cell"}},
+                "when_flag": {"type": "string", "description": "Only while this fight flag is set."},
+                "broken": {"type": "string", "description": "Only once the object the scenery made from this prop is broken (a window)."}
+              }
+            }
+          },
           "objects": {
             "type": "array",
             "description": "Things the fight puts down itself (BattleScenery.for_spec, EncounterObjects.put): a boss's food, a jar holding a ghost. Each on its square while its `when` holds.",
