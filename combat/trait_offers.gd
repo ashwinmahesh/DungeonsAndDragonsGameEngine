@@ -64,7 +64,7 @@ func entries(c: Combatant) -> Array[Dictionary]:
 			var check := offer.get("check", {}) as Dictionary
 			var skill := str(check.get("skill", "performance")).capitalize()
 			var contest := offer.get("contest", null) is Dictionary
-			out.append({"id": "offer:%s:%s" % [holder.id, str(tr.get("id", ""))],
+			out.append({"id": "offer:%s:%s" % [holder.id, str(tr.get("id", ""))], "icon_key": key_of(tr, offer),
 				"label": "%s%s (%s)" % ["Influence: " if bool(offer.get("influence", false)) else "", label_of(tr, offer), holder.name()],
 				"sub": ("%s vs its %s save" % [skill, str((offer["contest"] as Dictionary).get("save", "cha")).capitalize()]) if contest
 					else "DC %d %s" % [int(check.get("dc", 10)), skill],
