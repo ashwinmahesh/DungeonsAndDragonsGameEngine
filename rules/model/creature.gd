@@ -593,8 +593,19 @@ func roll_d20(dice: DiceRoller, kind: D20Test.Kind, bonus: Breakdown, target: in
 		var sgn := int(x.get("sign", 1))
 		extra += r2 * sgn
 		extra_text += " %s %s %d" % ["+" if sgn > 0 else "-", x.get("source", ""), r2]
+	# A board that widens what crits and what fumbles (`crit_widen`: crits that much lower, stacking with Improved
+	# Critical; `fumble_range`: a d20 that low always misses): on attack rolls only.
+	var fumble := 1
+	if kind == D20Test.Kind.ATTACK_ROLL:
+		for m in modifiers_for(&"crit_widen"):
+			crit_range -= int(m.number("value"))
+		for m in modifiers_for(&"fumble_range"):
+			fumble = maxi(fumble, int(m.number("value")))
 	var t := D20Test.roll(dice, kind, bonus.total(), target, adv.size(), dis.size(), label, crit_range,
 		extra, extra_text.strip_edges())
+	if fumble > 1:
+		t.fumble_range = fumble
+		t._resolve()
 	if has_flag("luck"):
 		t.reroll_ones(dice, "Luck")
 	# A d20 of less than the floor counts as the floor (Zone of Amicability on a check to influence).

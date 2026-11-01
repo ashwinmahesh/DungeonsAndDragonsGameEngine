@@ -123,6 +123,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	var grid := _combat_grid(view)
 	var sitting := keep_back(view, grid, _starting_squares(view, spec))   # before the encounter, so her square blocks
 	var e := Encounter.new(grid, view.dice)
+	e.place_rules = (view.loc.get("fight_rules", {}) as Dictionary).duplicate(true)   # the place's own (a jinxed riverboat)
 	e.title = str(spec.get("text", ""))
 	# Bosses (ADR 0014): the place (a Misty Escape's resting place), the lair's actions, a foe that withdraws.
 	e.location_id = view.loc_id
@@ -633,6 +634,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		ModeController.force(ModeController.Mode.EXPLORATION)
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
+	e.place_rules = (view.loc.get("fight_rules", {}) as Dictionary).duplicate(true)
 	e.ends_when = ends_when_for(view, spec)
 	e.meters.setup(FightMeters.for_story(spec.get("meters", []) as Array, view.st))   # a guide's loyalty, a rite's pips (a saved round keeps their values)
 	e.zones.from_location(view.loc)

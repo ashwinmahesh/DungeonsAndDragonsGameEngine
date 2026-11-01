@@ -24,6 +24,8 @@ var natural_one: bool = false
 var label: String = ""
 ## Lowest natural roll that is a Critical Hit (Improved Critical: 19). Attack rolls only.
 var crit_range: int = 20
+## The highest d20 on an attack roll that misses whatever the total (1; more on a jinxed board: `fumble_range`).
+var fumble_range: int = 1
 ## Bonus or penalty dice already rolled (Bless +1d4, Bane -1d4): total and text like "Bless 3".
 var extra: int = 0
 var extra_label: String = ""
@@ -206,7 +208,7 @@ func _note_reroll(source: String, what: String) -> void:
 func would_succeed_with(natural: int) -> bool:
 	if kind == Kind.ATTACK_ROLL and natural >= crit_range:
 		return true
-	if kind == Kind.ATTACK_ROLL and natural == 1:
+	if kind == Kind.ATTACK_ROLL and natural <= fumble_range:
 		return false
 	return natural + modifier + extra >= target
 
@@ -214,7 +216,7 @@ func would_succeed_with(natural: int) -> bool:
 func _resolve() -> void:
 	total = kept + modifier + extra
 	critical = kind == Kind.ATTACK_ROLL and kept >= crit_range
-	natural_one = kind == Kind.ATTACK_ROLL and kept == 1
+	natural_one = kind == Kind.ATTACK_ROLL and kept <= fumble_range
 	if critical:
 		success = true
 	elif natural_one:

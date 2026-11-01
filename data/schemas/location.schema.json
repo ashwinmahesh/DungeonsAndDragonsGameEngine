@@ -93,6 +93,13 @@
           "every_min": {"type": "integer", "minimum": 1}, "exhaustion": {"type": "integer", "minimum": 0}}},
         "immune_flags": {"type": "array", "items": {"type": "string"}},
         "when": {"type": "string", "description": "A story condition: the air is bad only while it holds."}
+    "fight_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The place's own rules in every fight there (Encounter.place_rules): modifiers on every creature in the fight, gone with it (a jinxed riverboat: crits on 19-20, misses on 1-2, music against Concentration).",
+      "properties": {
+        "name": {"type": "string"},
+        "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}}
       }
     },
     "areas": {

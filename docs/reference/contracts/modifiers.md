@@ -198,3 +198,6 @@ Exhaustion (Necromancer's Grave Power with Arcane Recovery).
 
 `fickle_die` ({dice, on}): rolled with each D20 Test it covers (every one when `on` is unset); a 1 gives Disadvantage on that test, anything else is
 added to it (a jinxed drink). `extra_damage` with `once: true` is used up by the hit that deals it (a coating on a blade).
+
+`crit_widen` (value): attack rolls score a Critical Hit on a d20 that much lower, stacking with `crit_range` (Improved
+Critical). `fumble_range` (value): an attack roll's d20 at or below it always misses (the highest one counts).

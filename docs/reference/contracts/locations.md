@@ -140,6 +140,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   `condition` (Poisoned) on a failure; a hero holding it saves again every `lasting.every_min` (60) minutes wherever
   they are, failing for `lasting.exhaustion` (1) levels of Exhaustion, succeeding to end it. The world shows what
   happens as toasts (StoryState.hazard_news).
+
+- **A place's fight rules (Encounter.place_rules):** a location's `fight_rules` ({name, modifiers}) puts those modifiers on
+  every creature in every fight there, those that join later too, as an effect named `name` that goes with the fight.
+  With the modifiers `crit_widen` (attack rolls crit that much lower, stacking with Improved Critical) and `fumble_range`
+  (a d20 that low on an attack always misses), a jinxed board crits on 19-20 and misses on 1-2.
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open
