@@ -35,7 +35,7 @@ static func show_on(root: Node) -> void:
 static func lines(st: StoryState, narrator: Narrator) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	var open := narrator.line("recap:open", st)
-	out.append(_beat(open if open != "" else "Previously, in Barovia."))
+	out.append(_beat(open if open != "" else "Previously, in %s." % Campaign.realm_name()))
 	var loc := Compendium.shared().get_entry("locations", st.location)
 	var where := narrator.line("recap:where:%s" % str(loc.get("region", "")), st) if not loc.is_empty() else ""
 	if where == "" and not loc.is_empty():

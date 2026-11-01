@@ -459,13 +459,13 @@ func _game_rows() -> void:
 		"Bar: hold LB for a wheel of tabs, then step through the hotbar. Wheels: hold LB for a wheel of your actions themselves, the D-pad changing the filter and the page.")
 	y += ROW_PITCH
 	var respec := CheckBox.new()
-	respec.text = "Allow rebuilding a character at Madam Eva"
+	respec.text = Campaign.text("respec_option", "Allow rebuilding a character at Madam Eva")
 	respec.add_theme_font_override("font", serif())
 	respec.add_theme_font_size_override("font_size", roundi(10.5 * K))
 	for k: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
 		respec.add_theme_color_override(k, Color(_c("arch_text"), 0.8))
 	respec.button_pressed = bool(st.options.get("respec", true)) if st != null else true
-	respec.tooltip_text = "Madam Eva can rebuild one of the party from scratch (a respec)."
+	respec.tooltip_text = Campaign.text("respec_tip", "Madam Eva can rebuild one of the party from scratch (a respec).")
 	respec.toggled.connect(func(on: bool) -> void:
 		if st != null:
 			st.options["respec"] = on)

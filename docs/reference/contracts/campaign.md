@@ -33,6 +33,9 @@ engine's default, which is how the first game (Curse of Strahd) played.
 | `level_cap` | 11 | The highest level the story takes the party to. A number, or `{"cap": 13, "raised": [{"when": "<condition>", "cap": 20}]}`: the highest raised cap whose condition holds wins (`StoryState.level_cap()`, `Campaign.level_cap(st)`) |
 | `boon_ability_max` | 20 | How high a story's boon may take a score (`StoryBoons.raise_ability`) |
 | `travel_map`, `travel_map_always_seen`, `land_name`, `travel_main` | the first game's | The travel map's 3:2 painting, the spots never under mist, the land's name, and the travel file merged first |
+| `realm_name` | `land_name` | The whole world's name, for lines that name it ("Previously, in ...", a dragon sensed within 30 miles of it, a beanstalk wilting in its sky) |
+| `texts` | the first game's words | Lines the engine shows that name the first game's world, by key: `respec_option` and `respec_tip` (the pause menu's respec switch), `skirmish_search_foes`, `skirmish_search_maps`, `skirmish_search_brushes` (the skirmish search boxes' hints), `reading_ally_stays` (a guest the reading named won't leave: `%s` is their name), `planes_closed` (a plane-shifting amulet's failure). `Campaign.text(key, first_games)` |
+| `quest_regions` | the first game's | `{order, names}`: the journal's region headings and their order; a campaign that gives them never falls back to the first game's (QuestRegions) |
 | `weather` | the first game's | The climates file (story/weather.gd) |
 | `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
 | `reading` | the first game's deck | See "The reading" below (`ReadingDeck`) |
