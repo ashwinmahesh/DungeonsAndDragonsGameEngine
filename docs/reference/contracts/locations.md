@@ -179,6 +179,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   squares: a creature that steps onto one, walking or pushed, comes out on the other (or the nearest free square) and
   that move ends. A pair works always, or while the fight flag `when_flag` is set, or once the object the scenery made
   from prop `broken` is broken (a demiplane's windows opening onto the one opposite).
+
+- **Crowds (Crowds):** an area's `crowd` ({count, name, sprites, push_to, push_every, when}) fills it with bystander
+  figures while its story `when` holds: not NPCs (no talk, no turn) and never in anyone's way, milling a square at a time
+  inside the area. With `push_to`, while the leader stands in the area and the party isn't busy, every `push_every`
+  seconds (4) the party is walked one square toward that square. `sprites` name the figures' art.
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open
