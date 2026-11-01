@@ -92,13 +92,21 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	var id := str(ev["id"])
 	var st := (done.get(id, {}) as Dictionary).duplicate()
 	var times := int(st.get("times", 0))
-	var outcome := _pick(ev, str(st.get("last", "")))
+	var outcome := _pick(ev, str(st.get("last", "")), times)
 	st["round"] = e.round_no
 	st["times"] = times + 1
 	st["last"] = str(outcome.get("id", ""))
 	done[id] = st
+	if outcome.is_empty():
+		return CombatResult.new()   # a sequence that has run its course
 	var label := str(outcome.get("name", ev.get("name", id.capitalize())))
 	leg()._log("spell", "Initiative %d: %s" % [int(ev.get("at", 20)), label], null, [str(outcome.get("summary", ev.get("summary", "")))])
+	# Only while fewer than `at_least` of the creatures named in `who` stand (`unless_count`: another herald dances in
+	# only when fewer than three are left).
+	var cap := outcome.get("unless_count", {}) as Dictionary
+	if not cap.is_empty() and _count_of(cap.get("who", []) as Array) >= int(cap.get("at_least", 1)):
+		leg()._log("info", "%s: enough of them already" % label, null)
+		return CombatResult.new()
 	var r := CombatResult.new()
 	var reached := _reached(outcome)
 	e.events.append({"type": "round_event", "event": id, "outcome": str(outcome.get("id", "")), "name": label,
@@ -121,12 +129,27 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	return done_fn.call() as CombatResult
 
 
-## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn, else at random and
-## never the one used last time).
-func _pick(ev: Dictionary, last: String) -> Dictionary:
+## The creatures on the board named in `who` (names or stat block ids), up.
+func _count_of(who: Array) -> int:
+	var n := 0
+	for c in enc().living():
+		if c.has_meta("left_fight") or c.is_down():
+			continue
+		var block := str((c.creature as Monster).data.get("id", "")) if c.creature is Monster else ""
+		if c.name() in who or (block != "" and block in who):
+			n += 1
+	return n
+
+
+## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn; "sequence" each in
+## turn once, then nothing ({}): arrivals one a round; else at random and never the one used last time). `times`: how
+## often it has acted before.
+func _pick(ev: Dictionary, last: String, times: int = 0) -> Dictionary:
 	var table := ev.get("table", []) as Array
 	if table.is_empty():
 		return ev
+	if str(ev.get("pick", "random")) == "sequence":
+		return table[times] as Dictionary if times < table.size() else {}
 	if str(ev.get("pick", "random")) == "cycle":
 		var at := 0
 		for i in table.size():

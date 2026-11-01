@@ -1235,11 +1235,14 @@
                   "type": "integer",
                   "minimum": 1
                 },
+                "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                 "pick": {
                   "enum": [
                     "random",
-                    "cycle"
-                  ]
+                    "cycle",
+                    "sequence"
+                  ],
+                  "description": "random (never the same twice running), cycle (in turn, round and round) or sequence (each once in turn, then nothing)."
                 },
                 "table": {
                   "type": "array",
@@ -1249,6 +1252,7 @@
                       "id"
                     ],
                     "properties": {
+                      "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                       "id": {
                         "type": "string"
                       },
