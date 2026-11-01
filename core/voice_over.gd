@@ -34,8 +34,27 @@ static func clip_path(speaker: String, text: String) -> String:
 	return "%s%s/%s.mp3" % [DIR, speaker, key(text)]
 
 
+## The asset root's voice folder: the Makefile passes it as CM_ASSET_ROOT (tools/asset_root.py). A line whose clip isn't in the
+## game's own audio plays the one at <root>/voice/<speaker>/<key>.mp3 when it is there; without the variable, or without the
+## file, the line stays silent, as before.
+static func _external_path(speaker: String, text: String) -> String:
+	var root := OS.get_environment("CM_ASSET_ROOT").strip_edges()
+	if root == "" or speaker == "" or text.strip_edges() == "":
+		return ""
+	var path := "%s/voice/%s/%s.mp3" % [root, speaker, key(text)]
+	return path if FileAccess.file_exists(path) else ""
+
+
+## A line's clip as a stream: the game's own, else the asset root's, else null (silent).
+static func _stream(speaker: String, text: String) -> AudioStream:
+	if ResourceLoader.exists(clip_path(speaker, text)):
+		return load(clip_path(speaker, text)) as AudioStream
+	var ext := _external_path(speaker, text)
+	return AudioStreamMP3.load_from_file(ext) if ext != "" else null
+
+
 static func has_clip(speaker: String, text: String) -> bool:
-	return speaker != "" and text.strip_edges() != "" and ResourceLoader.exists(clip_path(speaker, text))
+	return speaker != "" and text.strip_edges() != "" and (ResourceLoader.exists(clip_path(speaker, text)) or _external_path(speaker, text) != "")
 
 
 ## Speaks a line: `speaker` is "narrator" or an npc id (a dialogue beat's speaker_id). Cuts off whatever was playing.
@@ -44,7 +63,7 @@ static func say(speaker: String, text: String) -> float:
 	stop()
 	if not has_clip(speaker, text):
 		return 0.0
-	var stream := load(clip_path(speaker, text)) as AudioStream
+	var stream := _stream(speaker, text)
 	if stream == null:
 		return 0.0
 	var p := _ensure_player()
@@ -91,7 +110,9 @@ static func say_all(beats: Array) -> float:
 		var voice := beat_voice(beat)
 		if has_clip(voice, str(beat["text"])):
 			_queue.append({"voice": voice, "text": str(beat["text"])})
-			total += (load(clip_path(voice, str(beat["text"]))) as AudioStream).get_length() + 0.3
+			var clip := _stream(voice, str(beat["text"]))
+			if clip != null:
+				total += clip.get_length() + 0.3
 	_next()
 	return total
 
@@ -101,7 +122,7 @@ static func _next() -> void:
 		return
 	var item := _queue.pop_front() as Dictionary
 	var p := _ensure_player()
-	var stream := load(clip_path(str(item["voice"]), str(item["text"]))) as AudioStream
+	var stream := _stream(str(item["voice"]), str(item["text"]))
 	if p == null or stream == null:
 		_queue.clear()
 		return
