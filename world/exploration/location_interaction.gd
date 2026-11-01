@@ -56,6 +56,9 @@ static func actions_at(view: LocationView, cell: Vector2i) -> Dictionary:
 			var lies := LocationNpcs.is_asleep(view, str(spec["npc"])) or LocationNpcs.is_lying(view, str(spec["npc"]))
 			out.append({"id": "talk", "label": "Approach" if lies else "Talk", "enabled": str(spec.get("dialogue", "")) != "",
 				"why": "" if str(spec.get("dialogue", "")) != "" else "Nothing to say"})
+			# A guide who leads without a word (`leads`: a mute figure beckoning the party on): Follow, while its `when` holds.
+			if not lead_of(view, spec).is_empty():
+				out.append({"id": "follow", "label": "Follow"})
 			if npc.has("shop"):
 				var closed := str((npc["shop"] as Dictionary).get("closed", ""))
 				var open := closed == "" or not StoryConditions.check(closed, view.st)
@@ -530,3 +533,13 @@ static func _use_prop(view: LocationView, prop: Dictionary) -> void:
 	if not said and str(prop.get("text", "")) != "":
 		view.narration.emit(str(prop["text"]))
 	view._trigger_encounter("examine:" + id)
+
+
+## The lead a placed NPC offers without a conversation (docs/contracts/locations.md `leads`): the placement's own `leads`,
+## else the NPC entry's: {to (as `lead <npc> to <where>` takes it), when, flag (set once the party has followed)}, or {}
+## when it has none or its `when` doesn't hold.
+static func lead_of(view: LocationView, spec: Dictionary) -> Dictionary:
+	var lead: Variant = spec.get("leads", Compendium.shared().get_entry("npcs", str(spec.get("npc", ""))).get("leads", null))
+	if not lead is Dictionary or str((lead as Dictionary).get("to", "")) == "":
+		return {}
+	return lead as Dictionary if StoryConditions.check(str((lead as Dictionary).get("when", "")), view.st) else {}
