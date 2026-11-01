@@ -423,7 +423,7 @@ static func _custom(st: StoryState, ch: Character, c: Combatant, e: Encounter, p
 		"ring_store":
 			return _store_spell(st, ch, p, opts)
 		"sense_dragons":
-			return {"ok": true, "text": "%s reaches out: no living dragon of its kind stirs within 30 miles of Barovia." % label}
+			return {"ok": true, "text": "%s reaches out: no living dragon of its kind stirs within 30 miles of %s." % [label, Campaign.realm_name()]}
 		"useful_items":
 			return _patch(st, ch, p, opts, dice)
 		"bag_of_beans":
@@ -609,7 +609,7 @@ static func _bean(st: StoryState, ch: Character, dice: DiceRoller) -> Dictionary
 		ch.add_item("potion_of_healing")
 		return {"ok": true, "text": "A pod splits to show a Potion of Healing."}
 	if roll <= 90:
-		return {"ok": true, "text": "A giant beanstalk grows into the clouds... and wilts in Barovia's grey sky."}
+		return {"ok": true, "text": "A giant beanstalk grows into the clouds... and wilts in %s's grey sky." % Campaign.realm_name()}
 	if roll <= 98:
 		var fx := Effect.new("Bag of Beans: fireflies", &"item", "bag_of_beans")
 		fx.lasting({"kind": "hours", "amount": 1})

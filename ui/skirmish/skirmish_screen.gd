@@ -653,7 +653,7 @@ func _foes_tab() -> void:
 	left.add_theme_constant_override("separation", 6)
 	row.add_child(left)
 	left.add_child(UiParts.section("The stat blocks (%d)" % SkirmishSetup.monsters().size()))
-	left.add_child(_search("Search by name or kind: wolf, undead, dragon, Strahd...", _fill_foes))
+	left.add_child(_search(Campaign.text("skirmish_search_foes", "Search by name or kind: wolf, undead, dragon, Strahd..."), _fill_foes))
 	var pair := _scroll_list()
 	left.add_child(pair[0])
 	_list = pair[1]
@@ -759,9 +759,9 @@ func _field_tab() -> void:
 		_filter = ""
 		_redraw(), {}, 14))
 	if field_list == "Maps":
-		left.add_child(_search("Search: Vallaki, castle, road...", _fill_maps))
+		left.add_child(_search(Campaign.text("skirmish_search_maps", "Search: Vallaki, castle, road..."), _fill_maps))
 	else:
-		left.add_child(_search("Search: wolf, undead, Strahd...", _fill_brushes))
+		left.add_child(_search(Campaign.text("skirmish_search_brushes", "Search: wolf, undead, Strahd..."), _fill_brushes))
 	var pair := _scroll_list()
 	left.add_child(pair[0])
 	_list = pair[1]

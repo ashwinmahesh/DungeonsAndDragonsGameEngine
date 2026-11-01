@@ -68,6 +68,18 @@ static func path(key: String) -> String:
 	return str(config().get(key, LEGACY.get(key, "")))
 
 
+## The realm the story is set in, for lines that name the whole world ("Previously, in ..."): `realm_name`, else the
+## travel map's `land_name` (the first game: Barovia for both).
+static func realm_name() -> String:
+	return str(config().get("realm_name", path("land_name")))
+
+
+## A line of the first game's that names its world, unless the campaign gives its own (`texts` in data/campaign.json,
+## by key): what the engine shows the player, kept in the campaign's words.
+static func text(key: String, first_games: String) -> String:
+	return str((config().get("texts", {}) as Dictionary).get(key, first_games))
+
+
 ## The game's name in what it writes (error reports): `title`, else the project's name.
 static func title() -> String:
 	return str(config().get("title", ProjectSettings.get_setting("application/config/name", "Game")))

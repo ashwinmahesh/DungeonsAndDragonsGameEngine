@@ -31,8 +31,21 @@ static func of(quest_id: String) -> String:
 	return region if region != "" else NONE
 
 
+## The campaign's own regions (data/campaign.json `quest_regions` {order, names}); a campaign that names them never falls
+## back to the first game's ORDER and NAMES. {} when it names none.
+static func campaign_regions() -> Dictionary:
+	var v: Variant = Campaign.setting("quest_regions", {})
+	return v as Dictionary if v is Dictionary else {}
+
+
 ## A region's heading.
 static func title(region: String) -> String:
+	var own := campaign_regions()
+	if not own.is_empty():
+		var names := own.get("names", {}) as Dictionary
+		if names.has(region):
+			return str(names[region])
+		return "Elsewhere" if region == NONE else region.replace("_", " ").capitalize()
 	if NAMES.has(region):
 		return str(NAMES[region])
 	return "Elsewhere" if region == NONE else region.replace("_", " ").capitalize()
@@ -40,10 +53,14 @@ static func title(region: String) -> String:
 
 ## Where a region sorts: its place in ORDER, the unknown ones after it, the quests with no region last.
 static func rank(region: String) -> int:
-	var i := ORDER.find(region)
+	var order: Array = ORDER
+	var own := campaign_regions()
+	if not own.is_empty():
+		order = own.get("order", []) as Array
+	var i := order.find(region)
 	if i >= 0:
 		return i
-	return ORDER.size() + 1 if region == NONE else ORDER.size()
+	return order.size() + 1 if region == NONE else order.size()
 
 
 ## Whether `a` comes before `b`: by rank, and the regions ORDER doesn't know by id.

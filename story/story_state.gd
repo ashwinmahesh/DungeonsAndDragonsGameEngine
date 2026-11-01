@@ -865,7 +865,7 @@ func guest_stays(npc_id: String) -> String:
 		if StoryConditions.check(str(rule.get("when", "")), self):
 			return str(rule["why"])
 	if Campaign.module().field(self, "ally.npc") == npc_id:
-		return "Madam Eva's cards named %s for the end of this, and that isn't a promise to walk away from." \
+		return Campaign.text("reading_ally_stays", "Madam Eva's cards named %s for the end of this, and that isn't a promise to walk away from.") \
 			% str(npc.get("name", npc_id))
 	return ""
 

@@ -460,7 +460,7 @@ func _planes(c: Combatant, label: String) -> CombatResult:
 	var e := enc()
 	var t := c.creature.roll_check(e.dice, &"arcana", 15, [], [], "Arcana (%s)" % label)
 	if t.success:
-		e.log.add("info", "The amulet reaches for another plane, but the Mists of Barovia close around it", c.id, [t.describe()])
+		e.log.add("info", Campaign.text("planes_closed", "The amulet reaches for another plane, but the Mists of Barovia close around it"), c.id, [t.describe()])
 		return CombatResult.new()
 	e.log.add("info", "The amulet's magic goes astray, flinging those near %s across the field" % c.name(), c.id, [t.describe()])
 	for o in e.living():
