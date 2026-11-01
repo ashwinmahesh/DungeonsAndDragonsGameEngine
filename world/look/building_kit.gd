@@ -168,6 +168,45 @@ static func merge(parts: Array, paint: String = "", bend: BuildingBend = null, a
 	return mi
 
 
+## `parts` merged as `merge` does under `bend`, with a second shape, the same parts under `tidy`, held as a blend shape named
+## "morph" (BuildingMorph drives its weight: 0 the mesh as `bend` makes it, 1 as `tidy` does). Without a `tidy` (or when the two
+## meshes do not line up point for point) it is `merge`. The mesh is tagged (meta "morph") for BuildingMorph.
+static func merge_morph(parts: Array, paint: String, bend: BuildingBend, tidy: BuildingBend, at: Vector2 = Vector2.ZERO,
+		whole_modules: bool = false) -> MeshInstance3D:
+	var main := merge(parts, paint, bend, at, whole_modules)
+	if main == null or bend == null or tidy == null:
+		return main
+	var other := merge(parts, paint, tidy, at, whole_modules)
+	if other == null:
+		return main
+	var from := main.mesh as ArrayMesh
+	var to := other.mesh as ArrayMesh
+	if from.get_surface_count() != to.get_surface_count():
+		other.free()
+		return main
+	var out := ArrayMesh.new()
+	out.add_blend_shape(&"morph")
+	for i in from.get_surface_count():
+		var base := from.surface_get_arrays(i)
+		var target := to.surface_get_arrays(i)
+		var verts := base[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var goal := target[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		if verts.size() != goal.size():
+			other.free()
+			return main
+		var shape := []
+		shape.resize(Mesh.ARRAY_MAX)
+		shape[Mesh.ARRAY_VERTEX] = goal
+		if target[Mesh.ARRAY_NORMAL] is PackedVector3Array and base[Mesh.ARRAY_NORMAL] is PackedVector3Array:
+			shape[Mesh.ARRAY_NORMAL] = target[Mesh.ARRAY_NORMAL]
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, base, [shape])
+		out.surface_set_material(i, from.surface_get_material(i))
+	other.free()
+	main.mesh = out
+	main.set_meta("morph", true)
+	return main
+
+
 ## Forgets the kept meshes (a tool timing first arrivals, a test that changes what a place is built from).
 static func forget() -> void:
 	_kept.clear()
