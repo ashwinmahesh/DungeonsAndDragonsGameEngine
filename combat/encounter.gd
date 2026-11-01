@@ -143,6 +143,8 @@ var objects: EncounterObjects
 var undo: EncounterUndo
 ## The location's traps, which go off under whoever moves onto them (combat/encounter_traps.gd).
 var traps: EncounterTraps
+## The fight's meters: a guide's loyalty, a rite's pips (combat/fight_meters.gd).
+var meters: FightMeters
 
 
 func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
@@ -161,6 +163,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	ground = GroundItems.new(self)
 	objects = EncounterObjects.new(self)
 	traps = EncounterTraps.new(self)
+	meters = FightMeters.new(self)
 	spells = SpellCaster.new(self)
 	features = CombatFeatures.new(self)
 	reactions = Reactions.new(self)

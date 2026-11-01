@@ -942,6 +942,9 @@ func refresh() -> void:
 				shown = c
 				break
 	_round_label.text = "Round %d" % maxi(1, e.round_no)
+	# The fight's meters (a guide's loyalty, a rite's pips): their counts beside the round.
+	for line in e.meters.lines():
+		_round_label.text += " · " + line
 	# A fight on a clock (`ends_when.rounds`): how many rounds are left, and what happens then.
 	var left := e.turns.clock_left()
 	if left >= 0:

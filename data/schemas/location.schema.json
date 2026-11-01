@@ -1105,6 +1105,55 @@
               }
             }
           },
+          "meters": {
+            "type": "array",
+            "description": "Counts the fight is about, shown on the HUD (FightMeters): a guide's loyalty, a rite's pips. The heroes move them with their actions; reaching a mark sets a flag or ends the fight.",
+            "items": {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": {"type": "string"},
+                "label": {"type": "string"},
+                "start": {"type": "integer"},
+                "min": {"type": "integer"},
+                "max": {"type": "integer"},
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "check"],
+                    "properties": {
+                      "id": {"type": "string"},
+                      "label": {"type": "string"},
+                      "cost": {"enum": ["action", "bonus"]},
+                      "near": {"type": "string", "description": "An object id or a creature's name it must be done beside."},
+                      "range": {"type": "integer"},
+                      "check": {"type": "object"},
+                      "success": {"type": "integer"},
+                      "failure": {"type": "integer"},
+                      "failure_damage": {"type": "object"}
+                    }
+                  }
+                },
+                "marks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["value"],
+                    "properties": {
+                      "value": {"type": "integer"},
+                      "falling": {"type": "boolean"},
+                      "flag": {"type": "string"},
+                      "outcome": {"enum": ["victory", "defeat", "ended"]},
+                      "say": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          },
           "round_events": {
             "type": "array",
             "items": {
