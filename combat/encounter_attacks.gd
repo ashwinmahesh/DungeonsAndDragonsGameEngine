@@ -135,7 +135,9 @@ func attack(c: Combatant, target: Combatant, option_id: String, opts: Dictionary
 		return CombatResult.fail("No such attack")
 	# An Echo Knight's attack can come from its echo's space.
 	var check := e.echo_knight.attack_why(c, target, option, true)
-	if check != "":
+	# Or from its decoy image's square (DecoyImages: an action it makes through the image).
+	var through := e.images.attack_origin(c, target, option) if check != "" else null
+	if check != "" and through == null:
 		return CombatResult.fail(check)
 	# Haste's extra action (2024) takes one more attack once the Attack action and its attacks are used.
 	var via_haste := c.haste_attack_ready()
@@ -188,6 +190,8 @@ func attack(c: Combatant, target: Combatant, option_id: String, opts: Dictionary
 	if DecoyImages.is_image(target):
 		e.images.struck(c, target, "%s's %s" % [c.name(), str(option.get("name", "attack"))], "attack")
 		return CombatResult.new()
+	if through != null:
+		return e.images.strike(c, through, func() -> CombatResult: return _resolve_attack(c, target, option, opts))
 	var echo := e.echo_knight.attack_origin(c, target, option)
 	return e.echo_knight.strike(c, echo, func() -> CombatResult: return _resolve_attack(c, target, option, opts))
 

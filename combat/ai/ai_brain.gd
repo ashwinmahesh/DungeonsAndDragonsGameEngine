@@ -936,6 +936,8 @@ func _attack_cells(c: Combatant, t: Combatant, o: Dictionary, reach: Dictionary)
 	var max_d := p.reach if melee else (p.long_range if p.long_range > 0 else p.normal_range)
 	if e.grid.distance_ft(c.cell, c.size_cells, t.cell, t.size_cells, c.altitude, t.altitude) <= max_d:
 		out.append(c.cell)
+	elif e.images.attack_origin(c, t, o) != null:
+		out.append(c.cell)   # through its decoy image, from where it stands (DecoyImages)
 	# Dazed (Abjure Foes): it moves or acts, not both, so it strikes from where it stands or only closes in.
 	if not c.can_act() or c.movement_left <= 0 or c.creature.has_flag("dazed"):
 		return out

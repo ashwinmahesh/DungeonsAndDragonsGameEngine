@@ -29,6 +29,10 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 		return CombatResult.fail("Target is more than one size larger")
 	if not _spend_attack(c):
 		return CombatResult.fail("No attacks left this turn")
+	# A decoy image (DecoyImages): hands close on nothing, and what the one reaching makes of it.
+	if DecoyImages.is_image(target):
+		e.images.struck(c, target, "%s's %s" % [c.name(), "grab" if mode == "grapple" else "shove"], "attack")
+		return CombatResult.new()
 	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
 	var ab := &"str" if target.creature.save_bonus(&"str").total() >= target.creature.save_bonus(&"dex").total() else &"dex"
 	var against: Array[String] = []
