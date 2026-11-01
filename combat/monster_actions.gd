@@ -1618,3 +1618,19 @@ func death_burst(c: Combatant) -> void:
 			var sv := o.creature.roll_save(e.dice, &"dex", int((b["save"] as Dictionary)["dc"]), [], [], "Dexterity save vs Death Throes (%s)" % o.name())
 			var amt := int(rolled["total"]) / 2 if sv.success else int(rolled["total"])
 			e.deal_damage(c, o, [{"amount": amt, "type": str(dmg["type"])}], false, "Death Throes", [sv.describe(), str(rolled["text"])])
+
+
+## A trait that answers an attack roll that hits it (`when_hit`: {riders, once_per_turn (true)}): the riders land on the
+## attacker, `target` their source (a chain shooting out at whoever struck: a Strength save or Grappled).
+func when_hit(attacker: Combatant, target: Combatant) -> void:
+	var e := enc()
+	if attacker == null or attacker == target or not attacker.is_alive() or not target.is_alive() or target.creature.hp <= 0:
+		return
+	for tr: Variant in traits(target):
+		var wh := (tr as Dictionary).get("when_hit", {}) as Dictionary
+		if wh.is_empty():
+			continue
+		var label := str((tr as Dictionary).get("name", "When hit"))
+		if bool(wh.get("once_per_turn", true)) and not e.class_features._once(target, "when_hit:%s" % label):
+			continue
+		apply_riders(target, attacker, wh.get("riders", []) as Array, {}, label)

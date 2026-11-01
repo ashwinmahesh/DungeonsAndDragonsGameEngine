@@ -182,6 +182,7 @@ func spell_attack(ctx: Dictionary, t: Combatant, r: CombatResult) -> D20Test:
 		r.damage += dr.final
 		if melee:
 			e.retaliate(c, t)
+		e.monster_actions.when_hit(c, t)   # a trait that answers any attack roll that hits it
 		if str(s["id"]) == "chromatic_orb":
 			_orb_leap(ctx, t, rolled, r)
 	if t.is_alive():

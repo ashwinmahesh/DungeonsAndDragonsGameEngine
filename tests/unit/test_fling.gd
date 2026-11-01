@@ -32,3 +32,19 @@ func test_nobody_held_nothing_thrown() -> void:
 	TestCombat.hero(e, "hedda_ironvow", Vector2i(3, 3), 3)
 	TestCombat.start_with(e, reaper)
 	assert_false(e.monster_actions.fling(reaper, FLING).ok)
+
+
+## A trait that answers a hit (`when_hit`: The Jailer's chain): once a turn, whoever hits it saves or is held.
+func test_a_chain_that_answers_a_hit() -> void:
+	var e := TestCombat.open_field(3)
+	e.default_player_reaction = "never"
+	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(3, 3), 3)
+	var jailer := e.add(TestChars.dummy(300, false, {"name": "Test Jailer", "ac": 1, "traits": [{"id": "test_jailer", "name": "Test Jailer",
+		"when_hit": {"riders": [{"do": "grapple", "escape_dc": 13, "save": {"ability": "str", "dc": 40}}]}}]}), &"enemy", Vector2i(4, 3))
+	TestCombat.start_with(e, hero)
+	e.monster_actions.when_hit(hero, jailer)
+	assert_true(e.grapples.has(hero.id), "the chain holds whoever hit it")
+	e.grapples.erase(hero.id)
+	hero.creature.remove_condition(&"grappled")
+	e.monster_actions.when_hit(hero, jailer)
+	assert_false(e.grapples.has(hero.id), "once a turn")

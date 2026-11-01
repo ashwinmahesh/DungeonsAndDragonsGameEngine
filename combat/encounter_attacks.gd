@@ -807,6 +807,7 @@ func _apply_hit(st: Dictionary, parts: Dictionary, details: Array[String], dmg_t
 		if bool(option["melee"]):
 			retaliate(c, target)
 			e.spells.specials.high.holy_aura_hit(c, target)
+		e.monster_actions.when_hit(c, target)   # a trait that answers any attack roll that hits it (The Jailer's chain)
 		e.features.after_hit(c, target, option, dr, st, r)
 		e.items.after_hit(c, target, option, dr, st, r)
 		e.reaction_flow._queue_sentinels(c, target)
