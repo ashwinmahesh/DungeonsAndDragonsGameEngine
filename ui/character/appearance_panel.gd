@@ -130,7 +130,8 @@ func _redraw() -> void:
 			if _paper_doll():
 				_swatches(body, "Skin", "skins", "skin")
 			else:
-				body.add_child(UiKit.label("Faces, hair, skin and builds for each species come with its own bodies. Until then every hero stands as a plain figure of their height.", 13, "parchment", OPTIONS_W))
+				var builds := not HeroLook.offered(appearance, "builds", species).is_empty()
+				body.add_child(UiKit.label("Faces, hair, skin%s for each species come with its own bodies. Until then every hero stands as a plain figure of their height%s." % ["" if builds else " and builds", " and build" if builds else ""], 13, "parchment", OPTIONS_W))
 		"Head":
 			_pictures(body, "Head", "heads", "head", 4)
 			_pictures(body, "Hair", "hair", "hair", 5)
