@@ -117,3 +117,9 @@ A power with `custom: "drink_cast"` and `params: {spell, level, minutes, sustain
 drinker at `level`, with no slot and no Concentration, lasting `minutes`; the power's own `targeting` and `range` pick
 the target. With `sustain_cost` the spell's repeated actions cost that instead (Vampiric Touch's touch as a Bonus
 Action; ItemSpecials._drink_cast). SpellCasting.cast_free takes the same `level` and `sustain_cost` options.
+
+## Drinks that change shape
+
+A power with `custom: "drink_shape"` and `params: {form, minutes}` turns whoever drinks it (or is given it within 5 ft)
+into the stat block `form`, Polymorph's way with no Concentration: the form's own Hit Points as Temporary Hit Points,
+back to themselves when those are gone or `minutes` have passed on their own turns (ItemSpecials._drink_shape).

@@ -77,6 +77,34 @@ func _drink_cast(c: Combatant, p: Dictionary, targets: Array, point: Vector2) ->
 	return e.spells.cast_free(c, spell_id, targets, point, opts)
 
 
+## A drink that changes the drinker's shape (`drink_shape`: params {form: a stat block, minutes}): Polymorph's way, with
+## no Concentration: Temporary Hit Points of the form's own, and it ends when they are gone or the time is up.
+func _drink_shape(c: Combatant, p: Dictionary, t: Combatant) -> CombatResult:
+	var e := enc()
+	if t != c and e.distance(c, t) > 5:
+		return CombatResult.fail("Must be within 5 ft")
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	var form := Compendium.shared().get_entry("monsters", str(params.get("form", "")))
+	if form.is_empty():
+		return CombatResult.fail("No such form")
+	_pay(c, p)
+	var label := str((p["data"] as Dictionary).get("name", ""))
+	e.log.add("info", "%s %s %s" % [c.name(), "drinks" if t == c else "gives %s" % t.name(), label], c.id)
+	e.shapes.transform(t, form, {"temp_hp": int((form.get("hp", {}) as Dictionary).get("average", 1)), "ends_without_temp_hp": true, "label": label})
+	var fx := Effect.new(label, &"item", str(p.get("item_id", "")))
+	fx.lasting({"kind": "minutes", "amount": int(params.get("minutes", 60))})
+	fx.turn_owner_id = t.id   # counts down on the drinker's own turns
+	var tid := t.id
+	var ew := weakref(e)
+	fx.on_end = func() -> void:
+		var en := ew.get_ref() as Encounter
+		var tc := en.get_c(tid) if en != null else null
+		if tc != null and en.shapes.is_shaped(tc):
+			en.shapes.revert(tc, "%s wears off" % label)
+	t.creature.add_effect(fx)
+	return CombatResult.new()
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -97,6 +125,8 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return CombatResult.new()
 		"drink_cast":
 			return _drink_cast(c, p, targets, point)
+		"drink_shape":
+			return _drink_shape(c, p, t)
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)
