@@ -131,8 +131,9 @@ func test_it_eats_only_when_hurt_enough_to_gain() -> void:
 	assert_false(ObjectFuel.hungry(boss), "9 lost of a 20 heal: not yet (half the heal by default)")
 	boss.creature.hp = boss.creature.max_hp() - 10
 	assert_true(ObjectFuel.hungry(boss), "10 lost: now")
+	boss.cell = Vector2i(6, 3)
 	e.objects.fuel.turn_start(boss)
-	assert_true(can.destroyed, "it eats")
+	assert_true(can.destroyed, "beside the can again, it eats")
 
 
 func test_a_block_can_set_how_hungry() -> void:
