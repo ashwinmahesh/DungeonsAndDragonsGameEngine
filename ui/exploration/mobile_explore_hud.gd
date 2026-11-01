@@ -95,8 +95,8 @@ func reflow() -> void:
 func refresh(where: String, sneaking: bool, solo: bool, planning: bool) -> void:
 	if where != "":
 		location = where
-	state_text = "Day %d · %s · %d gp%s%s%s" % [hud.st.day, Calendar.clock(hud.st.minute_of_day), hud.st.gold,
-		" · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else ""]
+	state_text = "Day %d · %s · %d gp%s%s%s%s" % [hud.st.day, Calendar.clock(hud.st.minute_of_day), hud.st.gold,
+		ExploreHud.counters_text(hud.st), " · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else ""]
 
 
 func open_page(title: String, page_kind: String = "") -> VBoxContainer:

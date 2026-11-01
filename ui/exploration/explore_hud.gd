@@ -439,8 +439,22 @@ func refresh(location_name: String = "", sneaking: bool = false, solo: bool = fa
 	_quest.visible = _quest.text != ""
 	_goal.text = ("◆ " + str(followed["objective"])) if str(followed["objective"]) != "" else ""
 	_goal.visible = _goal.text != ""
-	_mode.text = "Day %d · %s%s%s%s%s · %d gp" % [st.day, Calendar.clock(st.minute_of_day), _weather(),
-		" · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else "", int(st.gold)]
+	_mode.text = "Day %d · %s%s%s%s%s · %d gp%s" % [st.day, Calendar.clock(st.minute_of_day), _weather(),
+		" · Sneaking" if sneaking else "", " · Split party" if solo else "", " · Turn-based" if planning else "", int(st.gold),
+		counters_text(st)]
+
+
+## The campaign's counters beside the gold (campaign.json `counters`: [{flag, label, when}]): " · 3 tickets" for each
+## whose story `when` holds and whose flag isn't 0 (a currency the party is carrying at a festival).
+static func counters_text(st: StoryState) -> String:
+	var out := ""
+	for raw: Variant in Campaign.setting("counters", []):
+		var cn := raw as Dictionary
+		var n := int(st.flags.get(str(cn.get("flag", "")), 0))
+		if n == 0 or not StoryConditions.check(str(cn.get("when", "")), st):
+			continue
+		out += " · %d %s" % [n, str(cn.get("label", cn.get("flag", "")))]
+	return out
 
 
 ## " · Fog" out in the open (F12's weather, story/weather.gd); "" indoors, where it doesn't reach.

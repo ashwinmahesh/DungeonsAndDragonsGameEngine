@@ -190,6 +190,10 @@ bright, dim}, off_at}; WardLights): in every fight the guest is in or sits out, 
 step into it unless already inside, and those in `disadvantage` have Disadvantage on D20 Tests in it. While `small.when`
 holds its numbers are `small`'s; at a place in `off_at` it isn't there.
 
+`counters` ([{flag, label, when}]): currencies or tallies shown on the exploring screen beside the gold, " · 3 tickets",
+for each whose story `when` holds and whose int flag isn't 0 (ExploreHud.counters_text). The flag is the story's own;
+dialogue moves it with `set flag += n`.
+
 ## Region travel files (Phase 5, ADR 0011)
 
 Every file in `data/travel/` is merged into the one map: a region adds `data/travel/<region>.json` with the same shape
