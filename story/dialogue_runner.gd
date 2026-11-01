@@ -291,6 +291,11 @@ func next() -> Dictionary:
 				var tired := _exhaust(s)
 				if tired != "":
 					return {"kind": "notice", "text": tired}
+			"timed_condition":
+				pc += 1
+				var held := _timed_condition(s)
+				if held != "":
+					return {"kind": "notice", "text": held}
 			"party_save":
 				pc += 1
 				var saved := _party_save(s)
@@ -1032,6 +1037,24 @@ func _exhaust(s: Dictionary) -> String:
 	var amount := absi(n)
 	return "%s %s %d level%s of Exhaustion" % [_names(got), ("gains" if n > 0 else "loses") if got.size() == 1 else ("gain" if n > 0 else "lose"),
 		amount, "" if amount == 1 else "s"]
+
+
+## `condition <Condition> <minutes> [party|failed]`: the condition on the hero in the conversation, every living hero or
+## those who failed the last party save, for that many minutes of the clock (immunities turn it away). Returns the notice.
+func _timed_condition(s: Dictionary) -> String:
+	var cond := StringName(str(s["condition"]))
+	var got: Array[String] = []
+	for ch in _receivers(bool(s["party"]), bool(s.get("failed", false))):
+		var fx := Effect.new(str(cond).capitalize(), &"story", "story_condition").with_condition(cond)
+		fx.ends = Effect.Ends.MINUTES
+		fx.minutes_left = int(s["minutes"])
+		if ch.add_effect(fx) and ch.has_condition(cond):
+			got.append(_first(ch))
+	if got.is_empty():
+		return ""
+	var mins := int(s["minutes"])
+	var span := ("%d hour%s" % [mins / 60, "" if mins == 60 else "s"]) if mins % 60 == 0 else "%d minutes" % mins
+	return "%s %s %s for %s" % [_names(got), "is" if got.size() == 1 else "are", str(cond).capitalize(), span]
 
 
 ## `save <Ability> DC <n> party [unless resists <type>]`: every living hero makes the saving throw (one with Resistance
