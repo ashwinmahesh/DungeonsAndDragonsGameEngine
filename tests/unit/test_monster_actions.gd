@@ -60,6 +60,52 @@ func test_shadow_drains_strength() -> void:
 	assert_true(h.creature.ability_score(&"str") < before)
 
 
+func test_a_floored_drain_never_takes_the_maximum_below_the_floor() -> void:
+	var e := _field(3)
+	var s := TestCombat.foe(e, "specter", Vector2i(3, 3))
+	var h := TestCombat.hero(e, "ilse_varga", Vector2i(4, 3))
+	TestCombat.start_with(e, s)
+	var top := h.creature.max_hp()
+	e.monster_actions.drain_max_hp(h, top + 20, "Life Drain", 1, "fight")
+	assert_eq(h.creature.max_hp(), 1, "the drain stops at the floor")
+	assert_false(h.creature.dead, "a floored drain alone doesn't kill")
+	e.monster_actions.drain_max_hp(h, 5, "Life Drain", 1, "fight")
+	assert_eq(h.creature.max_hp(), 1, "nothing more to drain at the floor")
+	e.monster_actions.drain_max_hp(h, top + 20, "Life Drain")
+	assert_true(h.creature.dead, "without a floor, a maximum drained to 0 is death (2024)")
+
+
+func test_a_drain_until_the_fight_ends_goes_with_the_fight() -> void:
+	var e := _field(3)
+	var s := TestCombat.foe(e, "specter", Vector2i(3, 3))
+	var h := TestCombat.hero(e, "ilse_varga", Vector2i(4, 3))
+	TestCombat.start_with(e, s)
+	var top := h.creature.max_hp()
+	var strength := h.creature.ability_score(&"str")
+	e.monster_actions.drain_max_hp(h, 3, "Life Drain", 1, "fight")
+	e.monster_actions.ability_drain(h, &"str", 2, "Draining Swipe", 1, "fight")
+	e.monster_actions.drain_max_hp(h, 2, "Life Drain")
+	assert_eq(h.creature.max_hp(), top - 5)
+	EncounterSetup.clear_fight_effects(h.creature)
+	assert_eq(h.creature.max_hp(), top - 2, "the fight's drain is gone, the Long Rest one stays")
+	assert_eq(h.creature.ability_score(&"str"), strength)
+
+
+func test_a_drain_until_a_short_rest_ends_on_one() -> void:
+	var e := _field(3)
+	var s := TestCombat.foe(e, "specter", Vector2i(3, 3))
+	var h := TestCombat.hero(e, "ilse_varga", Vector2i(4, 3))
+	TestCombat.start_with(e, s)
+	var top := h.creature.max_hp()
+	e.monster_actions.drain_max_hp(h, 3, "Life Drain", 0, "short_rest")
+	var fx: Effect = null
+	for f: Effect in h.creature.effects:
+		if f.source_id == "drain_max_hp":
+			fx = f
+	assert_true(fx != null and fx.ends == Effect.Ends.SHORT_REST)
+	assert_eq(h.creature.max_hp(), top - 3)
+
+
 func test_vampire_spawn_bites_a_grappled_target_and_heals() -> void:
 	var e := _field(4)
 	var v := TestCombat.foe(e, "vampire_spawn", Vector2i(3, 3))
