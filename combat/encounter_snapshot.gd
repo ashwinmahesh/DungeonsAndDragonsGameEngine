@@ -77,7 +77,7 @@ static func capture(e: Encounter) -> Dictionary:
 	return {"version": 1, "rows": rows, "combatants": cbs, "order": order, "round": e.round_no, "marks": e.marks.duplicate(true),
 		"grapples": e.grapples.duplicate(), "studied": e.studied.duplicate(), "title": e.title, "log": log,
 		"spells": e.spells.to_dict(), "shapes": e.shapes.to_dict(), "light": e.ambient_light, "sunlit": e.sunlit,
-		"location_id": e.location_id, "places": e.places.duplicate(), "lair": e.lair, "outdoors": e.outdoors, "weather_id": e.weather_id, "weather": e.weather.duplicate(), "boss": e.legendary.to_dict(),
+		"location_id": e.location_id, "places": e.places.duplicate(), "lair": e.lair, "stored_d20s": e.stored_d20s.duplicate(), "outdoors": e.outdoors, "weather_id": e.weather_id, "weather": e.weather.duplicate(), "boss": e.legendary.to_dict(),
 		"drop_ft": e.grid.drop_ft, "ceiling_ft": e.grid.ceiling_ft, "difficulty": e.difficulty.id, "ground": e.ground.to_dict(),
 		"objects": e.objects.to_dict(), "heights": heights, "traps": e.traps.to_dict(), "elevation": e.grid.elevation_rows()}
 
@@ -168,6 +168,7 @@ static func restore(d: Dictionary, dice: DiceRoller, party: Array[Character] = [
 	for pl: Variant in d.get("places", []):
 		e.places.append(str(pl))
 	e.lair = bool(d.get("lair", false))
+	e.stored_d20s.assign((d.get("stored_d20s", []) as Array).map(func(v: Variant) -> int: return int(v)))
 	e.outdoors = bool(d.get("outdoors", false))
 	e.weather_id = str(d.get("weather_id", ""))
 	e.weather = (d.get("weather", {}) as Dictionary).duplicate()

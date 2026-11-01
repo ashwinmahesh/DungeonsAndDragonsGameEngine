@@ -141,6 +141,9 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		e.weather = Weather.kind(e.weather_id)
 	e.legendary.set_withdraw(spec.get("withdraw", {}))
 	e.ends_when = ends_when_for(view, spec)
+	# d20s a story kept for this fight (DialogueRunner `store_d20`): spent in it, gone after it.
+	e.stored_d20s.assign(view.st.flags.get(DialogueRunner.STORED_D20S, []))
+	view.st.flags.erase(DialogueRunner.STORED_D20S)
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)

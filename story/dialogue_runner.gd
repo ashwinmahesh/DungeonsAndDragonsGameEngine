@@ -32,6 +32,8 @@ const MARK_UNIFORM_MENUS := false
 
 var st: StoryState
 var dice: DiceRoller
+## StoryState.flags: d20s kept for the party's next fight (`store_d20`; LocationFights hands them to it).
+const STORED_D20S := "_stored_d20s"
 var narrator: Narrator = null
 var file: DialogueFile = null
 var node: String = ""
@@ -324,6 +326,13 @@ func next() -> Dictionary:
 				var blessed := _bless(s)
 				if blessed != "":
 					return {"kind": "notice", "text": blessed}
+			"store_d20":
+				pc += 1
+				var rolled := dice.roll(20, int(s["count"]), "Stored d20s")
+				var kept := (st.flags.get(STORED_D20S, []) as Array).duplicate()
+				kept.append_array(rolled)
+				st.flags[STORED_D20S] = kept
+				return {"kind": "notice", "text": "Kept for the next fight: %s" % ", ".join(rolled.map(func(v: int) -> String: return str(v)))}
 			"twist":
 				pc += 1
 				var got: Array[String] = []

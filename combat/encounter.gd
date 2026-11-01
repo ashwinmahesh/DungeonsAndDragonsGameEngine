@@ -97,6 +97,9 @@ var _cover_cache: Dictionary = {}
 ## Savage Attacker is once per turn, any creature's turn: creature id -> the turn it was used on.
 var _savage_turn: Dictionary = {}
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
+## d20s the party brought to this fight (a boon): any hero may spend one in place of a visible creature's next d20
+## (FeatureActions `stored_d20`); what's left fades with the fight. Kept in a round's save.
+var stored_d20s: Array[int] = []
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.

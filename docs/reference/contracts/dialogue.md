@@ -130,6 +130,9 @@ temp_hp 1d6 [party]                One roll of Temporary Hit Points for the hero
 bless [party] [30m|2h]             Bless's bonus (1d4 on attack rolls and saving throws) from the story: on the hero in the
                                    conversation or with `party` every living hero, for an hour unless it says, with no
                                    Concentration and no slot (StoryBoons.spell_boon). Another one replaces it.
+store_d20 2                        Rolls that many d20s now (a notice shows them) and keeps them for the party's next fight:
+                                   there any hero can spend each once, a free hotbar line, to set a visible creature's next
+                                   d20 to it; what's left fades when that fight ends (Encounter.stored_d20s).
 twist +1 [party]                   A Twist of Fate for the hero in the conversation, or every living hero (`party`): kept
                                    with the hero (Character.twists); in a fight it's a free hotbar line, spent to set a
                                    visible creature's next d20 to a 1 or a 20. A notice says who.
