@@ -51,3 +51,6 @@ conversation or an arrival picture, shows one name at a time, and like the card 
 captures without `--motion`.
 
     make capture SCENE=res://tools/capture/place_title_capture.tscn NAME=place_title FRAMES=10 ARGS="--motion"
+
+A campaign can put a content note on the card (CampaignModule.content_note(region, st)): a line under the title for
+what the region holds that a player may want warning of. The base module gives none, and the card shows nothing.

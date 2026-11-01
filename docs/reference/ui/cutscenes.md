@@ -87,6 +87,8 @@ one conversation that plays a single picture (test_cutscenes `ONE_PICTURE`).
   line, ends the chain there, so a game with no Narrator plays the first scene alone. A treasure found in a
   conversation plays its next scenes after the notices (each picture with the Narrator's line over it) and then takes
   the picture away, so the talk goes on as it did.
+- A campaign's own content settings (CampaignModule.comfort_options: [{key, label, tip, default}]) show as more
+  checkboxes under Content in the pause menu, each kept in the playthrough's `st.options[key]` for the game to read.
 
 `make validate` checks every picture exists, every trigger is a node in a `narrative/narrator/` file (or a
 `find:` names a magic item), and every `cutscene <id>` in a conversation names a cutscene.

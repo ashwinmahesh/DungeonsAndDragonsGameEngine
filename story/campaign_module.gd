@@ -10,6 +10,18 @@ extends RefCounted
 
 # --- Text and facts the story data reaches for ------------------------------------------------------------------
 
+## The campaign's own content settings, shown as checkboxes under Content in the pause menu and kept in the
+## playthrough's options (st.options[key]): [{key, label, tip, default}]. None by default.
+func comfort_options() -> Array[Dictionary]:
+	return []
+
+
+## A content note the loading card shows arriving in `region` (what the place holds that a player may want warning
+## of), or "" for none.
+func content_note(_region: String, _st: StoryState) -> String:
+	return ""
+
+
 ## `text` with the campaign's {placeholders} filled from the story (quest journals, hints, warnings).
 func fill(text: String, _st: StoryState) -> String:
 	return text
