@@ -855,6 +855,12 @@
           "type": "integer",
           "minimum": 1
         },
+        "move": {
+          "type": "object",
+          "required": ["location", "encounter"],
+          "description": "The fight goes on in another place as the phase begins: {location, spawn, encounter} (an encounter entry there, usually `when: false`, giving the new board's squares).",
+          "properties": {"location": {"type": "string"}, "spawn": {"type": "string"}, "encounter": {"type": "string"}}
+        },
         "legendary_resistance": {
           "description": "\"refill\": its spent uses come back; a number: that many uses left.",
           "anyOf": [

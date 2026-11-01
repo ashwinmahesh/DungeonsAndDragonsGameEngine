@@ -880,6 +880,12 @@ static func _drop_token(tok: CombatToken, playing: CombatView) -> void:
 
 static func _end_encounter(view: LocationView, encounter_id: String, spec: Dictionary, e: Encounter, ctokens: Dictionary, outcome: String) -> void:
 	view.last_encounter = spec
+	# A phase moved the fight on (BossPhases `move`): everyone goes as they are, and the place they land picks it up.
+	var moved_to := {}
+	if outcome == "moved" and not e.legendary.moving.is_empty():
+		moved_to = e.legendary.moving.duplicate()
+		view.st.flags[MOVED] = {"snapshot": EncounterSnapshot.capture(e), "to": str(moved_to.get("location", "")),
+			"spawn": str(moved_to.get("spawn", "default")), "encounter": str(moved_to.get("encounter", "")), "from": encounter_id}
 	Bestiary.after_fight(view.st, e)   # who fell and what was studied, for the journal's Bestiary (U8)
 	for c in e.combatants:
 		if c.side in [&"party", &"guest"]:
@@ -996,6 +1002,8 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		view.st.travel_resume = {}
 	view._save_positions()
 	view.combat_ended.emit(outcome)
+	if not moved_to.is_empty():
+		view.exit_requested.emit(str(moved_to.get("location", "")), str(moved_to.get("spawn", "default")))
 	# A foe that withdrew or fled as mist leaves nothing behind (a Tarokka treasure here is still found).
 	if talk != "":
 		Captives.forget_spent(view.st)
@@ -1059,3 +1067,89 @@ static func _spoils(view: LocationView, encounter_id: String, spec: Dictionary, 
 		items.append_array(extra["items"] as Array)
 	if not items.is_empty() or gold > 0.0:
 		view.loot_opened.emit.call_deferred("fight:" + encounter_id, items, gold)
+
+
+# --- A fight a boss's phase moved here (BossPhases `move`) ---------------------------------------------------------
+
+## The story flag holding a fight on its way to another place: {snapshot, to, spawn, encounter, from}.
+const MOVED := "_fight_moved"
+
+
+## The party has arrived where a phase sent its fight: the fight goes on here, on this place's board, with everyone as
+## they were (Hit Points, conditions, effects, Initiative and round), the heroes on the squares they arrived on and the
+## foes on the destination entry's squares (by name, else stat block, else the nearest open square). What belonged to the
+## old board (objects, traps, things on the ground, spell zones, grapples, marks) stays behind. False when nothing waits.
+static func continue_moved(view: LocationView) -> bool:
+	var mv: Variant = view.st.flags.get(MOVED, null)
+	if not mv is Dictionary or str((mv as Dictionary).get("to", "")) != view.loc_id or view.in_combat:
+		return false
+	var carried := mv as Dictionary
+	view.st.flags.erase(MOVED)
+	var encounter_id := str(carried.get("encounter", ""))
+	var spec := {}
+	for en: Variant in view.loc.get("encounters", []):
+		if str((en as Dictionary)["id"]) == encounter_id:
+			spec = en as Dictionary
+	if spec.is_empty():
+		push_warning("A fight moved to %s, which has no encounter %s" % [view.loc_id, encounter_id])
+		return false
+	# This place's board, as its own fight would have it.
+	var fresh := Encounter.new(_combat_grid(view), view.dice)
+	BattleScenery.for_location(view, fresh)
+	BattleScenery.for_spec(view, fresh, spec)
+	var board := EncounterSnapshot.capture(fresh)
+	var data := (carried["snapshot"] as Dictionary).duplicate(true)
+	for k: String in ["rows", "elevation", "heights", "objects", "traps", "spells", "drop_ft", "ceiling_ft"]:
+		if board.has(k):
+			data[k] = board[k]
+	data["ground"] = {}
+	data["grapples"] = {}
+	data["marks"] = []
+	data["location_id"] = view.loc_id
+	data["outdoors"] = bool((view.loc.get("map", {}) as Dictionary).get("outdoors", false))
+	# Where everyone stands now.
+	var taken := {}
+	var spots := spec.get("monsters", []) as Array
+	var used := {}
+	for cdv: Variant in data["combatants"]:
+		var cd := cdv as Dictionary
+		var cell := Vector2i(-1, -1)
+		if cd.has("character"):
+			var cid := str((cd["character"] as Dictionary).get("id", ""))
+			for m: Combatant in view.members + view.guest_members:
+				if m.creature.id == cid:
+					cell = m.cell
+		else:
+			for i in spots.size():
+				var md := spots[i] as Dictionary
+				if used.has(i):
+					continue
+				if str(md.get("name", "")) == str(cd.get("name", "")) or (not md.has("name") and str(md["monster"]) == str(cd.get("monster", ""))):
+					cell = LocationView._cell(md["cell"])
+					used[i] = true
+					break
+			if cell.x < 0 and not spots.is_empty():
+				cell = LocationView._cell((spots[0] as Dictionary)["cell"])
+		if cell.x < 0 or taken.has(cell):
+			var near := cell if cell.x >= 0 else view.members[0].cell
+			cell = _open_near(fresh, near, taken)
+		taken[cell] = true
+		cd["cell"] = [cell.x, cell.y]
+	# A rider stays in the saddle.
+	for cdv2: Variant in data["combatants"]:
+		var cd2 := cdv2 as Dictionary
+		var on := str((cd2.get("meta", {}) as Dictionary).get("mounted_on", ""))
+		for other: Variant in data["combatants"]:
+			if on != "" and str((other as Dictionary)["id"]) == on:
+				cd2["cell"] = (other as Dictionary)["cell"]
+	return resume_encounter(view, {"data": data, "encounter": encounter_id, "location": view.loc_id})
+
+
+static func _open_near(e: Encounter, cell: Vector2i, taken: Dictionary) -> Vector2i:
+	for r in range(0, 8):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var at := cell + Vector2i(dx, dy)
+				if e.grid.in_bounds(at) and not e.grid.is_solid(at) and not taken.has(at):
+					return at
+	return cell

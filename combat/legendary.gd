@@ -22,6 +22,9 @@ var withdraws: Array[Dictionary] = []
 ## What the fight hands back to the story when it ends: flag -> value, quest id -> stage.
 var story_flags: Dictionary = {}
 var story_quests: Dictionary = {}
+## Where a phase sends the fight on (`move`: {location, spawn, encounter}): set as the fight ends with the outcome "moved",
+## for the place to carry it there (LocationFights). {} while it stays.
+var moving: Dictionary = {}
 ## Creatures that left the fight without dying: id -> "mist" (Misty Escape) or "withdraw".
 var departed: Dictionary = {}
 ## The round the lair last acted in, and the lair action it used.

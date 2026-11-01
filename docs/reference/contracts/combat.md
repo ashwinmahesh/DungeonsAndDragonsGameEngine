@@ -351,7 +351,7 @@ stays, at the phase's `hp`), `allies_down: [block ids]` (every one of them down)
 many creatures of a stat block dead, down or off the board, caught or vanished or withdrawn, on any side; checked as
 each falls or leaves), `round: N` (from that round's turn on), or `flag` (one this fight set: a game module's set
 piece, another phase, a catch's flag). With two triggers it begins on whichever is met first. What begins with it: `hp` ("full",
-"half" or a number) or `heal`; `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
+"half" or a number) or `heal`; `move` (`{location, spawn, encounter}`: the fight goes on in another place; it ends here as `moved`, the party is carried there through `exit_requested`, and LocationFights.continue_moved picks it up on that place's board from the encounter entry named, with everyone's Hit Points, conditions, effects, Initiative and round; the old board's objects, traps, ground, zones, grapples and marks stay behind; event `fight_moves`; vault Build/Design - Boss phase that moves the fight.md); `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
 actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
 `summon: {monster, count}`; `say` (a Narrator key: the fight's view speaks its line as it begins, as any Narrator line in
 a fight) and `cutscene` (a cutscene id played over the fight with that line as its caption; without it, a cutscene whose

@@ -226,6 +226,18 @@ func enter(c: Combatant, phase_id: String) -> bool:
 	e.events.append({"type": "phase", "id": c.id, "phase": phase_id, "name": label, "say": str(ph.get("say", "")),
 		"cutscene": str(ph.get("cutscene", ""))})
 	e.events.append({"type": "condition", "id": c.id})
+	# The fight goes on somewhere else (`move`: {location, spawn, encounter}): it ends here with the outcome "moved", and the
+	# place carries everyone there as they are (LocationFights.continue_moved; vault Build/Design - Boss phase that moves
+	# the fight.md).
+	if ph.get("move", null) is Dictionary and e.state == Encounter.State.ACTIVE:
+		leg().moving = (ph["move"] as Dictionary).duplicate()
+		e.state = Encounter.State.OVER
+		e.outcome = "moved"
+		e.ground.fight_over()
+		e.events.append({"type": "fight_moves", "location": str(leg().moving.get("location", "")),
+			"spawn": str(leg().moving.get("spawn", "default")), "encounter": str(leg().moving.get("encounter", ""))})
+		e.log.add("info", "The fight moves on", "")
+		e.events.append({"type": "over", "outcome": "moved"})
 	return true
 
 
