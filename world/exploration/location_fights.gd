@@ -471,12 +471,16 @@ static func _fewer_attacks(actions: Array, n: int) -> Array:
 
 
 ## The encounter's `ends_when` (docs/contracts/combat.md) as the fight reads it (Encounter.ends_when): with
-## `party_left_map`, the squares of the place's exits that are open now; `trigger_hero_down` as it is. {} for none.
+## `party_left_map`, the squares of the place's exits that are open now; `trigger_hero_down` and the clock (`rounds`,
+## `rounds_outcome`, `rounds_flag`, `rounds_label`) as they are. {} for none.
 static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 	var ends := spec.get("ends_when", {}) as Dictionary
 	if ends.is_empty():
 		return {}
 	var out := {"trigger_hero_down": bool(ends.get("trigger_hero_down", false)), "exits": []}
+	for k: String in ["rounds", "rounds_outcome", "rounds_flag", "rounds_label"]:
+		if ends.has(k):
+			out[k] = int(ends[k]) if k == "rounds" else str(ends[k])
 	if bool(ends.get("party_left_map", false)):
 		for ex: Variant in view.loc.get("exits", []):
 			var exit := ex as Dictionary
