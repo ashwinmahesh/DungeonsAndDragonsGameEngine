@@ -111,6 +111,7 @@
             "description": "Ground that harms whoever stays in it in a fight (AreaHazards): a pool of blood, a bog of rot.",
             "properties": {
               "difficult": {"type": "boolean", "description": "Its squares are Difficult Terrain."},
+              "only_difficult": {"type": "boolean", "description": "Only the squares the map draws as Difficult Terrain (~) are in it: a moat round a dry island."},
               "on": {"enum": ["start", "end"], "description": "When it bites: the end of a turn in it (default) or the start."},
               "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
                 "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},

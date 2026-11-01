@@ -2,7 +2,8 @@ class_name AreaHazards
 extends RefCounted
 ## Ground that harms whoever stays in it (a location area's `hazard`; owned by the Encounter as `zones`): a pool of
 ## blood, a bog of rot. `{difficult, on, save, condition, damage, except_types, while_in}`:
-## - `difficult`: its squares are Difficult Terrain.
+## - `difficult`: its squares are Difficult Terrain. `only_difficult`: only the squares of its rectangle the map already
+##   draws as Difficult Terrain (`~`) are in it (a moat round a dry island).
 ## - At the end of its turn in one of the area's squares (`on: "end"`, the default) or the start (`on: "start"`), a
 ##   creature makes the `save` ({ability, dc}) unless its type is in `except_types`; failing, it takes `damage`
 ##   ({dice, type}) and gains `condition`. With `while_in` (the default) the condition lasts only while it stays in the
@@ -39,6 +40,8 @@ func from_location(loc: Dictionary) -> void:
 				var cell := Vector2i(x, z)
 				if not e.grid.in_bounds(cell) or e.grid.is_solid(cell):
 					continue
+				if bool((ad["hazard"] as Dictionary).get("only_difficult", false)) and not e.grid.has_flag(cell, CombatGrid.DIFFICULT):
+					continue   # only the map's rough squares (`~`): a moat round a dry island
 				cells[cell] = true
 				if bool((ad["hazard"] as Dictionary).get("difficult", false)):
 					e.grid.set_flag(cell, CombatGrid.DIFFICULT, true)

@@ -128,7 +128,8 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   sees; an area's `private` (an npc id) makes it a private room, with `open` (a condition) for when it may be entered;
   the location's `watch` names the guard who answers a crime here ("" for nobody; unset, the region's watch).
 - **Hazardous areas (AreaHazards):** an area's `hazard` ({difficult, on, save, condition, damage, except_types,
-  while_in}) is ground that harms whoever stays in it in a fight: its squares are Difficult Terrain with `difficult`; at
+  while_in, only_difficult}) is ground that harms whoever stays in it in a fight: its squares are Difficult Terrain with
+  `difficult` (with `only_difficult`, only the rectangle's squares the map draws as `~` are in it); at
   the end of a turn in it (`on: "start"` for the start) a creature on the ground whose type isn't in `except_types`
   makes the `save` or takes the `damage` and gains the `condition`, which with `while_in` (the default) lasts only until
   it steps out. Read from the place whenever a fight starts or is picked up, so nothing of it is saved.

@@ -43,6 +43,14 @@ func test_it_spares_the_types_it_names() -> void:
 	assert_false(ghoul.creature.has_condition(&"poisoned"))
 
 
+func test_only_the_rough_squares_of_a_moat() -> void:
+	var e := TestCombat.open_field(3)
+	e.grid.set_flag(Vector2i(4, 2), CombatGrid.DIFFICULT, true)
+	e.zones.from_location({"areas": [{"id": "test_moat", "name": "the moat", "cells": [[4, 2], [6, 4]],
+		"hazard": {"only_difficult": true, "condition": "poisoned"}}]})
+	assert_eq((e.zones.list[0]["cells"] as Dictionary).keys(), [Vector2i(4, 2)], "the dry squares aren't in it")
+
+
 func test_a_turn_ending_outside_does_nothing() -> void:
 	var got := _fight()
 	var e := got[0] as Encounter
