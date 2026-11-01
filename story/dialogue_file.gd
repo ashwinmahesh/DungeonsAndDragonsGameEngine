@@ -246,10 +246,13 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			if parts.size() >= 2 and RegEx.create_from_string("^[+-][1-6]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party", "failed"]):
 				return {"t": "exhaust", "levels": int(parts[1]), "party": parts.size() == 3 and parts[2] == "party", "failed": parts.size() == 3 and parts[2] == "failed"}
 		"save":
-			# `save <Ability> DC <n> party -> ok | fail`: every living hero rolls; `ok` when all of them save.
-			var msave := RegEx.create_from_string("^save\\s+([A-Za-z]+)\\s+DC\\s+(\\d+)\\s+party\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?$").search(line)
-			if msave != null and msave.get_string(1).to_lower() in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]:
-				return {"t": "party_save", "ability": msave.get_string(1).to_lower(), "dc": int(msave.get_string(2)), "ok": msave.get_string(3), "fail": msave.get_string(4)}
+			# `save <Ability> DC <n> party [unless resists <type>] -> ok | fail`: every living hero rolls (one with Resistance or
+			# Immunity to <type> passes without rolling); `ok` when all of them save.
+			var msave := RegEx.create_from_string("^save\\s+([A-Za-z]+)\\s+DC\\s+(\\d+)\\s+party(?:\\s+unless\\s+resists\\s+([a-z]+))?\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?$").search(line)
+			if msave != null and msave.get_string(1).to_lower() in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] \
+					and (msave.get_string(3) == "" or msave.get_string(3) in DAMAGE_TYPES):
+				return {"t": "party_save", "ability": msave.get_string(1).to_lower(), "dc": int(msave.get_string(2)), "resists": msave.get_string(3),
+					"ok": msave.get_string(4), "fail": msave.get_string(5)}
 		"hit_dice":
 			# `hit_dice restore <n|all> [party]` / `hit_dice grant <n> [party]`.
 			if parts.size() >= 3 and parts[1] in ["restore", "grant"] and (parts[2].is_valid_int() and int(parts[2]) > 0 or (parts[2] == "all" and parts[1] == "restore")) \

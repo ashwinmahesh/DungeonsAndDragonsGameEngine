@@ -1034,14 +1034,19 @@ func _exhaust(s: Dictionary) -> String:
 		amount, "" if amount == 1 else "s"]
 
 
-## `save <Ability> DC <n> party`: every living hero makes the saving throw; check.last is whether all of them saved, and
-## those who failed are the `failed` receivers of the lines after it. Returns the notice naming each roll.
+## `save <Ability> DC <n> party [unless resists <type>]`: every living hero makes the saving throw (one with Resistance
+## or Immunity to that damage type passes untouched: fire resistance through a burning door); check.last is whether all
+## of them saved, and those who failed are the `failed` receivers of the lines after it. Returns the notice naming each roll.
 func _party_save(s: Dictionary) -> String:
 	var ab := ABILITIES[str(s["ability"])] as StringName
 	var dc := int(s["dc"])
 	_failed_save.clear()
 	var said: Array[String] = []
+	var resists := StringName(str(s.get("resists", "")))
 	for ch in _living():
+		if resists != &"" and (ch.resistance_source(resists) != "" or ch.immunity_source(resists) != ""):
+			said.append("%s passes (%s Resistance)" % [_first(ch), str(resists).capitalize()])
+			continue
 		var t := ch.roll_save(dice, ab, dc)
 		if not t.success:
 			_failed_save.append(ch)

@@ -112,8 +112,9 @@ hit_dice grant 1 [party]           beyond them, kept until their next Long Rest.
 exhaust +1 [party|failed]          Levels of Exhaustion (+1 to +6 gained, through any immunity; -1 to -6 lost) for the
                                    hero in the conversation, every living hero (`party`) or those who failed the last
                                    party save (`failed`). A notice says who.
-save Constitution DC 13 party -> ok | fail
-                                   Every living hero makes the saving throw; `ok` when all of them saved (check.last),
+save Constitution DC 13 party [unless resists fire] -> ok | fail
+                                   Every living hero makes the saving throw (with `unless resists <type>`, one with
+                                   Resistance or Immunity to that damage type passes without rolling); `ok` when all of them saved (check.last),
                                    else `fail` (left out: `ok` either way). One notice names each roll. The heroes who
                                    failed are the `failed` of the lines after it: `damage 2d6 poison failed`, `exhaust +1 failed`.
 check Ranged Attack DC 15 -> ok | fail
