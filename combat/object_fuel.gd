@@ -2,7 +2,9 @@ class_name ObjectFuel
 extends RefCounted
 ## Things on the battlefield a creature eats, and things that hold a creature (docs/reference/contracts/combat.md
 ## "Fuel and what breaks open"), owned by EncounterObjects as `fuel`:
-## - A stat block's `devours` {fuel: [words], within (ft, default 10), heal, advantage, seeks, name}: at the start of its
+## - A stat block's `devours` {fuel: [words], within (ft, default 10), heal, hungry_at, advantage, seeks, name}: it eats
+##   only when hungry (hungry): with `heal`, when it has lost at least `hungry_at` x `heal` Hit Points (half the heal by
+##   default), so a can isn't wasted on a creature near its full Hit Points. At the start of its
 ##   turn, a creature within `within` feet of a standing object whose `fuel` is one of its words eats the nearest: the
 ##   object is gone, it regains `heal` Hit Points, and with `advantage` its attacks have Advantage until its next turn
 ##   starts. One a turn. The AI walks it to food it can reach this turn ahead of a foe, and with `seeks` toward the
@@ -39,7 +41,7 @@ static func devours_of(c: Combatant) -> Dictionary:
 func food_for(c: Combatant) -> Array[BattleObject]:
 	var dv := devours_of(c)
 	var out: Array[BattleObject] = []
-	if dv.is_empty():
+	if dv.is_empty() or not hungry(c):
 		return out
 	var words := dv.get("fuel", []) as Array
 	for o in enc().objects.list:
@@ -48,6 +50,17 @@ func food_for(c: Combatant) -> Array[BattleObject]:
 	var objs := enc().objects
 	out.sort_custom(func(a: BattleObject, b: BattleObject) -> bool: return objs.distance_ft(c, a) < objs.distance_ft(c, b))
 	return out
+
+
+## Whether `c` would gain from eating: always when its `devours` heals nothing; else once it has lost at least
+## `hungry_at` (a fraction of the heal, 0.5 by default) x `heal` Hit Points.
+static func hungry(c: Combatant) -> bool:
+	var dv := devours_of(c)
+	var heal := int(dv.get("heal", 0))
+	if heal <= 0:
+		return true
+	var missing := c.creature.max_hp() - c.creature.hp
+	return float(missing) >= float(heal) * float(dv.get("hungry_at", 0.5))
 
 
 ## How near `c` must be to eat.
