@@ -260,11 +260,22 @@ func _term() -> bool:
 		for ch in st.party:
 			lowest = mini(lowest, ch.character_level())
 		return _compare(lowest, op if op != "" else ">", _literal(rhs) if op != "" else 0)
+	if t == "party_alive":
+		# The heroes still travelling (a hero lost for good is in `fallen`): `party_alive == 0` for an empty car.
+		return _compare(st.party.size(), op if op != "" else ">", _company(rhs) if op != "" else 0)
+	if t == "party_size":
+		# Everyone who set out: the living and the fallen (`party_size > party_alive`: somebody fell).
+		return _compare(st.party.size() + st.fallen.size(), op if op != "" else ">", _company(rhs) if op != "" else 0)
+	# `flag?.<id>` reads like `flag.<id>`: a flag another chapter sets, which this one reads without registering it (the
+	# game's flag lint passes it by), false while nobody has set it.
+	if t.begins_with("flag?."):
+		t = "flag." + t.substr(6)
 	if t.begins_with("flag."):
 		var value: Variant = st.get_flag(t.substr(5), false)
 		if op == "":
 			return _truthy(value)
-		return _compare(value, op, _literal(rhs))
+		# A flag can be held against the size of the company (`flag.horned_bargains >= party_size`).
+		return _compare(value, op, _company(rhs))
 	if t.begins_with("affliction."):
 		# The highest level of an affliction among the living heroes (Afflictions): `affliction.rot >= 6`; bare, above 0.
 		return _compare(Afflictions.highest(st.party, t.substr(11)), op if op != "" else ">", _literal(rhs) if op != "" else 0)
@@ -325,6 +336,19 @@ static func hero_named(state: StoryState, wanted: String) -> bool:
 		if full == want or full.get_slice(" ", 0) == want:
 			return true
 	return false
+
+
+## A right-hand side: `party_size` and `party_alive` read the company, `flag.<id>` (or `flag?.<id>`) another flag (0 while
+## it isn't set: `flag.a <= flag.b`), anything else is a literal.
+func _company(rhs: String) -> Variant:
+	for pre: String in ["flag.", "flag?."]:
+		if rhs.begins_with(pre):
+			return st.get_flag(rhs.substr(pre.length()), 0)
+	if rhs == "party_size":
+		return st.party.size() + st.fallen.size()
+	if rhs == "party_alive":
+		return st.party.size()
+	return _literal(rhs)
 
 
 static func _truthy(v: Variant) -> bool:
