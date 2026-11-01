@@ -101,3 +101,10 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Spell powers without Concentration, or only from a zone
+
+A spell power with `no_concentration: true` casts its spell without Concentration (an elixir's Fog Cloud lasts its full
+time). One with `in_zone: <spell id>` works only when its user stands in a live zone of that spell or aims into one
+(Misty Step into or out of fog). The flag `sees_through_fog` lets a creature see through Heavily Obscured zones that
+aren't magical darkness (EncounterSight.can_see).

@@ -621,6 +621,14 @@
           "custom": {
             "type": "string"
           },
+          "no_concentration": {
+            "type": "boolean",
+            "description": "Its spell needs no Concentration (an elixir's Fog Cloud)."
+          },
+          "in_zone": {
+            "type": "string",
+            "description": "A spell id: the power works only from inside a zone of that spell or into one (Misty Step into or out of fog)."
+          },
           "field": {
             "type": "boolean"
           },

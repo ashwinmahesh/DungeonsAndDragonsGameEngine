@@ -552,6 +552,13 @@ func use(c: Combatant, item_id: String, power_id: String, targets: Array = [], p
 	if power.has("disadvantage_unless"):
 		opts = opts.duplicate()
 		opts["dis_unless"] = power["disadvantage_unless"]
+	# A power cast with no Concentration (an elixir's Fog Cloud), and one that must start or end in a zone (Misty Step
+	# into or out of fog: `in_zone`, a spell id).
+	if bool(power.get("no_concentration", false)):
+		opts = opts.duplicate()
+		opts["no_concentration"] = true
+	if str(power.get("in_zone", "")) != "" and not _in_zone(c, str(power["in_zone"]), point):
+		return CombatResult.fail("Only from or into %s" % comp().spell_data(str(power["in_zone"])).get("name", "it"))
 	var label := str(spell.get("name", "")) if str(spell.get("name", "")) == str(p["data"].get("name", item_id)) \
 		else "%s (%s)" % [spell.get("name", ""), p["data"].get("name", item_id)]
 	var r := cast(c, spell, lvl, targets, point, dir, nums, cost, opts, label)
@@ -699,11 +706,23 @@ func _wielder_numbers(c: Combatant) -> Dictionary:
 
 ## Casts `spell` (a spell or an item recipe) from an item: the item's action cost, no slot, the given numbers.
 ## Mirrors SpellCaster.cast_with_numbers for the spell itself (targets, Concentration, areas, resolution).
+## Whether `c` stands in a live zone of spell `spell_id`, or `point` (where it's going) lies in one.
+func _in_zone(c: Combatant, spell_id: String, point: Vector2) -> bool:
+	var at := Vector2i(floori(point.x), floori(point.y)) if point != Vector2.INF else Vector2i(-9999, -9999)
+	for o in enc().spells.zones.live():
+		if o.spell_id == spell_id and (c.footprint().any(func(f: Vector2i) -> bool: return f in o.cells) or at in o.cells):
+			return true
+	return false
+
+
 func cast(c: Combatant, spell: Dictionary, level: int, targets: Array, point: Vector2, dir: Vector2, nums: Dictionary,
 		cost: String, opts: Dictionary, label: String) -> CombatResult:
 	var e := enc()
 	var sp := e.spells
 	spell = Spellcasting.at_slot(spell, level)   # a scroll or wand of a higher level: that slot's duration
+	if bool(opts.get("no_concentration", false)) and bool((spell.get("duration", {}) as Dictionary).get("concentration", false)):
+		spell = spell.duplicate(true)
+		(spell["duration"] as Dictionary)["concentration"] = false
 	# A duration rolled when it starts (Potion of Growth: 1d4 hours).
 	var dur := spell.get("duration", {}) as Dictionary
 	if dur.has("dice"):

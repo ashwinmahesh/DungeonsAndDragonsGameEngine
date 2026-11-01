@@ -88,7 +88,7 @@ func can_see(a: Combatant, b: Combatant) -> bool:
 		return false
 	# Devil's Sight (invocation): normal sight in Darkness, magical or not, within 120 ft.
 	var devil := (a.creature.has_flag("devils_sight") and dist <= 120) or e.ravenloft.sees_through_darkness(a)
-	if e.spells.zones.line_obscured(a.cell, a.size_cells, b.cell, b.size_cells, devil) and not by_sense:
+	if e.spells.zones.line_obscured(a.cell, a.size_cells, b.cell, b.size_cells, devil, a.creature.has_flag("sees_through_fog")) and not by_sense:
 		return false
 	# Umbral Sight (Gloom Stalker): unseen in Darkness by creatures that rely on Darkvision.
 	var umbral := b.creature.has_flag("umbral_sight") and light_at(b.cell) == "dark"
