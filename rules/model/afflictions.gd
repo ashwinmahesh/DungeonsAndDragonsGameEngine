@@ -56,6 +56,12 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	var old := effect_of(cr, id)
 	# Symptoms (rolled on gaining a level, roll_symptom) stay while the level holds or grows, and all go on any reduction.
 	var symptoms: Array = (old.data.get("symptoms", []) as Array).duplicate() if old != null and new_level >= old_level else []
+	# What the clock keeps on it (AfflictionClock): dormant_until, successes, held, max_hp_lost.
+	var kept := {}
+	if old != null:
+		for k: String in ["dormant_until", "successes", "held", "max_hp_lost"]:
+			if old.data.has(k):
+				kept[k] = old.data[k]
 	if old != null:
 		cr.remove_effect(old)
 	if new_level <= 0:
@@ -65,9 +71,17 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	var fx := Effect.new("%s %d" % [name, new_level], SOURCE, id)
 	fx.ends = Effect.Ends.NEVER
 	fx.data = {"affliction": id, "level": new_level, "symptoms": symptoms}
-	for raw: Variant in def.get("modifiers", []):
+	fx.data.merge(kept)
+	# Hit Points lost for good to it (`long_rest.max_hp_loss`), while it lasts.
+	if int(kept.get("max_hp_lost", 0)) > 0:
+		fx.modifiers.append(Modifier.make({"stat": "hp_max", "value": -int(kept["max_hp_lost"])}, name, SOURCE))
+	# Exhaustion it won't let go of (`exhaustion_lock`): a Long Rest takes none away while it lasts.
+	if bool(def.get("exhaustion_lock", false)):
+		fx.modifiers.append(Modifier.make({"stat": "flag", "value": "exhaustion_locked"}, name, SOURCE))
+	var dormant := int(kept.get("dormant_until", -1)) >= 0
+	for raw: Variant in ([] if dormant else def.get("modifiers", [])):
 		fx.modifiers.append(_scaled(raw as Dictionary, new_level, name))
-	for raw: Variant in def.get("thresholds", []):
+	for raw: Variant in ([] if dormant else def.get("thresholds", [])):
 		var th := raw as Dictionary
 		if new_level >= int(th.get("at", 0)):
 			for md: Variant in th.get("modifiers", []):
@@ -210,6 +224,10 @@ static func cure_by_spell(cr: Creature, spell_id: String, conditions: Array) -> 
 	for id: String in of(cr).keys():
 		var def := definition(id)
 		var remove := 0
+		# A spell that holds it off (`held_off_by`): the next daily save doesn't come (AfflictionClock).
+		if spell_id in (def.get("held_off_by", []) as Array):
+			effect_of(cr, id).data["held"] = true
+			lines.append("%s's %s is held off for a day." % [cr.name, str(def.get("name", id))])
 		for raw: Variant in def.get("cures", []):
 			var cure := raw as Dictionary
 			var hit := spell_id in (cure.get("spells", []) as Array) or (cure.has("ends") and str(cure["ends"]) in conditions)
@@ -249,6 +267,14 @@ static func after_long_rest(cr: Creature, dice: DiceRoller) -> Array[String]:
 		else:
 			remove = _amount(cr, rest.get("success", 0))
 		remove = maxi(remove, int(rest.get("min", 0)))
+		# Hit Points lost for good with each rest it lasts (`max_hp_loss`: dice).
+		if str(rest.get("max_hp_loss", "")) != "":
+			var lost := int(dice.roll_expr(str(rest["max_hp_loss"]), "%s (%s)" % [str(def.get("name", id)), cr.name])["total"])
+			var fx := effect_of(cr, id)
+			fx.data["max_hp_lost"] = int(fx.data.get("max_hp_lost", 0)) + lost
+			set_level(cr, id, before, def)
+			cr.hp = mini(cr.hp, cr.max_hp())
+			lines.append("%s's %s takes %d from their Hit Point maximum." % [cr.name, str(def.get("name", id)), lost])
 		if remove <= 0:
 			continue
 		var after := set_level(cr, id, before - remove, def)

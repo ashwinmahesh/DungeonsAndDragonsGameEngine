@@ -953,7 +953,7 @@ func _afflict(s: Dictionary) -> String:
 	var lines: Array[String] = []
 	for ch in _receivers(bool(s["party"])):
 		var before := Afflictions.level_of(ch, id)
-		var after := Afflictions.set_level(ch, id, 0 if bool(s["clear"]) else before + int(s["levels"]))
+		var after := Afflictions.set_level(ch, id, 0) if bool(s["clear"]) else AfflictionClock.afflict(st, ch, id, int(s["levels"]))
 		if after == before:
 			continue
 		lines.append("%s's %s is %s" % [_first(ch), name, ("level %d" % after) if after > 0 else "gone"])

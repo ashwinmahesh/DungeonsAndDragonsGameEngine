@@ -30,5 +30,12 @@ Shown: `Afflictions.shown(cr)` ({id, name, level, summary, label}) puts a "<name
 cards and the party screen, and a row on the character sheet whose rules card lists what it does at this level; the sheet's
 effects list shows the effect itself.
 
-Not yet (later branches): delayed onset, daily saves at a set hour, Exhaustion that can't be removed while
-afflicted, Hit Point maximum lost per Long Rest.
+On the clock (story/affliction_clock.gd; LocationClock asks AfflictionClock.catch_up as time passes, beside the
+Schedule, and shows its lines): `onset_hours` (a new one given by the story, `afflict` or AfflictionClock.afflict, lies
+dormant that long, with no modifiers, then takes hold, bringing `onset_exhaustion` levels of Exhaustion), `daily` `{hour, save {ability, dc}, failure (1), successes_to_end}`
+(each day at that hour every living hero who has it saves: a failure adds levels, enough successes end it; at most 7 days a
+look), `held_off_by` (spell ids: one cast on the hero skips the next daily save), `exposure` `{when, every_minutes, save,
+levels (1)}` (while `when` holds, each living hero saves that often or gains levels), `exhaustion_lock` (while it lasts a
+Long Rest takes no Exhaustion away: the flag `exhaustion_locked`), and `long_rest.max_hp_loss` (dice: that much comes off
+the Hit Point maximum after each Long Rest while it lasts, back when it's gone). The clock's own state lives on the
+effect (`dormant_until`, `successes`, `held`, `max_hp_lost`) and in StoryState.flags["_affliction_clock"].
