@@ -1059,6 +1059,9 @@
                   "skill": {"type": "string"}, "dc": {"type": "integer"}}}
               }
             }
+          "free_fall": {
+            "type": "boolean",
+            "description": "Everyone falls together on one plane (a pit with no bottom): nobody flies up or down, levitates or teleports (Encounter.free_fall)."
           },
           "objects": {
             "type": "array",

@@ -156,6 +156,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   {skill, dc}}]) are windows a creature with `throws_out` can throw a held foe out of. The drop is `aloft.drop_ft` while
   the fight flag `aloft.flag` is set (a building in the air), else `drop_ft`; the thrown creature climbs back in with
   `climb` (Athletics DC 15) at the start of its turns. Read from the entry whenever the fight starts or is picked up.
+
+- **Free fall (Encounter.free_fall):** an encounter's `free_fall: true` is a fight where everyone falls together on
+  one plane: nobody flies up or down or levitates (vertical moves are refused), and teleporting fails (Misty Step,
+  Blink, Dimension Door: Encounter.teleport_blocked).
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open

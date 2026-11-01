@@ -117,6 +117,9 @@ var stored_d20s: Array[int] = []
 ## A place's own sight rules for the fight (a location map's `sight`, EncounterSight): {light_scale, darkvision_cap,
 ## sight_ft, immune: {flags, types, names}}; {} for none.
 var sight_rule: Dictionary = {}
+## A free-fall fight (an encounter's `free_fall`): everyone falls together on one plane, so nobody flies up or down,
+## levitates or teleports (EncounterMovement.vertical_why, teleport_blocked).
+var free_fall: bool = false
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
@@ -315,6 +318,11 @@ func apply_place_rules(c: Combatant) -> void:
 		mdd.erase("stat")
 		fx.with_modifier(stat, mdd)
 	c.creature.add_effect(fx)
+
+
+## Whether `c` can't teleport now: its own `no_teleport` flag, or a free-fall fight.
+func teleport_blocked(c: Combatant) -> bool:
+	return free_fall or c.creature.has_flag("no_teleport")
 
 
 func distance(a: Combatant, b: Combatant) -> int:
