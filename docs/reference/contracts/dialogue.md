@@ -204,7 +204,7 @@ inspire name:thistle: spoke her mind
 
 ## Conditions
 
-`flag.<id>` (truthy), `not flag.<id>`, `flag.<id> == 3` / `!= >= <= > <`, `class:cleric`, `species:elf`,
+`flag.<id>` (truthy), `not flag.<id>`, `flag.<id> == 3` / `!= >= <= > <`, one flag against another (`flag.a <= flag.b`; an unset one counts 0 on the right), `flag?.<id>` (the same read for a flag another chapter sets: the game's flag lint doesn't ask for it to be registered here), `class:cleric`, `species:elf`,
 `background:acolyte`, `subclass:oath_of_vengeance`, `feature:<id>` (a trait, feature, feat benefit or gift part a party
 member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
 `quest_days.<id> >= 3` (whole days since the quest last moved to its current stage; false before the quest begins),
