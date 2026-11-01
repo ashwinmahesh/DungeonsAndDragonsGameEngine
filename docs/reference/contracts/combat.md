@@ -326,6 +326,13 @@ and a waiting foe waits again on its square as its entry says (asleep with `surp
 Encounter holds what the fight reads (`Encounter.ends_when`: `exits` as squares, `trigger_hero_down`); a fight picked
 up from a round's save reads it from the entry again.
 
+Wards: a monster entry's `ward: true` (meta `EncounterTurns.WARD`, kept on a fight picked up from a save) is a
+creature the party must protect, usually `side: "guest"` so the player moves it (a spirit that can't act). If a ward is
+dead or at 0 Hit Points on the board, the fight is lost (`ends_when.ward_lost`: `defeat`, the default, or `ended`), before
+any other outcome. With `ends_when.wards_out` a ward that ends its turn on one of the place's open exits gets out
+(`vanish`, left: `exit`; the heroes don't step out by those squares unless `party_left_map` says so), and once every
+ward is out the fight is won. Beating the foes wins as usual.
+
 A clock: `ends_when.rounds: N` ends the fight as round N ends (the mill collapsing, a rite completed, a party holding
 out), whoever is still up, with `rounds_outcome` (`victory`, `defeat`, `ended`, the default, or `none`, a countdown only: the flag is set and the
 fight goes on, for a collapse its own round event deals) and `rounds_flag` set in

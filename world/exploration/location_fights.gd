@@ -389,6 +389,8 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 			mon.set_meta(&"steps_down", md["steps_down"])   # a person of the place stepping down into this foe (StepDown)
 		if md.has("catch"):
 			mon.set_meta(EncounterGrapples.CATCH, md["catch"])   # a loose creature the heroes can catch (EncounterGrapples)
+		if bool(md.get("ward", false)):
+			mon.set_meta(EncounterTurns.WARD, true)   # one the party must keep alive (and maybe get out)
 		if md.has("body"):
 			mon.set_meta(Legendary.BODY, md["body"])   # a body some damage ruins for good (Legendary._ruin)
 		if md.has("hp"):
@@ -478,15 +480,22 @@ static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 	if ends.is_empty():
 		return {}
 	var out := {"trigger_hero_down": bool(ends.get("trigger_hero_down", false)), "exits": []}
+	var open: Array = []
+	for ex: Variant in view.loc.get("exits", []):
+		var exit := ex as Dictionary
+		if StoryConditions.check(str(exit.get("when", "")), view.st):
+			var cell := LocationView._cell(exit["cell"])
+			open.append([cell.x, cell.y])
 	for k: String in ["rounds", "rounds_outcome", "rounds_flag", "rounds_label"]:
 		if ends.has(k):
 			out[k] = int(ends[k]) if k == "rounds" else str(ends[k])
 	if bool(ends.get("party_left_map", false)):
-		for ex: Variant in view.loc.get("exits", []):
-			var exit := ex as Dictionary
-			if StoryConditions.check(str(exit.get("when", "")), view.st):
-				var cell := LocationView._cell(exit["cell"])
-				(out["exits"] as Array).append([cell.x, cell.y])
+		out["exits"] = open
+	# Getting the wards out (a monster entry's `ward`) by the place's open exits wins the fight.
+	if bool(ends.get("wards_out", false)):
+		out["ward_exits"] = open.duplicate(true)
+	if ends.has("ward_lost"):
+		out["ward_lost"] = str(ends["ward_lost"])
 	return out
 
 
@@ -616,13 +625,14 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 				if c.side == &"enemy" and c.name() == str((md as Dictionary).get("name", "")):
 					c.creature.set_meta(&"steps_down", (md as Dictionary)["steps_down"])
 		# So is one the heroes can catch, or whose body some damage ruins (by its name, else its stat block).
-		for key: String in ["catch", "body"]:
+		for key: String in ["catch", "body", "ward"]:
 			if not (md as Dictionary).has(key):
 				continue
 			for c in e.combatants:
 				var named := str((md as Dictionary).get("name", ""))
 				if c.creature is Monster and (c.name() == named if named != "" else str((c.creature as Monster).data.get("id", "")) == str((md as Dictionary)["monster"])):
-					c.creature.set_meta(EncounterGrapples.CATCH if key == "catch" else Legendary.BODY, (md as Dictionary)[key])
+					var meta: StringName = {"catch": EncounterGrapples.CATCH, "body": Legendary.BODY, "ward": EncounterTurns.WARD}[key]
+					c.creature.set_meta(meta, (md as Dictionary)[key])
 	var ctokens := _fight_tokens(view, e, false)
 
 	view.combat_view = CombatView.new()

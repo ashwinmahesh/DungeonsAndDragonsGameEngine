@@ -46,7 +46,9 @@ var outcome: String = ""   ## "victory", "defeat", or "ended": over with no winn
 ## where a hero who ends their turn up steps out of the fight, and it ends once no hero who is up is left on the board;
 ## `trigger_hero_down`, it ends when the first hero to hurt a foe in it is down; `rounds` (a clock), it ends as round
 ## `rounds` ends, with `rounds_outcome` (victory, defeat, ended: the default, or none: a countdown only), setting `rounds_flag` for the story and
-## shown on the HUD with `rounds_label` (EncounterTurns.clock_left). {} for none.
+## shown on the HUD with `rounds_label` (EncounterTurns.clock_left). A fight with a ward (a creature whose meta
+## EncounterTurns.WARD is set: one the party must keep alive) is lost when a ward falls (`ward_lost`: defeat, the
+## default, or ended) and, with `ward_exits` (squares), won once every ward has left by one of them. {} for none.
 var ends_when: Dictionary = {}
 ## An opening the party chose before the fight (LocationFights: a flask thrown from the exploration menu): {by, kind
 ## ("flask"), item, target}. The `by` creature's first turn begins with it (EncounterTurns), then it is spent. {} none.

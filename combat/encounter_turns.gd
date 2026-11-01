@@ -511,7 +511,11 @@ func _check_over() -> void:
 			party_up = true
 		elif c.side == &"enemy":
 			enemies_up = true
-	if not enemies_up:
+	if _ward_fallen() != null:
+		e.state = Encounter.State.OVER
+		e.outcome = "ended" if str(e.ends_when.get("ward_lost", "defeat")) == "ended" else "defeat"
+		e.log.add("info", "%s is lost" % _ward_fallen().name(), "")
+	elif not enemies_up or _wards_out():
 		e.state = Encounter.State.OVER
 		e.outcome = "victory"
 	elif _party_left():
@@ -589,6 +593,36 @@ func _first_to_hurt_down() -> Combatant:
 	return null
 
 
+## The meta on a creature the party must keep alive in this fight (a location monster entry's `ward: true`): its fall
+## loses the fight, and with `ends_when.ward_exits` getting every ward out by one wins it.
+const WARD := &"ward"
+
+
+static func is_ward(c: Combatant) -> bool:
+	return bool(c.creature.get_meta(WARD, false))
+
+
+## A ward that has fallen (dead or at 0 Hit Points, still on the board), or null.
+func _ward_fallen() -> Combatant:
+	for c in enc().combatants:
+		if is_ward(c) and not c.has_meta("left_fight") and (not c.is_alive() or c.creature.hp <= 0):
+			return c
+	return null
+
+
+## Whether every ward has left by a ward exit (and there is one).
+func _wards_out() -> bool:
+	var e := enc()
+	if (e.ends_when.get("ward_exits", []) as Array).is_empty():
+		return false
+	var wards := e.combatants.filter(func(c: Combatant) -> bool: return is_ward(c))
+	return not wards.is_empty() and wards.all(func(c: Combatant) -> bool: return str(c.get_meta("left_fight", "")) == "exit")
+
+
+## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there; so does a ward on one of
+## `ends_when.ward_exits`.
+
+
 ## The rounds left on the fight's clock (`ends_when.rounds`), this one counted; -1 when it has none.
 func clock_left() -> int:
 	var e := enc()
@@ -619,6 +653,13 @@ func _clock_runs_out() -> void:
 ## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there.
 func _step_out(c: Combatant) -> void:
 	var e := enc()
+	if is_ward(c) and not c.is_down() and not c.has_meta("left_fight"):
+		for x: Variant in e.ends_when.get("ward_exits", []):
+			if Vector2i(int((x as Array)[0]), int((x as Array)[1])) in c.footprint():
+				c.set_meta(LEFT_AT, [c.cell.x, c.cell.y])
+				e.log.add("move", "%s gets out" % c.name(), c.id)
+				e.movement.leave_grid(c, "exit")
+				return
 	var exits := e.ends_when.get("exits", []) as Array
 	if exits.is_empty() or not _hero(c) or c.is_down() or c.has_meta("left_fight"):
 		return

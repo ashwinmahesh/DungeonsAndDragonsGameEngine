@@ -796,9 +796,11 @@
                 },
                 "side": {
                   "type": "string",
+                  "description": "enemy (the default), neutral, or guest: on the party's side and moved by the player (a ward to get out).",
                   "enum": [
                     "enemy",
-                    "neutral"
+                    "neutral",
+                    "guest"
                   ]
                 },
                 "hp": {
@@ -858,6 +860,10 @@
                       "description": "The warning its tooltip and hover show (whose body it is, and what ends it)."
                     }
                   }
+                },
+                "ward": {
+                  "type": "boolean",
+                  "description": "A creature the party must keep alive: if it falls, the fight is lost (ends_when.ward_lost); with ends_when.wards_out, getting every ward out by an open exit wins it. Usually on the guest side, so the player moves it."
                 },
                 "catch": {
                   "type": "object",
@@ -1425,6 +1431,14 @@
               "trigger_hero_down": {
                 "type": "boolean",
                 "description": "It ends when the first hero to hurt a foe in it drops to 0 Hit Points."
+              },
+              "wards_out": {
+                "type": "boolean",
+                "description": "The fight is won once every ward (a monster entry's `ward`) has ended a turn on one of the place's open exits and left."
+              },
+              "ward_lost": {
+                "enum": ["defeat", "ended"],
+                "description": "What a ward falling means: defeat (the default) or ended (no winner)."
               },
               "rounds": {
                 "type": "integer",
