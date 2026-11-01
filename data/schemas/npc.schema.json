@@ -54,6 +54,22 @@
     "guest": {
       "type": "boolean"
     },
+    "ward_light": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A guest's warding light in a fight (WardLights): round where the guest stands, it lights the field, keeps the creatures in `keep_out` from stepping in and gives those in `disadvantage` Disadvantage on D20 Tests inside.",
+      "properties": {
+        "radius": {"type": "integer", "minimum": 5},
+        "bright": {"type": "integer", "minimum": 0},
+        "dim": {"type": "integer", "minimum": 0},
+        "keep_out": {"type": "array", "items": {"type": "string"}, "description": "Creature names, stat block ids or creature types."},
+        "disadvantage": {"type": "array", "items": {"type": "string"}, "description": "Creature names, stat block ids or creature types."},
+        "small": {"type": "object", "additionalProperties": false, "properties": {
+          "when": {"type": "string"}, "radius": {"type": "integer", "minimum": 5}, "bright": {"type": "integer", "minimum": 0}, "dim": {"type": "integer", "minimum": 0}},
+          "description": "Its numbers while this story condition holds."},
+        "off_at": {"type": "array", "items": {"type": "string"}, "description": "Places where it isn't lit at all (a corrupted light)."}
+      }
+    },
     "guest_fights": {
       "type": "boolean",
       "description": "false: this guest keeps out of every fight (Ireena, Ashwin 2026-10-18). She takes no turn, no foe can target her and no area spell of either side catches her, because she is not in the encounter at all; her figure stays on the board as a bystander whose square blocks, stepped aside if the fight starts on it. Needs guest: true. Without it guests fight under the player's control (docs/contracts/campaign.md)."

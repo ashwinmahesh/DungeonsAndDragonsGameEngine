@@ -184,6 +184,12 @@ fight starts on a square someone will stand on (the party's, a foe's) she steps 
 the foes. She doesn't fall, so `see_to_fallen_guests` never sends her home, and she isn't in the fight's tokens, turn strip
 or party frames. The exploring screen's guest card says "Keeps back". A Tarokka ally always fights (`make validate`).
 
+A guest's NPC entry can carry a `ward_light` ({radius, bright, dim, keep_out, disadvantage, small: {when, radius,
+bright, dim}, off_at}; WardLights): in every fight the guest is in or sits out, a zone round its square lights the field
+(Bright `bright`, Dim `dim` more), the creatures named in `keep_out` (names, stat block ids or creature types) can't
+step into it unless already inside, and those in `disadvantage` have Disadvantage on D20 Tests in it. While `small.when`
+holds its numbers are `small`'s; at a place in `off_at` it isn't there.
+
 ## Region travel files (Phase 5, ADR 0011)
 
 Every file in `data/travel/` is merged into the one map: a region adds `data/travel/<region>.json` with the same shape

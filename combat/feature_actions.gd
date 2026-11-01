@@ -988,6 +988,8 @@ func before_d20(cr: Creature, kind: D20Test.Kind, keys: Array[String], _target: 
 			out["disadvantage"] = ["Sunlight"]
 	# A warding light round a cleansed set piece (ObjectCarry): the creatures it names have Disadvantage in it.
 	var warded := e.objects.carry.ward_disadvantage(c)
+	# A guest's warding light (WardLights): the creatures it names have Disadvantage in it.
+	var warded := WardLights.disadvantage(e, c)
 	if not warded.is_empty():
 		out["disadvantage"] = (out.get("disadvantage", []) as Array) + warded
 	if c.has_meta("portent_next"):
