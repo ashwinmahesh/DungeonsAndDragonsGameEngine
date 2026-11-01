@@ -395,6 +395,8 @@ piece, another phase, a catch's flag). With two triggers it begins on whichever 
 "half" or a number) or `heal` (a number may count the fight: "40 + 10 * alive:<stat block>", how many of that block
 are still up, Legendary.counted; dice too, a count of them in brackets: "(alive:<stat block>)d12"); `destroys` (stat
 block ids: their living creatures go as it begins, after the heal counted them); `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
+
+"half" or a number) or `heal`; `move` (`{location, spawn, encounter}`: the fight goes on in another place; it ends here as `moved`, the party is carried there through `exit_requested`, and LocationFights.continue_moved picks it up on that place's board from the encounter entry named, with everyone's Hit Points, conditions, effects, Initiative and round; the old board's objects, traps, ground, zones, grapples and marks stay behind; event `fight_moves`; vault Build/Design - Boss phase that moves the fight.md); `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
 actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
 `summon: {monster, count}`; `say` (a Narrator key: the fight's view speaks its line as it begins, as any Narrator line in
 a fight) and `cutscene` (a cutscene id played over the fight with that line as its caption; without it, a cutscene whose

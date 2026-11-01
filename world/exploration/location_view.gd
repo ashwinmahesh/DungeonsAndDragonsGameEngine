@@ -222,6 +222,9 @@ func _ready() -> void:
 	LocationStealth.refresh_waiting(self)
 	if arrive_sneaking and not in_combat:
 		LocationStealth.after_step(self)   # a foe that notices them where they arrive starts its fight at once
+	# A boss's phase sent its fight here (BossPhases `move`): it goes on as the party arrives.
+	if st.flags.has(LocationFights.MOVED):
+		LocationFights.continue_moved.call_deferred(self)
 
 
 func _process(delta: float) -> void:

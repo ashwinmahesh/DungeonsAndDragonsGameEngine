@@ -107,3 +107,14 @@ func test_a_slowed_werewolf_attacks_instead_of_shifting_first() -> void:
 	e.run_ai_turn()
 	assert_false(e.log.texts().slice(from).any(func(t: String) -> bool: return t.contains("twists into")), "no Bonus Action Shape-Shift before its action")
 	assert_eq(_blows(e, "Werewolf", from), 1, "and one attack")
+
+
+## A Multiattack under another id (a form's own, which a phase swaps for another) is still its Multiattack.
+func test_a_multiattack_by_any_name() -> void:
+	var m := TestChars.dummy(30, false, {"name": "Test Twin Blade", "actions": [
+		{"id": "test_form_multiattack", "name": "Multiattack", "kind": "multiattack", "multiattack": [{"action": "test_blade", "count": 2}]},
+		{"id": "test_blade", "name": "Blade", "kind": "melee", "attack": {"bonus": 5, "reach": 5}, "damage": [{"dice": "1d6", "type": "slashing"}]}]})
+	assert_eq(str(m.action("multiattack").get("id", "")), "test_form_multiattack")
+	var e := TestCombat.open_field(3)
+	var c := e.add(m, &"enemy", Vector2i(3, 3))
+	assert_eq(e.attacks.multiattack_total(c), 2)
