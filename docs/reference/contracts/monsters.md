@@ -97,6 +97,13 @@ that has one of the `needs` conditions (Paralyzed or Restrained) and stands with
 `openings` out of it (docs/reference/contracts/locations.md). The foe falls the opening's drop (1d6 per 10 ft, Prone)
 and is outside until a `climb` check at the start of one of its turns brings it back in. The AI throws whenever it can.
 
+## Leaping as its turn starts
+
+A trait's `turn_start_leap` ({`ft`: its Speed when unset, `when`: "bloodied" for only while it is Bloodied}): once at the
+start of each of its turns it may move up to `ft` to an open square without provoking Opportunity Attacks, keeping its
+own movement for the turn. The AI leaps beside the foe it would strike when that foe is out of its reach, or clear of
+foes when its blows reach farther than 10 ft (MonsterActions.leap_ft and leap, AiBrain._leap).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve

@@ -302,6 +302,34 @@ func entered_space(c: Combatant) -> void:
 			set_burning(c, o)
 
 
+## How far `c` may leap as its turn starts (a trait's `turn_start_leap`: {ft, when}; `ft` its Speed when unset, `when`
+## "bloodied" for only while it is): 0 when it has no such trait, the trait's time hasn't come, or it has leapt this turn.
+func leap_ft(c: Combatant) -> int:
+	if not c.can_act() or c.speed() <= 0 or int(c.get_meta("leapt_round", -1)) == enc().round_no:
+		return 0
+	for tr: Variant in traits(c):
+		var lp := (tr as Dictionary).get("turn_start_leap", {}) as Dictionary
+		if lp.is_empty():
+			continue
+		if str(lp.get("when", "")) == "bloodied" and not c.creature.is_bloodied():
+			continue
+		return int(lp.get("ft", c.speed()))
+	return 0
+
+
+## The leap at the start of its turn: up to leap_ft to an open square, provoking no Opportunity Attacks, leaving its own
+## movement as it was.
+func leap(c: Combatant, cell: Vector2i) -> CombatResult:
+	var e := enc()
+	var ft := leap_ft(c)
+	var reach := e.reachable_for(c, ft)
+	if ft <= 0 or cell == c.cell or not reach.has(cell) or bool((reach[cell] as Dictionary)["occupied"]):
+		return CombatResult.fail("Can't leap there")
+	c.set_meta("leapt_round", e.round_no)
+	e.log.add("info", "%s leaps" % c.name(), c.id)
+	return e.legendary._move(c, cell, ft)
+
+
 ## A grapple from a stat block: registered like an Unarmed Strike grapple, with the printed escape DC; a creature
 ## can hold only `limit` creatures at once (the Vampire Spawn's two claws).
 func grapple(src: Combatant, t: Combatant, escape_dc: int, limit: int, label: String, restrain: bool = false) -> void:
