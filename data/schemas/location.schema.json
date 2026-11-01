@@ -860,6 +860,9 @@
                     "neutral",
                     "guest"
                   ]
+                    "ally"
+                  ],
+                  "description": "enemy (the default), neutral, or ally: on the party's side as a guest the player controls (militia standing with the heroes)."
                 },
                 "hp": {
                   "type": "integer",

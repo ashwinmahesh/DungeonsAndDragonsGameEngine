@@ -166,6 +166,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   one; a creature with a Swim Speed and no Walk Speed (or the `water_only` flag) can't leave the water; a creature whose
   turn starts in the water moves at its Swim Speed when that is faster; one that falls or is shoved in stays in it.
   Without the key deep water stays impassable, as before.
+
+- **Allies in a fight:** a monster entry's `side: "ally"` fights on the party's side as a guest the player controls, like
+  every party member and guest (militia standing with the heroes): foes treat it as one of the party's, and it counts
+  for the party in the fight's end; it isn't a hero, so it leaves with the fight.
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open

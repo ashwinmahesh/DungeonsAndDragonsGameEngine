@@ -172,6 +172,10 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		var steed_name := str((md as Dictionary).get("rides", ""))
 		if steed_name != "" and by_name.has(steed_name) and by_name.has(str((md as Dictionary).get("name", ""))):
 			e.mounts.seat(by_name[str((md as Dictionary)["name"])] as Combatant, by_name[steed_name] as Combatant)
+		# An `ally` (militia standing with the party) fights on the party's side as a guest, under the player's control
+		# like every party member and guest.
+		var ally: bool = mo["side"] == &"ally"
+		e.add(mo["creature"] as Monster, &"guest" if ally else mo["side"] as StringName, mo["cell"] as Vector2i)
 	# The playthrough's difficulty: enemy Hit Points, what foes carry, how they fight (combat/difficulty.gd).
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
