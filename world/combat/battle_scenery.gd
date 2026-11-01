@@ -156,6 +156,13 @@ static func for_spec(view: LocationView, e: Encounter, spec: Dictionary) -> void
 		var entry := x as Dictionary
 		if StoryConditions.check(str(entry.get("when", "")), view.st):
 			e.objects.put(entry)
+	# Set-piece rules for things the scenery made from the place's props (`object_rules`: {prop, carry, takes, hazard,
+	# study}; ObjectCarry): a brazier on the map that a fight gives a hazard.
+	for x2: Variant in spec.get("object_rules", []):
+		var rule := x2 as Dictionary
+		for o in e.objects.list:
+			if o.prop_id == str(rule.get("prop", "")) and not o.destroyed:
+				EncounterObjects.set_piece_rules(o, rule)
 
 
 ## The squares a prop stands on: its own, or all of those its `span` covers ([across, down], its cell the north-west

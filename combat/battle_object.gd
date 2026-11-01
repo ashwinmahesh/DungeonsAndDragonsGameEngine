@@ -76,6 +76,23 @@ var threshold: int = 0
 var undo: Dictionary = {}
 ## The story flag set when it is gone, broken or undone ("" for none).
 var flag: String = ""
+## A plain thing a hero can carry (ObjectCarry): {tag}; {} for none. Such a thing can't be attacked.
+var carry: Dictionary = {}
+## The creature carrying it ("" when it lies on the floor).
+var carried_by: String = ""
+## What it takes in (ObjectCarry.put): {tag, label, flag, say, damage, light}; {} for nothing.
+var takes: Dictionary = {}
+## Done with: something was put in it, and its hazard is over.
+var cleansed: bool = false
+## Its hazards (ObjectCarry.hazards): [{on, near_ft, save, exhaustion, damage, if_flag, unless_flag}].
+var hazard: Array = []
+## Creature id -> the turn ("round:index") a hazard of it last struck that creature (once a turn).
+var hazard_hit: Dictionary = {}
+## The warding light lit round it once cleansed: {radius, disadvantage, color}; {} for none.
+var ward: Dictionary = {}
+## The Study that tells what it is: {skills, dc, say, flag}; {} for none.
+var study: Dictionary = {}
+var studied: bool = false
 
 
 ## A new object of `kind_id` from the kinds table (data/objects/kinds.json).
@@ -166,7 +183,10 @@ func to_dict() -> Dictionary:
 		"open": open, "locked": locked, "moves": moves, "move_dc": move_dc, "topple": topple.duplicate(true), "throwable": throwable,
 		"bursts": bursts.duplicate(true), "wreck": wreck.map(func(c: Vector2i) -> Array: return [c.x, c.y]), "home": [home.x, home.y],
 		"model": model, "fuel": fuel, "releases": releases.duplicate(true),
-		"threshold": threshold, "undo": undo.duplicate(true), "flag": flag}
+		"threshold": threshold, "undo": undo.duplicate(true), "flag": flag,
+		"carry": carry.duplicate(true), "carried_by": carried_by, "takes": takes.duplicate(true), "cleansed": cleansed,
+		"hazard": hazard.duplicate(true), "hazard_hit": hazard_hit.duplicate(), "ward": ward.duplicate(true),
+		"study": study.duplicate(true), "studied": studied}
 
 
 static func from_dict(d: Dictionary) -> BattleObject:
@@ -208,6 +228,15 @@ static func from_dict(d: Dictionary) -> BattleObject:
 	o.threshold = int(d.get("threshold", 0))
 	o.undo = (d.get("undo", {}) as Dictionary).duplicate(true)
 	o.flag = str(d.get("flag", ""))
+	o.carry = (d.get("carry", {}) as Dictionary).duplicate(true)
+	o.carried_by = str(d.get("carried_by", ""))
+	o.takes = (d.get("takes", {}) as Dictionary).duplicate(true)
+	o.cleansed = bool(d.get("cleansed", false))
+	o.hazard = (d.get("hazard", []) as Array).duplicate(true)
+	o.hazard_hit = (d.get("hazard_hit", {}) as Dictionary).duplicate()
+	o.ward = (d.get("ward", {}) as Dictionary).duplicate(true)
+	o.study = (d.get("study", {}) as Dictionary).duplicate(true)
+	o.studied = bool(d.get("studied", false))
 	for c2: Variant in d.get("wreck", []):
 		o.wreck.append(Vector2i(int((c2 as Array)[0]), int((c2 as Array)[1])))
 	var h := d.get("home", [-1, -1]) as Array

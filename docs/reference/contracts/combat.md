@@ -332,6 +332,20 @@ does nothing), `undo` (`{skill, dc, label}`: the Utilize action within 5 ft and 
 undone). `ends_when.objects_gone` (object ids) ends the fight once every one is gone, with `objects_outcome`
 (`victory`, the default, or `ended`); the event `objects_gone` comes before `over`. All three are kept in a round's save.
 
+Carried things (ObjectCarry, combat/object_carry.gd): an `objects` entry's `carry: {tag}` is a plain thing (no Hit
+Points or Armor Class, in nobody's way) no attack or spell can touch. A hero within 5 ft takes it with the object
+interaction (else Utilize: "Take <it>" on the Common tab) and holds it; dropping to 0 Hit Points or leaving the fight
+leaves it on that square. A thing with `takes: {tag, label, flag, say, damage: {who, amount, type}, light: {radius,
+disadvantage, color}}` takes one in with the Utilize action within 5 ft: the carried thing is used up, the receiver is
+cleansed (its `hazard` ends), `flag` is set, `damage` strikes each creature named in `who` (names or stat block ids), and
+`light` lights a ward round it in which the creatures named in `disadvantage` have Disadvantage on D20 Tests. `hazard`
+([{on, near_ft, save, exhaustion, damage: {dice, type}, if_flag, unless_flag}]): a creature entering a square within
+`near_ft` (0: its own squares; `on: "enter"`) or ending its turn there (`on: "end"`) makes the save or gains the
+Exhaustion and takes the damage, once a turn for each thing; `if_flag`/`unless_flag` tie it to a fight flag (a boss
+phase's `flag`). `study: {skills, dc, say, flag}`: the Study action within 30 ft and the best of those checks tell what
+it is (all things with the same `study` at once). An encounter's `object_rules` ([{prop, takes, hazard, study}]) give
+the same keys to the things the scenery made from the place's props. All of it is kept in a round's save.
+
 Wards: a monster entry's `ward: true` (meta `EncounterTurns.WARD`, kept on a fight picked up from a save) is a
 creature the party must protect, usually `side: "guest"` so the player moves it (a spirit that can't act). If a ward is
 dead or at 0 Hit Points on the board, the fight is lost (`ends_when.ward_lost`: `defeat`, the default, or `ended`), before
