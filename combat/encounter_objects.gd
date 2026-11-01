@@ -42,6 +42,8 @@ var actions: ObjectActions
 var fire: ObjectFire
 ## What creatures eat and what breaks open to let a creature out (combat/object_fuel.gd).
 var fuel: ObjectFuel
+## Things carried to other things, their hazards and wards (combat/object_carry.gd).
+var carry: ObjectCarry
 
 
 func _init(encounter: Encounter) -> void:
@@ -49,6 +51,7 @@ func _init(encounter: Encounter) -> void:
 	actions = ObjectActions.new(encounter)
 	fire = ObjectFire.new(encounter)
 	fuel = ObjectFuel.new(encounter)
+	carry = ObjectCarry.new(encounter)
 
 
 func enc() -> Encounter:
@@ -99,6 +102,11 @@ func put(entry: Dictionary) -> BattleObject:
 	o.threshold = int(entry.get("threshold", 0))
 	o.undo = (entry.get("undo", {}) as Dictionary).duplicate(true)
 	o.flag = str(entry.get("flag", ""))
+	set_piece_rules(o, entry)
+	if not o.carry.is_empty():
+		o.blocks = 0   # a plain thing lying there: no Hit Points, no Armor Class, in nobody's way
+		o.hp = 0
+		o.ac = 0
 	for k2: String in ["immune", "resist", "vulnerable"]:
 		if entry.has(k2):
 			var to: Array[String] = []
@@ -110,6 +118,19 @@ func put(entry: Dictionary) -> BattleObject:
 						to.append(ty)
 			o.set(k2, to)
 	return o
+
+
+## The set-piece keys an encounter gives a thing it puts down, or one the scenery made from a prop (`object_rules`):
+## carry, takes, hazard, study (ObjectCarry).
+static func set_piece_rules(o: BattleObject, entry: Dictionary) -> void:
+	if entry.has("carry"):
+		o.carry = (entry["carry"] as Dictionary).duplicate(true)
+	if entry.has("takes"):
+		o.takes = (entry["takes"] as Dictionary).duplicate(true)
+	if entry.has("hazard"):
+		o.hazard = (entry["hazard"] as Array).duplicate(true)
+	if entry.has("study"):
+		o.study = (entry["study"] as Dictionary).duplicate(true)
 
 
 ## `o`'s grid flag on its squares (a door standing open has none).
@@ -360,8 +381,10 @@ func _fall(o: BattleObject) -> void:
 ## "" if `c` could attack `o` with `option` from where it stands (not counting what's left of its turn).
 func attack_why(c: Combatant, o: BattleObject, option: Dictionary) -> String:
 	var e := enc()
-	if o == null or o.destroyed:
+	if o == null or o.destroyed or o.carried_by != "":
 		return "Nothing to attack there"
+	if not o.carry.is_empty():
+		return "%s can't be attacked" % o.title()
 	if option.is_empty():
 		return "No such attack"
 	var p := option["profile"] as WeaponProfile
@@ -579,8 +602,10 @@ func spell_target_why(c: Combatant, s: Dictionary, ref: String, rng: int) -> Str
 	if not hits_objects(s):
 		return "%s can't be aimed at an object" % s.get("name", "That spell")
 	var o := get_object(ref)
-	if o == null or o.destroyed:
+	if o == null or o.destroyed or o.carried_by != "":
 		return "Nothing to aim at there"
+	if not o.carry.is_empty():
+		return "%s can't be harmed" % o.title()
 	if o.hangs and str(s.get("attack", "")) == "melee":
 		return "%s hangs out of reach" % o.title()
 	if distance_ft(c, o) > rng:
@@ -675,7 +700,7 @@ func area_spell(ctx: Dictionary, cells: Array, shared: Dictionary, multi: Array,
 	var harmful := parts.filter(func(p: Dictionary) -> bool: return str(p["type"]) in types)
 	var texts: Array = harmful.map(func(p: Dictionary) -> String: return str(p["text"]))
 	for o: BattleObject in list.duplicate():
-		if o.destroyed or not _in_area(o, cells):
+		if o.destroyed or not o.carry.is_empty() or not _in_area(o, cells):
 			continue
 		if not harmful.is_empty():
 			damage(o, harmful, c, str(s["name"]), texts)
@@ -820,6 +845,7 @@ func _stands_in(c: Combatant, sq: Dictionary) -> bool:
 ## in it; webs whose prey is gone go.
 func turn_start(c: Combatant) -> void:
 	_tidy()
+	carry.tidy()
 	fuel.turn_start(c)
 	for sq: Dictionary in squares.duplicate():
 		if bool(sq.get("lit", false)) and "start" in (sq.get("on", []) as Array) and _stands_in(c, sq):
@@ -832,6 +858,7 @@ func turn_end(c: Combatant) -> void:
 	for sq: Dictionary in squares.duplicate():
 		if bool(sq.get("lit", false)) and "end" in (sq.get("on", []) as Array) and _stands_in(c, sq):
 			_burn(c, sq, "Burning oil")
+	carry.hazards(c, "end")
 	for sq: Dictionary in squares.duplicate():
 		if not bool(sq.get("lit", false)):
 			continue
@@ -847,6 +874,7 @@ func turn_end(c: Combatant) -> void:
 func on_moved(c: Combatant, from: Vector2i) -> void:
 	var was := CombatGrid.footprint(from, c.size_cells)
 	var on_fire := c.creature.effects.any(func(fx: Effect) -> bool: return bool(fx.data.get("douse", false)))
+	carry.hazards(c, "enter", from)
 	for sq: Dictionary in squares.duplicate():
 		if not _stands_in(c, sq) or sq["cell"] in was:
 			continue
@@ -1279,6 +1307,9 @@ func perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2) -
 	var handled := actions.perform(c, id)
 	if handled != null:
 		return handled
+	var carried := carry.perform(c, id)
+	if carried != null:
+		return carried
 	match id:
 		"oil:throw":
 			var t: Combatant = targets[0] as Combatant if not targets.is_empty() and targets[0] is Combatant else null

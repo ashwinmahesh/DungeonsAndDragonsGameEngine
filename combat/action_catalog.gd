@@ -439,6 +439,7 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	# Things lying within reach (GroundItems): picking each up. Doors within reach: opening or shutting each.
 	out.append_array(e.ground.entries(c))
 	out.append_array(e.objects.actions.entries(c))
+	out.append_array(e.objects.carry.entries(c))
 
 
 ## FeatureActions' entries as hotbar actions.

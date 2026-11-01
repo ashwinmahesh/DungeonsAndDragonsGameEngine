@@ -21,6 +21,7 @@ var _webs: Dictionary = {}       ## object id -> Node3D (its squares in meta "ce
 var _hung: Dictionary = {}       ## object id -> the chandelier drawn here (no location prop draws it)
 var _moved_to: Dictionary = {}   ## object id -> the square its art stands on, once a shove has moved it
 var _placed: Dictionary = {}     ## object id -> the piece drawn for something the fight put down (its `model`)
+var _wards: Dictionary = {}      ## object id -> the warding light lit round it (ObjectCarry)
 var _rng := RandomNumberGenerator.new()
 
 
@@ -40,6 +41,14 @@ func sync(objects: EncounterObjects) -> void:
 			_slide_now(o, _moved_to.get(o.id, o.home) as Vector2i, o.cells[0])
 		if o.model != "" and not o.destroyed and not _placed.has(o.id) and not o.cells.is_empty():
 			_placed[o.id] = _place_model(o)
+		# A thing a hero carries (ObjectCarry): gone from the floor, and back where it fell.
+		var held := _placed.get(o.id) as Node3D
+		if held != null and is_instance_valid(held):
+			held.visible = o.carried_by == "" and not o.destroyed
+			if held.visible and not o.cells.is_empty():
+				held.position = board.cell_center(o.cells[0])
+		if not o.ward.is_empty() and not o.destroyed and not _wards.has(o.id):
+			_wards[o.id] = _ward_light(o, objects)
 		if o.door_id != "" and not o.destroyed:
 			var leaf := board.get_node_or_null("Door_" + o.door_id) as Node3D
 			if leaf != null:
@@ -494,6 +503,20 @@ static func drop_piece(_board: ArenaBoard, node: Node3D, animate: bool) -> void:
 # --- Fire, oil and webs --------------------------------------------------------------------------------
 
 ## A burning object's flame (the flame art where it exists, else a few glowing cones) and its flickering light.
+## The warding light round a cleansed thing: its `color` (a hex string; the flame's colour when unset) out to its radius.
+func _ward_light(o: BattleObject, objects: EncounterObjects) -> Node3D:
+	var light := CandleFlicker.new()
+	var col := str(o.ward.get("color", ""))
+	light.light_color = Color(col) if col != "" else Look.color("flame")
+	light.base_energy = 2.0
+	light.flicker = 0.2
+	light.omni_range = float(int(o.ward.get("radius", 20))) / 5.0 + 0.5
+	var cells := objects.cells_of(o)
+	light.position = board.cell_center(cells[0] if not cells.is_empty() else Vector2i.ZERO) + Vector3(0, 1.2, 0)
+	add_child(light)
+	return light
+
+
 func _flame(cells: Array[Vector2i]) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Burning"
