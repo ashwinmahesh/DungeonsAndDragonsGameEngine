@@ -1257,7 +1257,7 @@ func finish_long_rest() -> void:
 		var ends := (e as Effect).ends
 		if ends == Effect.Ends.SHORT_REST or ends == Effect.Ends.LONG_REST:
 			remove_effect(e as Effect)
-	if exhaustion > 0:
+	if exhaustion > 0 and not has_flag("exhaustion_locked"):   # an affliction that won't let it go (Afflictions)
 		exhaustion -= 1
 	temp_hp = 0
 	unhealable = 0

@@ -53,6 +53,9 @@ func _process(_delta: float) -> void:
 	_minute = now
 	var before := str(Schedule.memory(view.st)["fired"])
 	var plays := Schedule.catch_up(view.st, view.loc_id)
+	# Afflictions on the clock (AfflictionClock): one waking, a day's save, a land that spreads one.
+	for said in AfflictionClock.catch_up(view.st, view.dice):
+		view.toast.emit(said)
 	# A quest whose days have run out ends (data/quests `closes`): the event just caught up may have been the last straw.
 	var closed := QuestClosures.sweep(view.st)
 	for said in closed:
