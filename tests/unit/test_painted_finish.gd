@@ -131,6 +131,38 @@ func test_a_game_paints_its_own_moon() -> void:
 	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "a missing picture keeps the disc")
 
 
+func test_a_moon_follows_the_story() -> void:
+	var settings := Look.painted_settings()
+	settings["moon_face_size"] = 0.1
+	settings["moon_face"] = [
+		{"when": "flag.moon_grin >= 2", "face": "res://widest.png", "size": 0.3},
+		{"when": "flag.moon_grin", "face": FACE},
+		{"face": "res://smirk.png"},
+	]
+	var st := StoryState.new()
+	assert_eq(PaintedFinish.moon_face_for(settings, st), {"face": "res://smirk.png", "size": 0.1}, "no flag: the last, with the game's size")
+	st.set_flag("moon_grin", 1)
+	assert_eq(PaintedFinish.moon_face_for(settings, st), {"face": FACE, "size": 0.1}, "a first seal")
+	st.set_flag("moon_grin", 2)
+	assert_eq(PaintedFinish.moon_face_for(settings, st), {"face": "res://widest.png", "size": 0.3}, "its own size")
+	assert_eq(PaintedFinish.moon_face_for(settings, null)["face"], "res://smirk.png", "without a story only the unconditional one")
+	settings["moon_face"] = [{"when": "flag.moon_grin", "face": FACE}]
+	assert_eq(str(PaintedFinish.moon_face_for(settings, StoryState.new())["face"]), "", "none holds: the plain disc")
+	settings["moon_face"] = FACE
+	assert_eq(str(PaintedFinish.moon_face_for(settings, st)["face"]), FACE, "a plain path still means that picture")
+	var mat := _post()
+	var was := GameState.story
+	GameState.story = StoryState.new()
+	GameState.story.set_flag("moon_grin", 1)
+	settings["moon_face"] = [{"when": "flag.moon_grin >= 3", "face": FACE}, {"face": "res://nowhere/moon.png"}]
+	PaintedFinish.set_moon_face(mat, settings, true)
+	assert_false(bool(mat.get_shader_parameter("sky_moon_has_face")), "a missing picture keeps the disc")
+	GameState.story.set_flag("moon_grin", 3)
+	PaintedFinish.set_moon_face(mat, settings, true)
+	assert_true(bool(mat.get_shader_parameter("sky_moon_has_face")), "the story moved the moon's face")
+	GameState.story = was
+
+
 func test_a_close_strike_flashes_a_cut_out() -> void:
 	var a := Atmosphere.new()
 	a.painted = Look.painted_settings({"lightning_cutout": 0.9})

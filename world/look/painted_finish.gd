@@ -36,15 +36,51 @@ static func apply(post: ShaderMaterial, s: Dictionary) -> void:
 		post.set_shader_parameter("branch_scale", float(s["bough_scale"]))
 		post.set_shader_parameter("branch_sway", float(s["bough_sway"]))
 		post.set_shader_parameter("use_branch_mask", bool(s["boughs_by_trees"]))
-	var face := str(s["moon_face"])
-	var tex := load(face) as Texture2D if on and face != "" and ResourceLoader.exists(face) else null
-	post.set_shader_parameter("sky_moon_has_face", tex != null)
-	post.set_shader_parameter("sky_moon_face", tex)
-	post.set_shader_parameter("sky_moon_face_size", float(s["moon_face_size"]))
+	set_moon_face(post, s, on)
 	post.set_shader_parameter("moon_water", 0.0)   # (aim_moon sets it each frame, at night)
 	post.set_shader_parameter("moon_water_size", float(s["moon_water_size"]))
 	post.set_shader_parameter("moon_water_bite", float(s["moon_water_bite"]))
 	post.set_shader_parameter("moon_water_ripple", float(s["moon_water_ripple"]))
+
+
+## The moon's picture in the sky and the water: the one `moon_face` names for the story as it stands (moon_face_for), or the
+## plain disc. `on` is whether the Modern or Toon finish is drawing (Look.modern()).
+static func set_moon_face(post: ShaderMaterial, s: Dictionary, on: bool) -> void:
+	var pick := moon_face_for(s, GameState.story)
+	var face := str(pick["face"])
+	var tex := load(face) as Texture2D if on and face != "" and ResourceLoader.exists(face) else null
+	post.set_shader_parameter("sky_moon_has_face", tex != null)
+	post.set_shader_parameter("sky_moon_face", tex)
+	post.set_shader_parameter("sky_moon_face_size", float(pick["size"]))
+	post.set_meta("moon_face_shown", face)
+
+
+## A story moves the moon's face while a place is open (a grin that widens, a scowl): every half second the picture the
+## story now asks for is compared with the one in the sky, and swapped when it differs. Costs nothing for a game whose
+## `moon_face` is a plain path.
+static func follow_moon_face(post: ShaderMaterial, s: Dictionary) -> void:
+	if post == null or not s["moon_face"] is Array or Engine.get_process_frames() % 30 != 0 or not Look.modern():
+		return
+	if str(moon_face_for(s, GameState.story)["face"]) != str(post.get_meta("moon_face_shown", "")):
+		set_moon_face(post, s, true)
+
+
+## Which moon the story shows: `moon_face` is a picture (a res:// path), or a list of {"when": "<condition>", "face":
+## "res://...", "size": 0.12} tried in order, the first whose condition holds winning (no "when": always; with no story only
+## those win). `size` falls back to moon_face_size. Returns {"face": path or "", "size": radius}.
+static func moon_face_for(s: Dictionary, st: StoryState) -> Dictionary:
+	var spec: Variant = s["moon_face"]
+	var size := float(s["moon_face_size"])
+	if not spec is Array:
+		return {"face": str(spec), "size": size}
+	for entry: Variant in spec as Array:
+		if not entry is Dictionary:
+			continue
+		var e := entry as Dictionary
+		var cond := str(e.get("when", ""))
+		if cond == "" or (st != null and StoryConditions.check(cond, st)):
+			return {"face": str(e.get("face", "")), "size": float(e.get("size", size))}
+	return {"face": "", "size": size}
 
 
 ## The moon in the water, each frame: where a level mirror under the camera's gaze looks, so the crescent lies in the

@@ -1235,6 +1235,7 @@ func _process(delta: float) -> void:
 			var off := wx.get_meta("offset") as Vector3
 			wx.global_position = Vector3(_rig.global_position.x + off.x, wx.global_position.y, _rig.global_position.z + off.z)
 	_focus_blur()
+	PaintedFinish.follow_moon_face(_post, painted)
 	PaintedFinish.aim_moon(_post, painted, _rig.camera)
 	_fit_sun_shadows()
 	_shadow_scan -= delta
