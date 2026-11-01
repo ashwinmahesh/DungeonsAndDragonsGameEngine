@@ -141,6 +141,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		e.weather = Weather.kind(e.weather_id)
 	e.legendary.set_withdraw(spec.get("withdraw", {}))
 	e.ends_when = ends_when_for(view, spec)
+	e.nonlethal = bool(spec.get("nonlethal", false))   # a brawl: whoever drops is knocked out
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
@@ -154,8 +155,17 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		# who keeps out of fights isn't in the encounter at all (sits_out, keep_back).
 		if not g.creature.dead and not LocationParty.is_follower(g) and not sits_out(view, g):
 			e.add(g.creature, &"guest", g.cell).controller = &"player"
-	for mo: Dictionary in monsters_for(view, spec):
-		e.add(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
+	var entries := spec.get("monsters", []) as Array
+	var monsters := monsters_for(view, spec)
+	for i in monsters.size():
+		var mo := monsters[i]
+		var added := e.add(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
+		var md := entries[i] as Dictionary if i < entries.size() else {}
+		# Never killed (knocked out at 0), and a bystander that turns on the party only once harmed (Encounter.provoke).
+		if bool(md.get("nonlethal", false)):
+			added.set_meta(Encounter.NONLETHAL, true)
+		if bool(md.get("hostile_if_harmed", false)):
+			added.set_meta(Encounter.PROVOKED_BY_HARM, true)
 	# The playthrough's difficulty: enemy Hit Points, what foes carry, how they fight (combat/difficulty.gd).
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
@@ -605,6 +615,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.ends_when = ends_when_for(view, spec)
+	e.nonlethal = bool(spec.get("nonlethal", false))
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):

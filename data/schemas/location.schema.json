@@ -801,6 +801,8 @@
                     "neutral"
                   ]
                 },
+                "nonlethal": {"type": "boolean", "description": "Knocked out at 0 Hit Points, never killed (a charmed townsperson)."},
+                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."},
                 "hp": {
                   "type": "integer",
                   "minimum": 1,
@@ -964,6 +966,10 @@
           "lair": {
             "type": "boolean",
             "description": "Lair actions on initiative count 20 for a monster that has them."
+          },
+          "nonlethal": {
+            "type": "boolean",
+            "description": "Nobody dies in this fight (a brawl): whoever drops to 0 Hit Points is knocked out."
           },
           "objects": {
             "type": "array",

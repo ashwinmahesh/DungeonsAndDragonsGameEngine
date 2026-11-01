@@ -58,6 +58,10 @@ func needs_death_save(c: Combatant) -> bool:
 ## the AI plays never knock anyone out.
 func knocks_out(source: Combatant, target: Combatant) -> bool:
 	var e := enc()
+	# A fight nobody dies in (`nonlethal` on the fight: a brawl), or a creature that's never killed (a charmed townsperson):
+	# 0 Hit Points knocks it out whoever struck the blow.
+	if (e.nonlethal or target.has_meta(Encounter.NONLETHAL)) and not target.creature.has_flag("spell_object") and target.creature.creature_type != &"object":
+		return true
 	if source == null or source == target or not source.is_player_controlled() or not bool(e.hit_context.get("melee", false)) \
 			or str(e.hit_context.get("attacker", "")) != source.id or str(e.hit_context.get("target", "")) != target.id:
 		return false
@@ -211,6 +215,7 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		details: Array = [], log_it: bool = true, responses_resolved: Array = []) -> DamageResult:
 	var e := enc()
 	target = e.monster_actions.redirect_shared(target)
+	e.provoke(source, target)   # a bystander that turns on whoever harms it
 	# Time Stop ends when the caster affects anyone else.
 	if source != null and source != target:
 		e.spells.specials.high.time_stop_broken(source, "it affected another creature")

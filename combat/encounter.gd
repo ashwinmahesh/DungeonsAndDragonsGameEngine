@@ -97,6 +97,12 @@ var _cover_cache: Dictionary = {}
 ## Savage Attacker is once per turn, any creature's turn: creature id -> the turn it was used on.
 var _savage_turn: Dictionary = {}
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
+## A fight nobody dies in (an encounter's `nonlethal`: a brawl): whoever drops to 0 is knocked out (EncounterDamage).
+var nonlethal := false
+## Meta on a creature that is knocked out at 0 Hit Points, never killed (a monster entry's `nonlethal`).
+const NONLETHAL := &"nonlethal"
+## Meta on a neutral creature that turns hostile once the party harms it or forces it to save (`hostile_if_harmed`).
+const PROVOKED_BY_HARM := &"hostile_if_harmed"
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
@@ -270,6 +276,19 @@ func occupant_at(cell: Vector2i) -> Combatant:
 		if c.is_alive() and cell in c.footprint():
 			return c
 	return null
+
+
+## `source` harmed `target` or forced it to save: a neutral bystander that turns on whoever harms it (meta
+## PROVOKED_BY_HARM) does, when the harm comes from the party's side.
+func provoke(source: Combatant, target: Combatant) -> void:
+	if source == null or target == null or target.side != &"neutral" or not target.has_meta(PROVOKED_BY_HARM):
+		return
+	if not source.side in [&"party", &"guest"]:
+		return
+	target.side = &"enemy"
+	target.remove_meta(PROVOKED_BY_HARM)
+	log.add("info", "%s turns on the party" % target.name(), target.id)
+	events.append({"type": "condition", "id": target.id})
 
 
 func distance(a: Combatant, b: Combatant) -> int:
