@@ -196,6 +196,7 @@
             "attacks_per_action",
             "damage_die_min",
             "bonus_die",
+            "fickle_die",
             "penalty_die",
             "cantrip_damage",
             "spell_damage",

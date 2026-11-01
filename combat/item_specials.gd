@@ -47,6 +47,19 @@ func why(c: Combatant, p: Dictionary) -> String:
 	return w if w != "" else _arcana_why(c, p)
 
 
+## A coating smeared on a weapon (`weapon_coating`: params {dice, types, minutes}): the next weapon hit within `minutes`
+## deals `dice` more of the chosen type (the first of `types` when none is chosen), and that hit uses it up.
+static func coating(p: Dictionary, choice: String) -> Effect:
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	var types := params.get("types", ["acid"]) as Array
+	var ty := choice if choice in types else str(types[0])
+	var label := str((p["data"] as Dictionary).get("name", "Coating"))
+	var fx := Effect.new(label, &"item", str(p.get("item_id", "")))
+	fx.lasting({"kind": "minutes", "amount": int(params.get("minutes", 1))})
+	fx.modifiers.append(Modifier.of("extra_damage", {"dice": str(params.get("dice", "1d8")), "type": ty, "once": true}, label, &"item"))
+	return fx
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -59,6 +72,12 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return _drink(c, p, t, id)
 		"end_granted_effect":
 			return _end_granted(c, p)
+		"weapon_coating":
+			_pay(c, p)
+			var coat := coating(p, str(opts.get("choice", "")))
+			c.creature.add_effect(coat)
+			enc().log.add("info", "%s coats a weapon with %s" % [c.name(), str((p["data"] as Dictionary).get("name", ""))], c.id)
+			return CombatResult.new()
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)
@@ -91,6 +110,11 @@ func _drink(c: Combatant, p: Dictionary, t: Combatant, id: String) -> CombatResu
 			var fx := Effect.new(label, &"item", str(p["item_id"]))
 			fx.lasting({"kind": "minutes", "amount": int(params.get("minutes", 10))})
 			fx.modifiers.append(Modifier.of("flag", {"value": "active_spell:%s" % params.get("spell", "")}, label, &"item"))
+			for md: Variant in params.get("modifiers", []):   # what the drink adds besides the spell (Insight against lies)
+				var mdd := (md as Dictionary).duplicate()
+				var stat := str(mdd["stat"])
+				mdd.erase("stat")
+				fx.modifiers.append(Modifier.of(stat, mdd, label, &"item"))
 			t.creature.add_effect(fx)
 		"potion_of_vitality":
 			if t.creature.exhaustion > 0:

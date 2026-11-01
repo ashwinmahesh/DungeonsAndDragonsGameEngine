@@ -567,6 +567,15 @@ func roll_d20(dice: DiceRoller, kind: D20Test.Kind, bonus: Breakdown, target: in
 		forced = int(pre.get("natural", 0))
 	var extra := 0
 	var extra_text := ""
+	# A fickle die (a jinxed drink): rolled with each D20 Test it covers (all of them without `on`); a 1 is Disadvantage, anything else is added.
+	for m in modifiers_for(&"fickle_die"):
+		if not m.data.has("on") or m.matches_any(keys):   # every D20 Test unless `on` narrows it
+			var fr := int(dice.roll_expr(m.text("dice", "1d4"), m.source_name)["total"])
+			if fr == 1:
+				dis.append(m.source_name)
+			else:
+				extra += fr
+				extra_text += " + %s %d" % [m.source_name, fr]
 	for m in modifiers_for(&"bonus_die"):
 		if m.matches_any(keys):
 			var r := int(dice.roll_expr(m.text("dice", "1d4"), m.source_name)["total"])
