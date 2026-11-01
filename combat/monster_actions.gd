@@ -220,7 +220,7 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 		"drain_max_hp":
 			var amount := int(by_type.get(str(rd.get("type", "necrotic")), 0))
 			if amount > 0:
-				drain_max_hp(t, amount, act_name)
+				drain_max_hp(t, amount, act_name, int(rd.get("floor", 0)), str(rd.get("until", "long_rest")))
 		"heal_self":
 			var amount2 := int(by_type.get(str(rd.get("type", "necrotic")), 0))
 			if amount2 > 0:
@@ -229,7 +229,8 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 					e.log.add("heal", "%s drinks %d Hit Points" % [src.name(), healed], src.id)
 					e.events.append({"type": "heal", "id": src.id, "amount": healed})
 		"ability_drain":
-			ability_drain(t, StringName(str(rd["ability"])), int(e._roll_damage_dice(str(rd.get("dice", "1d4")), false, 0, act_name)["total"]), act_name)
+			ability_drain(t, StringName(str(rd["ability"])), int(e._roll_damage_dice(str(rd.get("dice", "1d4")), false, 0, act_name)["total"]), act_name,
+					int(rd.get("floor", 0)), str(rd.get("until", "long_rest")))
 		"curse":
 			var fx := Effect.new("Cursed: %s" % str(rd["curse"]).capitalize(), &"monster", str(rd["curse"])).with_modifier("flag", {"value": "curse:%s" % rd["curse"]})
 			fx.ends = Effect.Ends.NEVER
@@ -416,15 +417,23 @@ func release_engulf(t: Combatant) -> void:
 
 
 ## Hit Point maximum reduction (Life Drain, the Spawn's Bite): lasts until a Long Rest; 0 means death.
-func drain_max_hp(t: Combatant, amount: int, label: String) -> void:
+## A rider can soften both (a campaign's own monster, not the 2024 block): `floor` keeps the maximum from dropping below that
+## many Hit Points (so the drain alone can't kill), and `until` ("long_rest", the default; "short_rest"; "fight": gone when the
+## fight is, EncounterSetup.clear_fight_effects) says when it comes back.
+func drain_max_hp(t: Combatant, amount: int, label: String, floor_hp: int = 0, until: String = "long_rest") -> void:
 	var e := enc()
 	# Aura of Life: Hit Point maximums can't be reduced inside it.
 	if t.creature.has_flag("no_max_hp_reduction"):
 		e.log.add("info", "%s's Hit Point maximum holds (%s)" % [t.name(), label], t.id)
 		return
+	if floor_hp > 0:
+		amount = mini(amount, maxi(0, t.creature.max_hp() - floor_hp))
+		if amount <= 0:
+			e.log.add("info", "%s's Hit Point maximum holds (%s)" % [t.name(), label], t.id)
+			return
 	var fx := Effect.new("%s (drained)" % label, &"monster", "drain_max_hp")
 	fx.stack_key = "drain_max_hp:%d" % fx.id
-	fx.ends = Effect.Ends.LONG_REST
+	_drain_ends(fx, until)
 	fx.modifiers.append(Modifier.of("hp_max", {"value": -amount}, label, &"monster"))
 	t.creature.add_effect(fx)
 	t.creature.hp = mini(t.creature.hp, t.creature.max_hp())
@@ -434,18 +443,36 @@ func drain_max_hp(t: Combatant, amount: int, label: String) -> void:
 		e.events.append({"type": "death", "id": t.id})
 
 
-## Ability drain (the Shadow's Draining Swipe): the score drops until a Long Rest; at 0 the creature dies.
-func ability_drain(t: Combatant, ab: StringName, amount: int, label: String) -> void:
+## Ability drain (the Shadow's Draining Swipe): the score drops until a Long Rest; at 0 the creature dies. `floor` and `until`
+## work as for drain_max_hp.
+func ability_drain(t: Combatant, ab: StringName, amount: int, label: String, floor_score: int = 0, until: String = "long_rest") -> void:
 	var e := enc()
+	if floor_score > 0:
+		amount = mini(amount, maxi(0, t.creature.ability_score(ab) - floor_score))
+		if amount <= 0:
+			e.log.add("info", "%s's %s holds (%s)" % [t.name(), Creature.ABILITY_NAMES[ab], label], t.id)
+			return
 	var fx := Effect.new("%s (%s drained)" % [label, Creature.ABILITY_SHORT[ab]], &"monster", "ability_drain")
 	fx.stack_key = "ability_drain:%d" % fx.id
-	fx.ends = Effect.Ends.LONG_REST
+	_drain_ends(fx, until)
 	fx.modifiers.append(Modifier.of("ability", {"ability": str(ab), "value": -amount, "max": 30}, label, &"monster"))
 	t.creature.add_effect(fx)
 	e.log.add("condition", "%s's %s drops by %d (now %d)" % [t.name(), Creature.ABILITY_NAMES[ab], amount, t.creature.ability_score(ab)], t.id)
 	if t.creature.ability_score(ab) <= 0:
 		t.creature._die("%s drained to 0" % Creature.ABILITY_NAMES[ab])
 		e.events.append({"type": "death", "id": t.id})
+
+
+## When a drain comes back: `until` from the rider (see drain_max_hp).
+static func _drain_ends(fx: Effect, until: String) -> void:
+	match until:
+		"short_rest":
+			fx.ends = Effect.Ends.SHORT_REST
+		"fight":
+			fx.ends = Effect.Ends.LONG_REST   # a rest still ends it, should the fight somehow not
+			fx.data[EncounterSetup.UNTIL_FIGHT_ENDS] = true
+		_:
+			fx.ends = Effect.Ends.LONG_REST
 
 
 # --- Saving-throw actions -------------------------------------------------------------------------
