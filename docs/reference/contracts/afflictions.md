@@ -13,6 +13,7 @@ creature's effects and needs no save change. Its modifiers are rebuilt whenever 
 | `thresholds` | `[{at, modifiers, halve_hp}]`: modifiers added while the level is `at` or more; `halve_hp` halves the current Hit Points (to at least 1) when the level first reaches `at` (with `hp_max_percent` 50 for the maximum, which comes back below it) |
 | `long_rest` | the recovery after a Long Rest (LongRest's benefits): `save {ability, dc}`, levels removed on `success` and on `failure` (an int, `mod:<ability>` or `half_mod:<ability>`), at least `min`. Without `save`, `success` is removed every rest. A rest that drops a threshold restores the whole maximum |
 | `cures` | `[{spells: [ids] or ends: <condition>, remove: n or "all"}]`: a spell in `spells`, or one whose `end_condition` ends (or, with a choice, was aimed at) `ends`, removes levels, once a casting, whether or not the creature had that condition (SpellEffects._end_condition) |
+| `symptoms` | `{when, save: {ability, dc}, table: [{id, name, summary, conditions, modifiers}]}`: where `when` holds (the story checks it; `afflict` does), each level gained brings, after a failed `save` (or always without one), a symptom from the table the creature hasn't got, picked by DiceRoller; its conditions and modifiers join the affliction's effect. They stack, and any reduction of the level clears them all (`Afflictions.roll_symptom`, `symptoms_of`) |
 | `blocked_by` | a condition id: a creature immune to it can't gain levels. Missing: nothing keeps it out (poison immunity doesn't, unless the definition names `poisoned`) |
 
 API (static, pure): `Afflictions.level_of(cr, id)`, `of(cr)` ({id: level}), `set_level(cr, id, level)`, `add(cr, id, n)`,
@@ -27,6 +28,5 @@ Shown: `Afflictions.shown(cr)` ({id, name, level, summary, label}) puts a "<name
 cards and the party screen, and a row on the character sheet whose rules card lists what it does at this level; the sheet's
 effects list shows the effect itself.
 
-Not yet (later branches): a
-symptom table on gaining a level, delayed onset, daily saves at a set hour, Exhaustion that can't be removed while
+Not yet (later branches): delayed onset, daily saves at a set hour, Exhaustion that can't be removed while
 afflicted, Hit Point maximum lost per Long Rest.

@@ -54,6 +54,8 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	if new_level > old_level and def.has("blocked_by") and cr.is_condition_immune(StringName(str(def["blocked_by"]))):
 		return old_level
 	var old := effect_of(cr, id)
+	# Symptoms (rolled on gaining a level, roll_symptom) stay while the level holds or grows, and all go on any reduction.
+	var symptoms: Array = (old.data.get("symptoms", []) as Array).duplicate() if old != null and new_level >= old_level else []
 	if old != null:
 		cr.remove_effect(old)
 	if new_level <= 0:
@@ -62,7 +64,7 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	var name := str(def.get("name", id.capitalize()))
 	var fx := Effect.new("%s %d" % [name, new_level], SOURCE, id)
 	fx.ends = Effect.Ends.NEVER
-	fx.data = {"affliction": id, "level": new_level}
+	fx.data = {"affliction": id, "level": new_level, "symptoms": symptoms}
 	for raw: Variant in def.get("modifiers", []):
 		fx.modifiers.append(_scaled(raw as Dictionary, new_level, name))
 	for raw: Variant in def.get("thresholds", []):
@@ -70,6 +72,12 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 		if new_level >= int(th.get("at", 0)):
 			for md: Variant in th.get("modifiers", []):
 				fx.modifiers.append(_scaled(md as Dictionary, new_level, name))
+	for sid: Variant in symptoms:
+		var sym := symptom(def, str(sid))
+		for md: Variant in sym.get("modifiers", []):
+			fx.modifiers.append(_scaled(md as Dictionary, new_level, str(sym.get("name", name))))
+		for cond: Variant in sym.get("conditions", []):
+			fx.conditions.append(StringName(str(cond)))
 	cr.add_effect(fx)
 	for raw: Variant in def.get("thresholds", []):
 		var th := raw as Dictionary
@@ -79,6 +87,54 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	cr.hp = mini(cr.hp, cr.max_hp())
 	cr.log_event({"type": "affliction", "creature": cr.id, "affliction": id, "level": new_level})
 	return new_level
+
+
+## Symptom `sid` of a definition's `symptoms.table`, or {}.
+static func symptom(def: Dictionary, sid: String) -> Dictionary:
+	for raw: Variant in (def.get("symptoms", {}) as Dictionary).get("table", []):
+		if str((raw as Dictionary).get("id", "")) == sid:
+			return raw as Dictionary
+	return {}
+
+
+## The symptoms `cr` has of `id` (their ids).
+static func symptoms_of(cr: Creature, id: String) -> Array[String]:
+	var out: Array[String] = []
+	var fx := effect_of(cr, id)
+	if fx != null:
+		for s: Variant in fx.data.get("symptoms", []):
+			out.append(str(s))
+	return out
+
+
+## A level of `id` gained where its symptoms strike (the caller checks `symptoms.when`): the save in `symptoms.save`, and on
+## a failure (or with no save) a symptom from the table `cr` doesn't have yet, picked with `dice`, its modifiers and
+## conditions joining the affliction's. Returns the line to show ("" when nothing came).
+static func roll_symptom(cr: Creature, id: String, dice: DiceRoller) -> String:
+	var def := definition(id)
+	var sy := def.get("symptoms", {}) as Dictionary
+	var fx := effect_of(cr, id)
+	if sy.is_empty() or fx == null:
+		return ""
+	if sy.has("save"):
+		var sv := sy["save"] as Dictionary
+		var ab := StringName(str(sv.get("ability", "con")))
+		var t := cr.roll_save(dice, ab, int(sv.get("dc", 10)), [], [], "%s save vs a symptom of %s (%s)" % [Creature.ABILITY_NAMES[ab],
+			str(def.get("name", id)), cr.name])
+		if t.success:
+			return ""
+	var had := symptoms_of(cr, id)
+	var open: Array[Dictionary] = []
+	for raw: Variant in sy.get("table", []):
+		if not str((raw as Dictionary).get("id", "")) in had:
+			open.append(raw as Dictionary)
+	if open.is_empty():
+		return ""
+	var picked := open[dice.roll_one(open.size(), "%s symptom" % str(def.get("name", id))) - 1]
+	had.append(str(picked["id"]))
+	(fx.data["symptoms"] as Array).assign(had)
+	set_level(cr, id, level_of(cr, id), def)   # rebuilt with the new symptom
+	return "%s: %s" % [cr.name, str(picked.get("summary", picked.get("name", "")))]
 
 
 ## Adds `n` levels of `id` to `cr` (a negative `n` removes them). Returns the new level.

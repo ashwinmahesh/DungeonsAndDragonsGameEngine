@@ -957,6 +957,13 @@ func _afflict(s: Dictionary) -> String:
 		if after == before:
 			continue
 		lines.append("%s's %s is %s" % [_first(ch), name, ("level %d" % after) if after > 0 else "gone"])
+		# Where its symptoms strike (`symptoms.when`), each level gained may bring one (Afflictions.roll_symptom).
+		var sy := Afflictions.definition(id).get("symptoms", {}) as Dictionary
+		if after > before and not sy.is_empty() and StoryConditions.check(str(sy.get("when", "")), st):
+			for i in after - before:
+				var got := Afflictions.roll_symptom(ch, id, dice)
+				if got != "":
+					lines.append(got)
 	return ", ".join(lines) if lines.size() <= 1 else "; ".join(lines)
 
 
