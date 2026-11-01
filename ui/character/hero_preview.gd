@@ -33,6 +33,9 @@ var _table: Node3D
 var _camera: Camera3D
 var _fig: ModelFigure
 var _fig_body := ""
+var _fig_build := ""
+## The art id the preview registers the shown look's figure under (HeroLook.figure_entry).
+const PREVIEW_ID := "hero_preview_look"
 ## Parts the 3D figure wears (its starting gear).
 var gear: Array = []
 ## Radians a second the standing figure turns, and how far a drag of one pixel turns it.
@@ -64,6 +67,8 @@ func show_look(app: Dictionary, species_id: String) -> void:
 	species = species_id
 	var body := HeroLook.figure_for(appearance, species)
 	if body != "":
+		# The look's own figure (its build's breadth on the body), under one id for whichever look is shown.
+		FigureModels.register(PREVIEW_ID, HeroLook.figure_entry(appearance, species))
 		_show_figure(body)
 		return
 	_drop_figure()
@@ -164,12 +169,14 @@ func _show_figure(body: String) -> void:
 	_pic.visible = false
 	_note.text = ""
 	var h := HeroLook.height_units(appearance, species)
-	if _fig == null or _fig_body != body or not is_equal_approx(float(_fig.get_meta("drawn_height", 0.0)), h):
+	var build := str(appearance.get("build", ""))
+	if _fig == null or _fig_body != body or _fig_build != build or not is_equal_approx(float(_fig.get_meta("drawn_height", 0.0)), h):
 		if _fig != null:
 			_fig.queue_free()
-		_fig = DirectionalSprite.create(FigureModels.frames(body), h) as ModelFigure
+		_fig = DirectionalSprite.create(FigureModels.frames(PREVIEW_ID), h) as ModelFigure
 		_fig.set_meta("drawn_height", h)
 		_fig_body = body
+		_fig_build = build
 		_table.add_child(_fig)
 		_fig.attack_finished.connect(func() -> void: set_mode("turn"))
 		_fig.wear(gear)
@@ -188,6 +195,7 @@ func _drop_figure() -> void:
 		_fig.queue_free()
 		_fig = null
 		_fig_body = ""
+		_fig_build = ""
 	if _view != null:
 		_view.queue_free()
 		_view = null

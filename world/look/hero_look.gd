@@ -101,6 +101,9 @@ static func _has_art(app: Dictionary, category: String, id: String, species: Str
 						return true
 			return false
 		"builds":
+			# A 3D body draws any build that says how broad it is (its `broad`), on the one rigged body.
+			if figure_for(app, species) != "" and option("builds", id).has("broad"):
+				return true
 			for o: Variant in options("outfits"):
 				if _body_ready("%s_%s_%s" % [g, id, (o as Dictionary)["id"]]):
 					return true
@@ -183,12 +186,25 @@ static func figure_for(app: Dictionary, species: String = "") -> String:
 	return FigureModels.body_for(species, str(app.get("gender", "female")))
 
 
+## The figures-manifest entry a look's 3D figure is: its body (figure_for), drawn as broad as its build says (the
+## build's `broad`: wider and deeper at the same height); {} for the paper doll.
+static func figure_entry(app: Dictionary, species: String = "") -> Dictionary:
+	var body := figure_for(app, species)
+	if body == "":
+		return {}
+	var entry := {"base": body}
+	var broad := float(option("builds", str(app.get("build", "average"))).get("broad", 1.0))
+	if not is_equal_approx(broad, 1.0):
+		entry["broad"] = broad
+	return entry
+
+
 ## A hero whose look has a body is registered as a figure under their own art id, wearing that body, so every place
 ## that draws them (their token, the gray-box room) draws it; one that no longer has a body is let go.
 static func _wear_body(art: String, app: Dictionary, species: String) -> void:
 	var body := figure_for(app, species)
 	if body != "":
-		FigureModels.register(art, {"base": body})
+		FigureModels.register(art, figure_entry(app, species))
 		_bodied[art] = body
 	elif _bodied.has(art):
 		FigureModels.unregister(art)
