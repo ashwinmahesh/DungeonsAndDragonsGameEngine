@@ -131,6 +131,8 @@ sacrifice                          The player picks a living party member, who d
                                    party (StoryState.fallen keeps their name). Skipped if only one is alive. The
                                    last option backs out ("No one. Not this."): check.last is false after it, true
                                    after a pick, so the node can return to its menu.
+afflict hartsblight +1 [party]     Levels of an affliction (docs/contracts/afflictions.md) gained (+n), lost (-n) or
+afflict hartsblight clear [party]  cleared, for the hero in the conversation or every living hero; a notice says who.
 reading draw                       Draws Madam Eva's reading (once per playthrough; docs/contracts/campaign.md).
 reading read tome [speaker]        Turns the card for a slot (tome, symbol, sword, ally, enemy): a notice with
                                    the card, then the verse spoken by `speaker` (default madam_eva).
@@ -221,7 +223,7 @@ a dungeon; a night's line written for sleeping behind walls carries it, so a cam
 switch), and `interject guest:ireena: Text` for a story ally travelling with the party,
 `approval.thistle >= close` (a companion's approval tier, compared by rank, so `<= strained` is Strained or worse;
 or a number), `attention >= marked` (Strahd's attention: a number or a tier from data/strahd/attention.json, F9),
-`gifted:liriel_dawnsong` (that hero, by pregen id, has taken a dark gift), `fallen:thistle` (that hero is lost for good: the
+`gifted:liriel_dawnsong` (that hero, by pregen id, has taken a dark gift), `affliction.hartsblight >= 6` (the highest level of it among the living heroes; bare, anyone has it), `fallen:thistle` (that hero is lost for good: the
 altar beneath Death House or the Deck of Many Things), `gold >= 25` (the party's purse), `level >= 3`
 (the lowest character level in the party), `leader:name:thistle` (the one speaking for the party matches the selector
 after `leader:`; `name:thistle and not leader:name:thistle` is Thistle when she isn't the one speaking),

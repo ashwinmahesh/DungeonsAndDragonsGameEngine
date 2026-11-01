@@ -265,6 +265,9 @@ func _term() -> bool:
 		if op == "":
 			return _truthy(value)
 		return _compare(value, op, _literal(rhs))
+	if t.begins_with("affliction."):
+		# The highest level of an affliction among the living heroes (Afflictions): `affliction.rot >= 6`; bare, above 0.
+		return _compare(Afflictions.highest(st.party, t.substr(11)), op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)

@@ -369,6 +369,11 @@ func next() -> Dictionary:
 				pc += 1
 				if st.remove_guest(str(s["npc"])):
 					return {"kind": "notice", "text": "%s leaves the party" % Compendium.shared().display_name("npcs", str(s["npc"]))}
+			"afflict":
+				pc += 1
+				var sick := _afflict(s)
+				if sick != "":
+					return {"kind": "notice", "text": sick}
 			"sacrifice":
 				pc += 1
 				st.last_check = true   # skipped with one left alive: the scene goes on as before
@@ -931,6 +936,21 @@ static func _npc_for(low: String) -> Dictionary:
 func _fill(text: String) -> String:
 	var who := speaker if speaker != null else st.leader_character()
 	return text.replace("{name}", _first(who)).replace("{leader}", _first(st.leader_character()))
+
+
+## `afflict <id> <+n|-n|clear> [party]`: the hero in the conversation (or every living hero) gains or loses levels of
+## affliction `id`, or is cleared of it. Returns the notice, or "".
+func _afflict(s: Dictionary) -> String:
+	var id := str(s["id"])
+	var name := str(Afflictions.definition(id).get("name", id.capitalize()))
+	var lines: Array[String] = []
+	for ch in _receivers(bool(s["party"])):
+		var before := Afflictions.level_of(ch, id)
+		var after := Afflictions.set_level(ch, id, 0 if bool(s["clear"]) else before + int(s["levels"]))
+		if after == before:
+			continue
+		lines.append("%s's %s is %s" % [_first(ch), name, ("level %d" % after) if after > 0 else "gone"])
+	return ", ".join(lines) if lines.size() <= 1 else "; ".join(lines)
 
 
 static func _first(ch: Character) -> String:

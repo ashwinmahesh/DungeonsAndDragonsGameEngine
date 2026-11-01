@@ -18,6 +18,11 @@ creature's effects and needs no save change. Its modifiers are rebuilt whenever 
 API (static, pure): `Afflictions.level_of(cr, id)`, `of(cr)` ({id: level}), `set_level(cr, id, level)`, `add(cr, id, n)`,
 `clear(cr, id)`, `cure_by_spell(cr, spell_id, conditions)`, `after_long_rest(cr, dice)` (the lines for the rest screen).
 
-Not yet (later branches): story statements and conditions that read and change a level, the party frames and sheet, a
+In the story: `afflict <id> <+n|-n|clear> [party]` (docs/reference/contracts/dialogue.md) gains, loses or clears levels
+for the hero in the conversation or every living hero, with a notice; the condition `affliction.<id> >= n` reads the
+highest level among the living heroes (bare: anyone has it). The temple's Lesser Restoration (story/services.gd) serves
+a hero it would ease (`Afflictions.eased_by`), aiming at the poison when nothing else is to end.
+
+Not yet (later branches): the party frames and sheet, a
 symptom table on gaining a level, delayed onset, daily saves at a set hour, Exhaustion that can't be removed while
 afflicted, Hit Point maximum lost per Long Rest.

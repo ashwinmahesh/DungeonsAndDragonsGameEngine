@@ -214,6 +214,12 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			return {"t": "xp"}
 		"sacrifice":
 			return {"t": "sacrifice"}
+		"afflict":
+			# `afflict <id> <+n|-n|clear> [party]`: levels of an affliction (Afflictions) gained or lost.
+			if parts.size() >= 3 and (parts[2] == "clear" or RegEx.create_from_string("^[+-]\\d+$").search(parts[2]) != null) \
+					and _words_of(Array(parts.slice(3)), ["party"]):
+				return {"t": "afflict", "id": parts[1], "levels": 0 if parts[2] == "clear" else int(parts[2]), "clear": parts[2] == "clear",
+					"party": parts.size() == 4}
 		"heal":
 			# `heal <dice> [party] [temp]` (docs/contracts/dialogue.md).
 			var words := Array(parts.slice(2))

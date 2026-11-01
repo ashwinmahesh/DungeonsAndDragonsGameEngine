@@ -100,6 +100,25 @@ static func _scaled(md: Dictionary, level: int, name: String) -> Modifier:
 	return Modifier.make(d, name, SOURCE)
 
 
+## Whether a spell `spell_id` ending `conditions` would ease any affliction `cr` has (cure_by_spell without the cure).
+static func eased_by(cr: Creature, spell_id: String, conditions: Array) -> bool:
+	for id: String in of(cr).keys():
+		for raw: Variant in definition(id).get("cures", []):
+			var cure := raw as Dictionary
+			if spell_id in (cure.get("spells", []) as Array) or (cure.has("ends") and str(cure["ends"]) in conditions):
+				return true
+	return false
+
+
+## The highest level of `id` among `creatures` (0 when none has it).
+static func highest(creatures: Array, id: String) -> int:
+	var top := 0
+	for c: Variant in creatures:
+		if c is Creature and not (c as Creature).dead:
+			top = maxi(top, level_of(c as Creature, id))
+	return top
+
+
 ## A spell `spell_id` landing on `cr` that ends `conditions` (the ones it ended or could end): each affliction's cures
 ## that match it remove their levels. Returns a line per affliction eased ("" none).
 static func cure_by_spell(cr: Creature, spell_id: String, conditions: Array) -> Array[String]:

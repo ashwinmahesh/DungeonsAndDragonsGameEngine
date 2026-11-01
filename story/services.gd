@@ -85,7 +85,7 @@ static func why_not(st: StoryState, line: Dictionary, ch: Character) -> String:
 		"afflicted":
 			if ch.dead:
 				return "%s is dead" % who
-			if _restorable(ch) == &"":
+			if _restorable(ch) == &"" and not Afflictions.eased_by(ch, "lesser_restoration", ["poisoned"]):
 				return "%s has nothing it ends" % who
 		"cursed":
 			if ch.dead:
@@ -124,8 +124,13 @@ static func buy(st: StoryState, npc_id: String, line: Dictionary, ch: Character,
 			said = "%s heals %s for %d (%s %d %s %d)." % [reader, who, healed, line["heal"], int(roll["total"]), "+" if mod >= 0 else "-", absi(mod)]
 		"lesser_restoration":
 			var cond := _restorable(ch)
-			cure(ch, cond)
-			said = "%s is no longer %s." % [who, str(cond).capitalize()]
+			var said_parts: Array[String] = []
+			if cond != &"":
+				cure(ch, cond)
+				said_parts.append("%s is no longer %s." % [who, str(cond).capitalize()])
+			# An affliction it eases (Afflictions: a cure by a spell ending Poisoned), the priest aiming at the poison.
+			said_parts.append_array(Afflictions.cure_by_spell(ch, "lesser_restoration", [str(cond)] if cond != &"" else ["poisoned"]))
+			said = " ".join(said_parts)
 		"remove_curse":
 			var n := 0
 			for fx in curses(ch):
