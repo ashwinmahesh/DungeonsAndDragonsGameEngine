@@ -101,3 +101,9 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Drinks that change shape
+
+A power with `custom: "drink_shape"` and `params: {form, minutes}` turns whoever drinks it (or is given it within 5 ft)
+into the stat block `form`, Polymorph's way with no Concentration: the form's own Hit Points as Temporary Hit Points,
+back to themselves when those are gone or `minutes` have passed on their own turns (ItemSpecials._drink_shape).
