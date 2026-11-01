@@ -99,7 +99,6 @@ func test_the_ai_walks_to_food_it_can_reach_before_a_foe_it_could_strike() -> vo
 	var boss := e.add(Monster.from_data(_eater()), &"enemy", Vector2i(0, 3))
 	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(2, 5), 5)
 	var can := e.objects.put(_can(Vector2i(8, 3)))
-	boss.creature.hp = 60   # hurt enough to want it
 	TestCombat.start_with(e, boss)
 	assert_false(can.destroyed, "out of reach as its turn starts")
 	e.ai.play_turn(boss)
@@ -118,9 +117,10 @@ func test_food_out_of_its_reach_this_turn_leaves_its_plan_alone() -> void:
 	assert_ne(str(e.ai.last_plan.get("kind", "")), "fuel", "too far: it fights as it would")
 
 
-func test_it_eats_only_when_hurt_enough_to_gain() -> void:
+func test_with_hungry_at_it_eats_only_when_hurt_enough() -> void:
 	var e := _field()
-	var boss := e.add(Monster.from_data(_eater()), &"enemy", Vector2i(5, 3))
+	var boss := e.add(Monster.from_data(_eater({"devours": {"fuel": ["fuel"], "within": 10, "heal": 20, "hungry_at": 0.5,
+		"advantage": true, "name": "Fuel"}})), &"enemy", Vector2i(5, 3))
 	TestCombat.hero(e, "hedda_ironvow", Vector2i(0, 0), 5)
 	var can := e.objects.put(_can(Vector2i(8, 3)))
 	TestCombat.start_with(e, boss)
@@ -128,7 +128,7 @@ func test_it_eats_only_when_hurt_enough_to_gain() -> void:
 	e.ai.play_turn(boss)
 	assert_ne(str(e.ai.last_plan.get("kind", "")), "fuel", "nor makes for it")
 	boss.creature.hp = boss.creature.max_hp() - 9
-	assert_false(ObjectFuel.hungry(boss), "9 lost of a 20 heal: not yet (half the heal by default)")
+	assert_false(ObjectFuel.hungry(boss), "9 lost of a 20 heal: not yet (hungry_at 0.5)")
 	boss.creature.hp = boss.creature.max_hp() - 10
 	assert_true(ObjectFuel.hungry(boss), "10 lost: now")
 	boss.cell = Vector2i(6, 3)
@@ -145,6 +145,17 @@ func test_a_block_can_set_how_hungry() -> void:
 	assert_true(ObjectFuel.hungry(boss))
 	var free := e.add(Monster.from_data(_eater({"devours": {"fuel": ["fuel"], "advantage": true}})), &"enemy", Vector2i(8, 6))
 	assert_true(ObjectFuel.hungry(free), "food that heals nothing is always worth it")
+
+
+func test_without_hungry_at_food_is_fuel_eaten_at_full_hit_points() -> void:
+	var e := _field()
+	var boss := e.add(Monster.from_data(_eater()), &"enemy", Vector2i(5, 3))
+	TestCombat.hero(e, "hedda_ironvow", Vector2i(0, 0), 5)
+	var can := e.objects.put(_can(Vector2i(8, 3)))
+	assert_eq(boss.creature.hp, boss.creature.max_hp())
+	assert_true(ObjectFuel.hungry(boss))
+	TestCombat.start_with(e, boss)
+	assert_true(can.destroyed, "at full Hit Points it still takes its fuel")
 
 
 static func _has_fx(c: Combatant, source_id: String) -> bool:
