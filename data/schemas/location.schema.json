@@ -798,8 +798,10 @@
                   "type": "string",
                   "enum": [
                     "enemy",
-                    "neutral"
-                  ]
+                    "neutral",
+                    "ally"
+                  ],
+                  "description": "enemy (the default), neutral, or ally: on the party's side, played by the AI (militia standing with the heroes)."
                 },
                 "hp": {
                   "type": "integer",

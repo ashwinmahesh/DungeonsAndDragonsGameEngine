@@ -155,7 +155,11 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		if not g.creature.dead and not LocationParty.is_follower(g) and not sits_out(view, g):
 			e.add(g.creature, &"guest", g.cell).controller = &"player"
 	for mo: Dictionary in monsters_for(view, spec):
-		e.add(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
+		# An `ally` (militia standing with the party) fights on the party's side, played by the AI.
+		var ally: bool = mo["side"] == &"ally"
+		var added := e.add(mo["creature"] as Monster, &"guest" if ally else mo["side"] as StringName, mo["cell"] as Vector2i)
+		if ally:
+			added.controller = &"ai"
 	# The playthrough's difficulty: enemy Hit Points, what foes carry, how they fight (combat/difficulty.gd).
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
