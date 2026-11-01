@@ -108,4 +108,5 @@ An item's `applied: true` marks a potion that is applied rather than drunk (a co
 A power with `custom: "weapon_coating"` and `params: {dice, types, minutes}` (with a `choice` of the `types`) coats a
 weapon: the next weapon hit within `minutes` deals `dice` more of the chosen type, and that hit uses it up (in a fight
 or outside one). `drink_field_spell` takes `params.modifiers` too: what the drink adds for its minutes besides the
-exploring spell (Advantage on Insight).
+exploring spell (Advantage on Insight), and `params.after_save` ({ability, dc, minutes, modifiers}): a save after
+the drink, and on a failure those modifiers for that long (a price for what it showed).

@@ -36,3 +36,16 @@ func test_a_coating_lasts_one_hit() -> void:
 			break
 	assert_false(hero.creature.effects.any(func(fx: Effect) -> bool: return fx.source_id == "test_sap"), "a hit used it up")
 	assert_true(e.log.texts().any(func(t: String) -> bool: return t.to_lower().contains("cold")), "cold damage on that hit")
+
+
+func test_a_drink_with_a_price_after() -> void:
+	var e := TestCombat.open_field(3)
+	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(2, 3), 5)
+	TestCombat.punching_bag(e, Vector2i(10, 3), 300)
+	TestCombat.start_with(e, hero)
+	var p := {"item_id": "test_nectar", "data": {"name": "Test Nectar"},
+		"power": {"id": "drink", "custom": "drink_field_spell", "cost": "bonus", "params": {"spell": "commune_with_nature", "minutes": 1,
+			"after_save": {"ability": "wis", "dc": 40, "minutes": 480, "modifiers": [{"stat": "disadvantage", "on": ["attack", "check:all"]}]}}}}
+	assert_true(e.items.specials.use(hero, p, [], Vector2.INF, Vector2.ZERO, 0, {}).ok)
+	assert_true(hero.creature.effects.any(func(fx: Effect) -> bool: return fx.source_id == "test_nectar:after"), "DC 40: the price is paid")
+	assert_true(hero.creature.roll_check(e.dice, &"athletics", 10).disadvantage, "Disadvantage on checks")
