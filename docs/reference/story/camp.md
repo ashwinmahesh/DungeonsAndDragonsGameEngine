@@ -114,6 +114,27 @@ Long Rest. Afterwards the panel offers **Change prepared spells**, counted from 
 night ended with, and **Break camp**. Breaking camp packs everything away (`camp:strike`), and the party falls in behind its leader. Leaving
 the place, or anything that builds it again, ends the camp too.
 
+## Named night events
+
+`data/camp/night_events.json` (optional; schema night_events.schema.json; story/night_events.gd) names what comes for a
+party that takes a real Long Rest, anywhere (a camp, the rest screen, a magic item's rest), in certain places while a
+story condition holds: a forest's Dead of Night, a plague's swarms on the first night in a village.
+
+```json
+{"id": "night_events", "summary": "...", "events": [
+  {"id": "forest_dead_of_night", "regions": ["test_forest"], "locations": [], "when": "not flag.forest_nights_done",
+   "once": false, "chance": 1.0, "dialogue": "forest/night:chain", "text": "Something wakes the camp."}]}
+```
+
+`locations` (map ids) or `regions` say where (neither: anywhere); `when` (a story condition) must hold; a `once` event
+(the default) comes a single time (`_night_events` flag: id -> the minute it came); `chance` is a d100's (certain when
+unset). One comes in a night at most: the first in the file that's due, checked as the eight hours end (LongRest), so a
+night the d6 broke first has its event when the party sleeps on. It breaks the rest as the campaign's visit does
+(LongRest.VISIT, BROKEN's `event`), before the benefits, with its `text` (else the watch's word). The game plays its
+`dialogue` from `visit_after_rest`, calling LongRest.event_played as it starts (LongRest.event_waiting: a save made
+before then plays it on load); a dialogue may start a fight (`combat <id>` from the place's encounters). Once the talk,
+and any fight, is over the party sleeps on (LongRest.resume, an hour more for a fight); nothing else is asked that night.
+
 ## Rests elsewhere
 
 In a safe place, under a booked roof and where no fire will go, the rest screen takes the Long Rest as before

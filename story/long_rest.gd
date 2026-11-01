@@ -24,7 +24,8 @@ const MORNING_MINUTES := 60
 ## st.flags: the Long Rest something in the night broke into, until the party sleeps on or gives up (an underscore
 ## key: bookkeeping, not story): {start: the minute it began, left: minutes still to sleep (an hour more for each
 ## fight), at: the minute it broke, visit: true when the campaign's night visit broke it (saves before 2026-10-30 call it
-## `strahd`), night: whether the rest ran through the night (the visit's trigger)}.
+## `strahd`), night: whether the rest ran through the night (the visit's trigger), event: the named night event that
+## broke it (NightEvents), event_played: true once the game has started its dialogue}.
 const BROKEN := "_long_rest_broken"
 ## What a night's result says happened (`how`): it was slept through (the benefits are in); something came out of the
 ## dark (the d6), or the campaign's villain is visiting (CampaignModule.visit_may_fight: the benefits wait for the fight);
@@ -84,6 +85,23 @@ static func _by_visit(b: Dictionary) -> bool:
 	return bool(b.get("visit", b.get("strahd", false)))
 
 
+## The named night event that broke the rest (NightEvents: its data, with `dialogue`), or {}.
+static func night_event(st: StoryState) -> Dictionary:
+	var id := str(broken_rest(st).get("event", ""))
+	return NightEvents.get_event(id) if id != "" else {}
+
+
+## Whether the night event that broke the rest waits for its dialogue to start (none started yet, or a save made
+## before it did). The game calls event_played as it starts it.
+static func event_waiting(st: StoryState) -> bool:
+	return not night_event(st).is_empty() and not bool(broken_rest(st).get("event_played", false))
+
+
+static func event_played(st: StoryState) -> void:
+	if broken(st):
+		(st.flags[BROKEN] as Dictionary)["event_played"] = true
+
+
 ## The broken rest's bookkeeping (BROKEN), or {}.
 static func broken_rest(st: StoryState) -> Dictionary:
 	return st.flags[BROKEN] as Dictionary if broken(st) else {}
@@ -134,6 +152,14 @@ static func restless(st: StoryState, text: String = "") -> Dictionary:
 static func _sleep_on(st: StoryState, dice: DiceRoller, start: int, left: int, ask_visit: bool, warned: String = "") -> Dictionary:
 	st.advance_minutes(left)
 	var night := Campaign.module().night_between(start, st.total_minutes())
+	# A named night event (NightEvents) comes as a visit does, before the benefits; the game plays its dialogue.
+	var event := NightEvents.due(st, dice) if ask_visit else {}
+	if not event.is_empty():
+		_break(st, start, 0, true)
+		(st.flags[BROKEN] as Dictionary)["night"] = night
+		(st.flags[BROKEN] as Dictionary)["event"] = str(event["id"])
+		var said := str(event.get("text", ""))
+		return _result(st, VISIT, start, said if said != "" else "Before %s, the one on watch shakes everyone awake: something is out there." % Calendar.word("dawn"))
 	if ask_visit and Campaign.module().visit_may_fight(st, "rest", {"night": night}):
 		_break(st, start, 0, true)
 		(st.flags[BROKEN] as Dictionary)["night"] = night
