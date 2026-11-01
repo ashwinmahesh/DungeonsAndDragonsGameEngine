@@ -9,7 +9,8 @@ extends RefCounted
 ## level, or a flat value while afflicted], thresholds: [{at, modifiers, halve_hp}], long_rest: {save: {ability, dc},
 ## success, failure, min} (levels removed: an int, "mod:<ability>" or "half_mod:<ability>"), cures: [{spells: [ids] or
 ## ends: <condition>, remove: n or "all"}], blocked_by: <condition> (a creature immune to it can't be afflicted;
-## nothing blocks it when missing)}.
+## nothing blocks it when missing), holds_at: {locations: [ids], regions: [ids], min_level (1), text} (a hero who has it
+## can't leave those places while it lasts: holding)}.
 
 const SOURCE := &"affliction"
 
@@ -31,6 +32,29 @@ static func effect_of(cr: Creature, id: String) -> Effect:
 static func level_of(cr: Creature, id: String) -> int:
 	var fx := effect_of(cr, id)
 	return int(fx.data.get("level", 0)) if fx != null else 0
+
+
+## Why the party can't go from `location` (in `region`) to `to` ("" or "travel" for the road): a living hero has an
+## affliction whose `holds_at` names this place (its `locations` or `regions`) and not `to`, at its `min_level` or more
+## (a curse that won't let a gambler leave the casino). "" when nothing holds them.
+static func holding(party: Array, location: String, region: String, to: String) -> String:
+	for m: Variant in party:
+		var cr := m as Creature
+		if cr == null or cr.dead:
+			continue
+		for id: String in of(cr):
+			var held := definition(id).get("holds_at", {}) as Dictionary
+			if held.is_empty() or level_of(cr, id) < int(held.get("min_level", 1)):
+				continue
+			var locs := held.get("locations", []) as Array
+			var regions := held.get("regions", []) as Array
+			if not (locs.has(location) or regions.has(region)):
+				continue
+			if to != "" and to != "travel" and locs.has(to):
+				continue   # another room of the same place
+			var text := str(held.get("text", "%s can't bring themselves to leave." % cr.name))
+			return text.replace("{name}", cr.name)
+	return ""
 
 
 ## Every affliction `cr` has: {id: level}.
