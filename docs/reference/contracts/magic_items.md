@@ -129,3 +129,9 @@ back to themselves when those are gone or `minutes` have passed on their own tur
 A power with `custom: "drink_zone"` and `params: {spell, minutes}` casts the spell's area round the drinker for
 `minutes`, with no Concentration, and the area moves with them (a 20-ft Silence that goes where they go;
 ItemSpecials._drink_zone).
+
+## Lures
+
+A power with `custom: "throw_lure"` and `params: {range, radius, lures, rounds}` throws a lure to a square within `range`
+ft: each creature named in `lures` (names, stat block ids or creature types) within `radius` ft of it goes to it and is
+busy over it (Incapacitated) for `rounds` (dice) of its turns or until something harms it (ItemSpecials._throw_lure).
