@@ -911,12 +911,15 @@ func light_at(cell: Vector2i) -> String:
 	if _fires.is_empty():
 		return ""
 	var light := kinds().get("fire_light", {"bright": 10, "dim": 10}) as Dictionary
+	var scale := enc().sight.light_scale()   # a place whose gloom shrinks every light (EncounterSight)
+	var bright := int(int(light["bright"]) * scale)
+	var dim := int(int(light["dim"]) * scale)
 	var best := ""
 	for f in _fires:
 		var d := enc().grid.distance_ft(f, 1, cell, 1)
-		if d <= int(light["bright"]):
+		if d <= bright:
 			return "bright"
-		if d <= int(light["bright"]) + int(light["dim"]):
+		if d <= bright + dim:
 			best = "dim"
 	return best
 

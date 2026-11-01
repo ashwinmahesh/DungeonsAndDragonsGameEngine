@@ -650,8 +650,9 @@ func spell_light(cell: Vector2i) -> Dictionary:
 			if tt != null:
 				src = tt.cell
 		var d := enc().grid.distance_ft(src, 1, cell, 1)
-		var bright := int(l.get("bright", 0))
-		var dim := int(l.get("dim", 0))
+		var scale := enc().sight.light_scale()   # a place whose gloom shrinks every light (EncounterSight)
+		var bright := int(int(l.get("bright", 0)) * scale)
+		var dim := int(int(l.get("dim", 0)) * scale)
 		if d <= bright:
 			level = "bright"
 			sun = sun or bool(l.get("sunlight", false))

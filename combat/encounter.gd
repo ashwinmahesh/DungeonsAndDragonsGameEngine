@@ -112,6 +112,9 @@ const PLACE_RULES := "place_rules"
 ## d20s the party brought to this fight (a boon): any hero may spend one in place of a visible creature's next d20
 ## (FeatureActions `stored_d20`); what's left fades with the fight. Kept in a round's save.
 var stored_d20s: Array[int] = []
+## A place's own sight rules for the fight (a location map's `sight`, EncounterSight): {light_scale, darkvision_cap,
+## sight_ft, immune: {flags, types, names}}; {} for none.
+var sight_rule: Dictionary = {}
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
