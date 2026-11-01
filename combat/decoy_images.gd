@@ -10,6 +10,8 @@ extends RefCounted
 ##   always, when unset) the one who aimed it makes the `save` (Int DC 15 by default): failing, they talk themselves into
 ##   it, and the log tells it as a miss, a spell shrugged off or a blow that went home; succeeding, they see an image.
 ##   Outside that time, or once they've seen through it, it simply passes through.
+## - The maker acts through it: its stat-block actions named in `through` (an attack) may be made from the image's
+##   square when they can't reach from its own (attack_origin, strike).
 ## - The Study action within 30 ft and the `study` check ({skill, dc}: Investigation DC 15) unmask it for everyone, as
 ##   does `gone_flag` being set (a boss phase's `flag`): it fades.
 
@@ -173,6 +175,57 @@ func struck(by: Combatant, img: Combatant, what: String, kind: String) -> void:
 	lines.append("%s strikes %s... it passes through, or did it?" % [what, img.name()])
 	var pick := lines[e.dice.roll_one(lines.size(), "What they believe") - 1]
 	e.log.add("info", pick, by.id, [t.describe()])
+
+
+# --- Acting through it ----------------------------------------------------------------------------------------
+
+## The image `c` would make `option`'s attack on `target` from: one of its `through` actions that can't reach from
+## where `c` stands but can from the image's square; null otherwise.
+func attack_origin(c: Combatant, target: Combatant, option: Dictionary) -> Combatant:
+	var e := enc()
+	var img := image_of(c) if not spec_of(c).is_empty() else null
+	if img == null or target == null or option.is_empty() or target == img:
+		return null
+	if not str(option.get("action_id", "")) in (spec_of(c).get("through", []) as Array).map(func(x: Variant) -> String: return str(x)):
+		return null
+	if e.attack_legal(c, target, option) == "":
+		return null
+	return img if _legal_from(c, img, target, option) == "" else null
+
+
+func _legal_from(c: Combatant, img: Combatant, target: Combatant, option: Dictionary) -> String:
+	var keep := [c.cell, c.size_cells]
+	c.cell = img.cell
+	c.size_cells = img.size_cells
+	var why := enc().attack_legal(c, target, option)
+	c.cell = keep[0]
+	c.size_cells = keep[1]
+	return why
+
+
+## Runs `fn` (the attack) with `c` measured from the image's square, then puts it back (after any prompt is answered).
+func strike(c: Combatant, img: Combatant, fn: Callable) -> CombatResult:
+	var keep := [c.cell, c.size_cells]
+	c.cell = img.cell
+	c.size_cells = img.size_cells
+	c.set_meta("strike_from", img.id)
+	enc().log.add("info", "%s strikes through %s" % [c.name(), img.name()], c.id)
+	return _after(fn.call() as CombatResult, c, keep)
+
+
+func _after(r: CombatResult, c: Combatant, keep: Array) -> CombatResult:
+	var e := enc()
+	if e.pending == null:
+		c.cell = keep[0]
+		c.size_cells = keep[1]
+		c.remove_meta("strike_from")
+		return r
+	var req := e.pending
+	var inner := req.continuation
+	req.continuation = func(use: bool) -> CombatResult:
+		return _after(inner.call(use) as CombatResult, c, keep)
+	r.pending = req
+	return r
 
 
 # --- Study ---------------------------------------------------------------------------------------------------------

@@ -6,8 +6,9 @@ extends TestCase
 const BLOCK := {"id": "test_trickster", "name": "Test Trickster", "speed": {"walk": 30},
 	"traits": [{"id": "test_image", "name": "Test Image", "decoy_image": {"name": "Test Jester", "move_ft": 60,
 		"save": {"ability": "int", "dc": 40}, "while_flag": "test_fooling", "study": {"skill": "investigation", "dc": 5},
-		"gone_flag": "test_unmasked"}}],
-	"actions": [{"id": "claw", "name": "Claw", "kind": "melee", "attack": {"bonus": 5, "reach": 5}, "damage": [{"dice": "1d4", "type": "slashing"}]}]}
+		"gone_flag": "test_unmasked", "through": ["zap"]}}],
+	"actions": [{"id": "claw", "name": "Claw", "kind": "melee", "attack": {"bonus": 5, "reach": 5}, "damage": [{"dice": "1d4", "type": "slashing"}]},
+		{"id": "zap", "name": "Zap", "kind": "melee", "attack": {"bonus": 30, "reach": 5}, "damage": [{"dice": "1d4", "type": "lightning"}]}]}
 
 
 func _fight() -> Array:
@@ -99,3 +100,33 @@ func test_its_maker_sends_it_and_the_flag_ends_it() -> void:
 	e.legendary.story_flags["test_unmasked"] = true
 	e.images.check_flags()
 	assert_true(img.has_meta("left_fight"))
+
+
+func test_its_maker_strikes_through_it() -> void:
+	var got := _fight()
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var owner := got[2] as Combatant
+	var img := got[3] as Combatant
+	img.cell = Vector2i(3, 3)
+	e.turn_index = e.order.find(owner)
+	var zap := e.option_by_id(owner, "monster:zap")
+	var claw := e.option_by_id(owner, "monster:claw")
+	assert_true(e.images.attack_origin(owner, hero, zap) == img, "the zap from the image's square")
+	assert_true(e.images.attack_origin(owner, hero, claw) == null, "the claw only from its own")
+	var hp := hero.creature.hp
+	assert_true(e.attack(owner, hero, "monster:zap").ok)
+	assert_true(hero.creature.hp < hp, "a hit")
+	assert_eq(owner.cell, Vector2i(12, 7), "back in its own square")
+	assert_false(e.attack(owner, hero, "monster:claw").ok, "out of reach")
+
+
+func test_a_grab_at_it_closes_on_nothing() -> void:
+	var got := _fight()
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var img := got[3] as Combatant
+	img.cell = Vector2i(3, 3)
+	assert_true(e.grappling.unarmed_special(hero, img, "grapple").ok)
+	assert_false(e.grapples.has(img.id))
+	assert_true(e.log.texts().any(func(t: String) -> bool: return t.contains("grab passes straight through")))

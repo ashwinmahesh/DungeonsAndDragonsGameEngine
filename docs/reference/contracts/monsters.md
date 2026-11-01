@@ -36,14 +36,16 @@ which fails if a trait or feature says `"implemented": "engine"` and no code rea
 
 ## Decoy images
 
-A trait's `decoy_image` ({name, size, move_ft, save, while_flag, study, gone_flag}; DecoyImages): as initiative is
+A trait's `decoy_image` ({name, size, move_ft, save, while_flag, study, gone_flag, through}; DecoyImages): as initiative is
 rolled, an image of the creature (`name`, default its own; `size`, default small) is put down beside it. It has no
 turn and doesn't count for the fight's end; nothing harms it and no condition takes. At the start of its maker's turn
 the AI sends it up to `move_ft` (60) toward the foe it wants. An attack or spell aimed at it, or an area it is caught in,
 does nothing to it; while `while_flag` is set (always, when unset) the one who aimed it makes the `save` (Int DC 15):
 failing, the log tells it as a miss, a spell shrugged off or a blow that may have landed; succeeding, they see through
 it, and from then on it passes straight through. The Study action within 30 ft and the `study` check ({skill, dc})
-unmask it, as `gone_flag` being set does (a boss phase's `flag`): it fades.
+unmask it, as `gone_flag` being set does (a boss phase's `flag`): it fades. The maker's stat-block actions named in `through` may be made from the image's
+square when they can't reach from its own (the AI counts them as reachable from where it stands). A grapple or shove
+aimed at the image is taken the same way as an attack.
 
 ## Spellcasting
 
