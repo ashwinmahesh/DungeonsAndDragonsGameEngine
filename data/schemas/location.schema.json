@@ -74,6 +74,9 @@
             "dark"
           ]
         },
+        "outdoors": {
+          "type": "boolean"
+        },
         "sight": {
           "type": "object",
           "additionalProperties": false,
@@ -88,36 +91,11 @@
               "names": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}}},
             "when": {"type": "string", "description": "A story condition: the rules hold only while it does (until a beacon is lit)."}
           }
+        },
         "swim": {
           "type": "boolean",
           "description": "Its deep water (w) can be swum in fights: double cost without a Swim Speed; water-only creatures stay in it (docs/reference/contracts/locations.md)."
-        },
-        "outdoors": {
-          "type": "boolean"
         }
-      }
-    },
-    "hazard": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Air that harms whoever stays here, on the exploration clock (PlaceHazards): a save on entering and every `every_min` minutes, a condition, then saves every `lasting.every_min` minutes that add Exhaustion until one succeeds.",
-      "properties": {
-        "name": {"type": "string"},
-        "every_min": {"type": "integer", "minimum": 1},
-        "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
-          "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
-        "condition": {"type": "string"},
-        "lasting": {"type": "object", "additionalProperties": false, "properties": {
-          "every_min": {"type": "integer", "minimum": 1}, "exhaustion": {"type": "integer", "minimum": 0}}},
-        "immune_flags": {"type": "array", "items": {"type": "string"}},
-        "when": {"type": "string", "description": "A story condition: the air is bad only while it holds."}
-    "fight_rules": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "The place's own rules in every fight there (Encounter.place_rules): modifiers on every creature in the fight, gone with it (a jinxed riverboat: crits on 19-20, misses on 1-2, music against Concentration).",
-      "properties": {
-        "name": {"type": "string"},
-        "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}}
       }
     },
     "areas": {
@@ -145,34 +123,6 @@
               "$ref": "#/$defs/cell"
             },
             "description": "Two corners of a rectangle, inclusive."
-          },
-          "hazard": {
-            "type": "object",
-            "additionalProperties": false,
-            "description": "Ground that harms whoever stays in it in a fight (AreaHazards): a pool of blood, a bog of rot.",
-            "properties": {
-              "difficult": {"type": "boolean", "description": "Its squares are Difficult Terrain."},
-              "only_difficult": {"type": "boolean", "description": "Only the squares the map draws as Difficult Terrain (~) are in it: a moat round a dry island."},
-              "on": {"enum": ["start", "end"], "description": "When it bites: the end of a turn in it (default) or the start."},
-              "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
-                "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
-              "condition": {"type": "string", "description": "Gained on a failed save."},
-              "damage": {"type": "object", "additionalProperties": false, "required": ["dice"], "properties": {
-                "dice": {"type": "string"}, "type": {"type": "string"}}},
-              "except_types": {"type": "array", "items": {"type": "string"}, "description": "Creature types it spares (fiend, undead)."},
-              "while_in": {"type": "boolean", "description": "The condition lasts only while the creature stays in it (default true)."}
-          "crowd": {
-            "type": "object",
-            "additionalProperties": false,
-            "description": "Bystanders milling about this area (Crowds): figures that aren't NPCs and never block; with push_to, they jostle the party toward that square while it stands here.",
-            "properties": {
-              "count": {"type": "integer", "minimum": 1},
-              "name": {"type": "string"},
-              "sprites": {"type": "array", "items": {"type": "string"}, "description": "The figures' art (stand-ins until the place has its own)."},
-              "push_to": {"$ref": "#/$defs/cell"},
-              "push_every": {"type": "number", "minimum": 0.5},
-              "when": {"type": "string"}
-            }
           },
           "light": {
             "type": "string",
@@ -214,6 +164,36 @@
           "antimagic": {
             "type": ["boolean", "string"],
             "description": "An antimagic area (Van Richten's Tower's ring, Dungeon Expansion Plan V1): no spell is cast on a square in it, from the character sheet (Wards.antimagic_at, FieldCasting) or in a fight there (an Antimagic Field zone over its open squares, LocationFights._ward_the_fight). A string is the notice shown to a caster who tries."
+          },
+          "hazard": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Ground that harms whoever stays in it in a fight (AreaHazards): a pool of blood, a bog of rot.",
+            "properties": {
+              "difficult": {"type": "boolean", "description": "Its squares are Difficult Terrain."},
+              "only_difficult": {"type": "boolean", "description": "Only the squares the map draws as Difficult Terrain (~) are in it: a moat round a dry island."},
+              "on": {"enum": ["start", "end"], "description": "When it bites: the end of a turn in it (default) or the start."},
+              "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
+                "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
+              "condition": {"type": "string", "description": "Gained on a failed save."},
+              "damage": {"type": "object", "additionalProperties": false, "required": ["dice"], "properties": {
+                "dice": {"type": "string"}, "type": {"type": "string"}}},
+              "except_types": {"type": "array", "items": {"type": "string"}, "description": "Creature types it spares (fiend, undead)."},
+              "while_in": {"type": "boolean", "description": "The condition lasts only while the creature stays in it (default true)."}
+            }
+          },
+          "crowd": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Bystanders milling about this area (Crowds): figures that aren't NPCs and never block; with push_to, they jostle the party toward that square while it stands here.",
+            "properties": {
+              "count": {"type": "integer", "minimum": 1},
+              "name": {"type": "string"},
+              "sprites": {"type": "array", "items": {"type": "string"}, "description": "The figures' art (stand-ins until the place has its own)."},
+              "push_to": {"$ref": "#/$defs/cell"},
+              "push_every": {"type": "number", "minimum": 0.5},
+              "when": {"type": "string"}
+            }
           }
         }
       }
@@ -741,13 +721,6 @@
           "dialogue": {
             "type": "string"
           },
-          "leads": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["to"],
-            "description": "A guide who leads without a word: Follow on the figure's menu while `when` holds, then the party follows it to `to` as `lead <npc> to <where>` does, and `flag` is set once it has.",
-            "properties": {"to": {"type": "string"}, "when": {"type": "string"}, "flag": {"type": "string"}}
-          },
           "when": {
             "type": "string"
           },
@@ -826,6 +799,13 @@
               "maximum": 24
             },
             "description": "[from, to]: the NPC is here only between these hours (to may be past midnight, [19, 6]); with `when`, both must hold."
+          },
+          "leads": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["to"],
+            "description": "A guide who leads without a word: Follow on the figure's menu while `when` holds, then the party follows it to `to` as `lead <npc> to <where>` does, and `flag` is set once it has.",
+            "properties": {"to": {"type": "string"}, "when": {"type": "string"}, "flag": {"type": "string"}}
           }
         }
       }
@@ -870,74 +850,16 @@
                 "name": {
                   "type": "string"
                 },
-                "path": {
-                  "type": "array",
-                  "minItems": 1,
-                  "description": "A patrol's round (a waiting fight's foe): the same waypoints as an NPC's path; it walks them before its fight, its sight cone turning with it, and the fight starts where it is (LocationStealth.tick_patrols).",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "minItems": 2,
-                        "maxItems": 3,
-                        "items": {
-                          "type": "number",
-                          "minimum": 0
-                        }
-                      },
-                      {
-                        "type": "object",
-                        "required": [
-                          "at"
-                        ],
-                        "additionalProperties": false,
-                        "properties": {
-                          "at": {
-                            "$ref": "#/$defs/cell"
-                          },
-                          "wait": {
-                            "type": "number",
-                            "minimum": 0
-                          },
-                          "face": {
-                            "type": "string",
-                            "enum": [
-                              "north",
-                              "south",
-                              "east",
-                              "west",
-                              "northeast",
-                              "northwest",
-                              "southeast",
-                              "southwest"
-                            ]
-                          },
-                          "work": {
-                            "type": "string",
-                            "enum": [
-                              "swing",
-                              "gesture"
-                            ]
-                          }
-                        }
-                      }
-                    ]
-                  }
-                },
                 "side": {
                   "type": "string",
-                  "description": "enemy (the default), neutral, or guest: on the party's side and moved by the player (a ward to get out).",
                   "enum": [
                     "enemy",
                     "neutral",
-                    "guest"
-                  ]
+                    "guest",
                     "ally"
                   ],
-                  "description": "enemy (the default), neutral, or ally: on the party's side as a guest the player controls (militia standing with the heroes)."
+                  "description": "enemy (the default), neutral, guest (on the party's side and moved by the player: a ward to get out) or ally (on the party's side as a guest the player controls: militia standing with the heroes)."
                 },
-                "nonlethal": {"type": "boolean", "description": "Knocked out at 0 Hit Points, never killed (a charmed townsperson)."},
-                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."},
                 "hp": {
                   "type": "integer",
                   "minimum": 1,
@@ -996,13 +918,6 @@
                     }
                   }
                 },
-                "ward": {
-                  "type": "boolean",
-                  "description": "A creature the party must keep alive: if it falls, the fight is lost (ends_when.ward_lost); with ends_when.wards_out, getting every ward out by an open exit wins it. Usually on the guest side, so the player moves it."
-                "rides": {
-                  "type": "string",
-                  "description": "The `name` of another monster in this fight it starts the fight riding: it sits in that creature's space, carried when it moves, and the two act on the same Initiative count (each still takes its own turn). The rider needs a `name` too."
-                },
                 "catch": {
                   "type": "object",
                   "additionalProperties": false,
@@ -1032,7 +947,71 @@
                     "$ref": "common.schema.json#/$defs/id"
                   },
                   "description": "Ids from the stat block's own `states` this fight puts the foe in, added to its traits (Sarkhaza chained or grave-salted; LocationFights.with_states)."
-                }
+                },
+                "ward": {
+                  "type": "boolean",
+                  "description": "A creature the party must keep alive: if it falls, the fight is lost (ends_when.ward_lost); with ends_when.wards_out, getting every ward out by an open exit wins it. Usually on the guest side, so the player moves it."
+                },
+                "rides": {
+                  "type": "string",
+                  "description": "The `name` of another monster in this fight it starts the fight riding: it sits in that creature's space, carried when it moves, and the two act on the same Initiative count (each still takes its own turn). The rider needs a `name` too."
+                },
+                "path": {
+                  "type": "array",
+                  "minItems": 1,
+                  "description": "A patrol's round (a waiting fight's foe): the same waypoints as an NPC's path; it walks them before its fight, its sight cone turning with it, and the fight starts where it is (LocationStealth.tick_patrols).",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 3,
+                        "items": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "at"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "at": {
+                            "$ref": "#/$defs/cell"
+                          },
+                          "wait": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "face": {
+                            "type": "string",
+                            "enum": [
+                              "north",
+                              "south",
+                              "east",
+                              "west",
+                              "northeast",
+                              "northwest",
+                              "southeast",
+                              "southwest"
+                            ]
+                          },
+                          "work": {
+                            "type": "string",
+                            "enum": [
+                              "swing",
+                              "gesture"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "nonlethal": {"type": "boolean", "description": "Knocked out at 0 Hit Points, never killed (a charmed townsperson)."},
+                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."}
               }
             }
           },
@@ -1109,51 +1088,6 @@
             "type": "boolean",
             "description": "Lair actions on initiative count 20 for a monster that has them."
           },
-          "object_rules": {
-            "type": "array",
-            "description": "Set-piece rules for things the scenery made from the place's props (BattleScenery.for_spec, ObjectCarry): a brazier on the map given a hazard, things to put in it.",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["prop"],
-              "properties": {
-                "prop": {"type": "string", "description": "The prop's id."},
-                "takes": {"$ref": "#/$defs/set_piece_takes"},
-                "hazard": {"$ref": "#/$defs/set_piece_hazard"},
-                "study": {"$ref": "#/$defs/set_piece_study"}
-          "openings": {
-            "type": "array",
-            "description": "Openings a creature can be thrown out of (FightOpenings): a creature with a `throws_out` trait throws a held foe by one out of it; the foe falls the drop and climbs back in on its turn.",
-          "portals": {
-            "type": "array",
-            "description": "Paired squares that lead into each other (FightPortals): a creature stepping onto one, walking or pushed, comes out on the other and its move ends.",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["cells"],
-              "properties": {
-                "name": {"type": "string"},
-                "cells": {"type": "array", "items": {"$ref": "#/$defs/cell"}},
-                "drop_ft": {"type": "integer", "minimum": 0},
-                "aloft": {"type": "object", "additionalProperties": false, "required": ["flag", "drop_ft"], "properties": {
-                  "flag": {"type": "string", "description": "A fight flag: while it is set, the drop is this one's."},
-                  "drop_ft": {"type": "integer", "minimum": 0}}},
-                "climb": {"type": "object", "additionalProperties": false, "properties": {
-                  "skill": {"type": "string"}, "dc": {"type": "integer"}}}
-              }
-            }
-          "free_fall": {
-            "type": "boolean",
-            "description": "Everyone falls together on one plane (a pit with no bottom): nobody flies up or down, levitates or teleports (Encounter.free_fall)."
-                "cells": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/cell"}},
-                "when_flag": {"type": "string", "description": "Only while this fight flag is set."},
-                "broken": {"type": "string", "description": "Only once the object the scenery made from this prop is broken (a window)."}
-              }
-            }
-          "nonlethal": {
-            "type": "boolean",
-            "description": "Nobody dies in this fight (a brawl): whoever drops to 0 Hit Points is knocked out."
-          },
           "objects": {
             "type": "array",
             "description": "Things the fight puts down itself (BattleScenery.for_spec, EncounterObjects.put): a boss's food, a jar holding a ghost. Each on its square while its `when` holds.",
@@ -1185,30 +1119,6 @@
                 "model": {
                   "type": "string",
                   "description": "The props catalog model the scene draws it with."
-                },
-                "carry": {"$ref": "#/$defs/set_piece_carry"},
-                "takes": {"$ref": "#/$defs/set_piece_takes"},
-                "hazard": {"$ref": "#/$defs/set_piece_hazard"},
-                "study": {"$ref": "#/$defs/set_piece_study"},
-                "threshold": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "description": "Damage Threshold: damage less than this from one source does nothing to it (a captive's chains)."
-                },
-                "undo": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["dc"],
-                  "description": "A check that takes it off without breaking it by force: the Utilize action within 5 ft (ObjectActions.undo).",
-                  "properties": {
-                    "skill": {"type": "string", "description": "The skill or ability checked (default athletics)."},
-                    "dc": {"type": "integer"},
-                    "label": {"type": "string", "description": "The verb on the hotbar (default Free)."}
-                  }
-                },
-                "flag": {
-                  "type": "string",
-                  "description": "A story flag set when it is gone, broken or undone."
                 },
                 "fuel": {
                   "type": "string",
@@ -1288,56 +1198,31 @@
                       "description": "The stat block id of the boss it leaves with (BossPhases.fell)."
                     }
                   }
-                }
-              }
-            }
-          },
-          "meters": {
-            "type": "array",
-            "description": "Counts the fight is about, shown on the HUD (FightMeters): a guide's loyalty, a rite's pips. The heroes move them with their actions; reaching a mark sets a flag or ends the fight.",
-            "items": {
-              "type": "object",
-              "required": ["id"],
-              "properties": {
-                "id": {"type": "string"},
-                "label": {"type": "string"},
-                "start": {"type": "integer"},
-                "min": {"type": "integer"},
-                "max": {"type": "integer"},
-                "actions": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["id", "check"],
-                    "properties": {
-                      "id": {"type": "string"},
-                      "label": {"type": "string"},
-                      "cost": {"enum": ["action", "bonus"]},
-                      "near": {"type": "string", "description": "An object id or a creature's name it must be done beside."},
-                      "range": {"type": "integer"},
-                      "check": {"type": "object"},
-                      "success": {"type": "integer"},
-                      "failure": {"type": "integer"},
-                      "failure_damage": {"type": "object"}
-                    }
+                },
+                "threshold": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Damage Threshold: damage less than this from one source does nothing to it (a captive's chains)."
+                },
+                "undo": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["dc"],
+                  "description": "A check that takes it off without breaking it by force: the Utilize action within 5 ft (ObjectActions.undo).",
+                  "properties": {
+                    "skill": {"type": "string", "description": "The skill or ability checked (default athletics)."},
+                    "dc": {"type": "integer"},
+                    "label": {"type": "string", "description": "The verb on the hotbar (default Free)."}
                   }
                 },
-                "marks": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": {"type": "integer"},
-                      "falling": {"type": "boolean"},
-                      "flag": {"type": "string"},
-                      "outcome": {"enum": ["victory", "defeat", "ended"]},
-                      "say": {"type": "string"}
-                    }
-                  }
-                }
+                "flag": {
+                  "type": "string",
+                  "description": "A story flag set when it is gone, broken or undone."
+                },
+                "carry": {"$ref": "#/$defs/set_piece_carry"},
+                "takes": {"$ref": "#/$defs/set_piece_takes"},
+                "hazard": {"$ref": "#/$defs/set_piece_hazard"},
+                "study": {"$ref": "#/$defs/set_piece_study"}
               }
             }
           },
@@ -1363,22 +1248,9 @@
                     "save",
                     "summon",
                     "take",
-                    "text"
                     "text",
                     "effect"
                   ]
-                },
-                "who": {
-                  "type": "array",
-                  "items": {"type": "string"},
-                  "description": "take: the names or stat-block ids it may take, the first still on the board each time."
-                },
-                "narration": {
-                  "type": "string",
-                  "description": "take: the line the view shows as the creature goes (the blue mist)."
-                "one": {
-                  "type": "boolean",
-                  "description": "It strikes one creature it reaches, picked at random (a neutral one too, with affects all)."
                 },
                 "affects": {
                   "enum": [
@@ -1513,9 +1385,6 @@
                   "type": "integer",
                   "minimum": 1
                 },
-                "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
-                "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
-                "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                 "pick": {
                   "enum": [
                     "random",
@@ -1532,9 +1401,6 @@
                       "id"
                     ],
                     "properties": {
-                      "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
-                      "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
-                      "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                       "id": {
                         "type": "string"
                       },
@@ -1549,19 +1415,9 @@
                           "save",
                           "summon",
                           "take",
-                          "text"
                           "text",
                           "effect"
                         ]
-                      },
-                      "who": {
-                        "type": "array",
-                        "items": {"type": "string"}
-                      },
-                      "narration": {
-                        "type": "string"
-                      "one": {
-                        "type": "boolean"
                       },
                       "affects": {
                         "enum": [
@@ -1671,10 +1527,39 @@
                       "say": {
                         "type": "string",
                         "description": "A Narrator key the view says as it acts."
-                      }
+                      },
+                      "who": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                      },
+                      "narration": {
+                        "type": "string"
+                      },
+                      "one": {
+                        "type": "boolean"
+                      },
+                      "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
+                      "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
+                      "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}}
                     }
                   }
-                }
+                },
+                "who": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "take: the names or stat-block ids it may take, the first still on the board each time."
+                },
+                "narration": {
+                  "type": "string",
+                  "description": "take: the line the view shows as the creature goes (the blue mist)."
+                },
+                "one": {
+                  "type": "boolean",
+                  "description": "It strikes one creature it reaches, picked at random (a neutral one too, with affects all)."
+                },
+                "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
+                "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
+                "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}}
               },
               "description": "Round events (combat/round_events.gd): something that happens on initiative count `at` with no creature behind it, in the rounds it says; as itself, or one entry of `table` each time."
             }
@@ -1712,20 +1597,6 @@
               }
             }
           },
-          "defeat": {
-            "type": "object",
-            "additionalProperties": false,
-            "description": "Losing this fight means being taken, not killed (DefeatCapture): the outcome is captured, the fallen heroes come round at hp, `set` flags are stamped with the minute, and the party is jailed (Jail) or moved there.",
-            "properties": {
-              "jail": {"type": "string", "description": "<location>[:<spawn>]: locked up there (gear kept by the jailers unless keep_gear)."},
-              "move": {"type": "string", "description": "<location>[:<spawn>]: carried there, gear and all."},
-              "until": {"type": "string", "description": "jail: a condition that lets the party out."},
-              "keep_gear": {"type": "boolean"},
-              "hp": {"type": "integer", "minimum": 1, "description": "The Hit Points the fallen come round at (1)."},
-              "set": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}], "description": "Flags set to the minute the party was taken (for a clock, days_since)."},
-              "say": {"type": "string", "description": "A Narrator key for the moment (default combat:captured)."}
-            }
-          },
           "ends_when": {
             "type": "object",
             "additionalProperties": false,
@@ -1739,22 +1610,16 @@
                 "type": "boolean",
                 "description": "It ends when the first hero to hurt a foe in it drops to 0 Hit Points."
               },
-              "objects_gone": {
+              "flag": {
+                "type": "string",
+                "description": "A story flag set when it ends this way."
+              },
+              "clear_flags": {
                 "type": "array",
-                "items": {"type": "string"},
-                "description": "Object ids (the fight's `objects`): once every one is broken or undone, the fight ends with objects_outcome."
-              },
-              "objects_outcome": {
-                "enum": ["victory", "ended"],
-                "description": "What getting rid of them all means: victory (the default) or ended."
-              },
-              "wards_out": {
-                "type": "boolean",
-                "description": "The fight is won once every ward (a monster entry's `ward`) has ended a turn on one of the place's open exits and left."
-              },
-              "ward_lost": {
-                "enum": ["defeat", "ended"],
-                "description": "What a ward falling means: defeat (the default) or ended (no winner)."
+                "items": {
+                  "type": "string"
+                },
+                "description": "Story flags cleared when it ends this way (the flag that woke a sleeper, so it can be woken again)."
               },
               "rounds": {
                 "type": "integer",
@@ -1773,22 +1638,148 @@
                 "type": "string",
                 "description": "What the clock counts down to, for the HUD (\"The mill falls\")."
               },
-              "flag": {
-                "type": "string",
-                "description": "A story flag set when it ends this way."
+              "wards_out": {
+                "type": "boolean",
+                "description": "The fight is won once every ward (a monster entry's `ward`) has ended a turn on one of the place's open exits and left."
               },
-              "clear_flags": {
+              "ward_lost": {
+                "enum": ["defeat", "ended"],
+                "description": "What a ward falling means: defeat (the default) or ended (no winner)."
+              },
+              "objects_gone": {
                 "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Story flags cleared when it ends this way (the flag that woke a sleeper, so it can be woken again)."
+                "items": {"type": "string"},
+                "description": "Object ids (the fight's `objects`): once every one is broken or undone, the fight ends with objects_outcome."
+              },
+              "objects_outcome": {
+                "enum": ["victory", "ended"],
+                "description": "What getting rid of them all means: victory (the default) or ended."
               }
             }
           },
           "allies_block": {
             "type": "boolean",
             "description": "In this fight, party members can't move through each other's spaces (default: they can, as Difficult Terrain)."
+          },
+          "meters": {
+            "type": "array",
+            "description": "Counts the fight is about, shown on the HUD (FightMeters): a guide's loyalty, a rite's pips. The heroes move them with their actions; reaching a mark sets a flag or ends the fight.",
+            "items": {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": {"type": "string"},
+                "label": {"type": "string"},
+                "start": {"type": "integer"},
+                "min": {"type": "integer"},
+                "max": {"type": "integer"},
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["id", "check"],
+                    "properties": {
+                      "id": {"type": "string"},
+                      "label": {"type": "string"},
+                      "cost": {"enum": ["action", "bonus"]},
+                      "near": {"type": "string", "description": "An object id or a creature's name it must be done beside."},
+                      "range": {"type": "integer"},
+                      "check": {"type": "object"},
+                      "success": {"type": "integer"},
+                      "failure": {"type": "integer"},
+                      "failure_damage": {"type": "object"}
+                    }
+                  }
+                },
+                "marks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["value"],
+                    "properties": {
+                      "value": {"type": "integer"},
+                      "falling": {"type": "boolean"},
+                      "flag": {"type": "string"},
+                      "outcome": {"enum": ["victory", "defeat", "ended"]},
+                      "say": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "object_rules": {
+            "type": "array",
+            "description": "Set-piece rules for things the scenery made from the place's props (BattleScenery.for_spec, ObjectCarry): a brazier on the map given a hazard, things to put in it.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["prop"],
+              "properties": {
+                "prop": {"type": "string", "description": "The prop's id."},
+                "takes": {"$ref": "#/$defs/set_piece_takes"},
+                "hazard": {"$ref": "#/$defs/set_piece_hazard"},
+                "study": {"$ref": "#/$defs/set_piece_study"}
+              }
+            }
+          },
+          "openings": {
+            "type": "array",
+            "description": "Openings a creature can be thrown out of (FightOpenings): a creature with a `throws_out` trait throws a held foe by one out of it; the foe falls the drop and climbs back in on its turn.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cells"],
+              "properties": {
+                "name": {"type": "string"},
+                "cells": {"type": "array", "items": {"$ref": "#/$defs/cell"}},
+                "drop_ft": {"type": "integer", "minimum": 0},
+                "aloft": {"type": "object", "additionalProperties": false, "required": ["flag", "drop_ft"], "properties": {
+                  "flag": {"type": "string", "description": "A fight flag: while it is set, the drop is this one's."},
+                  "drop_ft": {"type": "integer", "minimum": 0}}},
+                "climb": {"type": "object", "additionalProperties": false, "properties": {
+                  "skill": {"type": "string"}, "dc": {"type": "integer"}}}
+              }
+            }
+          },
+          "free_fall": {
+            "type": "boolean",
+            "description": "Everyone falls together on one plane (a pit with no bottom): nobody flies up or down, levitates or teleports (Encounter.free_fall)."
+          },
+          "portals": {
+            "type": "array",
+            "description": "Paired squares that lead into each other (FightPortals): a creature stepping onto one, walking or pushed, comes out on the other and its move ends.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cells"],
+              "properties": {
+                "name": {"type": "string"},
+                "cells": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/cell"}},
+                "when_flag": {"type": "string", "description": "Only while this fight flag is set."},
+                "broken": {"type": "string", "description": "Only once the object the scenery made from this prop is broken (a window)."}
+              }
+            }
+          },
+          "nonlethal": {
+            "type": "boolean",
+            "description": "Nobody dies in this fight (a brawl): whoever drops to 0 Hit Points is knocked out."
+          },
+          "defeat": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Losing this fight means being taken, not killed (DefeatCapture): the outcome is captured, the fallen heroes come round at hp, `set` flags are stamped with the minute, and the party is jailed (Jail) or moved there.",
+            "properties": {
+              "jail": {"type": "string", "description": "<location>[:<spawn>]: locked up there (gear kept by the jailers unless keep_gear)."},
+              "move": {"type": "string", "description": "<location>[:<spawn>]: carried there, gear and all."},
+              "until": {"type": "string", "description": "jail: a condition that lets the party out."},
+              "keep_gear": {"type": "boolean"},
+              "hp": {"type": "integer", "minimum": 1, "description": "The Hit Points the fallen come round at (1)."},
+              "set": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}], "description": "Flags set to the minute the party was taken (for a clock, days_since)."},
+              "say": {"type": "string", "description": "A Narrator key for the moment (default combat:captured)."}
+            }
           }
         }
       }
@@ -1816,20 +1807,6 @@
         "no"
       ],
       "description": "Whether a Long Rest is possible here (risky: 1 in 6 to be interrupted)."
-    },
-    "rest_when": {
-      "type": "array",
-      "description": "Story-dependent rest rules (RestRules.rule_of): the first whose `when` holds replaces `rest` (and `rest_text`), as a village's one house the mob fears lets the party sleep while the town hunts it.",
-      "items": {
-        "type": "object",
-        "required": ["when", "rest"],
-        "additionalProperties": false,
-        "properties": {
-          "when": {"type": "string"},
-          "rest": {"type": "string", "enum": ["safe", "risky", "no"]},
-          "rest_text": {"type": "string"}
-        }
-      }
     },
     "rest_text": {
       "type": "string",
@@ -1887,64 +1864,48 @@
         "front": {"$ref": "#/$defs/cell"},
         "looks": {"type": "string", "enum": ["south", "east", "west", "north"]}
       }
+    },
+    "hazard": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Air that harms whoever stays here, on the exploration clock (PlaceHazards): a save on entering and every `every_min` minutes, a condition, then saves every `lasting.every_min` minutes that add Exhaustion until one succeeds.",
+      "properties": {
+        "name": {"type": "string"},
+        "every_min": {"type": "integer", "minimum": 1},
+        "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
+          "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
+        "condition": {"type": "string"},
+        "lasting": {"type": "object", "additionalProperties": false, "properties": {
+          "every_min": {"type": "integer", "minimum": 1}, "exhaustion": {"type": "integer", "minimum": 0}}},
+        "immune_flags": {"type": "array", "items": {"type": "string"}},
+        "when": {"type": "string", "description": "A story condition: the air is bad only while it holds."}
+      }
+    },
+    "fight_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The place's own rules in every fight there (Encounter.place_rules): modifiers on every creature in the fight, gone with it (a jinxed riverboat: crits on 19-20, misses on 1-2, music against Concentration).",
+      "properties": {
+        "name": {"type": "string"},
+        "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}}
+      }
+    },
+    "rest_when": {
+      "type": "array",
+      "description": "Story-dependent rest rules (RestRules.rule_of): the first whose `when` holds replaces `rest` (and `rest_text`), as a village's one house the mob fears lets the party sleep while the town hunts it.",
+      "items": {
+        "type": "object",
+        "required": ["when", "rest"],
+        "additionalProperties": false,
+        "properties": {
+          "when": {"type": "string"},
+          "rest": {"type": "string", "enum": ["safe", "risky", "no"]},
+          "rest_text": {"type": "string"}
+        }
+      }
     }
   },
   "$defs": {
-    "set_piece_carry": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["tag"],
-      "description": "A plain thing a hero carries (ObjectCarry): no Hit Points or Armor Class, can't be attacked; taken with the object interaction within 5 ft.",
-      "properties": {"tag": {"type": "string", "description": "What it is, for the things that take it."}}
-    },
-    "set_piece_takes": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["tag"],
-      "description": "What it takes in (ObjectCarry.put): the Utilize action within 5 ft by a hero carrying a thing with this tag. Cleansed: its hazard ends.",
-      "properties": {
-        "tag": {"type": "string"},
-        "label": {"type": "string", "description": "The verb on the hotbar (default Put it in)."},
-        "flag": {"type": "string", "description": "A fight flag set when something goes in."},
-        "say": {"type": "string", "description": "A log line when something goes in."},
-        "damage": {"type": "object", "additionalProperties": false, "required": ["who", "amount"], "properties": {
-          "who": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}, "amount": {"type": "integer", "minimum": 1}, "type": {"type": "string"}}},
-        "light": {"type": "object", "additionalProperties": false, "required": ["radius"], "properties": {
-          "radius": {"type": "integer", "minimum": 5}, "disadvantage": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}, "color": {"type": "string", "description": "A hex colour for the light."}},
-          "description": "A warding light round it: the creatures named in `disadvantage` have Disadvantage on D20 Tests within `radius` ft."}
-      }
-    },
-    "set_piece_hazard": {
-      "type": "array",
-      "description": "Its hazards (ObjectCarry.hazards), once a turn each: entering a square within `near_ft` (on: enter; 0 = its own squares) or ending a turn there (on: end) means the save or `exhaustion` and `damage`.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "on": {"enum": ["enter", "end"]},
-          "near_ft": {"type": "integer", "minimum": 0},
-          "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
-            "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
-          "exhaustion": {"type": "integer", "minimum": 1},
-          "damage": {"type": "object", "additionalProperties": false, "required": ["dice"], "properties": {
-            "dice": {"type": "string"}, "type": {"type": "string"}}},
-          "if_flag": {"type": "string", "description": "Only while this fight flag is set (a boss phase's `flag`)."},
-          "unless_flag": {"type": "string", "description": "Only while this fight flag is unset."}
-        }
-      }
-    },
-    "set_piece_study": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["dc"],
-      "description": "The Study action within 30 ft: the best of `skills` (default investigation) tells what it is (`say`) and sets `flag`.",
-      "properties": {
-        "skills": {"type": "array", "items": {"type": "string"}},
-        "dc": {"type": "integer"},
-        "say": {"type": "string"},
-        "flag": {"type": "string"}
-      }
-    },
     "lying": {
       "description": "Owner 2026-10-13 (the text has Vasilka lying under a sheet, very still; she stood beside her table): the figure lies down here with no condition (LyingFigures), until the entry changes or, for a foe, its fight opens and it gets up. true, or {on, head, sheet, pose, lift}. A person lies on their back on their own square, on top of the furniture standing there, or on the prop `on` names (a bier beside them), head along the furniture or toward `head`; `sheet` lays linen over them to the chest or over the face. A beast or a dragon lies on its belly, low on the ground (`pose` back or belly says otherwise). `lift` sets how high it lies instead of the top of what it lies on. `picture` names a drawing of the figure lying down (art/sprites/lying/<id>.png: Sarkhaza across her gold) that stands in for it until it gets up; until that drawing exists, the figure lies as it would without one.",
       "anyOf": [
@@ -2043,6 +2004,61 @@
       "items": {
         "type": "integer",
         "minimum": 0
+      }
+    },
+    "set_piece_carry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag"],
+      "description": "A plain thing a hero carries (ObjectCarry): no Hit Points or Armor Class, can't be attacked; taken with the object interaction within 5 ft.",
+      "properties": {"tag": {"type": "string", "description": "What it is, for the things that take it."}}
+    },
+    "set_piece_takes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag"],
+      "description": "What it takes in (ObjectCarry.put): the Utilize action within 5 ft by a hero carrying a thing with this tag. Cleansed: its hazard ends.",
+      "properties": {
+        "tag": {"type": "string"},
+        "label": {"type": "string", "description": "The verb on the hotbar (default Put it in)."},
+        "flag": {"type": "string", "description": "A fight flag set when something goes in."},
+        "say": {"type": "string", "description": "A log line when something goes in."},
+        "damage": {"type": "object", "additionalProperties": false, "required": ["who", "amount"], "properties": {
+          "who": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}, "amount": {"type": "integer", "minimum": 1}, "type": {"type": "string"}}},
+        "light": {"type": "object", "additionalProperties": false, "required": ["radius"], "properties": {
+          "radius": {"type": "integer", "minimum": 5}, "disadvantage": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}, "color": {"type": "string", "description": "A hex colour for the light."}},
+          "description": "A warding light round it: the creatures named in `disadvantage` have Disadvantage on D20 Tests within `radius` ft."}
+      }
+    },
+    "set_piece_hazard": {
+      "type": "array",
+      "description": "Its hazards (ObjectCarry.hazards), once a turn each: entering a square within `near_ft` (on: enter; 0 = its own squares) or ending a turn there (on: end) means the save or `exhaustion` and `damage`.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "on": {"enum": ["enter", "end"]},
+          "near_ft": {"type": "integer", "minimum": 0},
+          "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
+            "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
+          "exhaustion": {"type": "integer", "minimum": 1},
+          "damage": {"type": "object", "additionalProperties": false, "required": ["dice"], "properties": {
+            "dice": {"type": "string"}, "type": {"type": "string"}}},
+          "if_flag": {"type": "string", "description": "Only while this fight flag is set (a boss phase's `flag`)."},
+          "unless_flag": {"type": "string", "description": "Only while this fight flag is unset."}
+        }
+      }
+    },
+    "set_piece_study": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dc"],
+      "description": "The Study action within 30 ft: the best of `skills` (default investigation) tells what it is (`say`) and sets `flag`.",
+      "properties": {
+        "skills": {"type": "array", "items": {"type": "string"}},
+        "dc": {"type": "integer"},
+        "say": {"type": "string"},
+        "flag": {"type": "string"}
       }
     }
   }
