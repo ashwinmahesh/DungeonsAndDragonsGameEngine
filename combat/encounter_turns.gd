@@ -56,6 +56,7 @@ func start(surprised_ids: Array = []) -> void:
 			c.initiative_group = group
 		e.log.add("roll", "%s rolls Initiative: %d" % [c.name(), t.total], c.id, [t.describe(), bonus.describe()])
 	e.class_features.initiative_rolled()
+	_symptoms_on_initiative()
 	e.ravenloft.initiative_rolled()
 	e.faerun.initiative_rolled()
 	e.game.initiative_rolled()
@@ -537,6 +538,27 @@ func _check_over() -> void:
 
 
 # --- Fights that end with no winner (Encounter.ends_when) -----------------------------------------------------------
+
+## An affliction's symptom that strikes as Initiative is rolled (`on_initiative`: {save {ability, dc}, flag, rounds (10)}):
+## a failed save leaves the creature under that flag for the fight (`confused`: it acts as Confusion makes it).
+func _symptoms_on_initiative() -> void:
+	var e := enc()
+	for c in e.combatants:
+		for h in Afflictions.hooks(c.creature, "on_initiative"):
+			var hook := h["hook"] as Dictionary
+			var sv := hook.get("save", {}) as Dictionary
+			var ab := StringName(str(sv.get("ability", "wis")))
+			var t := c.creature.roll_save(e.dice, ab, int(sv.get("dc", 10)), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab],
+				str((h["symptom"] as Dictionary).get("name", "a symptom")), c.name()])
+			if t.success:
+				continue
+			var fx := Effect.new(str((h["symptom"] as Dictionary).get("name", h["affliction"])), &"affliction", "symptom")
+			fx.ends = Effect.Ends.ROUNDS
+			fx.rounds_left = int(hook.get("rounds", 10))
+			fx.modifiers.append(Modifier.make({"stat": "flag", "value": str(hook.get("flag", "confused"))}, fx.name, &"affliction"))
+			c.creature.add_effect(fx)
+			e.log.add("condition", "%s is overcome (%s)" % [c.name(), fx.name], c.id, [t.describe()])
+
 
 ## The meta on the first hero to hurt a foe in a fight that ends when they drop (`trigger_hero_down`).
 const FIRST_TO_HURT := "first_to_hurt"

@@ -97,6 +97,20 @@ static func symptom(def: Dictionary, sid: String) -> Dictionary:
 	return {}
 
 
+## What `cr`'s symptoms ask the fight to do at `key` (`on_initiative`, `on_hurt`): [{symptom, hook, affliction}].
+static func hooks(cr: Creature, key: String) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for fx in cr.effects:
+		if fx.source_kind != SOURCE:
+			continue
+		var def := definition(fx.source_id)
+		for sid: Variant in fx.data.get("symptoms", []):
+			var sym := symptom(def, str(sid))
+			if sym.get(key, null) is Dictionary:
+				out.append({"symptom": sym, "hook": sym[key], "affliction": str(def.get("name", fx.source_id))})
+	return out
+
+
 ## The symptoms `cr` has of `id` (their ids).
 static func symptoms_of(cr: Creature, id: String) -> Array[String]:
 	var out: Array[String] = []
