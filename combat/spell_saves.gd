@@ -68,6 +68,7 @@ func _save_spell(ctx: Dictionary, victims: Array[Combatant], r: CombatResult, pa
 
 ## One creature's save against the spell, then what it does to that creature (_after_save).
 func _save_victim(ctx: Dictionary, t: Combatant, victims: Array[Combatant], st: Dictionary, r: CombatResult, pausable: bool) -> CombatResult:
+	enc().provoke(ctx["c"] as Combatant, t)   # forced to save: a bystander turns on the caster's side
 	var e := enc()
 	var c := ctx["c"] as Combatant
 	var s := ctx["s"] as Dictionary

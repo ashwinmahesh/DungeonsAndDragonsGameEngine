@@ -929,6 +929,8 @@
                   ],
                   "description": "enemy (the default), neutral, or ally: on the party's side as a guest the player controls (militia standing with the heroes)."
                 },
+                "nonlethal": {"type": "boolean", "description": "Knocked out at 0 Hit Points, never killed (a charmed townsperson)."},
+                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."},
                 "hp": {
                   "type": "integer",
                   "minimum": 1,
@@ -1141,6 +1143,9 @@
                 "broken": {"type": "string", "description": "Only once the object the scenery made from this prop is broken (a window)."}
               }
             }
+          "nonlethal": {
+            "type": "boolean",
+            "description": "Nobody dies in this fight (a brawl): whoever drops to 0 Hit Points is knocked out."
           },
           "objects": {
             "type": "array",

@@ -151,6 +151,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	e.openings.set_openings(spec.get("openings", []))   # windows a creature can be thrown out of (FightOpenings)
 	e.free_fall = bool(spec.get("free_fall", false))   # all falling together: no flight, levitation or teleport
 	e.portals.set_portals(spec.get("portals", []))   # squares that lead into each other (FightPortals)
+	e.nonlethal = bool(spec.get("nonlethal", false))   # a brawl: whoever drops is knocked out
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
@@ -177,6 +178,17 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		# like every party member and guest.
 		var ally: bool = mo["side"] == &"ally"
 		e.add(mo["creature"] as Monster, &"guest" if ally else mo["side"] as StringName, mo["cell"] as Vector2i)
+	var entries := spec.get("monsters", []) as Array
+	var monsters := monsters_for(view, spec)
+	for i in monsters.size():
+		var mo := monsters[i]
+		var added := e.add(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
+		var md := entries[i] as Dictionary if i < entries.size() else {}
+		# Never killed (knocked out at 0), and a bystander that turns on the party only once harmed (Encounter.provoke).
+		if bool(md.get("nonlethal", false)):
+			added.set_meta(Encounter.NONLETHAL, true)
+		if bool(md.get("hostile_if_harmed", false)):
+			added.set_meta(Encounter.PROVOKED_BY_HARM, true)
 	# The playthrough's difficulty: enemy Hit Points, what foes carry, how they fight (combat/difficulty.gd).
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
@@ -660,6 +672,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 	e.openings.set_openings(spec.get("openings", []))
 	e.free_fall = bool(spec.get("free_fall", false))
 	e.portals.set_portals(spec.get("portals", []))
+	e.nonlethal = bool(spec.get("nonlethal", false))
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):

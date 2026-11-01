@@ -184,6 +184,12 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   figures while its story `when` holds: not NPCs (no talk, no turn) and never in anyone's way, milling a square at a time
   inside the area. With `push_to`, while the leader stands in the area and the party isn't busy, every `push_every`
   seconds (4) the party is walked one square toward that square. `sprites` name the figures' art.
+
+- **Non-lethal fights and bystanders:** an encounter's `nonlethal: true` is a fight nobody dies in (a brawl): whoever
+  drops to 0 Hit Points, hero or foe, is knocked out (EncounterDamage.knock_out). A monster entry's `nonlethal: true`
+  is knocked out at 0, never killed; with `side: "neutral"`, `hostile_if_harmed: true` keeps it out of the fight (it
+  doesn't count for the end) until the party harms it or forces it to make a save, when it turns hostile
+  (Encounter.provoke).
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open
