@@ -152,6 +152,14 @@ func _ready() -> void:
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(title)
 	col.add_child(UiKit.divider(360.0))
+	# What the campaign wants a player warned of here (CampaignModule.content_note): nothing by default.
+	var note := Campaign.module().content_note(str(location.get("region", "")), GameState.story)
+	if note != "":
+		var warn := UiKit.label(note, 16, "bone")
+		warn.name = "ContentNote"
+		warn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		warn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		col.add_child(warn)
 	var hint := UiKit.label(tip, 18, "vellum")
 	hint.name = "Tip"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

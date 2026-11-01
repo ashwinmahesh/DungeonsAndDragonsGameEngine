@@ -491,6 +491,26 @@ func _game_rows() -> void:
 	_row_item(graphic)
 	graphic.reset_size()
 	graphic.position = Vector2((_u(W_U, 0).x - graphic.size.x) / 2.0, _u(0, y).y - graphic.size.y / 2.0) - _row_origin
+	# The campaign's own content settings (CampaignModule.comfort_options), each a checkbox kept in the playthrough.
+	for opt: Dictionary in Campaign.module().comfort_options():
+		y += ROW_PITCH
+		var key := str(opt.get("key", ""))
+		var box := CheckBox.new()
+		box.name = "Comfort_" + key
+		box.text = str(opt.get("label", key))
+		box.add_theme_font_override("font", serif())
+		box.add_theme_font_size_override("font_size", roundi(10.5 * K))
+		for k: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+			box.add_theme_color_override(k, Color(_c("arch_text"), 0.8))
+		box.button_pressed = bool(st.options.get(key, opt.get("default", true))) if st != null else bool(opt.get("default", true))
+		box.tooltip_text = str(opt.get("tip", ""))
+		box.toggled.connect(func(on: bool) -> void:
+			if st != null:
+				st.options[key] = on)
+		box.focus_mode = Control.FOCUS_NONE
+		_row_item(box)
+		box.reset_size()
+		box.position = Vector2((_u(W_U, 0).x - box.size.x) / 2.0, _u(0, y).y - box.size.y / 2.0) - _row_origin
 	_close_scroll(y + 14.0)
 
 
