@@ -120,9 +120,6 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 		if names.is_empty() or reached.any(func(c: Combatant) -> bool:
 				return c.name() in names or (c.creature is Monster and str((c.creature as Monster).data.get("id", "")) in names)):
 			e.meters.shift_clock(int(outcome["clock"]))
-	# One of them at random (`one: true`: a table that strikes a single creature, a captive among them).
-	if bool(outcome.get("one", false)) and reached.size() > 1:
-		reached = [reached[e.dice.roll_one(reached.size(), "Round event's target") - 1]] as Array[Combatant]
 	e.events.append({"type": "round_event", "event": id, "outcome": str(outcome.get("id", "")), "name": label,
 		"say": str(outcome.get("say", "")), "targets": reached.map(func(c: Combatant) -> String: return c.id)})
 	var done_fn := func() -> CombatResult:
@@ -142,6 +139,11 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 			_summon(outcome, int(ev.get("at", 20)))
 		"take":
 			_take(outcome)
+		"effect":
+			# No save: it just lands on whoever it reaches (a pelting that throws them off their aim).
+			for t in reached:
+				if t.is_alive():
+					_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
 	return done_fn.call() as CombatResult
 
 
@@ -167,17 +169,6 @@ func _take(o: Dictionary) -> void:
 		e.movement.leave_grid(c, "taken")
 		(e.events[-1] as Dictionary)["narration"] = str(o.get("narration", ""))
 		return
-
-
-## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn, else at random and
-## never the one used last time).
-func _pick(ev: Dictionary, last: String) -> Dictionary:
-		"effect":
-			# No save: it just lands on whoever it reaches (a pelting that throws them off their aim).
-			for t in reached:
-				if t.is_alive():
-					_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
-	return done_fn.call() as CombatResult
 
 
 ## The creatures on the board named in `who` (names or stat block ids), up.
