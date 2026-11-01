@@ -38,7 +38,8 @@ which fails if a trait or feature says `"implemented": "engine"` and no code rea
 
 A trait's `fears` (names, stat block ids or creature types): when the creature starts its turn able to see one of them,
 it is Frightened of that one until the start of its next turn (MonsterActions._fears; a creature in a shape counts as
-the shape). A familiar that can't abide canines lists the canine stat blocks.
+the shape). `fear_modifiers` add to it while it lasts (Disadvantage on saves). A familiar that can't abide canines lists
+the canine stat blocks.
 
 ## Spellcasting
 

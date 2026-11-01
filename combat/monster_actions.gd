@@ -863,6 +863,11 @@ func _fears(c: Combatant) -> void:
 				continue
 			var fx := Effect.new(str((tr as Dictionary).get("name", "Fear")), &"feature", str((tr as Dictionary).get("id", "fears"))).with_condition(&"frightened")
 			fx.caster_id = o.id
+			for md: Variant in (tr as Dictionary).get("fear_modifiers", []):   # what the dread does besides (Disadvantage on saves)
+				var mdd := (md as Dictionary).duplicate()
+				var stat := str(mdd["stat"])
+				mdd.erase("stat")
+				fx.with_modifier(stat, mdd)
 			fx.ends = Effect.Ends.START_OF_TURN
 			fx.turn_owner_id = c.id
 			c.creature.add_effect(fx)
