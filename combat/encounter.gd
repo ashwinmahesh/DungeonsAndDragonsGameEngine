@@ -97,6 +97,9 @@ var _cover_cache: Dictionary = {}
 ## Savage Attacker is once per turn, any creature's turn: creature id -> the turn it was used on.
 var _savage_turn: Dictionary = {}
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
+## A free-fall fight (an encounter's `free_fall`): everyone falls together on one plane, so nobody flies up or down,
+## levitates or teleports (EncounterMovement.vertical_why, teleport_blocked).
+var free_fall: bool = false
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
@@ -270,6 +273,11 @@ func occupant_at(cell: Vector2i) -> Combatant:
 		if c.is_alive() and cell in c.footprint():
 			return c
 	return null
+
+
+## Whether `c` can't teleport now: its own `no_teleport` flag, or a free-fall fight.
+func teleport_blocked(c: Combatant) -> bool:
+	return free_fall or c.creature.has_flag("no_teleport")
 
 
 func distance(a: Combatant, b: Combatant) -> int:

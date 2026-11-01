@@ -1262,6 +1262,8 @@ func center_of(c: Combatant) -> Vector2:
 func vertical_why(c: Combatant, delta: int) -> String:
 	if delta == 0:
 		return "Choose up or down"
+	if enc().free_fall:
+		return "Everyone is falling together: no flying up or down"
 	var goal := vertical_goal(c, delta)
 	if goal == c.altitude:
 		if delta < 0 and c.altitude <= 0:

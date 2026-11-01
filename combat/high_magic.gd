@@ -489,8 +489,11 @@ func box_between(a: Combatant, b: Combatant) -> bool:
 	return false
 
 
-## Teleporting out of a cage: a Charisma save first; a failure wastes the attempt.
+## Teleporting out of a cage: a Charisma save first; a failure wastes the attempt. In a free-fall fight it fails outright.
 func teleport_blocked(ctx: Dictionary, c: Combatant) -> bool:
+	if enc().free_fall:
+		enc().log.add("info", "%s tumbles on with everything else: there is nowhere to step to" % c.name(), c.id)
+		return true
 	var cage := cage_of(c)
 	if cage == null:
 		return false

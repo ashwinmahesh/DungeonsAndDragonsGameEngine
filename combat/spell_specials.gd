@@ -385,7 +385,7 @@ func dimension_door(ctx: Dictionary, cell: Vector2i, r: CombatResult) -> void:
 func thunder_step(ctx: Dictionary, cell: Vector2i, cells: Array[Vector2i], r: CombatResult, pausable: bool) -> void:
 	var c := ctx["c"] as Combatant
 	var e := enc()
-	if c.creature.has_flag("no_teleport"):
+	if enc().teleport_blocked(c):
 		sp()._teleport(c, cell, r)   # says why it can't, and the spell is spent
 		return
 	# Who may come is settled where the caster stands now: it is within 5 ft of it before it goes.

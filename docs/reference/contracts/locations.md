@@ -127,6 +127,9 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
 - **Crime (F8, docs/rules/stealth.md):** a container's `owner` (an npc id) makes taking from it stealing when somebody
   sees; an area's `private` (an npc id) makes it a private room, with `open` (a condition) for when it may be entered;
   the location's `watch` names the guard who answers a crime here ("" for nobody; unset, the region's watch).
+- **Free fall (Encounter.free_fall):** an encounter's `free_fall: true` is a fight where everyone falls together on
+  one plane: nobody flies up or down or levitates (vertical moves are refused), and teleporting fails (Misty Step,
+  Blink, Dimension Door: Encounter.teleport_blocked).
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open
