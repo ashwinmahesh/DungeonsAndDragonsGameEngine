@@ -324,6 +324,14 @@ func next() -> Dictionary:
 				var blessed := _bless(s)
 				if blessed != "":
 					return {"kind": "notice", "text": blessed}
+			"twist":
+				pc += 1
+				var got: Array[String] = []
+				for ch in _receivers(bool(s["party"])):
+					ch.gain_twists(int(s["count"]))
+					got.append(_first(ch))
+				if not got.is_empty():
+					return {"kind": "notice", "text": "%s %s a Twist of Fate" % [_names(got), "gains" if got.size() == 1 else "gain"]}
 			"inspiration":
 				pc += 1
 				var inspired := _inspiration(bool(s["party"]))

@@ -183,6 +183,11 @@ func list(c: Combatant) -> Array[Dictionary]:
 				slot = l
 				break
 		out.append(_entry("restore_ward", "Restore Arcane Ward", "+%d HP (level %d slot)" % [2 * slot, slot], "bonus", _first(bw, "" if slot > 0 else "No spell slots"), "none", "Bonus Action: expend a spell slot to restore 2 × its level Hit Points to the ward."))
+	# A Twist of Fate the story gave (Character.twists): a visible creature's next d20 shows a 1 or a 20.
+	if c.creature is Character and (c.creature as Character).twists() > 0:
+		for v: int in [1, 20]:
+			out.append(_entry("twist:%d" % v, "Twist of Fate: %d" % v, "%d left" % (c.creature as Character).twists(), "free", e._turn_check(c), "creature",
+				"Spend a Twist of Fate: the next D20 Test of a creature you can see shows %d." % v, 9999))
 	# Diviner: Portent.
 	if has(c, "portent"):
 		for v: Variant in c.get_meta("portent_rolls", []):
@@ -632,6 +637,15 @@ func perform(c: Combatant, id: String, t: Combatant, point: Vector2, choice: Str
 					c.creature.ward_hp = mini(ch.resource_max("arcane_ward"), c.creature.ward_hp + 2 * l)
 					e.log.add("info", "%s restores the Arcane Ward to %d" % [c.name(), c.creature.ward_hp], c.id)
 					break
+		"twist":
+			if t == null or not e.can_see(c, t):
+				return CombatResult.fail("Choose a creature you can see")
+			if not c.creature is Character or not (c.creature as Character).twists() > 0:
+				return CombatResult.fail("No Twist of Fate left")
+			var v4 := int(id.get_slice(":", 1))
+			(c.creature as Character).gain_twists(-1)
+			t.set_meta("portent_next", v4)
+			e.log.add("info", "%s twists fate: %s's next d20 will show %d" % [c.name(), t.name(), v4], c.id)
 		"portent":
 			if t == null:
 				return CombatResult.fail("Choose a creature")
