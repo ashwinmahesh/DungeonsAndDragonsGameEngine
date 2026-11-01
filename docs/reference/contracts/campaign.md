@@ -184,6 +184,10 @@ fight starts on a square someone will stand on (the party's, a foe's) she steps 
 the foes. She doesn't fall, so `see_to_fallen_guests` never sends her home, and she isn't in the fight's tokens, turn strip
 or party frames. The exploring screen's guest card says "Keeps back". A Tarokka ally always fights (`make validate`).
 
+`counters` ([{flag, label, when}]): currencies or tallies shown on the exploring screen beside the gold, " · 3 tickets",
+for each whose story `when` holds and whose int flag isn't 0 (ExploreHud.counters_text). The flag is the story's own;
+dialogue moves it with `set flag += n`.
+
 ## Region travel files (Phase 5, ADR 0011)
 
 Every file in `data/travel/` is merged into the one map: a region adds `data/travel/<region>.json` with the same shape
