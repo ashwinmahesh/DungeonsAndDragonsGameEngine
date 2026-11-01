@@ -104,6 +104,13 @@ start of each of its turns it may move up to `ft` to an open square without prov
 own movement for the turn. The AI leaps beside the foe it would strike when that foe is out of its reach, or clear of
 foes when its blows reach farther than 10 ft (MonsterActions.leap_ft and leap, AiBrain._leap).
 
+## Fears
+
+A trait's `fears` (names, stat block ids or creature types): when the creature starts its turn able to see one of them,
+it is Frightened of that one until the start of its next turn (MonsterActions._fears; a creature in a shape counts as
+the shape). `fear_modifiers` add to it while it lasts (Disadvantage on saves). A familiar that can't abide canines lists
+the canine stat blocks.
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve

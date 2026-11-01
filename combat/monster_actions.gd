@@ -883,6 +883,35 @@ func spend_reaction_spell(c: Combatant, spell_id: String) -> int:
 ## Start of `c`'s turn: Recharge, Berserk, the auras of nearby monsters reaching it (Stench, Festering Aura) and its own
 ## (Whispering Aura), Regeneration, grips, Engulf and Sunlight Hypersensitivity. An aura's save stops for the choices
 ## after its roll, so the rest waits on Encounter.then.
+## A creature's dread of certain others (a trait's `fears`: names, stat block ids or creature types): starting its
+## turn where it sees one of them, it is Frightened of that one until the start of its next turn (a familiar that can't
+## abide dogs). A creature in a shape counts as that shape (a druid as a wolf).
+func _fears(c: Combatant) -> void:
+	var e := enc()
+	for tr: Variant in traits(c):
+		var who := (tr as Dictionary).get("fears", []) as Array
+		if who.is_empty() or not c.can_act():
+			continue
+		for o in e.living():
+			if o == c or o.is_down() or not e.can_see(c, o):
+				continue
+			var block := str((o.creature as Monster).data.get("id", "")) if o.creature is Monster else ""
+			if not (o.name() in who or (block != "" and block in who) or str(o.creature.creature_type) in who):
+				continue
+			var fx := Effect.new(str((tr as Dictionary).get("name", "Fear")), &"feature", str((tr as Dictionary).get("id", "fears"))).with_condition(&"frightened")
+			fx.caster_id = o.id
+			for md: Variant in (tr as Dictionary).get("fear_modifiers", []):   # what the dread does besides (Disadvantage on saves)
+				var mdd := (md as Dictionary).duplicate()
+				var stat := str(mdd["stat"])
+				mdd.erase("stat")
+				fx.with_modifier(stat, mdd)
+			fx.ends = Effect.Ends.START_OF_TURN
+			fx.turn_owner_id = c.id
+			c.creature.add_effect(fx)
+			e.log.add("condition", "%s cowers at the sight of %s" % [c.name(), o.name()], c.id)
+			return
+
+
 func turn_start(c: Combatant) -> CombatResult:
 	var e := enc()
 	if c.creature is Monster:
@@ -896,6 +925,7 @@ func turn_start(c: Combatant) -> CombatResult:
 			if roll == 6:
 				c.set_meta("berserk", true)
 				e.log.add("condition", "%s goes berserk (d6: 6)" % c.name(), c.id)
+	_fears(c)
 	var auras: Array = []
 	for o in e.living():
 		if o == c or o.is_down():
