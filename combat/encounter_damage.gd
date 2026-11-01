@@ -413,6 +413,8 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 	if dr.final > 0 and target.is_alive():
 		e.monster_actions.loathsome_limbs(target, parts)
 		e.monster_actions.damage_traits(target, parts)
+		e.monster_actions.heads_hurt(target, dr.final, parts.filter(func(p: Variant) -> bool: return int((p as Dictionary).get("amount", 0)) > 0)
+			.map(func(p: Variant) -> String: return str((p as Dictionary)["type"])))
 	if target.is_down():
 		e.monster_actions.body_dropped(target)
 		e.spells.specials.mid.hand_destroyed(target)

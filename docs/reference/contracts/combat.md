@@ -377,7 +377,8 @@ allow, as itself or as one entry of its `table` (`pick`:
 enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
 for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and
 `condition` until `until`), a `summon` (`monster` x `count` at `cells`, joining the order on the event's count), or
-`text`. `dc_from: {flag, base, step}` sets the DC from the story as the fight starts (LocationFights.round_events_for).
+`text`; any outcome with `one: true` strikes a single creature it reaches, at random (a neutral one too with `affects: all`:
+a table that answers to no master). `dc_from: {flag, base, step}` sets the DC from the story as the fight starts (LocationFights.round_events_for).
 Legendary runs them with the lair's turn (`lair_due`, `lair_turn`, `round_ending`), so an event below every creature's
 count acts as the round ends; each sends `{type: "round_event", event, outcome, name, say, targets}`.
 

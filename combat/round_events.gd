@@ -101,6 +101,9 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	leg()._log("spell", "Initiative %d: %s" % [int(ev.get("at", 20)), label], null, [str(outcome.get("summary", ev.get("summary", "")))])
 	var r := CombatResult.new()
 	var reached := _reached(outcome)
+	# One of them at random (`one: true`: a table that strikes a single creature, a captive among them).
+	if bool(outcome.get("one", false)) and reached.size() > 1:
+		reached = [reached[e.dice.roll_one(reached.size(), "Round event's target") - 1]] as Array[Combatant]
 	e.events.append({"type": "round_event", "event": id, "outcome": str(outcome.get("id", "")), "name": label,
 		"say": str(outcome.get("say", "")), "targets": reached.map(func(c: Combatant) -> String: return c.id)})
 	var done_fn := func() -> CombatResult:

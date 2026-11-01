@@ -1103,6 +1103,10 @@
                     "text"
                   ]
                 },
+                "one": {
+                  "type": "boolean",
+                  "description": "It strikes one creature it reaches, picked at random (a neutral one too, with affects all)."
+                },
                 "affects": {
                   "enum": [
                     "party",
@@ -1264,6 +1268,9 @@
                           "summon",
                           "text"
                         ]
+                      },
+                      "one": {
+                        "type": "boolean"
                       },
                       "affects": {
                         "enum": [
