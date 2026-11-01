@@ -38,4 +38,10 @@ look), `held_off_by` (spell ids: one cast on the hero skips the next daily save)
 levels (1)}` (while `when` holds, each living hero saves that often or gains levels), `exhaustion_lock` (while it lasts a
 Long Rest takes no Exhaustion away: the flag `exhaustion_locked`), and `long_rest.max_hp_loss` (dice: that much comes off
 the Hit Point maximum after each Long Rest while it lasts, back when it's gone). The clock's own state lives on the
-effect (`dormant_until`, `successes`, `held`, `max_hp_lost`) and in StoryState.flags["_affliction_clock"].
+effect (`dormant_until`, `successes`, `held`, `max_hp_lost`, `suppressed_until`, `dead_seen`) and in
+StoryState.flags["_affliction_clock"]. `onset_hours` may be dice ("1d4"), rolled with the story's DiceRoller. A maximum
+worn to 0 by `max_hp_loss` kills. `suppressed_by` `{spells, hours}`: such a spell holds all of it down (modifiers,
+thresholds, the Exhaustion lock) for that many hours from the clock's next look, the level untouched. `on_death`
+`{hour, becomes, flag, only_types}`: a hero who died with it (and is of one of `only_types`, if given) is lost for good at
+the next `hour` o'clock, their body become that creature (StoryState.fallen keeps `becomes`: the condition
+`became:<monster>`), and `flag` counts it.
