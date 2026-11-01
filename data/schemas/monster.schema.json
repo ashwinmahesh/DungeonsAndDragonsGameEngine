@@ -1290,6 +1290,10 @@
                 "$ref": "common.schema.json#/$defs/id",
                 "description": "One use of this stat-block action (an attack or a save action)."
               },
+              "requires_head": {
+                "type": "string",
+                "description": "Only while this named head of its Multiple Heads lives (`head_names` on the trait)."
+              },
               "move": {
                 "type": "boolean",
                 "description": "Moves up to its Speed (half of it with `half`) without provoking Opportunity Attacks; with `action` too, the move comes first and the strike after it (the 2025 dragons' Pounce)."
