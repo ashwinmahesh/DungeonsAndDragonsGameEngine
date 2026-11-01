@@ -197,6 +197,7 @@ func _ready() -> void:
 	StoryConditions.note_departure(st, st.location, str(loc.get("region", "")))   # leaving Castle Ravenloft ends its truce
 	var left := QuestClosures.region_left(st.location, str(loc.get("region", "")))   # a quest that ends as the party leaves
 	st.location = loc_id
+	PlaceHazards.entered(st)   # a haze or miasma checks whoever comes in
 	var first := not st.visited.has(loc_id)
 	st.visited[loc_id] = true
 	if first:
@@ -233,6 +234,8 @@ func _process(delta: float) -> void:
 		refresh_exits()
 		CampaignLook.current().refresh(self)   # the temple's amber: waiting, speaking, sated or sealed
 		LocationStealth.refresh_waiting(self)   # a door opened, a lamp lit: foes come into view
+		for line in PlaceHazards.drain(st):
+			toast.emit(line)   # what the place's air did (PlaceHazards)
 	if board != null and rig != null and rig.camera != null and not members.is_empty() and (not board.occluders.is_empty() or not board.mesh_occluders.is_empty() or not board.buildings.is_empty()):
 		var focus := (tokens[leader().id] as Node3D).global_position if tokens.has(leader().id) else Vector3.ZERO
 		if is_instance_valid(rig.cutaway_focus):
