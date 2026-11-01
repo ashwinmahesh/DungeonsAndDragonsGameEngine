@@ -312,3 +312,13 @@ They skip his wards (`Wards.hides_from_strahd`) and his attention tier's shorter
 `gap_hours`, and keep `quiet_regions` and holy ground. Each needs a unique id (across all visit files), a `dialogue` and
 a limit (`once`, `max` or `cooldown_hours`). The story bot answers their conversations by the exit
 (`tests/support/ally_visit_answer.gd`).
+
+## Companions
+
+A creature bonded to one hero, not by a spell (story/companions.gd): `companion bond <monster> [<name>]` in a
+conversation bonds a stat block to the hero speaking (one each; a new bond replaces the old), `companion release` ends it.
+The bond lives in the story's flags (`_companions`: {hero id: {monster, name}}), so saves keep it unchanged. It walks at
+the back of the line (LocationParty.place_guests, `companion_of` its hero), comes into every fight beside its hero on
+the party's side at full Hit Points, played by the player (EncounterSetup.bring_companions), and a companion killed in a
+fight is gone (the bond ends, with a notice). Its own powers are the game's (GameFeatures), as any creature's.
+

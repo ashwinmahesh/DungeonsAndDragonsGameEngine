@@ -214,6 +214,12 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			return {"t": "xp"}
 		"sacrifice":
 			return {"t": "sacrifice"}
+		"companion":
+			# `companion bond <monster> [<name>]` / `companion release`: the speaking hero's bonded companion (Companions).
+			if parts.size() >= 3 and parts[1] == "bond":
+				return {"t": "companion", "bond": parts[2], "name": " ".join(parts.slice(3))}
+			if parts.size() == 2 and parts[1] == "release":
+				return {"t": "companion", "bond": "", "name": ""}
 		"heal":
 			# `heal <dice> [party] [temp]` (docs/contracts/dialogue.md).
 			var words := Array(parts.slice(2))

@@ -369,6 +369,16 @@ func next() -> Dictionary:
 				pc += 1
 				if st.remove_guest(str(s["npc"])):
 					return {"kind": "notice", "text": "%s leaves the party" % Compendium.shared().display_name("npcs", str(s["npc"]))}
+			"companion":
+				pc += 1
+				var who := speaker if speaker != null and not speaker.dead else null
+				if who != null:
+					if str(s["bond"]) != "":
+						Companions.bond(st, who.id, str(s["bond"]), str(s["name"]))
+						var called := str(s["name"]) if str(s["name"]) != "" else Compendium.shared().display_name("monsters", str(s["bond"]))
+						return {"kind": "notice", "text": "%s is bound to %s now" % [called, _first(who)]}
+					if Companions.release(st, who.id):
+						return {"kind": "notice", "text": "%s's companion is gone" % _first(who)}
 			"sacrifice":
 				pc += 1
 				st.last_check = true   # skipped with one left alive: the scene goes on as before

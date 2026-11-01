@@ -211,13 +211,18 @@ static func place_guests(view: LocationView) -> void:
 		if m.creature is Character and not (m.creature as Character).steed.is_empty() and not m.creature.dead:
 			riders.append(m)
 	keepers.append_array(riders)
-	if (view.st.guests.is_empty() and keepers.is_empty()) or view.members.is_empty():
+	# Bonded companions (Companions) walk last, each beside the line as its hero's.
+	var bonded: Array[Combatant] = []
+	for m in view.members:
+		if m.creature is Character and not m.creature.dead and not Companions.of(view.st, m.creature.id).is_empty():
+			bonded.append(m)
+	if (view.st.guests.is_empty() and keepers.is_empty() and bonded.is_empty()) or view.members.is_empty():
 		return
 	var tail := view.members[view.members.size() - 1].cell
 	var taken := {}
 	for m in view.members:
 		taken[m.cell] = true
-	var spots := _cells_around(view, tail, view.members.size() + view.st.guests.size() + keepers.size() + 4)
+	var spots := _cells_around(view, tail, view.members.size() + view.st.guests.size() + keepers.size() + bonded.size() + 4)
 	var k := 0
 	for i in view.st.guests.size() + keepers.size():
 		while k < spots.size() and taken.has(spots[k]):
@@ -250,6 +255,22 @@ static func place_guests(view: LocationView) -> void:
 		tok.position = view.board.cell_center(cell)
 		view.add_child(tok)
 		view.tokens[cb.id] = tok
+	for keeper in bonded:
+		var mon := Companions.creature_for(view.st, keeper.creature.id)
+		if mon == null:
+			continue
+		while k < spots.size() and taken.has(spots[k]):
+			k += 1
+		var at := spots[k] if k < spots.size() else tail
+		taken[at] = true
+		var pet := Combatant.new(mon, &"guest", at)
+		pet.id = mon.id
+		pet.set_meta("companion_of", keeper.id)
+		view.guest_members.append(pet)
+		var ptok := CombatToken.create(pet, "")
+		ptok.position = view.board.cell_center(at)
+		view.add_child(ptok)
+		view.tokens[pet.id] = ptok
 
 
 ## Brings the familiars and steeds at the back of the line up to date with their casters: one cast just now, lost in a
@@ -261,19 +282,25 @@ static func refresh_familiars(view: LocationView) -> void:
 			want["familiar:" + m.id] = true
 		if m.creature is Character and not (m.creature as Character).steed.is_empty() and not m.creature.dead:
 			want["steed:%s:%s" % [m.id, (m.creature as Character).steed]] = true
+		if m.creature is Character and not m.creature.dead and not Companions.of(view.st, m.creature.id).is_empty():
+			want["companion:%s:%s" % [m.id, Companions.of(view.st, m.creature.id)]] = true
 	var have := {}
 	for g in view.guest_members:
 		if g.has_meta("familiar_of"):
 			have["familiar:" + str(g.get_meta("familiar_of"))] = true
 		if g.has_meta("steed_of"):
 			have["steed:%s:%s" % [g.get_meta("steed_of"), g.get_meta("steed", {})]] = true
+		if g.has_meta("companion_of"):
+			var owner := view.members.filter(func(m: Combatant) -> bool: return m.id == str(g.get_meta("companion_of")))
+			if not owner.is_empty():
+				have["companion:%s:%s" % [g.get_meta("companion_of"), Companions.of(view.st, (owner[0] as Combatant).creature.id)]] = true
 	if want != have:
 		place_guests(view)
 
 
 ## A familiar or steed walking with its caster: not one of the story's guests, and its caster's fights bring it.
 static func is_follower(g: Combatant) -> bool:
-	return g.has_meta("familiar_of") or g.has_meta("steed_of")
+	return g.has_meta("familiar_of") or g.has_meta("steed_of") or g.has_meta("companion_of")
 
 
 static func _cells_around(view: LocationView, start: Vector2i, n: int) -> Array[Vector2i]:
