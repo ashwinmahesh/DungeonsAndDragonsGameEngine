@@ -75,6 +75,17 @@ func test_a_floored_drain_never_takes_the_maximum_below_the_floor() -> void:
 	assert_true(h.creature.dead, "without a floor, a maximum drained to 0 is death (2024)")
 
 
+func test_a_drain_that_keeps_half_stops_at_half_the_undrained_maximum() -> void:
+	var e := _field(3)
+	var s := TestCombat.foe(e, "specter", Vector2i(3, 3))
+	var h := TestCombat.hero(e, "ilse_varga", Vector2i(4, 3))
+	TestCombat.start_with(e, s)
+	var top := h.creature.max_hp()
+	e.monster_actions.drain_max_hp(h, 3, "Life Drain", 1, "fight", 0.5)
+	e.monster_actions.drain_max_hp(h, top, "Life Drain", 1, "fight", 0.5)
+	assert_eq(h.creature.max_hp(), ceili(top * 0.5), "a second drain counts from the maximum before the first")
+
+
 func test_a_drain_until_the_fight_ends_goes_with_the_fight() -> void:
 	var e := _field(3)
 	var s := TestCombat.foe(e, "specter", Vector2i(3, 3))

@@ -431,6 +431,12 @@
           "minimum": 0,
           "description": "drain_max_hp and ability_drain: the lowest the Hit Point maximum or score can be drained to (0, the default: the 2024 rule, where 0 is death)."
         },
+        "keep": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "drain_max_hp: the share of the maximum before any drain that the drain can't take it below (0, the default: none)."
+        },
         "not_types": {
           "type": "array",
           "items": {

@@ -28,8 +28,8 @@ Numbers are the 2024 stat block's. These machine-readable keys sit next to the p
 `condition` (with `until`: target_turn_end, target_turn_start, source_turn_start, source_turn_end, minute, permanent;
 optional `modifiers`), `grapple` (`escape_dc`, `limit`, `restrain`; `until: target_turn_end` lets go at the end of the
 held creature's next turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self` (`type`), `ability_drain`
-(`ability`, `dice`; both drains also take `floor`, the lowest the maximum or score can be drained to, 0 by default, and
-`until`: long_rest by default, short_rest, or fight, gone when the fight ends), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`:
+(`ability`, `dice`; both drains also take `floor`, the lowest the maximum or score can be drained to, 0 by default, `keep` for
+drain_max_hp, the share of the undrained maximum it can't go below, and `until`: long_rest by default, short_rest, or fight, gone when the fight ends), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`:
 levels of an affliction, docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that
 burn and then rot).
 
