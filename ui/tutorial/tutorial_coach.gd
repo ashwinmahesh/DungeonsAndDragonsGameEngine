@@ -173,6 +173,8 @@ static func _reading_label(text: String, size: int, colour: String = "vellum") -
 	return label
 
 
+## `lesson`: title, body, objective, details (each with a _pad copy for the controller), read_only, free_practice;
+## `progress` names the count over the title ("LESSON" unless given), and `corner` "bottom_right" keeps the card there.
 func present(lesson: Dictionary, index: int, total: int) -> void:
 	_build()
 	_lesson = lesson.duplicate(true)
@@ -191,7 +193,7 @@ func present(lesson: Dictionary, index: int, total: int) -> void:
 	_chrome_visible = true
 	_step_hint = ""
 	_free_practice = MobileDevice.enabled() or bool(lesson.get("free_practice", false))
-	_progress.text = "LESSON %d OF %d" % [index + 1, total]
+	_progress.text = "%s %d OF %d" % [str(lesson.get("progress", "LESSON")), index + 1, total]
 	_title.text = str(lesson.get("title", "Learn to play"))
 	_set_copy(_body, str(lesson.get("body", "")), str(lesson.get("body_pad", lesson.get("body", ""))))
 	_set_copy(_objective, "Try it: " + str(lesson.get("objective", "")), "Try it: " + str(lesson.get("objective_pad", lesson.get("objective", ""))))
@@ -432,6 +434,8 @@ func _reflow() -> void:
 		at = (viewport - Vector2(width, height)) / 2.0
 	elif _card_top_right:
 		at = Vector2(viewport.x - width - MARGIN, MARGIN)
+	elif str(_lesson.get("corner", "")) == "bottom_right":
+		at = Vector2(viewport.x - width - MARGIN, viewport.y - height - MARGIN)
 	elif bool(_lesson.get("read_only", false)):
 		at = (viewport - Vector2(width, height)) / 2.0
 	elif not _action_scope and _target.has_area() and Rect2(at, Vector2(width, height)).intersects(_target.grow(12.0)):
