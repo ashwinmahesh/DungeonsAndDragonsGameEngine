@@ -227,23 +227,58 @@ static func hours(legs: Array[Dictionary]) -> float:
 ## place the journey is bound for and `leg_to` the place this leg ends at: a road the party has walked, or a place it
 ## has been, is familiar ground (RoadFamiliarity). `fights` false (the player turned random fights off in Settings,
 ## Ashwin 2026-10-26): a roll that would pick a fight leaves the road quiet; the meetings are rolled as before.
+## A table may hold only `when` its condition does; a quiet leg then rolls each `every_road` table (a hunted villain's
+## minions on whatever road the party takes), by id, on its own chance, and a `per_night` one once a night at most.
 static func roll(road: Dictionary, st: StoryState, dice: DiceRoller, journey_to: String = "", leg_to: String = "",
 		fights: bool = true) -> Dictionary:
-	var tid := str(road.get("table", ""))
-	if tid == "":
-		return {}
 	# Find the Path: the party knows the safe way while it lasts (a day).
 	if st.spell_active("find_the_path"):
 		return {}
-	var table := Compendium.shared().get_entry("random_encounters", tid)
-	if table.is_empty():
-		return {}
-	var chance := float(table["chance_night"]) if st.is_night() else float(table["chance_day"])
-	# Ground the party knows is quieter (Ashwin, 2026-10-18); Strahd's eyes and the weather are added after.
-	chance *= RoadFamiliarity.scale(st, road, journey_to, leg_to)
-	# Strahd's attention (F9): the more he has noticed the party, the more of his eyes and patrols are on the roads.
-	var watch := Campaign.module().presence_tier(st)
-	chance = minf(0.95, chance + float(watch.get("road_night" if st.is_night() else "road_day", 0.0)) + Weather.road_bonus(st))
+	var tid := str(road.get("table", ""))
+	var table := Compendium.shared().get_entry("random_encounters", tid) if tid != "" else {}
+	if not table.is_empty() and StoryConditions.check(str(table.get("when", "")), st):
+		var chance := float(table["chance_night"]) if st.is_night() else float(table["chance_day"])
+		# Ground the party knows is quieter (Ashwin, 2026-10-18); Strahd's eyes and the weather are added after.
+		chance *= RoadFamiliarity.scale(st, road, journey_to, leg_to)
+		# Strahd's attention (F9): the more he has noticed the party, the more of his eyes and patrols are on the roads.
+		var watch := Campaign.module().presence_tier(st)
+		chance = minf(0.95, chance + float(watch.get("road_night" if st.is_night() else "road_day", 0.0)) + Weather.road_bonus(st))
+		var out := _roll_table(table, chance, road, st, dice, fights)
+		if not out.is_empty():
+			return out
+	var ids: Array = Compendium.shared().table("random_encounters").keys()
+	ids.sort()
+	for id: Variant in ids:
+		var t := Compendium.shared().get_entry("random_encounters", str(id))
+		if not bool(t.get("every_road", false)) or str(id) == tid or not StoryConditions.check(str(t.get("when", "")), st):
+			continue
+		var chance2 := float(t["chance_night"]) if st.is_night() else float(t["chance_day"])
+		if chance2 <= 0.0:
+			continue
+		if bool(t.get("per_night", false)):
+			if not st.is_night():
+				continue
+			var nights := st.flags.get("_random_nights", {}) as Dictionary
+			if int(nights.get(str(id), -1)) == night_of(st):
+				continue
+			nights[str(id)] = night_of(st)
+			st.flags["_random_nights"] = nights
+		var out2 := _roll_table(t, chance2, road, st, dice, fights)
+		if not out2.is_empty():
+			return out2
+	return {}
+
+
+## Which night it is: the day the night began on (the small hours count as the night before; in a land of endless
+## night, noon to noon).
+static func night_of(st: StoryState) -> int:
+	return st.day if st.minute_of_day >= StoryState.DAY_MINUTES / 2 else st.day - 1
+
+
+## One table's roll: `chance` (0 to 1) on a d100, then an entry by weight among those whose `when` holds.
+static func _roll_table(table: Dictionary, chance: float, road: Dictionary, st: StoryState, dice: DiceRoller,
+		fights: bool) -> Dictionary:
+	var tid := str(table["id"])
 	var d100 := dice.roll_one(100, "Random encounter on %s" % road.get("name", road["id"]))
 	if d100 > roundi(chance * 100.0):
 		return {}
