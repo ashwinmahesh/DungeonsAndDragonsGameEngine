@@ -55,3 +55,17 @@ func test_ribbons_that_hold_until_a_save() -> void:
 	assert_true(fx != null, "bound")
 	assert_eq(hero.speed(), 0)
 	assert_eq(str(fx.repeat_save.get("ability", "")), "str", "the save comes again")
+
+
+func test_it_reaches_only_so_many() -> void:
+	var e := TestCombat.open_field(3)
+	e.default_player_reaction = "never"
+	for i in 4:
+		TestCombat.hero(e, "hedda_ironvow", Vector2i(1 + i, 1), 5)
+	TestCombat.punching_bag(e, Vector2i(11, 7), 500)
+	e.legendary.set_round_events([{"id": "test_ribbon", "kind": "effect", "affects": "party", "count": 2, "at": 20, "every": 1,
+		"modifiers": [{"stat": "speed_set", "value": 0}]}])
+	TestCombat.start_with(e, e.combatants[0])
+	e.legendary.round_events.act(e.legendary.round_events.events[0], false)
+	var bound := e.combatants.filter(func(c: Combatant) -> bool: return c.creature.effects.any(func(fx: Effect) -> bool: return fx.source_id.begins_with("round_event:")))
+	assert_eq(bound.size(), 2, "two of the four")

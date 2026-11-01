@@ -550,4 +550,5 @@ an outcome's `unless_count: {who, at_least}` does nothing while at least that ma
 (another herald dances in only when fewer than three are left). `random` never repeats the outcome used last time.
 An outcome's `kind: "effect"` lands with no save on whoever it reaches; a save or effect outcome can carry `modifiers`
 as well as a `condition`, `until: "round"` (one round), and `repeat_save: true` (the save again at the end of each of
-the creature's turns ends it).
+the creature's turns ends it). On any outcome but a summon, `count: n` (or `one: true` for a single one) reaches only that many of the
+creatures it would, picked at random through the dice (ribbons that bind two).

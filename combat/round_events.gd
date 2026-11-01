@@ -185,6 +185,10 @@ func _reached(o: Dictionary) -> Array[Combatant]:
 				skip = true
 		if not skip:
 			out.append(c)
+	# Only so many of them (`count`, or `one: true` for a single one), picked at random through the dice.
+	var n := int(o.get("count", 1 if bool(o.get("one", false)) else 0)) if str(o.get("kind", "")) != "summon" else 0
+	while n > 0 and out.size() > n:
+		out.remove_at(e.dice.roll_one(out.size(), "Who it reaches") - 1)
 	return out
 
 
