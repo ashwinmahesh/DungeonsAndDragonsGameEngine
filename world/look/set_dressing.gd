@@ -977,6 +977,7 @@ static func _hang(board: ArenaBoard, root: Node3D, art: String, cell: Vector2i, 
 	var model := ModelPiece.for_art(board, art)
 	if model != "":
 		var held := ModelPiece.hang(board, root, model, art, wall, normal, cell, model_scale)
+		WindowView.dress(board, held, art)   # a moving place's outside streaming past its panes
 		board.attach_to_building(wall, root)
 		TownBuilder.face_taken(board, wall, normal, held, art)   # a house's window goes; a door makes a door bay
 		return true
@@ -996,6 +997,7 @@ static func _hang(board: ArenaBoard, root: Node3D, art: String, cell: Vector2i, 
 	sp.position = Vector3(c.x, board.floor_y(cell if not _wall_at(board, cell) else cell + normal) + bottom, c.z) + n * (0.5 + WALL_GAP + board.wall_inset_at(wall, normal))
 	sp.rotation.y = atan2(n.x, n.z)
 	root.add_child(sp)
+	WindowView.dress(board, sp, art)
 	board.attach_to_building(wall, root)
 	TownBuilder.face_taken(board, wall, normal, sp, art)   # this piece hangs where a house had a window
 	return true
