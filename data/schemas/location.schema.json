@@ -74,6 +74,21 @@
             "dark"
           ]
         },
+        "sight": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The place's own sight rules in a fight (EncounterSight): mist, spore clouds, an oppressive gloom.",
+          "properties": {
+            "light_scale": {"type": "number", "minimum": 0, "description": "Every light's reach is scaled by this (0.5: half)."},
+            "darkvision_cap": {"type": "integer", "minimum": 0, "description": "Darkvision reaches no farther than this."},
+            "sight_ft": {"type": "integer", "minimum": 0, "description": "Heavily Obscured beyond this: nothing farther is seen (senses aside)."},
+            "immune": {"type": "object", "additionalProperties": false, "description": "Creatures that see normally.", "properties": {
+              "flags": {"type": "array", "items": {"type": "string"}},
+              "types": {"type": "array", "items": {"type": "string"}},
+              "names": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}}},
+            "when": {"type": "string", "description": "A story condition: the rules hold only while it does (until a beacon is lit)."}
+          }
+        },
         "outdoors": {
           "type": "boolean"
         }

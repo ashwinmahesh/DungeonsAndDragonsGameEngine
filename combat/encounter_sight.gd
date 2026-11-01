@@ -71,6 +71,10 @@ func can_see(a: Combatant, b: Combatant) -> bool:
 	var blind := a.creature.sense_range("blindsight")
 	var truesight := a.creature.sense_range("truesight")
 	var by_sense := (blind > 0 and dist <= blind) or (truesight > 0 and dist <= truesight)
+	var ruled := not e.sight_rule.is_empty() and not sight_immune(a)
+	# The place's sight limit (mist, spore clouds): Heavily Obscured beyond it, for all but those it spares.
+	if ruled and e.sight_rule.has("sight_ft") and dist > int(e.sight_rule["sight_ft"]) and not by_sense:
+		return false
 	if b.creature.has_flag("ethereal"):
 		return truesight > 0 and dist <= truesight and e.grid.can_see(a.cell, a.size_cells, b.cell, b.size_cells)
 	if not e.grid.can_see(a.cell, a.size_cells, b.cell, b.size_cells):
@@ -96,8 +100,37 @@ func can_see(a: Combatant, b: Combatant) -> bool:
 		"magic_dark":
 			return by_sense or devil
 		"dark":
-			return by_sense or devil or (a.creature.darkvision() >= dist and a.creature.darkvision() > 0 and not umbral) or outlined
+			return by_sense or devil or (darkvision_of(a) >= dist and darkvision_of(a) > 0 and not umbral) or outlined
 	return true
+
+
+## `a`'s Darkvision in this fight: its own, held to the place's `darkvision_cap` (Oppressive Gloom) unless it is spared.
+func darkvision_of(a: Combatant) -> int:
+	var e := enc()
+	var dv := a.creature.darkvision()
+	if e.sight_rule.has("darkvision_cap") and not sight_immune(a):
+		dv = mini(dv, int(e.sight_rule["darkvision_cap"]))
+	return dv
+
+
+## Whether the place's sight rules spare `c`: a flag it carries, its creature type, or its name or stat block in `immune`.
+func sight_immune(c: Combatant) -> bool:
+	var im := enc().sight_rule.get("immune", {}) as Dictionary
+	for f: Variant in im.get("flags", []):
+		if c.creature.has_flag(str(f)):
+			return true
+	if str(c.creature.creature_type) in (im.get("types", []) as Array).map(func(t: Variant) -> String: return str(t)):
+		return true
+	var block := str((c.creature as Monster).data.get("id", "")) if c.creature is Monster else ""
+	for n: Variant in im.get("names", []):
+		if str(n) == c.name() or (block != "" and str(n) == block):
+			return true
+	return false
+
+
+## The place's scale on every light's reach (Oppressive Gloom: half), 1.0 when it has none.
+func light_scale() -> float:
+	return float(enc().sight_rule.get("light_scale", 1.0))
 
 
 ## Whether `b` is Invisible by a spell, a feature, an item or its own stat block: the Invisible condition from any

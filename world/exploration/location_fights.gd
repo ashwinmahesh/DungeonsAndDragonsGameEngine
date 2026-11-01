@@ -163,6 +163,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	Wards.bring_circle(e, view.st, view.loc_id)   # a Magic Circle cast here within the hour
 	FieldCasting.bring_risen(e, view.st)   # Animate Dead's and Create Undead's dead, for their day
 	_light_the_fight(view, e)
+	e.sight_rule = sight_rule_for(view)   # the place's mist, spores or gloom (EncounterSight)
 	_ward_the_fight(view, e)
 	BattleScenery.for_location(view, e)   # doors, furniture and chandeliers that can be broken (F5)
 	BattleScenery.for_spec(view, e, spec)   # what the fight puts down itself (a boss's food, a jar holding a ghost)
@@ -605,6 +606,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.ends_when = ends_when_for(view, spec)
+	e.sight_rule = sight_rule_for(view)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):
@@ -799,6 +801,14 @@ static func _combat_token(c: Combatant) -> CombatToken:
 ## The fight sees what the party sees (vision rules live in the encounter): outdoors the hour sets the light (an
 ## overcast Barovian day is bright but not true sunlight; night is dark), indoors the map's light does; the
 ## location's lamps and candles, and the party's lantern when it's lit, are light sources on the grid.
+## The place's sight rules for a fight there (its map's `sight`, while its story `when` holds), {} for none.
+static func sight_rule_for(view: LocationView) -> Dictionary:
+	var s := (view.loc["map"] as Dictionary).get("sight", {}) as Dictionary
+	if s.is_empty() or not StoryConditions.check(str(s.get("when", "")), view.st):
+		return {}
+	return s.duplicate(true)
+
+
 static func _light_the_fight(view: LocationView, e: Encounter) -> void:
 	if bool(view.loc["map"].get("outdoors", false)):
 		e.ambient_light = {"day": "bright", "dusk": "dim", "dawn": "dim"}.get(view.time_phase(), "dark") as String

@@ -97,6 +97,9 @@ var _cover_cache: Dictionary = {}
 ## Savage Attacker is once per turn, any creature's turn: creature id -> the turn it was used on.
 var _savage_turn: Dictionary = {}
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
+## A place's own sight rules for the fight (a location map's `sight`, EncounterSight): {light_scale, darkvision_cap,
+## sight_ft, immune: {flags, types, names}}; {} for none.
+var sight_rule: Dictionary = {}
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
