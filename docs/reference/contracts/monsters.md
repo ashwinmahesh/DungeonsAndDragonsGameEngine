@@ -28,6 +28,10 @@ optional `modifiers`), `grapple` (`escape_dc`, `limit`), `pull` / `push` (`feet`
 (`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`: levels of an affliction,
 docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that burn and then rot).
 
+optional `modifiers`), `grapple` (`escape_dc`, `limit`, `restrain`; `until: target_turn_end` lets go at the end of the held creature's next
+turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self`
+(`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`).
+
 ## Traits read by code
 
 `aura` (`radius`, `trigger: start_turn`, `save`, `condition`, `until`, `immune_on_success`, `affects`): Stench,
@@ -60,7 +64,10 @@ head, once a turn), `regrow` (2 for each head lost, at the end of its own turn, 
 `stops_regrowth` type since, fire by default; or `regrow_one`: one dead head back each turn, up to how many it started
 with) and `regrow_heal` (20 Hit Points when they grow). No heads left is death.
 A Multiattack entry with `per_head` makes that many of the attack. Events: `heads` {id, heads}. (MonsterActions.heads_*;
-the MM Hydra's.)
+the MM Hydra's.) `oa_per_head`: one Opportunity Attack a round for each head beyond the first, on top of its Reaction
+(Reactive Heads; MonsterActions.spare_oa). `head_names`: the heads by name; the one that dies is picked at random, regrown
+heads come back in the trait's order (MonsterActions.heads_alive), and a legendary option with `requires_head` is offered
+only while that head lives.
 
 ## Spellcasting
 

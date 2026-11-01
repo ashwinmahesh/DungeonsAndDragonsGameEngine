@@ -111,7 +111,10 @@ func _opportunity_attack(p: Combatant, target: Combatant, choice: String = "") -
 	if option.is_empty():
 		return CombatResult.new()
 	var echo := e.echo_knight.oa_origin(p, target)
-	p.reaction_available = false
+	if p.reaction_available:
+		p.reaction_available = false
+	else:
+		e.monster_actions.use_spare_oa(p)   # one of a hydra's heads (Reactive Heads)
 	e.log.add("reaction", "%s makes an Opportunity Attack against %s%s" % [p.name(), target.name(), " from its echo's space" if echo != null else ""], p.id)
 	var oa := option.duplicate()
 	oa["opportunity"] = true

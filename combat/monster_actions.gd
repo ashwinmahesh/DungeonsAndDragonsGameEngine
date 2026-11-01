@@ -164,6 +164,9 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 			_timed_condition(src, t, str(rd.get("condition", "")), str(rd.get("until", "permanent")), act_name, rd.get("modifiers", []) as Array, rd)
 		"grapple":
 			grapple(src, t, int(rd.get("escape_dc", 10)), int(rd.get("limit", 1)), act_name, bool(rd.get("restrain", false)))
+			# A hold that lets go by itself (`until: target_turn_end`): at the end of the held creature's next turn.
+			if e.grapples.has(t.id) and str(rd.get("until", "")) == "target_turn_end":
+				t.set_meta("grapple_lapses", {"by": src.id, "skip": 1 if e.current() == t else 0})
 			if e.grapples.has(t.id) and rd.has("hold_damage"):
 				t.set_meta("hold_damage", rd["hold_damage"])
 			if e.grapples.has(t.id) and rd.has("grip_damage"):
@@ -1023,6 +1026,7 @@ func turn_end(c: Combatant) -> void:
 				if o != c and not o.is_down():
 					_aura_on(c, o, tr as Dictionary)
 	heads_regrow(c)
+	_grapple_lapses(c)
 	if has_trait(c, "incorporeal_movement"):
 		for cell in c.footprint():
 			if e.grid.is_solid(cell):
@@ -1638,6 +1642,62 @@ func heads_trait(c: Combatant) -> Dictionary:
 	return {}
 
 
+## The named heads still alive (`head_names` on the trait: a hag's, a pigeon's...), [] for heads without names.
+func heads_alive(c: Combatant) -> Array[String]:
+	var tr := heads_trait(c)
+	var out: Array[String] = []
+	if tr.is_empty() or not tr.has("head_names"):
+		return out
+	out.assign((c.get_meta("heads_alive", tr["head_names"]) as Array).map(func(x: Variant) -> String: return str(x)))
+	return out
+
+
+## Brings dead named heads back, `n` of them in the order the trait names them.
+func _heads_back(c: Combatant, n: int) -> void:
+	var tr := heads_trait(c)
+	if not tr.has("head_names"):
+		return
+	var alive := heads_alive(c)
+	for name: Variant in tr["head_names"]:
+		if n <= 0:
+			break
+		if not str(name) in alive:
+			alive.append(str(name))
+			n -= 1
+	c.set_meta("heads_alive", alive)
+
+
+## Opportunity Attacks it still has this round beyond its Reaction (`oa_per_head` on the heads trait: one for each
+## head beyond the first: a hydra's Reactive Heads).
+func spare_oa(c: Combatant) -> int:
+	var tr := heads_trait(c)
+	if tr.is_empty() or not bool(tr.get("oa_per_head", false)) or not c.can_act() or c.creature.has_flag("no_reactions"):
+		return 0
+	var used := c.get_meta("oa_spare", {}) as Dictionary
+	var spent := int(used.get("n", 0)) if int(used.get("round", -1)) == enc().round_no else 0
+	return maxi(0, heads_of(c) - 1 - spent)
+
+
+func use_spare_oa(c: Combatant) -> void:
+	var used := c.get_meta("oa_spare", {}) as Dictionary
+	var spent := int(used.get("n", 0)) if int(used.get("round", -1)) == enc().round_no else 0
+	c.set_meta("oa_spare", {"round": enc().round_no, "n": spent + 1})
+
+
+## The end of `c`'s turn: a hold set to lapse then (`grapple_lapses`) lets go, after the turn it began in.
+func _grapple_lapses(c: Combatant) -> void:
+	var e := enc()
+	if not c.has_meta("grapple_lapses"):
+		return
+	var g := c.get_meta("grapple_lapses") as Dictionary
+	if int(g.get("skip", 0)) > 0:
+		g["skip"] = int(g["skip"]) - 1
+		return
+	c.remove_meta("grapple_lapses")
+	if e.grapples.has(c.id) and str(e.grapples[c.id]) == str(g.get("by", "")):
+		e.grappling._end(c, "%s is let go" % c.name())
+
+
 ## The heads `c` has now (0 for a creature without them).
 func heads_of(c: Combatant) -> int:
 	var tr := heads_trait(c)
@@ -1667,7 +1727,13 @@ func heads_hurt(c: Combatant, amount: int, types: Array) -> void:
 	var left := heads_of(c) - 1
 	c.set_meta("heads", left)
 	c.set_meta("heads_lost", int(c.get_meta("heads_lost", 0)) + 1)
-	e.log.add("info", "One of %s's heads dies (%d left)" % [c.name(), left], c.id)
+	var which := ""
+	var alive := heads_alive(c)
+	if not alive.is_empty():
+		which = alive[e.dice.roll_one(alive.size(), "Which head dies") - 1]   # a random one (`head_names`)
+		alive.erase(which)
+		c.set_meta("heads_alive", alive)
+	e.log.add("info", "%s of %s's heads dies (%d left)" % [("The %s" % which) if which != "" else "One", c.name(), left], c.id)
 	e.events.append({"type": "heads", "id": c.id, "heads": left})
 	if left <= 0 and not c.creature.dead:
 		c.creature.hp = 0
@@ -1691,6 +1757,7 @@ func heads_regrow(c: Combatant) -> void:
 	if bool(tr.get("regrow_one", false)):
 		if heads_of(c) < int(tr["heads"]) and not seared:
 			c.set_meta("heads", heads_of(c) + 1)
+			_heads_back(c, 1)
 			var back := c.creature.heal(int(tr.get("regrow_heal", 20)), str(tr.get("name", "Multiple Heads")))
 			e.log.add("heal", "One of %s's heads lives again (%d now)" % [c.name(), heads_of(c)], c.id)
 			e.events.append({"type": "heads", "id": c.id, "heads": heads_of(c)})
@@ -1703,6 +1770,7 @@ func heads_regrow(c: Combatant) -> void:
 		return
 	var now := heads_of(c) + lost * int(tr.get("regrow", 2))
 	c.set_meta("heads", now)
+	_heads_back(c, lost * int(tr.get("regrow", 2)))
 	var healed := c.creature.heal(int(tr.get("regrow_heal", 20)), str(tr.get("name", "Multiple Heads")))
 	e.log.add("heal", "%s grows new heads (%d now)" % [c.name(), now], c.id)
 	e.events.append({"type": "heads", "id": c.id, "heads": now})

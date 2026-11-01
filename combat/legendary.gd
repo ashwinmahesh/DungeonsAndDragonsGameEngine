@@ -624,7 +624,13 @@ func per_round(c: Combatant) -> int:
 
 
 func options(c: Combatant) -> Array:
-	return (data_of(c).get("legendary_actions", {}) as Dictionary).get("options", []) as Array
+	var all := (data_of(c).get("legendary_actions", {}) as Dictionary).get("options", []) as Array
+	# An option one of its heads gives (`requires_head`: a named head of its Multiple Heads) goes with that head.
+	if not all.any(func(o: Variant) -> bool: return (o as Dictionary).has("requires_head")) or enc() == null:
+		return all
+	var alive := enc().monster_actions.heads_alive(c)
+	return all.filter(func(o: Variant) -> bool:
+		return not (o as Dictionary).has("requires_head") or str((o as Dictionary)["requires_head"]) in alive)
 
 
 func option(c: Combatant, opt_id: String) -> Dictionary:

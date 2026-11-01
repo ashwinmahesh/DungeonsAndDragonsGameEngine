@@ -749,7 +749,7 @@ func _provokers(mover: Combatant, from: Vector2i, to: Vector2i) -> Array[Combata
 	if mover.has_meta(Legendary.NO_OA_MOVE):
 		return out   # a legendary move provokes none, a Sentinel's included
 	for p in e.hostiles_of(mover):
-		if not e.spells.can_react(p) or not e.can_see(p, mover) or p.creature.has_flag("no_opportunity_attacks"):
+		if not (e.spells.can_react(p) or e.monster_actions.spare_oa(p) > 0) or not e.can_see(p, mover) or p.creature.has_flag("no_opportunity_attacks"):
 			continue
 		# Disengage stops Opportunity Attacks, except a Sentinel's against a creature within 5 ft of it.
 		if mover.disengaged and not (e.features.has_feat(p, "sentinel") and e.grid.distance_ft(p.cell, p.size_cells, from, mover.size_cells, p.altitude, mover.altitude) <= 5):
@@ -1413,7 +1413,7 @@ func _provokers_up(c: Combatant, from: int, to: int) -> Array[Combatant]:
 	var e := enc()
 	var out: Array[Combatant] = []
 	for p in e.hostiles_of(c):
-		if not e.spells.can_react(p) or not e.can_see(p, c) or p.creature.has_flag("no_opportunity_attacks"):
+		if not (e.spells.can_react(p) or e.monster_actions.spare_oa(p) > 0) or not e.can_see(p, c) or p.creature.has_flag("no_opportunity_attacks"):
 			continue
 		var reach := p.reach_ft()
 		var before := e.grid.distance_ft(p.cell, p.size_cells, c.cell, c.size_cells, p.altitude, from)
