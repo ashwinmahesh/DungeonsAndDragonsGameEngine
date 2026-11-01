@@ -46,7 +46,9 @@ source_turn_start` means the start of the user's next turn). The event is sent w
 A contest instead of a set DC: `contest: {save}` makes the check's total the DC of the holder's saving throw, and the
 damage and riders land when the holder fails it. `needs` (a tool kind, such as `musical_instrument`): the user must
 carry one, and has Advantage on the check when proficient with the one they play. `influence: true` labels it
-"Influence: <label>", a variant of the Influence action.
+"Influence: <label>", a variant of the Influence action. `save: {ability, dc}`: the holder saves against that DC instead of a check (flattery
+it must resist), and the offer lands when it fails; `auto: true`: no roll, it simply lands. `needs_item` (item ids): the
+user must carry one of them (a memento shown, a bottle splashed), and `consumes: true` uses that one up.
 
 ## Spellcasting
 
