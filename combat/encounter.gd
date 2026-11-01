@@ -145,6 +145,8 @@ var undo: EncounterUndo
 var traps: EncounterTraps
 ## Actions a monster's trait offers everyone else in the fight (combat/trait_offers.gd).
 var trait_offers: TraitOffers
+## The fight's meters: a guide's loyalty, a rite's pips (combat/fight_meters.gd).
+var meters: FightMeters
 
 
 func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
@@ -164,6 +166,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	objects = EncounterObjects.new(self)
 	traps = EncounterTraps.new(self)
 	trait_offers = TraitOffers.new(self)
+	meters = FightMeters.new(self)
 	spells = SpellCaster.new(self)
 	features = CombatFeatures.new(self)
 	reactions = Reactions.new(self)

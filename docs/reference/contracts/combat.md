@@ -387,6 +387,19 @@ story can begin one with `e.legendary.phases.enter(c, id)`.
 fight (its summons, `summoner` meta) or that names it as `minion_of` (block field or meta) leaves with it
 (`Legendary.vanish`: `departed` "vanish", no loot, no death of its own).
 
+### Meters (combat/fight_meters.gd)
+
+An encounter's `meters` are counts the fight is about (a frightened guide's loyalty, a rite's pips): `{id, label, start
+(0), min (0), max, actions, marks}`. Each of `actions` (`{id, label, cost: action|bonus, near: an object id or a
+creature's name, range (5 ft), check: {skill, dc}, success (+1), failure (0), failure_damage: {dice, type}}`) is on the
+heroes' Common tab as `meter:<meter>:<action>`: its cost, its check, the meter moved by `success` or `failure`, and on a
+failure the damage to whoever tried (a rite's backlash). Each of `marks` (`{value, falling, flag, outcome, say}`) goes
+off once, when the count reaches `value` going up (or down to it with `falling`): its `flag` into the fight's
+`story_flags`, and with `outcome` (victory, defeat, ended) the fight ends there. Events: `meter` {id, value, from} and
+`meter_mark` {id, value, say}; the ability event `meter:<meter>:<action>` for the view. The HUD's round counter shows
+"<label> <value> / <max>". `Encounter.meters.change(id, delta)` lets a game module or round event move one. Kept in a
+round's save; LocationFights reads the entry's `meters` for a new fight and a saved one alike.
+
 ### Round events (combat/round_events.gd)
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a

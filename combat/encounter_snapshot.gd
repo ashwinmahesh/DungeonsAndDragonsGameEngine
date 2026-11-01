@@ -79,7 +79,7 @@ static func capture(e: Encounter) -> Dictionary:
 		"spells": e.spells.to_dict(), "shapes": e.shapes.to_dict(), "light": e.ambient_light, "sunlit": e.sunlit,
 		"location_id": e.location_id, "places": e.places.duplicate(), "lair": e.lair, "outdoors": e.outdoors, "weather_id": e.weather_id, "weather": e.weather.duplicate(), "boss": e.legendary.to_dict(),
 		"drop_ft": e.grid.drop_ft, "ceiling_ft": e.grid.ceiling_ft, "difficulty": e.difficulty.id, "ground": e.ground.to_dict(),
-		"objects": e.objects.to_dict(), "heights": heights, "traps": e.traps.to_dict(), "elevation": e.grid.elevation_rows()}
+		"objects": e.objects.to_dict(), "meters": e.meters.to_dict(), "heights": heights, "traps": e.traps.to_dict(), "elevation": e.grid.elevation_rows()}
 
 
 ## Rebuilds the fight; `party` supplies the party's Character objects (from the loaded story) by id when present.
@@ -176,6 +176,7 @@ static func restore(d: Dictionary, dice: DiceRoller, party: Array[Character] = [
 	Difficulty.named(str(d.get("difficulty", Difficulty.DEFAULT))).arm(e)
 	e.ground.from_dict(d.get("ground", {}) as Dictionary)
 	e.objects.from_dict(d.get("objects", {}) as Dictionary)
+	e.meters.from_dict(d.get("meters", {}) as Dictionary)
 	e.traps.from_dict(d.get("traps", {}) as Dictionary)
 	e.state = Encounter.State.ACTIVE
 	e.round_no = int(d["round"])
