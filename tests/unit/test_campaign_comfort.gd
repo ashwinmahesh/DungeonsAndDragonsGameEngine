@@ -27,7 +27,9 @@ func test_the_pause_menu_shows_and_keeps_a_campaign_setting() -> void:
 	var menu := PauseMenu.new()
 	add_child(menu)
 	menu.call("open", self, st, 0)
+	await get_tree().process_frame
 	menu.call("_show_settings", "Game")
+	await get_tree().process_frame
 	var boxes := menu.find_children("Comfort_test_spiders", "CheckBox", true, false)
 	assert_eq(boxes.size(), 1, "its row is there")
 	var box := boxes[0] as CheckBox
@@ -35,3 +37,4 @@ func test_the_pause_menu_shows_and_keeps_a_campaign_setting() -> void:
 	box.button_pressed = false
 	assert_false(bool(st.options["test_spiders"]), "kept in the playthrough")
 	menu.queue_free()
+	await get_tree().process_frame
