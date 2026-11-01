@@ -194,3 +194,5 @@ in a fight, and the class tab offers Automatic and Off for it (Rallying Cry, Fam
 `exhaustion_relief`: `when_spent` (a resource) and `value`: spending that resource also removes that many levels of
 Exhaustion (Necromancer's Grave Power with Arcane Recovery).
 
+`fickle_die` ({dice, on}): rolled with each D20 Test it covers (every one when `on` is unset); a 1 gives Disadvantage on that test, anything else is
+added to it (a jinxed drink). `extra_damage` with `once: true` is used up by the hit that deals it (a coating on a blade).

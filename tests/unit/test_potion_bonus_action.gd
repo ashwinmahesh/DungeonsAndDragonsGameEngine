@@ -1,7 +1,7 @@
 extends TestCase
 ## Drinking a potion, or giving it to a creature within 5 ft, is a Bonus Action (2024 DMG, Potions; the owner's wish,
-## 2026-10-12). Every potion is held to it, so a new one can't come in costing an Action. Oils are potions too but are
-## applied, not drunk, so they keep their own cost.
+## 2026-10-12). Every potion is held to it, so a new one can't come in costing an Action. Oils and coatings are
+## potions too but are applied, not drunk (an `oil_of_` id, or `applied` on the item), so they keep their own cost.
 
 
 ## Every potion in the game: [{id, data}].
@@ -22,7 +22,7 @@ func test_every_potion_is_drunk_as_a_bonus_action() -> void:
 		for p in MagicItems.powers_of(d):
 			if str(p.get("id", "")) == "drink":
 				drink = p
-		if id.begins_with("oil_of_"):
+		if id.begins_with("oil_of_") or bool(d.get("applied", false)):
 			assert_true(drink.is_empty(), "%s is applied, not drunk" % id)
 			continue
 		assert_false(drink.is_empty(), "%s is drunk" % id)

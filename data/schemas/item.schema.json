@@ -499,6 +499,10 @@
       ],
       "additionalProperties": false
     },
+    "applied": {
+      "type": "boolean",
+      "description": "A potion applied rather than drunk (a coating, an oil): it has no Drink power."
+    },
     "powers": {
       "type": "array",
       "description": "What the item can be used for (docs/contracts/magic_items.md).",

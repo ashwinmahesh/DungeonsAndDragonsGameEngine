@@ -728,6 +728,11 @@ func _after_hit(st: Dictionary) -> CombatResult:
 			"penalty": bool(m.data.get("penalty", false))})
 		if first_melee:
 			e.spells.reaction_spells.spend_stored_charge(c, m)
+		# A coating on the blade (`once`): the hit uses it up.
+		if bool(m.data.get("once", false)):
+			for fx: Effect in c.creature.effects.duplicate():
+				if m in fx.modifiers:
+					c.creature.remove_effect(fx)
 	var turn_key := "%d:%d" % [e.round_no, e.turn_index]
 	var savage := c.creature.has_flag("savage_attacker") and str(e._savage_turn.get(c.id, "")) != turn_key and c.creature is Character
 	var exploit := e.faerun.exploit_opening(c, opts)

@@ -101,3 +101,11 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Coatings and applied potions
+
+An item's `applied: true` marks a potion that is applied rather than drunk (a coating, an oil): it has no Drink power.
+A power with `custom: "weapon_coating"` and `params: {dice, types, minutes}` (with a `choice` of the `types`) coats a
+weapon: the next weapon hit within `minutes` deals `dice` more of the chosen type, and that hit uses it up (in a fight
+or outside one). `drink_field_spell` takes `params.modifiers` too: what the drink adds for its minutes besides the
+exploring spell (Advantage on Insight).
