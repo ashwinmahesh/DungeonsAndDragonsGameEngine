@@ -213,6 +213,7 @@ static func _benefits(st: StoryState, dice: DiceRoller) -> Array[String]:
 	var room := Services.after_long_rest(st)   # a room booked at the inn (F14)
 	if room != "":
 		lines.append(room)
+	lines.append_array(Wards.after_long_rest(st))   # wards drawn on by resting in them (a spell's `rest_ward`)
 	lines.append_array(RestCasts.after_long_rest(st.party, dice))
 	return lines
 

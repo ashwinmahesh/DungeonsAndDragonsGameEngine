@@ -10,6 +10,9 @@ extends RefCounted
 ## - Magic Circle: cast within the hour before a fight in the same place, it stands around its caster when the fight
 ##   starts: Celestials, Elementals, Fey, Fiends and Undead can't step into it and attack anyone inside it at
 ##   Disadvantage.
+## - A ward drawn on by resting in it (a spell's `rest_ward`: {modifiers, others}): finishing a Long Rest where it was
+##   cast ends the spell, and its caster and up to `others` more (its spellcasting modifier, at least 1, when unset), the
+##   party first, gain its modifiers for what is left of the spell's duration.
 ## Pure story and combat logic: no nodes.
 
 ## The wards that belong to the place they're cast in.
@@ -26,8 +29,66 @@ static func cast_here(st: StoryState, spell_id: String) -> void:
 		if not st.location in places:
 			places.append(st.location)
 		st.flags[HALLOWED] = places
-	elif spell_id in PLACE_BOUND and st.active_spells.has(spell_id):
+	elif (spell_id in PLACE_BOUND or Compendium.shared().spell_data(spell_id).has("rest_ward")) and st.active_spells.has(spell_id):
 		(st.active_spells[spell_id] as Dictionary)["location"] = st.location
+
+
+## A Long Rest just finished: each `rest_ward` spell running here ends, and those it was cast for take its ward for
+## the rest of its duration. Returns a line for each.
+static func after_long_rest(st: StoryState) -> Array[String]:
+	var lines: Array[String] = []
+	for spell_id: String in st.active_spells.keys():
+		var data := Compendium.shared().spell_data(spell_id)
+		var ward := data.get("rest_ward", {}) as Dictionary
+		if ward.is_empty() or not active_at(st, spell_id, st.location):
+			continue
+		var rec := st.active_spells[spell_id] as Dictionary
+		var left := int(rec["until"]) - st.total_minutes()
+		st.active_spells.erase(spell_id)
+		var caster: Character = null
+		var everyone: Array[Character] = []
+		for ch in st.party:
+			if not ch.dead:
+				everyone.append(ch)
+		for g: Variant in st.guests:
+			if g is Character and not (g as Character).dead:
+				everyone.append(g as Character)
+		for ch in everyone:
+			if ch.id == str(rec.get("caster", "")):
+				caster = ch
+		if caster == null:
+			continue
+		var others := int(ward.get("others", maxi(1, _casting_mod(caster, data))))
+		var chosen: Array[Character] = [caster]
+		for ch in everyone:
+			if ch != caster and chosen.size() <= others:
+				chosen.append(ch)
+		for ch in chosen:
+			var fx := Effect.new(str(data.get("name", spell_id)), &"spell", spell_id)
+			fx.caster_id = caster.id
+			for m: Variant in ward.get("modifiers", []):
+				var md := (m as Dictionary).duplicate()
+				var stat := str(md["stat"])
+				md.erase("stat")
+				fx.with_modifier(stat, md)
+			fx.ends = Effect.Ends.MINUTES
+			fx.minutes_left = left
+			ch.add_effect(fx)
+		lines.append("%s's %s gives way as the rest ends: %s keep its ward for %d hours." % [caster.name.get_slice(" ", 0),
+			str(data.get("name", spell_id)), ", ".join(chosen.map(func(c: Character) -> String: return c.name.get_slice(" ", 0))), left / 60])
+	return lines
+
+
+## `caster`'s spellcasting ability modifier for `data` (the spell's class, else its best).
+static func _casting_mod(caster: Character, data: Dictionary) -> int:
+	var best := -99
+	for entry: Variant in caster.spellcasting:
+		var ed := entry as Dictionary
+		var mod := caster.ability_mod(StringName(str(ed.get("ability", "int"))))
+		if str(ed.get("class_id", "")) in (data.get("classes", []) as Array):
+			return mod
+		best = maxi(best, mod)
+	return best if best > -99 else 0
 
 
 ## Whether `spell_id`'s ward is running at `location_id` (Guards and Wards: anywhere in its building).
