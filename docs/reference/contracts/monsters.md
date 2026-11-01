@@ -69,6 +69,12 @@ the MM Hydra's.) `oa_per_head`: one Opportunity Attack a round for each head bey
 heads come back in the trait's order (MonsterActions.heads_alive), and a legendary option with `requires_head` is offered
 only while that head lives.
 
+## Damage Threshold
+
+`damage_threshold` on a stat block: less damage than that from one source does nothing (2024 DMG). A number, or
+arithmetic counting the living, "5 * alive:<stat block>" (Legendary.counted: a boss whose hide hardens with each minion
+still standing).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve

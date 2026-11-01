@@ -183,15 +183,16 @@ func enter(c: Combatant, phase_id: String) -> bool:
 	_rebuild(c)
 	var label := str(ph.get("name", phase_id.capitalize()))
 	leg()._log("info", "%s: %s" % [c.name(), label], c, [str(ph.get("summary", ""))])
-	# Hit Points: "full", "half" (of its maximum), a number to set, or `heal` to add.
+	# Hit Points: "full", "half" (of its maximum), a number to set, or `heal` to add; a number may count the living
+	# ("40 + 10 * alive:test_minion": Legendary.counted).
 	if ph.has("hp"):
 		var to: Variant = ph["hp"]
 		var full := cr.max_hp()
-		var hp := full if str(to) == "full" else (full / 2 if str(to) == "half" else int(to))
+		var hp := full if str(to) == "full" else (full / 2 if str(to) == "half" else leg().counted(to))
 		cr.hp = clampi(hp, 1, full)
 		e.events.append({"type": "heal", "id": c.id, "amount": maxi(0, cr.hp)})
 	elif ph.has("heal"):
-		var healed := cr.heal(int(ph["heal"]), label)
+		var healed := cr.heal(leg().counted(ph["heal"]), label)
 		if healed > 0:
 			e.events.append({"type": "heal", "id": c.id, "amount": healed})
 	elif cr.max_hp() != had_max:
@@ -214,6 +215,12 @@ func enter(c: Combatant, phase_id: String) -> bool:
 			e.grapples.erase(c.id)
 	if bool(ph.get("lair", false)):
 		e.lair = true
+	# The creatures it takes with it as it begins (`destroys`: stat block ids), after its Hit Points counted them.
+	for bid: Variant in ph.get("destroys", []):
+		for o in e.combatants:
+			if o != c and o.is_alive() and o.creature.hp > 0 and not o.has_meta("left_fight") and o.creature is Monster \
+					and str((o.creature as Monster).data.get("id", "")) == str(bid):
+				leg().vanish(o, str(ph.get("destroys_narration", "")))   # gone with it, whatever it resists
 	if ph.has("flag"):
 		leg().story_flags[str(ph["flag"])] = true
 	var sm := ph.get("summon", {}) as Dictionary

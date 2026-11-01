@@ -851,12 +851,25 @@
                 "full",
                 "half"
               ]
+            },
+            {
+              "type": "string",
+              "pattern": "alive:",
+              "description": "Arithmetic counting the living: \"40 + 10 * alive:<stat block>\" (Legendary.counted)."
             }
           ]
         },
+        "destroys": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Stat blocks whose living creatures go with it as the phase begins (after `hp` or `heal` counted them)."
+        },
+        "destroys_narration": {"type": "string"},
         "heal": {
-          "type": "integer",
-          "minimum": 1
+          "anyOf": [
+            {"type": "integer", "minimum": 1},
+            {"type": "string", "pattern": "alive:", "description": "Arithmetic counting the living: \"10 * alive:<stat block>\"."}
+          ]
         },
         "legendary_resistance": {
           "description": "\"refill\": its spent uses come back; a number: that many uses left.",
@@ -1002,6 +1015,10 @@
     }
   },
   "properties": {
+    "damage_threshold": {
+      "description": "Damage Threshold: less damage than this from one source does nothing. A number, or arithmetic counting the living (\"5 * alive:<stat block>\").",
+      "anyOf": [{"type": "integer", "minimum": 1}, {"type": "string", "pattern": "alive:"}]
+    },
     "id": {
       "$ref": "common.schema.json#/$defs/id"
     },
