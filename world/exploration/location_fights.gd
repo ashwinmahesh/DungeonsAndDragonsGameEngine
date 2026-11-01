@@ -501,6 +501,10 @@ static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 	if ends.has("objects_gone"):
 		out["objects_gone"] = (ends["objects_gone"] as Array).duplicate()
 		out["objects_outcome"] = str(ends.get("objects_outcome", "victory"))
+	# The meters the fight needs full before beating the foes wins it (a rite's six successes).
+	if ends.has("meters_needed"):
+		out["meters_needed"] = (ends["meters_needed"] as Array).duplicate(true)
+		out["meters_outcome"] = str(ends.get("meters_outcome", "victory"))
 	return out
 
 

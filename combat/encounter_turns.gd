@@ -515,9 +515,9 @@ func _check_over() -> void:
 		e.state = Encounter.State.OVER
 		e.outcome = "ended" if str(e.ends_when.get("ward_lost", "defeat")) == "ended" else "defeat"
 		e.log.add("info", "%s is lost" % _ward_fallen().name(), "")
-	elif not enemies_up or _wards_out():
+	elif (not enemies_up and meters_met()) or _wards_out():
 		e.state = Encounter.State.OVER
-		e.outcome = "victory"
+		e.outcome = "victory" if (e.ends_when.get("meters_needed", []) as Array).is_empty() else str(e.ends_when.get("meters_outcome", "victory"))
 	elif _party_left():
 		e.state = Encounter.State.OVER
 		e.outcome = "ended"
@@ -533,6 +533,16 @@ func _check_over() -> void:
 		_wrap_up()
 
 
+## Whether every meter the fight needs (`ends_when.meters_needed`: [{meter, value}], a rite's six successes) has
+## reached its value; beating the foes doesn't end the fight before.
+func meters_met() -> bool:
+	var e := enc()
+	for n: Variant in e.ends_when.get("meters_needed", []):
+		if e.meters.value(str((n as Dictionary)["meter"])) < int((n as Dictionary).get("value", 1)):
+			return false
+	return true
+
+
 ## Ends the fight now with `outcome` (the clock running out).
 func _finish(outcome: String) -> void:
 	var e := enc()
@@ -546,6 +556,7 @@ func _finish(outcome: String) -> void:
 ## What every fight's end does, however it ended.
 func _wrap_up() -> void:
 	var e := enc()
+	e.meters.store_values()   # a meter the story keeps (a beacon's brilliant successes)
 	# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
 	e.ground.fight_over()
 	# A relic spent in the fight crumbles (Saint Markovia's Thighbone, once it has hit a vampire).
