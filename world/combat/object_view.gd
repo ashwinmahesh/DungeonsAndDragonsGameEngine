@@ -85,6 +85,17 @@ func _drop(d: Dictionary, key: String) -> void:
 	d.erase(key)
 
 
+## The effect an object makes at `moment` ("broken", "eaten"): art/audio.json "objects", keyed by the object's fuel
+## (what eats it, ObjectFuel) and else its kind, each naming an effect in "sfx" per moment; "" with none, which plays
+## nothing (a game whose file has no "objects" keeps its fights as they sound now).
+static func sound_for(o: BattleObject, moment: String) -> String:
+	var table := Audio._data.get("objects", {}) as Dictionary
+	for key: String in [o.fuel, o.kind]:
+		if key != "" and table.has(key):
+			return str((table[key] as Dictionary).get(moment, ""))
+	return ""
+
+
 ## Plays one object event (with the fight's SpellFx, for a spell's or a shot's missile); awaits it.
 func play(ev: Dictionary, objects: EncounterObjects, tokens: Dictionary, fx: SpellFx) -> void:
 	var o := objects.get_object(str(ev.get("id", "")))
@@ -114,12 +125,14 @@ func play(ev: Dictionary, objects: EncounterObjects, tokens: Dictionary, fx: Spe
 				_float(_spot(o, objects) + Vector3(0, -0.3, 0), "-%d" % int(ev.get("amount", 0)), "rose")
 		"object_broken", "object_fall":
 			if o != null and not _broken.has(o.id):
+				Audio.sfx(sound_for(o, "broken"))
 				_show_broken(o, objects, true)
 				await get_tree().create_timer(0.35).timeout
 		"object_eaten":
 			# Eaten whole (ObjectFuel.devour): it shrinks into the eater, leaving no wreckage.
 			if o != null and not _broken.has(o.id):
 				_broken[o.id] = true
+				Audio.sfx(sound_for(o, "eaten"))
 				var piece := _placed.get(o.id) as Node3D
 				if piece != null and is_instance_valid(piece):
 					var tw := create_tween()
