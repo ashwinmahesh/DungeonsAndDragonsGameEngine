@@ -880,6 +880,10 @@ static func _drop_token(tok: CombatToken, playing: CombatView) -> void:
 
 static func _end_encounter(view: LocationView, encounter_id: String, spec: Dictionary, e: Encounter, ctokens: Dictionary, outcome: String) -> void:
 	view.last_encounter = spec
+	# A fight the party loses by being taken, not killed (the entry's `defeat`, DefeatCapture).
+	var taken_to := {}
+	if outcome == "defeat" and not DefeatCapture.rule_for(spec).is_empty():
+		outcome = DefeatCapture.OUTCOME
 	Bestiary.after_fight(view.st, e)   # who fell and what was studied, for the journal's Bestiary (U8)
 	for c in e.combatants:
 		if c.side in [&"party", &"guest"]:
@@ -957,6 +961,11 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		for key in Campaign.module().fight_victory_keys():
 			view._say(key)
 		view._fight_bark_due = true   # a guest may have a word as the party walks on (LocationWalk._guest_chatter)
+	elif outcome == DefeatCapture.OUTCOME:
+		var rule := DefeatCapture.rule_for(spec)
+		taken_to = DefeatCapture.apply(view.st, rule)
+		if str(rule.get("say", "")) == "" or not view._say(str(rule["say"])):
+			view._say("combat:captured")
 	elif outcome == "ended":
 		# Over with no winner: the fallen are stabilized by their friends, as after a won fight.
 		for m in view.members:
@@ -996,6 +1005,8 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		view.st.travel_resume = {}
 	view._save_positions()
 	view.combat_ended.emit(outcome)
+	if str(taken_to.get("location", "")) != "":
+		view.exit_requested.emit(str(taken_to["location"]), str(taken_to["spawn"]))   # carried off to the cell
 	# A foe that withdrew or fled as mist leaves nothing behind (a Tarokka treasure here is still found).
 	if talk != "":
 		Captives.forget_spent(view.st)
