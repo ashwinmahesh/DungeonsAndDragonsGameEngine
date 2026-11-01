@@ -183,6 +183,15 @@ func list(c: Combatant) -> Array[Dictionary]:
 				slot = l
 				break
 		out.append(_entry("restore_ward", "Restore Arcane Ward", "+%d HP (level %d slot)" % [2 * slot, slot], "bonus", _first(bw, "" if slot > 0 else "No spell slots"), "none", "Bonus Action: expend a spell slot to restore 2 × its level Hit Points to the ward."))
+	# d20s the party brought to the fight (a boon): one in place of a visible creature's next d20.
+	if c.side in [&"party", &"guest"]:
+		var listed := {}
+		for v: int in e.stored_d20s:
+			if listed.has(v):
+				continue
+			listed[v] = true
+			out.append(_entry("stored_d20:%d" % v, "Stored d20: %d" % v, "%d kept" % e.stored_d20s.size(), "free", e._turn_check(c), "creature",
+				"Spend this kept d20: the next D20 Test of a creature you can see shows %d." % v, 9999))
 	# A Twist of Fate the story gave (Character.twists): a visible creature's next d20 shows a 1 or a 20.
 	if c.creature is Character and (c.creature as Character).twists() > 0:
 		for v: int in [1, 20]:
@@ -637,6 +646,15 @@ func perform(c: Combatant, id: String, t: Combatant, point: Vector2, choice: Str
 					c.creature.ward_hp = mini(ch.resource_max("arcane_ward"), c.creature.ward_hp + 2 * l)
 					e.log.add("info", "%s restores the Arcane Ward to %d" % [c.name(), c.creature.ward_hp], c.id)
 					break
+		"stored_d20":
+			if t == null or not e.can_see(c, t):
+				return CombatResult.fail("Choose a creature you can see")
+			var v5 := int(id.get_slice(":", 1))
+			if not v5 in e.stored_d20s:
+				return CombatResult.fail("No such d20 kept")
+			e.stored_d20s.erase(v5)
+			t.set_meta("portent_next", v5)
+			e.log.add("info", "%s spends a kept d20: %s's next d20 will show %d" % [c.name(), t.name(), v5], c.id)
 		"twist":
 			if t == null or not e.can_see(c, t):
 				return CombatResult.fail("Choose a creature you can see")

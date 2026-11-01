@@ -280,6 +280,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				minutes = int(last.left(-1)) * (60 if last.ends_with("h") else 1)
 			if _words_of(rest, ["party"]) and minutes > 0:
 				return {"t": "bless", "party": rest.size() == 1, "minutes": minutes}
+		"store_d20":
+			# `store_d20 <n>`: n d20s rolled now and kept for the party's next fight (a death spirit's boon).
+			if parts.size() == 2 and parts[1].is_valid_int() and int(parts[1]) > 0:
+				return {"t": "store_d20", "count": int(parts[1])}
 		"twist":
 			# `twist +<n> [party]`: Twists of Fate for the hero in the conversation, or every living hero.
 			if parts.size() >= 2 and RegEx.create_from_string("^\\+[1-9]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party"]):

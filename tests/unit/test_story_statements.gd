@@ -92,6 +92,26 @@ func test_a_twist_of_fate_from_the_story_and_spent_in_a_fight() -> void:
 	assert_eq(foe.creature.roll_save(e.dice, &"dex", 10).kept, 1, "its next d20 shows a 1")
 
 
+func test_kept_d20s_spent_in_the_next_fight() -> void:
+	var st := _st()
+	var beats := _beats(_run(st, "~ start\nstore_d20 2\n"))
+	assert_true(str(beats[0]["text"]).begins_with("Kept for the next fight:"))
+	var kept := st.flags[DialogueRunner.STORED_D20S] as Array
+	assert_eq(kept.size(), 2)
+	var e := TestCombat.open_field(3)
+	e.default_player_reaction = "never"
+	var c := e.add(st.party[0], &"party", Vector2i(2, 3))
+	var foe := TestCombat.punching_bag(e, Vector2i(6, 3), 100)
+	e.stored_d20s.assign(kept)
+	TestCombat.start_with(e, c)
+	var v := int(kept[0])
+	assert_true(e.feature_actions.perform(c, "stored_d20:%d" % v, foe, Vector2.INF).ok)
+	assert_eq(e.stored_d20s.size(), 1, "one spent")
+	assert_eq(foe.creature.roll_save(e.dice, &"dex", 10).kept, v, "the kept number")
+	var back := EncounterSnapshot.restore(EncounterSnapshot.capture(e), e.dice, st.party)
+	assert_eq(back.stored_d20s.size(), 1, "a round's save keeps the other")
+
+
 func test_an_attack_roll_check() -> void:
 	var st := _st()
 	var ch := st.party[0]
