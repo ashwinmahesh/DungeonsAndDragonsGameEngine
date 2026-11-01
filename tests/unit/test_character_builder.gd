@@ -167,3 +167,15 @@ func test_magic_initiate_list_fixed_by_background() -> void:
 	assert_true(c.option("sacred_flame") != null, "Acolyte's Magic Initiate uses the Cleric list")
 	assert_true(c.option("fire_bolt") == null, "no Wizard cantrips")
 	assert_true(b.get_choice("background.feat.list") == null, "no list choice when the background fixes it")
+
+
+func test_a_builder_started_from_a_look_alone_takes_every_pick() -> void:
+	# The hero creator starts its builder from a look and pronouns alone; the rest of the build is the empty one.
+	var b := CharacterBuilder.new(null, {"appearance": {"gender": "male"}, "identity": {"pronouns": "he/him"}})
+	b.set_class("fighter")
+	b.set_equipment("class", "b")
+	assert_eq(str((b.build["equipment"] as Dictionary)["class"]), "b", "the equipment pick is kept")
+	assert_eq(str((b.build["appearance"] as Dictionary)["gender"]), "male", "the look it started from stays")
+	var ids: Array = b.preview().inventory.map(func(e: Dictionary) -> String: return str(e["id"]))
+	assert_true("longbow" in ids, "option B's gear: %s" % [ids])
+	assert_false("greatsword" in ids, "not option A's")
