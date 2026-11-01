@@ -168,6 +168,8 @@ func _group_key(a: Dictionary) -> String:
 		return "policy:" + str(a["policy"])
 	if a.has("group"):
 		return "label:" + str(a["group"])
+	if str(a.get("menu", "")) != "":
+		return "label:" + str(a["menu"])
 	if str(a.get("spell_id", "")) != "" and str(a["kind"]) == "spell" and str(a.get("tab", "")) == SPELLS:
 		return "spell:" + str(a["spell_id"])
 	var label := str(a["label"])
@@ -406,7 +408,7 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	for m in e.meters.entries(c):
 		var meter_entry := _entry(str(m["id"]), COMMON, str(m["label"]), str(m["sub"]), str(m["cost"]), str(m["why"]), "none", str(m["help"]))
 		if str(m.get("menu", "")) != "":
-			meter_entry["group"] = str(m["menu"])   # a rite's themes under one entry (the meter's `menu`)
+			meter_entry["menu"] = str(m["menu"])   # a rite's themes under one entry (the meter's `menu`)
 		out.append(meter_entry)
 	if e.grapples.has(c.id):
 		out.append(_entry("escape", COMMON, "Escape Grapple", "Athletics or Acrobatics", "action", why, "none"))
