@@ -47,6 +47,41 @@ func why(c: Combatant, p: Dictionary) -> String:
 	return w if w != "" else _arcana_why(c, p)
 
 
+## A lure thrown to a square (`throw_lure`: params {range, radius, lures, rounds}): each creature named in `lures`
+## (names, stat block ids or creature types) within `radius` ft of where it lands goes for it, and is busy over it,
+## Incapacitated, for `rounds` (dice) of its own turns or until something harms it (bloody scraps for hounds).
+func _throw_lure(c: Combatant, p: Dictionary, point: Vector2) -> CombatResult:
+	var e := enc()
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	if point == Vector2.INF:
+		return CombatResult.fail("Choose where to throw it")
+	var at := Vector2i(floori(point.x), floori(point.y))
+	if e.grid.distance_ft(c.cell, c.size_cells, at, 1) > int(params.get("range", 30)):
+		return CombatResult.fail("Too far: %d ft at most" % int(params.get("range", 30)))
+	_pay(c, p)
+	var label := str((p["data"] as Dictionary).get("name", "the lure"))
+	e.log.add("info", "%s throws %s" % [c.name(), label], c.id)
+	var who := params.get("lures", []) as Array
+	for o in e.living():
+		if o == c or e.grid.distance_ft(o.cell, o.size_cells, at, 1) > int(params.get("radius", 60)):
+			continue
+		var block := str((o.creature as Monster).data.get("id", "")) if o.creature is Monster else ""
+		if not (o.name() in who or (block != "" and block in who) or str(o.creature.creature_type) in who):
+			continue
+		var spot := e.spells._free_cell_near(at, o.size_cells)
+		if spot.x >= 0 and spot != o.cell:
+			var from := o.cell
+			o.cell = spot
+			e.events.append({"type": "move", "id": o.id, "from": from, "to": spot, "forced": true})
+		var rounds := int(e.dice.roll_expr(str(params.get("rounds", "1d3")), label)["total"])
+		var fx := Effect.new(label, &"item", "lure").with_condition(&"incapacitated")
+		fx.lasting_rounds(rounds, o.id)
+		fx.ends_on_damage = true
+		o.creature.add_effect(fx)
+		e.log.add("condition", "%s goes for %s (%d rounds)" % [o.name(), label, rounds], o.id)
+	return CombatResult.new()
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -59,6 +94,8 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return _drink(c, p, t, id)
 		"end_granted_effect":
 			return _end_granted(c, p)
+		"throw_lure":
+			return _throw_lure(c, p, point)
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)

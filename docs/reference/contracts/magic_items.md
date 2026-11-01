@@ -101,3 +101,9 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Lures
+
+A power with `custom: "throw_lure"` and `params: {range, radius, lures, rounds}` throws a lure to a square within `range`
+ft: each creature named in `lures` (names, stat block ids or creature types) within `radius` ft of it goes to it and is
+busy over it (Incapacitated) for `rounds` (dice) of its turns or until something harms it (ItemSpecials._throw_lure).
