@@ -261,6 +261,12 @@ What the story gives a hero for good, kept in their build so a save and every re
 build's `story_feats`, [{id, source}], walked after the dark gifts with the sheet naming `source`; false for an unknown
 feat or one the hero has that isn't `repeatable`), and a spell's bonus for a while (`spell_boon`).
 
+## Given up for good (Character.given_up)
+
+A hero's build may list `given_up`: ids of class, subclass, species or background features and of feats the hero gave
+up (a campaign's ritual price). Character.refresh leaves each out, with what it grants (its modifiers, resources and
+spells); `give_up(id)` adds one and refreshes. The build is saved as it is, so a save keeps the loss.
+
 ## Dark gifts (Phase 5)
 
 `data/dark_gifts/<id>.json`:
