@@ -451,6 +451,9 @@ func _advance_index() -> void:
 			e.legendary.round_ending()
 			if e.state != Encounter.State.ACTIVE:
 				return
+			_clock_runs_out()
+			if e.state != Encounter.State.ACTIVE:
+				return
 			e.turn_index = 0
 			e.round_no += 1
 			_drop_reflex_turns()
@@ -527,17 +530,33 @@ func _check_over() -> void:
 		e.outcome = "ended"
 		e.log.add("info", "%s is down, and the fight goes out of the foes" % _first_to_hurt_down().name(), "")
 	if e.state == Encounter.State.OVER:
-		# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
-		e.ground.fight_over()
-		# A relic spent in the fight crumbles (Saint Markovia's Thighbone, once it has hit a vampire).
-		e.items.fight_over()
-		# An Antimagic Field doesn't outlast the fight: magic items wake up again.
-		for c in e.combatants:
-			for who: Creature in [c.creature, e.shapes.original(c)]:
-				if who is Character:
-					(who as Character).magic_suppressed = false
-		e.log.add("info", {"victory": "Victory!", "ended": "The fight is over."}.get(e.outcome, "The party has fallen.") as String, "")
-		e.events.append({"type": "over", "outcome": e.outcome})
+		_wrap_up()
+
+
+## Ends the fight now with `outcome` (the clock running out).
+func _finish(outcome: String) -> void:
+	var e := enc()
+	if e.state != Encounter.State.ACTIVE:
+		return
+	e.state = Encounter.State.OVER
+	e.outcome = outcome
+	_wrap_up()
+
+
+## What every fight's end does, however it ended.
+func _wrap_up() -> void:
+	var e := enc()
+	# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
+	e.ground.fight_over()
+	# A relic spent in the fight crumbles (Saint Markovia's Thighbone, once it has hit a vampire).
+	e.items.fight_over()
+	# An Antimagic Field doesn't outlast the fight: magic items wake up again.
+	for c in e.combatants:
+		for who: Creature in [c.creature, e.shapes.original(c)]:
+			if who is Character:
+				(who as Character).magic_suppressed = false
+	e.log.add("info", {"victory": "Victory!", "ended": "The fight is over."}.get(e.outcome, "The party has fallen.") as String, "")
+	e.events.append({"type": "over", "outcome": e.outcome})
 
 
 # --- Fights that end with no winner (Encounter.ends_when) -----------------------------------------------------------
@@ -602,6 +621,36 @@ func _wards_out() -> bool:
 
 ## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there; so does a ward on one of
 ## `ends_when.ward_exits`.
+
+
+## The rounds left on the fight's clock (`ends_when.rounds`), this one counted; -1 when it has none.
+func clock_left() -> int:
+	var e := enc()
+	var rounds := int(e.ends_when.get("rounds", 0))
+	return maxi(0, rounds - maxi(1, e.round_no) + 1) if rounds > 0 else -1
+
+
+## As a round ends: the clock's last round is over, so the fight ends as the clock says (the mill falls, the rite is
+## done, the party held out), its flag set for the story; a countdown only (`none`) sets the flag and goes on.
+func _clock_runs_out() -> void:
+	var e := enc()
+	var rounds := int(e.ends_when.get("rounds", 0))
+	if rounds <= 0 or e.round_no != rounds:
+		return
+	var outcome := str(e.ends_when.get("rounds_outcome", "ended"))
+	if not outcome in ["victory", "defeat", "ended", "none"]:
+		outcome = "ended"
+	var flag := str(e.ends_when.get("rounds_flag", ""))
+	if flag != "":
+		e.legendary.story_flags[flag] = true
+	var label := str(e.ends_when.get("rounds_label", ""))
+	e.log.add("info", "Time is up%s" % ((": " + label) if label != "" else ""), "")
+	e.events.append({"type": "clock", "outcome": outcome, "label": label, "rounds": rounds})
+	if outcome != "none":   # a countdown only: what it counted down to happens in the fight itself (a round event)
+		_finish(outcome)
+
+
+## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there.
 func _step_out(c: Combatant) -> void:
 	var e := enc()
 	if is_ward(c) and not c.is_down() and not c.has_meta("left_fight"):

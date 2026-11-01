@@ -473,7 +473,8 @@ static func _fewer_attacks(actions: Array, n: int) -> Array:
 
 
 ## The encounter's `ends_when` (docs/contracts/combat.md) as the fight reads it (Encounter.ends_when): with
-## `party_left_map`, the squares of the place's exits that are open now; `trigger_hero_down` as it is. {} for none.
+## `party_left_map`, the squares of the place's exits that are open now; `trigger_hero_down` and the clock (`rounds`,
+## `rounds_outcome`, `rounds_flag`, `rounds_label`) as they are. {} for none.
 static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 	var ends := spec.get("ends_when", {}) as Dictionary
 	if ends.is_empty():
@@ -485,6 +486,9 @@ static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 		if StoryConditions.check(str(exit.get("when", "")), view.st):
 			var cell := LocationView._cell(exit["cell"])
 			open.append([cell.x, cell.y])
+	for k: String in ["rounds", "rounds_outcome", "rounds_flag", "rounds_label"]:
+		if ends.has(k):
+			out[k] = int(ends[k]) if k == "rounds" else str(ends[k])
 	if bool(ends.get("party_left_map", false)):
 		out["exits"] = open
 	# Getting the wards out (a monster entry's `ward`) by the place's open exits wins the fight.

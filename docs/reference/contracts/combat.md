@@ -333,6 +333,13 @@ any other outcome. With `ends_when.wards_out` a ward that ends its turn on one o
 (`vanish`, left: `exit`; the heroes don't step out by those squares unless `party_left_map` says so), and once every
 ward is out the fight is won. Beating the foes wins as usual.
 
+A clock: `ends_when.rounds: N` ends the fight as round N ends (the mill collapsing, a rite completed, a party holding
+out), whoever is still up, with `rounds_outcome` (`victory`, `defeat`, `ended`, the default, or `none`, a countdown only: the flag is set and the
+fight goes on, for a collapse its own round event deals) and `rounds_flag` set in
+the fight's `story_flags`; the event `{type: "clock", outcome, label, rounds}` comes before `over`. The combat HUD's round
+counter adds the rounds left (`EncounterTurns.clock_left`, the current one counted) and `rounds_label` as its tooltip. A
+fight won or lost before then never runs out.
+
 What a fight hands back to the story (`Encounter.legendary`): `story_flags` (flag -> value: Misty Escape's flag, a
 withdrawal's flag, `strahd_destroyed`), `story_quests` (quest -> stage), `departed` (creature id -> `mist` or
 `withdraw`). LocationView applies them when the fight ends, whatever the outcome; a creature that departed leaves no

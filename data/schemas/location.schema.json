@@ -1440,6 +1440,23 @@
                 "enum": ["defeat", "ended"],
                 "description": "What a ward falling means: defeat (the default) or ended (no winner)."
               },
+              "rounds": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "A clock: the fight ends as this round ends, with rounds_outcome; the HUD counts the rounds left."
+              },
+              "rounds_outcome": {
+                "enum": ["victory", "defeat", "ended", "none"],
+                "description": "What the clock running out means: victory (the party held out), defeat, ended (the default: no winner) or none (only a countdown: the flag is set and the fight goes on)."
+              },
+              "rounds_flag": {
+                "type": "string",
+                "description": "A flag set for the story when the clock runs out."
+              },
+              "rounds_label": {
+                "type": "string",
+                "description": "What the clock counts down to, for the HUD (\"The mill falls\")."
+              },
               "flag": {
                 "type": "string",
                 "description": "A story flag set when it ends this way."

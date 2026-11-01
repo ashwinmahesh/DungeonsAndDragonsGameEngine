@@ -942,6 +942,13 @@ func refresh() -> void:
 				shown = c
 				break
 	_round_label.text = "Round %d" % maxi(1, e.round_no)
+	# A fight on a clock (`ends_when.rounds`): how many rounds are left, and what happens then.
+	var left := e.turns.clock_left()
+	if left >= 0:
+		var label := str(e.ends_when.get("rounds_label", ""))
+		_round_label.text += " · %d left" % left
+		_round_label.tooltip_text = "%d round%s left%s" % [left, "" if left == 1 else "s", (": " + label) if label != "" else ""]
+		_round_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	# Every card, bar and button reads the same unchanged creatures: one read (Creature.begin_read).
 	Creature.begin_read()
 	_refresh_strip()
