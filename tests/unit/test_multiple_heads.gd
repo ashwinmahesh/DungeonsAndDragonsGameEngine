@@ -66,3 +66,17 @@ func test_a_round_event_that_strikes_one_at_random_even_a_captive() -> void:
 	assert_true(rounds >= 2, "the table acted each round")
 	assert_eq(lashes, rounds, "one creature a round")
 	assert_true(hero.creature.hp < start[0] or captive.creature.hp < start[1])
+
+
+func test_one_head_back_a_turn() -> void:
+	var got := _fight()
+	var e := got[0] as Encounter
+	var hydra := got[2] as Combatant
+	((hydra.creature as Monster).data["traits"] as Array)[0]["regrow_one"] = true
+	((hydra.creature as Monster).data["traits"] as Array)[0]["stops_regrowth"] = []
+	hydra.set_meta("heads", 1)
+	e.monster_actions.heads_regrow(hydra)
+	assert_eq(e.monster_actions.heads_of(hydra), 2, "one back")
+	e.monster_actions.heads_regrow(hydra)
+	e.monster_actions.heads_regrow(hydra)
+	assert_eq(e.monster_actions.heads_of(hydra), 3, "never past three")

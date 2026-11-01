@@ -39,7 +39,8 @@ which fails if a trait or feature says `"implemented": "engine"` and no code rea
 
 A trait's `heads` (how many it starts with), with `head_damage` (25: damage taken during one creature's turn that kills a
 head, once a turn), `regrow` (2 for each head lost, at the end of its own turn, unless it took damage of a
-`stops_regrowth` type since, fire by default) and `regrow_heal` (20 Hit Points when they grow). No heads left is death.
+`stops_regrowth` type since, fire by default; or `regrow_one`: one dead head back each turn, up to how many it started
+with) and `regrow_heal` (20 Hit Points when they grow). No heads left is death.
 A Multiattack entry with `per_head` makes that many of the attack. Events: `heads` {id, heads}. (MonsterActions.heads_*;
 the MM Hydra's.)
 

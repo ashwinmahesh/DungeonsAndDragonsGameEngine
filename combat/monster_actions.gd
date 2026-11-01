@@ -1587,7 +1587,8 @@ func death_burst(c: Combatant) -> void:
 
 ## The trait that gives `c` heads (`heads`: how many it starts with; `head_damage` (25): damage taken in one turn that
 ## kills a head; `regrow` (2) heads for each lost, at the end of its turn, unless it took damage of a `stops_regrowth`
-## type (fire) since its last turn; `regrow_heal` (20) Hit Points when it grows them), or {}.
+## type (fire) since its last turn; or `regrow_one`: one dead head back each turn, up to `heads`; `regrow_heal` (20)
+## Hit Points when it grows them), or {}.
 func heads_trait(c: Combatant) -> Dictionary:
 	for tr: Variant in traits(c):
 		if int((tr as Dictionary).get("heads", 0)) > 0:
@@ -1644,6 +1645,16 @@ func heads_regrow(c: Combatant) -> void:
 	var seared := bool(c.get_meta("heads_seared", false))
 	c.set_meta("heads_lost", 0)
 	c.set_meta("heads_seared", false)
+	# One dead head back a turn, never past how many it started with (`regrow_one`), whenever any is dead.
+	if bool(tr.get("regrow_one", false)):
+		if heads_of(c) < int(tr["heads"]) and not seared:
+			c.set_meta("heads", heads_of(c) + 1)
+			var back := c.creature.heal(int(tr.get("regrow_heal", 20)), str(tr.get("name", "Multiple Heads")))
+			e.log.add("heal", "One of %s's heads lives again (%d now)" % [c.name(), heads_of(c)], c.id)
+			e.events.append({"type": "heads", "id": c.id, "heads": heads_of(c)})
+			if back > 0:
+				e.events.append({"type": "heal", "id": c.id, "amount": back})
+		return
 	if lost <= 0 or seared:
 		if lost > 0:
 			e.log.add("info", "%s's burned stumps don't grow back" % c.name(), c.id)
