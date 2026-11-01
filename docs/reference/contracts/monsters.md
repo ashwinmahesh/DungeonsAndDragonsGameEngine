@@ -17,6 +17,7 @@ Numbers are the 2024 stat block's. These machine-readable keys sit next to the p
 | `forms` | Shape-Shift forms that can use it (the Werewolf's Bite) |
 | `weapon` | a held weapon (Disarming Attack) |
 | `ac_bonus` | Parry: +AC against one melee hit while holding a weapon |
+| `do: fling` | a creature it holds (Grappled by it, up to `targets.max_size`) thrown at its nearest other foe within `targets.range`: the grapple ends, it lands in the open square nearest that foe, and both make the action's save (damage, half with `success: half`, `on_fail` riders). As one slot of a Multiattack (`or: ["fling"]`) the AI throws when it holds someone (MonsterActions.fling) |
 | `do`, `cast` | special Bonus Actions: `dash_or_disengage`, `hide_in_dim`, `shape_shift`, `cast` (Divine Aid's spells) |
 
 ## Riders (`on_hit[]`, `on_fail[]`)

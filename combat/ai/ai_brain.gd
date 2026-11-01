@@ -1439,6 +1439,13 @@ func _multi_step(c: Combatant, target: Combatant, queue: Array[String]) -> Comba
 						tactics.note_strike(victim, c)
 				e.monster_actions.save_action(c, act, aim, r0)
 				return e.then(r0, func() -> CombatResult: return _multi_step(c, target, queue))
+	# A creature it holds thrown at the others (Fling: one of the slot's choices), when it holds one.
+	for cf in choices:
+		var actf := m.action(cf)
+		if str(actf.get("do", "")) == "fling" and e.monster_actions.why_not(c, actf) == "" and not e.grappling.held_by(c).is_empty():
+			var flung := e.monster_actions.fling(c, actf, false)
+			if flung.ok:
+				return e.then(flung, func() -> CombatResult: return _multi_step(c, target, queue))
 	# Otherwise the best attack among the choices that can reach the target (or another foe): a ranged attack
 	# when the foe is out of reach, the bigger damage when both work.
 	var best_id := ""

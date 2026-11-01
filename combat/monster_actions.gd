@@ -1355,7 +1355,45 @@ func bonus_action(c: Combatant, plan: String = "") -> CombatResult:
 ## (GameFeatures.bonus_action and special_action). `heal`, `save` and `teleport` are the summoned creatures' own
 ## (SummonBlocks: Healing Touch, Fell Glare, Venomous Spew, Fey Step), run by FeatureActions._perform_creature.
 const ENGINE_DOS: Array[String] = ["dash_or_disengage", "hide_in_dim", "shape_shift", "cast", "cast_control", "fey_step",
-	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish", "heal", "save", "teleport"]
+	"swoop", "consume_life", "vow", "trample", "bonus_save", "rampage", "vanish", "heal", "save", "teleport", "fling"]
+
+
+## Fling (`do: fling`; as an action, or one slot of a Multiattack, AiBrain._multi_step): a creature `c` holds (Grappled by it, no bigger than `targets.max_size`) is thrown at another of
+## its foes within `targets.range` (30 ft): the grapple ends, the thrown creature lands in the open square nearest that
+## foe, and both make the action's save, taking its damage (half with `success: half`) and its `on_fail` riders on a
+## failure. With no other foe in range it is thrown to the farthest open square in range. Uses the action.
+func fling(c: Combatant, act: Dictionary, own_action: bool = true) -> CombatResult:
+	var e := enc()
+	var tg := act.get("targets", {}) as Dictionary
+	var held: Combatant = null
+	for t in e.grappling.held_by(c):
+		if not tg.has("max_size") or Creature.SIZES.find(t.creature.size) <= Creature.SIZES.find(StringName(str(tg["max_size"]))):
+			held = t
+	if held == null:
+		return CombatResult.fail("Holding no one to throw")
+	var reach := int(tg.get("range", 30))
+	var at: Combatant = null
+	for o in e.hostiles_of(c):
+		if o != held and o.is_alive() and not o.is_down() and e.distance(c, o) <= reach and (at == null or e.distance(c, o) < e.distance(c, at)):
+			at = o
+	var landing := e.spells._free_cell_near(at.cell if at != null else held.cell, held.size_cells)
+	if own_action:
+		e.spend_action(c)   # taken on its own; within a Multiattack it is one of the attacks
+	else:
+		e.use_one_attack(c)
+	spend(c, act)
+	e.grapples.erase(held.id)
+	held.creature.remove_condition(&"grappled")
+	var from := held.cell
+	held.cell = landing
+	e.events.append({"type": "move", "id": held.id, "from": from, "to": landing, "forced": true})
+	e.log.add("info", "%s flings %s%s" % [c.name(), held.name(), (" at %s" % at.name()) if at != null else ""], c.id)
+	e.events.append({"type": "ability", "source": "monster", "by": c.id, "key": action_key(c, act), "targets": [held.id], "cells": []})
+	var r := CombatResult.new()
+	var rolled := {}
+	for v in ([held, at] if at != null else [held]):
+		_save_one(c, act, v as Combatant, r, rolled, false)
+	return r
 
 
 ## Whether `act` is one of the game's own (a `do` the engine doesn't run).
