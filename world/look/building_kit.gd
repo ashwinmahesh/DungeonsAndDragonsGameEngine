@@ -185,6 +185,7 @@ static func merge_morph(parts: Array, paint: String, bend: BuildingBend, tidy: B
 		other.free()
 		return main
 	var out := ArrayMesh.new()
+	out.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED   # the shape holds the tidy house's own points, not offsets
 	out.add_blend_shape(&"morph")
 	for i in from.get_surface_count():
 		var base := from.surface_get_arrays(i)
