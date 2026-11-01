@@ -3,7 +3,8 @@ extends RefCounted
 ## What a fight sounds like (art/audio.json "combat", docs/art/spell_effects.md). Sounds are picked the way the effects'
 ## looks are: a spell or ability by its family and flavour (SpellFx's cue), a blow by what struck and how hard it landed.
 ## SpellFx and its families call it at the moments their effects show (a cast, a missile leaving the hand, an impact, a
-## jump's far end); the combat view calls `hit` when a weapon or claw lands. Only plays sounds: the encounter decides
+## jump's far end); the combat view calls `blow` when a weapon or claw lands: the action's own "hit" sounds (`keys`) if
+## it has them, else `hit`, by what struck and how hard. Only plays sounds: the encounter decides
 ## everything, and a sound with no recording is silent.
 ##
 ## Each moment names a list of effects in art/audio.json "sfx". An entry starting with "@" is the flavour's own sound
@@ -113,6 +114,31 @@ static func sound(entry: String) -> void:
 
 
 # --- Blows --------------------------------------------------------------------------------------------
+
+## A blow lands (`action`: the attack event's, "monster:claw", "weapon:longsword@arrow"): its own "hit" sounds
+## (own_hit) in place of the kind's, else `hit` by what struck and how hard. A game keys a monster's signature blow
+## this way (a locomotive's iron slam) without changing every bludgeoning hit.
+static func blow(attacker: Combatant, action: String, amount: int, target: Combatant, critical: bool) -> void:
+	var own := own_hit(attacker, action)
+	if own.is_empty():
+		hit(hit_kind(attacker, action), amount, target, critical)
+		return
+	for id in own:
+		sound(id)
+
+
+## A blow's own sounds (`keys`, moment "hit"): the monster action's ("<monster>.<action>", MonsterActions.action_key),
+## else the action's or weapon's id ("<action>"), else none.
+static func own_hit(attacker: Combatant, action: String) -> Array[String]:
+	var keys := data().get("keys", {}) as Dictionary
+	var aid := action.get_slice(":", 1).get_slice("@", 0) if action.contains(":") else action
+	if action.begins_with("monster:") and attacker != null and attacker.creature is Monster:
+		var mine := keys.get(MonsterActions.action_key(attacker, {"id": aid}), {}) as Dictionary
+		if mine.has("hit"):
+			return _list(mine["hit"])
+	var any := keys.get(aid, {}) as Dictionary if aid != "" else {}
+	return _list(any.get("hit", []))
+
 
 ## A weapon, claw or bite lands on `target` for `amount` (-1: the damage isn't known): the kind's light or heavy
 ## sound by how hard it landed, or its critical one.

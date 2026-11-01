@@ -2267,13 +2267,15 @@ func _play_events() -> void:
 					if bool(ev["hit"]):
 						var struck: Array[CombatToken] = [d]
 						final_played = _impact_on(struck, events, ev_at, final_fall, bool(ev.get("critical", false)), a.global_position) or final_played
-					# A blow sounds by what struck and how hard it landed (CombatSfx); a spell's missile or a magic touch
-					# already sounded as its effect landed.
+					# A blow sounds by what struck and how hard it landed, or by its own "hit" sounds (CombatSfx.blow); a
+					# spell's missile or a magic touch already sounded as its effect landed, unless the blow has its own.
+					var action := str(ev.get("action", ""))
 					if not bool(ev["hit"]):
 						Audio.sfx("swing")
-					elif not flew and not str(ev.get("action", "")).begins_with("spell:") and (acue.is_empty() or str(acue["flavour"]) == "steel"):
-						CombatSfx.hit(CombatSfx.hit_kind(a.combatant, str(ev.get("action", ""))), _damage_after(events, ev_at, d.combatant.id),
-							d.combatant, bool(ev.get("critical", false)))
+					elif not flew and not action.begins_with("spell:") and (acue.is_empty() or str(acue["flavour"]) == "steel" \
+							or not CombatSfx.own_hit(a.combatant, action).is_empty()):
+						CombatSfx.blow(a.combatant, action, _damage_after(events, ev_at, d.combatant.id), d.combatant,
+							bool(ev.get("critical", false)))
 					if bool(ev["hit"]):
 						barks.bark(a.combatant, "strike")
 					if not bool(ev["hit"]):
