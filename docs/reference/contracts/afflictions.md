@@ -23,6 +23,10 @@ for the hero in the conversation or every living hero, with a notice; the condit
 highest level among the living heroes (bare: anyone has it). The temple's Lesser Restoration (story/services.gd) serves
 a hero it would ease (`Afflictions.eased_by`), aiming at the poison when nothing else is to end.
 
-Not yet (later branches): the party frames and sheet, a
+Shown: `Afflictions.shown(cr)` ({id, name, level, summary, label}) puts a "<name> <level>" pill on the exploration party
+cards and the party screen, and a row on the character sheet whose rules card lists what it does at this level; the sheet's
+effects list shows the effect itself.
+
+Not yet (later branches): a
 symptom table on gaining a level, delayed onset, daily saves at a set hour, Exhaustion that can't be removed while
 afflicted, Hit Point maximum lost per Long Rest.

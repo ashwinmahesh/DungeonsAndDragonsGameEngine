@@ -594,6 +594,8 @@ func _status_tags(ch: Character) -> Control:
 		flow.add_child(UiParts.pill(str(c).capitalize(), "rose", 10))
 	if ch.exhaustion > 0:
 		flow.add_child(UiParts.pill("Exhaustion %d" % ch.exhaustion, "rose", 10))
+	for a in Afflictions.shown(ch):   # a rot or plague with levels (Afflictions)
+		flow.add_child(UiParts.pill(str(a["label"]), "rose", 10))
 	if flow.get_child_count() == 0:
 		flow.free()
 		return null

@@ -278,6 +278,14 @@ func _details(ch: Character) -> PanelContainer:
 		list.add_child(_detail("Exhaustion", "Level %d" % ch.exhaustion, func() -> Control:
 			return UiParts.rules_tip("Exhaustion %d" % ch.exhaustion, "",
 				str(Compendium.shared().condition_data("exhaustion").get("summary", ""))), "rose"))
+	# Afflictions with levels (a rot, a plague): the level, and the rules card with what it does at this level.
+	for a in Afflictions.shown(ch):
+		var fx := Afflictions.effect_of(ch, str(a["id"]))
+		var facts: Array = []
+		for m in fx.modifiers:
+			facts.append(["At this level", _modifier_text(m)])
+		list.add_child(_detail(str(a["name"]), "Level %d" % int(a["level"]), func() -> Control:
+			return UiParts.rules_tip(str(a["label"]), "Affliction", str(a["summary"]), facts), "rose"))
 	return card
 
 
