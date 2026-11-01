@@ -261,6 +261,20 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 	var held := e.d20.collect(target, true)
 	var conc := target.creature.concentration
 	parts = e.objects.adjust_incoming(target, parts)
+	# A stat block's Damage Threshold (`damage_threshold`: a number, or one counting the living, "5 * alive:minion"):
+	# less damage than that from one source does nothing.
+	if target.creature is Monster and (target.creature as Monster).data.has("damage_threshold"):
+		var threshold := e.legendary.counted((target.creature as Monster).data["damage_threshold"])
+		var total := 0
+		for p: Variant in parts:
+			total += maxi(0, int((p as Dictionary)["amount"]))
+		if total > 0 and total < threshold:
+			details = details.duplicate()
+			details.append("Damage Threshold %d: %d isn't enough" % [threshold, total])
+			parts = parts.map(func(p: Variant) -> Dictionary:
+				var q := (p as Dictionary).duplicate()
+				q["amount"] = 0
+				return q)
 	var saves_from := e.events.size()
 	var dr := target.creature.take_damage_parts(parts, critical, e.dice, label)
 	# The Concentration save is rolled inside the damage; the screen shows it after the blow and the damage, so its

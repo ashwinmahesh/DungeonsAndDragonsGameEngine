@@ -183,15 +183,16 @@ func enter(c: Combatant, phase_id: String) -> bool:
 	_rebuild(c)
 	var label := str(ph.get("name", phase_id.capitalize()))
 	leg()._log("info", "%s: %s" % [c.name(), label], c, [str(ph.get("summary", ""))])
-	# Hit Points: "full", "half" (of its maximum), a number to set, or `heal` to add.
+	# Hit Points: "full", "half" (of its maximum), a number to set, or `heal` to add; a number may count the living
+	# ("40 + 10 * alive:test_minion": Legendary.counted).
 	if ph.has("hp"):
 		var to: Variant = ph["hp"]
 		var full := cr.max_hp()
-		var hp := full if str(to) == "full" else (full / 2 if str(to) == "half" else int(to))
+		var hp := full if str(to) == "full" else (full / 2 if str(to) == "half" else leg().counted(to))
 		cr.hp = clampi(hp, 1, full)
 		e.events.append({"type": "heal", "id": c.id, "amount": maxi(0, cr.hp)})
 	elif ph.has("heal"):
-		var healed := cr.heal(int(ph["heal"]), label)
+		var healed := cr.heal(leg().counted(ph["heal"]), label)
 		if healed > 0:
 			e.events.append({"type": "heal", "id": c.id, "amount": healed})
 	elif cr.max_hp() != had_max:

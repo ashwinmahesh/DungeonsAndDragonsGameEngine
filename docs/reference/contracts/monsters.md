@@ -34,6 +34,12 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Damage Threshold
+
+`damage_threshold` on a stat block: less damage than that from one source does nothing (2024 DMG). A number, or
+arithmetic counting the living, "5 * alive:<stat block>" (Legendary.counted: a boss whose hide hardens with each minion
+still standing).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
