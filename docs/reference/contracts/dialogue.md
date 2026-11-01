@@ -220,6 +220,9 @@ cutscene cutscene_id               A full-screen picture (data/cutscenes/<id>.js
                                    lines that follow, which read as captions on it; the box comes back over it for
                                    options and notices. Skipped when none of its pictures' conditions hold.
                                    "cutscene end" takes it away (so does the conversation's end).
+campaign thread rook betrayal      The campaign's own statement (CampaignModule.statement(st, verb, args, dice)): the
+                                   verb and its words go to the game's module, which may answer with a notice. The
+                                   engine's base module does nothing with it.
 end_game                           Ends the campaign (ADR 0014): the ending whose condition holds is played
                                    when the conversation closes (docs/contracts/campaign.md Endings).
 approve thistle +3 kip_smudgewick -2: You freed the wolves

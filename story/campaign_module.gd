@@ -10,6 +10,12 @@ extends RefCounted
 
 # --- Text and facts the story data reaches for ------------------------------------------------------------------
 
+## A dialogue's `campaign <verb> [args...]`: the campaign's own story statement (a thread's beat, a ritual's step).
+## Returns a notice for the player, or "".
+func statement(_st: StoryState, _verb: String, _args: Array[String], _dice: DiceRoller) -> String:
+	return ""
+
+
 ## `text` with the campaign's {placeholders} filled from the story (quest journals, hints, warnings). The base fills
 ## `{flag.<id>}` with the flag's value (0 while unset: "The plague has taken {flag.plague_toll} souls"); a campaign that
 ## overrides it calls fill_flags for the same.
