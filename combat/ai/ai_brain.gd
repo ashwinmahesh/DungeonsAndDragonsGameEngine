@@ -194,6 +194,9 @@ func begin_turn(c: Combatant) -> CombatResult:
 	var sent := e.images.owner_turn(c)
 	if sent != null and sent.is_paused():
 		return sent
+	var thrown := e.openings.ai_throw(c)   # a held foe by a window goes out of it (FightOpenings)
+	if thrown != null and thrown.is_paused():
+		return thrown
 	# The difficulty's kit and morale: a Bloodied foe drinks its potion; a broken side flees (combat/ai/ai_tactics.gd).
 	if c.side == &"enemy":
 		# F13: a Bloodied talker whose side broke gives up, in every mode (story/captives.gd takes it from there).

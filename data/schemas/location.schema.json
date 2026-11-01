@@ -1041,6 +1041,22 @@
                 "takes": {"$ref": "#/$defs/set_piece_takes"},
                 "hazard": {"$ref": "#/$defs/set_piece_hazard"},
                 "study": {"$ref": "#/$defs/set_piece_study"}
+          "openings": {
+            "type": "array",
+            "description": "Openings a creature can be thrown out of (FightOpenings): a creature with a `throws_out` trait throws a held foe by one out of it; the foe falls the drop and climbs back in on its turn.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cells"],
+              "properties": {
+                "name": {"type": "string"},
+                "cells": {"type": "array", "items": {"$ref": "#/$defs/cell"}},
+                "drop_ft": {"type": "integer", "minimum": 0},
+                "aloft": {"type": "object", "additionalProperties": false, "required": ["flag", "drop_ft"], "properties": {
+                  "flag": {"type": "string", "description": "A fight flag: while it is set, the drop is this one's."},
+                  "drop_ft": {"type": "integer", "minimum": 0}}},
+                "climb": {"type": "object", "additionalProperties": false, "properties": {
+                  "skill": {"type": "string"}, "dc": {"type": "integer"}}}
               }
             }
           },

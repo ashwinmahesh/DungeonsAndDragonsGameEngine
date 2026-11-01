@@ -153,6 +153,7 @@ func _begin_turn() -> CombatResult:
 		func() -> CombatResult:
 			e.objects.turn_start(c)
 			e.zones.turn_start(c)
+			e.openings.turn_start(c)   # thrown out of a window: the climb back in
 			e.feature_actions.turn_start(c)
 			return none,
 		func() -> CombatResult: return e.class_features.turn_start(c),
