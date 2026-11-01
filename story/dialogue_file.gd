@@ -270,6 +270,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				minutes = int(last.left(-1)) * (60 if last.ends_with("h") else 1)
 			if _words_of(rest, ["party"]) and minutes > 0:
 				return {"t": "bless", "party": rest.size() == 1, "minutes": minutes}
+		"twist":
+			# `twist +<n> [party]`: Twists of Fate for the hero in the conversation, or every living hero.
+			if parts.size() >= 2 and RegEx.create_from_string("^\\+[1-9]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party"]):
+				return {"t": "twist", "count": int(parts[1]), "party": parts.size() == 3}
 		"inspiration":
 			# `inspiration [party]`.
 			if _words_of(Array(parts.slice(1)), ["party"]):

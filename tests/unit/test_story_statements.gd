@@ -76,6 +76,22 @@ func test_a_condition_for_a_while_on_those_who_failed() -> void:
 	assert_false(st.party[1].has_condition(&"poisoned"), "an hour on, it's gone")
 
 
+func test_a_twist_of_fate_from_the_story_and_spent_in_a_fight() -> void:
+	var st := _st()
+	_beats(_run(st, "~ start\ntwist +1\ntwist +1 party\n"))
+	assert_eq([st.party[0].twists(), st.party[1].twists()], [2, 1])
+	var e := TestCombat.open_field(3)
+	e.default_player_reaction = "never"
+	var c := e.add(st.party[0], &"party", Vector2i(2, 3))
+	var foe := TestCombat.punching_bag(e, Vector2i(6, 3), 100)
+	TestCombat.start_with(e, c)
+	var ids := e.feature_actions.list(c).map(func(f: Dictionary) -> String: return str(f["id"]))
+	assert_true("feat:twist:20" in ids and "feat:twist:1" in ids, "both on the hotbar")
+	assert_true(e.feature_actions.perform(c, "twist:1", foe, Vector2.INF).ok)
+	assert_eq(st.party[0].twists(), 1, "one spent")
+	assert_eq(foe.creature.roll_save(e.dice, &"dex", 10).kept, 1, "its next d20 shows a 1")
+
+
 func test_an_attack_roll_check() -> void:
 	var st := _st()
 	var ch := st.party[0]

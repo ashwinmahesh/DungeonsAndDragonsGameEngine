@@ -2726,6 +2726,16 @@ static func from_dict(d: Dictionary, compendium_: Compendium = null) -> Characte
 	return c
 
 
+## Twists of Fate the hero holds (a story's gift: a Discovery of their Thread; kept in the build so a save keeps them):
+## each sets a visible creature's next d20 to a 1 or a 20 (FeatureActions).
+func twists() -> int:
+	return int(build.get("twists_of_fate", 0))
+
+
+func gain_twists(n: int) -> void:
+	build["twists_of_fate"] = maxi(0, twists() + n)
+
+
 func spend_resource(res_id: String, amount: int = 1) -> bool:
 	if not super.spend_resource(res_id, amount):
 		return false
