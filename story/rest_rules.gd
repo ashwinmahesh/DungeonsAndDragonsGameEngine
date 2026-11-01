@@ -34,13 +34,33 @@ const CHANGE_MINUTES := 60
 const SELF_STARTING: Array[String] = ["enter_area", "open", "examine"]
 
 
+## A place's rest rule now ("safe", "risky" or "no"): the first of its `rest_when` ({when, rest, rest_text}) whose
+## condition holds, else its `rest` (risky when unset). A village whose mob hunts the party still lets it sleep at the
+## one house the mob fears.
+static func rule_of(loc: Dictionary, st: StoryState) -> String:
+	return str(_rest_entry(loc, st).get("rest", loc.get("rest", "risky")))
+
+
+## Why a place allows no rest now, in its own words (the `rest_when` entry's, else the place's `rest_text`).
+static func text_of(loc: Dictionary, st: StoryState) -> String:
+	return str(_rest_entry(loc, st).get("rest_text", loc.get("rest_text", "This place won't let anyone sleep.")))
+
+
+static func _rest_entry(loc: Dictionary, st: StoryState) -> Dictionary:
+	if st != null:
+		for r: Variant in loc.get("rest_when", []):
+			if StoryConditions.check(str((r as Dictionary).get("when", "")), st):
+				return r as Dictionary
+	return {}
+
+
 ## Why the party can't start a Long Rest where it stands, one sentence per reason; [] when it can. A place that allows
 ## no sleep says so in its own words (`rest_text`), and nothing else needs saying.
 static func long_rest_refusals(st: StoryState) -> Array[String]:
 	var out: Array[String] = []
 	var loc := Compendium.shared().get_entry("locations", st.location)
-	if str(loc.get("rest", "risky")) == "no":
-		out.append(str(loc.get("rest_text", "This place won't let anyone sleep.")))
+	if rule_of(loc, st) == "no":
+		out.append(text_of(loc, st))
 		return out
 	if LongRest.broken(st):
 		out.append(BROKEN_NIGHT)

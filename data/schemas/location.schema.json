@@ -1796,6 +1796,20 @@
       ],
       "description": "Whether a Long Rest is possible here (risky: 1 in 6 to be interrupted)."
     },
+    "rest_when": {
+      "type": "array",
+      "description": "Story-dependent rest rules (RestRules.rule_of): the first whose `when` holds replaces `rest` (and `rest_text`), as a village's one house the mob fears lets the party sleep while the town hunts it.",
+      "items": {
+        "type": "object",
+        "required": ["when", "rest"],
+        "additionalProperties": false,
+        "properties": {
+          "when": {"type": "string"},
+          "rest": {"type": "string", "enum": ["safe", "risky", "no"]},
+          "rest_text": {"type": "string"}
+        }
+      }
+    },
     "rest_text": {
       "type": "string",
       "description": "Why resting isn't possible (shown when rest is 'no')."
