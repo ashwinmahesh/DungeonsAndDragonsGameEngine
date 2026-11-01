@@ -381,10 +381,11 @@ static func _house_kit(board: ArenaBoard, r: Rect2i, group: int, style: String, 
 	upper.name = "Upper"
 	root.add_child(upper)
 	var bend := _bend_of(board, style, kind, r, h, joined)
+	var tidy := _tidy_of(board, style, kind, r, h, joined)
 	var over := maxf(BuildingKit.constant("EAVE"), BuildingKit.constant("VERGE"))
 	var b := {"root": root, "walls": null, "stub": null, "upper": upper, "height": h, "extras": [], "cut": false,
 		"aabb": AABB(Vector3(r.position.x - over, root.position.y, r.position.y - over), Vector3(r.size.x + 2 * over, h + rise + 0.5, r.size.y + 2 * over)),
-		"rect": r, "group": group, "kit": style, "roof": kind, "rise": rise, "seed": seed, "bend": bend,
+		"rect": r, "group": group, "kit": style, "roof": kind, "rise": rise, "seed": seed, "bend": bend, "tidy": tidy,
 		"paint": str(paints[seed % paints.size()]) if style == "clapboard" and not paints.is_empty() else "",
 		"core": str((cfg.get("cores", {}) as Dictionary).get(style, "")), "faces": {}, "markers": [],
 		"joined": joined.get("cells", {}), "butts": butts}
@@ -433,6 +434,28 @@ static func _bend_of(board: ArenaBoard, style: String, kind: String, r: Rect2i, 
 	if not joined.is_empty():
 		joined["bend"] = bend
 	return bend
+
+
+## The tidy shape of the building house `r` belongs to, where the catalog's building_kit.bend.morph names this place ({"<place>":
+## {"tidy": 0.2}}): the same house, with the same lean and sway, at that bend amount, shared by every part of an L-shaped block.
+## The walls and roof then carry it as a blend shape (BuildingKit.merge_morph) that BuildingMorph drives. Null elsewhere, so a
+## game that names no place builds exactly as before.
+static func _tidy_of(board: ArenaBoard, style: String, kind: String, r: Rect2i, h: float, joined: Dictionary) -> BuildingBend:
+	var cfg := (BuildingKit.settings().get("bend", {}) as Dictionary).get("morph", {}) as Dictionary
+	if board.place == "" or not cfg.has(board.place) or not Look.modern():
+		return null
+	if joined.has("tidy"):
+		return joined["tidy"] as BuildingBend
+	var main := joined.get("main", r) as Rect2i
+	var parts: Array[Rect2] = []
+	for part: Rect2i in joined.get("rects", [r]):
+		parts.append(Rect2(part))
+	var span := main.size.y if main.size.x >= main.size.y else main.size.x
+	var tidy := BuildingBend.for_house(board, style, parts, Rect2(main), h, BuildingKit.rise(style, kind, span),
+		float((cfg[board.place] as Dictionary).get("tidy", 0.2)))
+	if not joined.is_empty():
+		joined["tidy"] = tidy
+	return tidy
 
 
 ## The square of a church's doors (an exit named for the church) on the house `r`, or (-1, -1).
@@ -603,7 +626,7 @@ static func _kit_walls(board: ArenaBoard, idx: int) -> void:
 		parts.append([BuildingKit.wall_id(style, "corner"), BuildingKit.face_xf(corner[0] as Vector3, float(corner[1]), s_corner, foot)])
 		stub.append([BuildingKit.wall_id(style, "corner"), BuildingKit.face_xf(corner[0] as Vector3, float(corner[1]),
 			(CUT_H + 0.06) / KH)])
-	var walls := BuildingKit.merge(parts, str(b["paint"]), bend, Vector2.ZERO, true)
+	var walls := BuildingKit.merge_morph(parts, str(b["paint"]), bend, b.get("tidy") as BuildingBend, Vector2.ZERO, true)
 	walls.name = "Walls"
 	root.add_child(walls)
 	root.move_child(walls, 0)
@@ -701,7 +724,9 @@ static func _kit_roof(board: ArenaBoard, b: Dictionary, along_x: bool, span: int
 		var keep := ""
 		if bend != null:
 			keep = "roof|%s|%s|%s|%s|%d|%.2f|%.2f|%s|%s|%s" % [board.place, r, style, kind, seed, h, rise, bend.signature(), str(b["paint"]), Look.style()]
-		var roof := BuildingKit.merge(parts, str(b["paint"]), bend, Vector2.ZERO, false, keep)
+		var tidy := b.get("tidy") as BuildingBend
+		var roof := BuildingKit.merge_morph(parts, str(b["paint"]), bend, tidy, Vector2.ZERO, false) if tidy != null \
+			else BuildingKit.merge(parts, str(b["paint"]), bend, Vector2.ZERO, false, keep)
 		roof.name = "Roof"
 		upper.add_child(roof)
 

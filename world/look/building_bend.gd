@@ -122,11 +122,15 @@ static func place_seed(board: ArenaBoard) -> int:
 
 ## The bend of a house, shared by every part of an L-shaped building: `parts` are its rectangles, `main` the one the
 ## ridge runs along, `height` its walls', `rise` the main roof's. Its points are the board's x and z and the height
-## above its foot. Null where the style stays straight.
-static func for_house(board: ArenaBoard, style: String, parts: Array[Rect2], main: Rect2, height: float, rise: float) -> BuildingBend:
+## above its foot. Null where the style stays straight. `amount_over` (not under zero) builds the same house, with the same lean
+## and sway, at that amount instead of the place's: the tidy shape a morph goes to (BuildingMorph).
+static func for_house(board: ArenaBoard, style: String, parts: Array[Rect2], main: Rect2, height: float, rise: float,
+		amount_over: float = -1.0) -> BuildingBend:
 	var a := amount_for(board, style)
 	if a <= 0.0:
 		return null
+	if amount_over >= 0.0:
+		a = amount_over
 	var b := BuildingBend.new()
 	b.kind = HOUSE
 	b.amount = a
