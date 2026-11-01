@@ -25,13 +25,13 @@ func _object(kind: String, fuel: String) -> BattleObject:
 
 
 func test_fuel_names_the_sound_before_the_kind() -> void:
-	Audio._data["objects"] = {"soul_can": {"broken": "can_smash", "eaten": "can_gulp"}, "crate": {"broken": "wood_break"}}
-	assert_eq(ObjectView.sound_for(_object("crate", "soul_can"), "broken"), "can_smash", "the fuel's entry wins")
-	assert_eq(ObjectView.sound_for(_object("crate", "soul_can"), "eaten"), "can_gulp")
+	Audio._data["objects"] = {"lamp_oil": {"broken": "jar_smash", "eaten": "oil_gulp"}, "crate": {"broken": "wood_break"}}
+	assert_eq(ObjectView.sound_for(_object("crate", "lamp_oil"), "broken"), "jar_smash", "the fuel's entry wins")
+	assert_eq(ObjectView.sound_for(_object("crate", "lamp_oil"), "eaten"), "oil_gulp")
 	assert_eq(ObjectView.sound_for(_object("crate", ""), "broken"), "wood_break", "else the kind's")
 	assert_eq(ObjectView.sound_for(_object("crate", ""), "eaten"), "", "a moment it has no sound for is silent")
 
 
 func test_no_entry_is_silent() -> void:
 	Audio._data.erase("objects")
-	assert_eq(ObjectView.sound_for(_object("crate", "soul_can"), "broken"), "", "a game with no objects table plays nothing")
+	assert_eq(ObjectView.sound_for(_object("crate", "lamp_oil"), "broken"), "", "a game with no objects table plays nothing")
