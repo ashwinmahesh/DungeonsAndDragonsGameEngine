@@ -26,13 +26,11 @@ Numbers are the 2024 stat block's. These machine-readable keys sit next to the p
 
 `{do, save, until, not_types, only_types, not_species, max_size, immune_on_success, ...}`:
 `condition` (with `until`: target_turn_end, target_turn_start, source_turn_start, source_turn_end, minute, permanent;
-optional `modifiers`), `grapple` (`escape_dc`, `limit`), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self`
-(`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`: levels of an affliction,
-docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that burn and then rot).
-
-optional `modifiers`), `grapple` (`escape_dc`, `limit`, `restrain`; `until: target_turn_end` lets go at the end of the held creature's next
-turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self`
-(`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`).
+optional `modifiers`), `grapple` (`escape_dc`, `limit`, `restrain`; `until: target_turn_end` lets go at the end of the
+held creature's next turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self` (`type`), `ability_drain`
+(`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`:
+levels of an affliction, docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that
+burn and then rot).
 
 ## Traits read by code
 

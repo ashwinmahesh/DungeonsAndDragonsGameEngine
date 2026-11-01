@@ -166,8 +166,8 @@ static func _field_why(e: Encounter, c: Combatant, p: Dictionary) -> String:
 
 const FIELD_CUSTOM: Array[String] = ["read_tome", "alchemy_jug", "bag_of_beans", "deck_of_many_things", "exalted_deeds", "vile_darkness",
 	"manual_study", "instant_fortress", "rod_of_security", "oil_of_sharpness", "ring_store", "sense_dragons", "useful_items",
-	"flavour", "drink_field_spell", "weapon_coating", "chime_of_opening", "mystery_key", "wand_of_secrets", "feather_token", "paint_object", "trade_to_coin", "icon_augury"]
-	"flavour", "drink_field_spell", "weapon_mark", "chime_of_opening", "mystery_key", "wand_of_secrets", "feather_token", "paint_object", "trade_to_coin", "icon_augury"]
+	"flavour", "drink_field_spell", "weapon_coating", "weapon_mark", "chime_of_opening", "mystery_key", "wand_of_secrets", "feather_token", "paint_object",
+	"trade_to_coin", "icon_augury"]
 
 
 ## Uses a power outside a fight. `target` is the creature it's used on (yourself if null): a party member, or a story
