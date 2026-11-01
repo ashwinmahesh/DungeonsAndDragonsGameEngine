@@ -165,27 +165,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		# who keeps out of fights isn't in the encounter at all (sits_out, keep_back).
 		if not g.creature.dead and not LocationParty.is_follower(g) and not sits_out(view, g):
 			e.add(g.creature, &"guest", g.cell).controller = &"player"
-	var by_name := {}
-	var entries := spec.get("monsters", []) as Array
-	var monsters := monsters_for(view, spec)
-	for i in monsters.size():
-		var mo := monsters[i]
-		# An `ally` (militia standing with the party) fights on the party's side as a guest, under the player's control
-		# like every party member and guest.
-		var ally: bool = mo["side"] == &"ally"
-		var added := e.add(mo["creature"] as Monster, &"guest" if ally else mo["side"] as StringName, mo["cell"] as Vector2i)
-		by_name[added.name()] = added
-		var md := entries[i] as Dictionary if i < entries.size() else {}
-		# Never killed (knocked out at 0), and a bystander that turns on the party only once harmed (Encounter.provoke).
-		if bool(md.get("nonlethal", false)):
-			added.set_meta(Encounter.NONLETHAL, true)
-		if bool(md.get("hostile_if_harmed", false)):
-			added.set_meta(Encounter.PROVOKED_BY_HARM, true)
-	# A rider on another of the fight's creatures (`rides`: that entry's name): in the saddle, on one Initiative.
-	for md: Variant in entries:
-		var steed_name := str((md as Dictionary).get("rides", ""))
-		if steed_name != "" and by_name.has(steed_name) and by_name.has(str((md as Dictionary).get("name", ""))):
-			e.mounts.seat(by_name[str((md as Dictionary)["name"])] as Combatant, by_name[steed_name] as Combatant)
+	add_monsters(view, e, spec)
 	# The playthrough's difficulty: enemy Hit Points, what foes carry, how they fight (combat/difficulty.gd).
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
@@ -521,6 +501,34 @@ static func companions_for(view: LocationView) -> Dictionary:
 		if mon != null:
 			out[ch.id] = mon
 	return out
+
+
+
+## Adds the fight entry's creatures to `e`, each once: an `ally` as a guest the player commands, the `nonlethal` and the
+## `hostile_if_harmed` marked, and a rider (`rides`) seated on its steed. Returns them by name.
+static func add_monsters(view: LocationView, e: Encounter, spec: Dictionary) -> Dictionary:
+	var by_name := {}
+	var entries := spec.get("monsters", []) as Array
+	var monsters := monsters_for(view, spec)
+	for i in monsters.size():
+		var mo := monsters[i]
+		# An `ally` (militia standing with the party) fights on the party's side as a guest, under the player's control
+		# like every party member and guest.
+		var ally: bool = mo["side"] == &"ally"
+		var added := e.add(mo["creature"] as Monster, &"guest" if ally else mo["side"] as StringName, mo["cell"] as Vector2i)
+		by_name[added.name()] = added
+		var md := entries[i] as Dictionary if i < entries.size() else {}
+		# Never killed (knocked out at 0), and a bystander that turns on the party only once harmed (Encounter.provoke).
+		if bool(md.get("nonlethal", false)):
+			added.set_meta(Encounter.NONLETHAL, true)
+		if bool(md.get("hostile_if_harmed", false)):
+			added.set_meta(Encounter.PROVOKED_BY_HARM, true)
+	# A rider on another of the fight's creatures (`rides`: that entry's name): in the saddle, on one Initiative.
+	for md: Variant in entries:
+		var steed_name := str((md as Dictionary).get("rides", ""))
+		if steed_name != "" and by_name.has(steed_name) and by_name.has(str((md as Dictionary).get("name", ""))):
+			e.mounts.seat(by_name[str((md as Dictionary)["name"])] as Combatant, by_name[steed_name] as Combatant)
+	return by_name
 
 
 ## The encounter's `ends_when` (docs/contracts/combat.md) as the fight reads it (Encounter.ends_when): with
