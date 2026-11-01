@@ -147,7 +147,9 @@ static func refresh_waiting(view: LocationView) -> void:
 			var foe := Combatant.new(mo["creature"] as Monster, mo["side"] as StringName, mo["cell"] as Vector2i)
 			foe.id = "waiting_%s_%d" % [id, i]
 			# A patrol (`path` on the entry, as a townsperson's): it walks its round, its sight cone turning with it.
-			var route := NpcRoutes.route_for(view, entries[i] as Dictionary) if (entries[i] as Dictionary).has("path") else [] as Array[Dictionary]
+			var route: Array[Dictionary] = []
+			if (entries[i] as Dictionary).has("path"):
+				route = NpcRoutes.route_for(view, entries[i] as Dictionary)
 			view.waiting.append({"encounter": id, "foe": foe, "token": null, "low": [],
 				"facing": waiting_facing(view, ids[id] as Dictionary, i, monsters), "route": route, "at": 0, "wait": 0.0, "clock": 0.0})
 	if view.waiting.is_empty() or view.members.is_empty() or view.waiting.all(func(w: Dictionary) -> bool: return w["token"] != null):
