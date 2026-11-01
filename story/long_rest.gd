@@ -174,14 +174,16 @@ static func _benefits(st: StoryState, dice: DiceRoller) -> Array[String]:
 	RestRules.note_long_rest(st)
 	st.morning = {"at": st.total_minutes()}
 	st.flags.erase(RestRules.SHORT_CHANGE)   # the Long Rest offers those changes itself
+	var lines: Array[String] = []
 	for ch in st.party:
 		if not ch.dead:
 			ch.finish_long_rest()
 			EncounterSetup.clear_fight_effects(ch)
+			lines.append_array(Afflictions.after_long_rest(ch, dice))   # each affliction's recovery save
 	for g in st.guests:
 		if not g.dead:
 			g.finish_long_rest()
-	var lines: Array[String] = []
+			lines.append_array(Afflictions.after_long_rest(g, dice))
 	var room := Services.after_long_rest(st)   # a room booked at the inn (F14)
 	if room != "":
 		lines.append(room)

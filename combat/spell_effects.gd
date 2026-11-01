@@ -462,12 +462,24 @@ func _end_condition(ctx: Dictionary, t: Combatant, params: Dictionary, r: Combat
 	for x: String in listed:
 		if not x in order:
 			order.append(x)
+	# An affliction this spell eases (Afflictions: its cures by spell, or by a condition the spell ends), once a cast.
+	var eased: Array[String] = []
+	var done := ctx.get("afflictions_eased", []) as Array
+	if not t.id in done:
+		done.append(t.id)
+		ctx["afflictions_eased"] = done
+		eased = Afflictions.cure_by_spell(t.creature, str((ctx["s"] as Dictionary).get("id", "")), [pick] if pick in listed else listed)
+		for line in eased:
+			r.lines.append(e.log.add("heal", line, t.id))
 	for cond in order:
 		if t.creature.has_condition(StringName(cond)):
 			cure(t, StringName(cond))
 			r.lines.append(e.log.add("heal", "%s is no longer %s (%s)" % [t.name(), cond.capitalize(), (ctx["s"] as Dictionary)["name"]], t.id))
 			e.events.append({"type": "condition", "id": t.id})
 			return
+	if not eased.is_empty():
+		e.events.append({"type": "condition", "id": t.id})
+		return
 	r.lines.append(e.log.add("info", "%s has nothing for %s to end" % [t.name(), (ctx["s"] as Dictionary)["name"]], t.id))
 
 
