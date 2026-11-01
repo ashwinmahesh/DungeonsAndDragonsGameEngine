@@ -138,3 +138,10 @@ func test_schedule_counters_and_flag_fills() -> void:
 	Schedule.use([] as Array[Dictionary])
 	assert_eq(CampaignModule.fill_flags("{flag.test_days_left} days, {flag.test_unset} more", st), "3 days, 0 more")
 	assert_eq(CampaignModule.new().fill("Left: {flag.test_days_left}", st), "Left: 3", "the base module fills them")
+
+
+func test_twists_for_a_chosen_hero() -> void:
+	var st := _st()
+	var second := st.party[1]
+	_beats(_run(st, "~ start\ntwist +2 hero:2\ntwist +1 name:%s\ntwist +1 hero:9\n" % second.id))
+	assert_eq([st.party[0].twists(), second.twists()], [0, 3], "the second hero, by place and by name; no ninth")

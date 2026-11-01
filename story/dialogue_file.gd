@@ -291,7 +291,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			if parts.size() == 2 and parts[1].is_valid_int() and int(parts[1]) > 0:
 				return {"t": "store_d20", "count": int(parts[1])}
 		"twist":
-			# `twist +<n> [party]`: Twists of Fate for the hero in the conversation, or every living hero.
+			# `twist +<n> [party | hero:<n> | <selector>]`: Twists of Fate for the hero in the conversation, every living hero,
+			# the nth hero in the party's order, or the hero a selector names (name:rook, class:wizard).
+			if parts.size() == 3 and RegEx.create_from_string("^\\+[1-9]$").search(parts[1]) != null and parts[2].contains(":"):
+				return {"t": "twist", "count": int(parts[1]), "party": false, "who": parts[2]}
 			if parts.size() >= 2 and RegEx.create_from_string("^\\+[1-9]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party"]):
 				return {"t": "twist", "count": int(parts[1]), "party": parts.size() == 3}
 		"inspiration":

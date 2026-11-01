@@ -344,7 +344,8 @@ func next() -> Dictionary:
 			"twist":
 				pc += 1
 				var got: Array[String] = []
-				for ch in _receivers(bool(s["party"])):
+				var to := _chosen(str(s["who"])) if s.has("who") else _receivers(bool(s["party"]))
+				for ch in to:
 					ch.gain_twists(int(s["count"]))
 					got.append(_first(ch))
 				if not got.is_empty():
@@ -532,6 +533,24 @@ func _heal(s: Dictionary) -> String:
 
 
 ## Who a story's gift goes to: the hero in the conversation, or with `party` every hero who isn't dead.
+## The living hero `who` names: `hero:<n>`, the nth in the party's order (from 1), or a member selector (name:rook,
+## class:wizard; StoryState.member_matches), the first that matches. [] when none does.
+func _chosen(who: String) -> Array[Character]:
+	var out: Array[Character] = []
+	var living := _living()
+	if who.begins_with("hero:"):
+		var n := int(who.substr(5))
+		var all := st.party
+		if n >= 1 and n <= all.size() and not all[n - 1].dead:
+			out.append(all[n - 1])
+		return out
+	for ch in living:
+		if StoryState.member_matches(ch, who):
+			out.append(ch)
+			break
+	return out
+
+
 func _receivers(party: bool, failed: bool = false) -> Array[Character]:
 	if failed:
 		return _failed_save.filter(func(ch: Character) -> bool: return not ch.dead)

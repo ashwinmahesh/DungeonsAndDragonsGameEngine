@@ -133,9 +133,12 @@ bless [party] [30m|2h]             Bless's bonus (1d4 on attack rolls and saving
 store_d20 2                        Rolls that many d20s now (a notice shows them) and keeps them for the party's next fight:
                                    there any hero can spend each once, a free hotbar line, to set a visible creature's next
                                    d20 to it; what's left fades when that fight ends (Encounter.stored_d20s).
-twist +1 [party]                   A Twist of Fate for the hero in the conversation, or every living hero (`party`): kept
-                                   with the hero (Character.twists); in a fight it's a free hotbar line, spent to set a
-                                   visible creature's next d20 to a 1 or a 20. A notice says who.
+twist +1 [party | hero:2 | name:rook]
+                                   A Twist of Fate for the hero in the conversation, every living hero (`party`), the nth
+                                   hero in the party's order (`hero:<n>`, from 1), or the first living hero a member
+                                   selector names (name:, class:, tag: ...): kept with the hero (Character.twists); in a
+                                   fight it's a free hotbar line, spent to set a visible creature's next d20 to a 1 or a
+                                   20. A notice says who.
 inspiration [party]                Heroic Inspiration for the hero in the conversation, or with `party` every living hero
                                    who lacks it, each time it runs (unlike `inspire`, which rewards playing in character
                                    once a playthrough).
