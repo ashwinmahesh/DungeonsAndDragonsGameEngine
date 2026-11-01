@@ -352,3 +352,21 @@ func test_a_hovering_ghost_part_bobs_beside_the_figure_in_its_own_look() -> void
 	assert_eq(ghost.get_instance_shader_parameter(&"tint"), Vector4(1, 1, 1, 0.5), "but fades with the figure")
 	assert_eq(fig._own_meshes[0].get_instance_shader_parameter(&"see_through"), null, "the figure itself isn't a ghost")
 	fig.free()
+
+
+func test_a_broad_figure_is_wider_but_its_head_keeps_its_shape() -> void:
+	FigureModels.register_part(LANTERN, {"bone": "Head", "follow": "turn", "fit": "head"}, _lantern())
+	FigureModels.register(ID, {"layers": [LANTERN], "broad": 1.25}, _headed())
+	var fig := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	add_child(fig)
+	assert_between(fig.model.scale.x / fig.model.scale.y, 1.249, 1.251, "a quarter wider than made")
+	var hold := fig._skeleton.find_children("Holds_*", "Node3D", false, false)[0] as Node3D
+	var piece := hold.get_child(0) as Node3D
+	var head := FigureModels.bone(fig._skeleton, "Head")
+	fig._skeleton.set_bone_pose_rotation(head, Quaternion(Vector3.UP, 0.7))
+	fig._follow_bones()
+	var world := (fig.model.global_transform * hold.transform * piece.transform).basis
+	var sx := world.get_scale()
+	assert_between(sx.x / sx.y, 0.999, 1.001, "the head isn't stretched, turned or not")
+	assert_between(sx.z / sx.y, 0.999, 1.001, "nor deepened")
+	fig.free()
