@@ -96,6 +96,10 @@ var d20: D20Responses
 var _cover_cache: Dictionary = {}
 ## Savage Attacker is once per turn, any creature's turn: creature id -> the turn it was used on.
 var _savage_turn: Dictionary = {}
+## The place's own rules for fights there (a location's `fight_rules`: {name, modifiers}): an effect on every creature
+## in the fight, those that join later too, gone with the fight (EncounterSetup.clear_fight_effects).
+var place_rules: Dictionary = {}
+const PLACE_RULES := "place_rules"
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
 var ambient_light: String = "bright"
 var sunlit: bool = false
@@ -194,6 +198,7 @@ func add(creature: Creature, side: StringName, cell: Vector2i) -> Combatant:
 	creature.fear_seen = fear_in_sight
 	creature.condition_blocked = _condition_blocked
 	combatants.append(c)
+	apply_place_rules(c)
 	# A foe that joins mid-fight (Children of the Night) comes at the difficulty's Hit Points and +2s too.
 	if state == State.ACTIVE and side == &"enemy" and creature is Monster:
 		difficulty.toughen(c, false)
@@ -270,6 +275,21 @@ func occupant_at(cell: Vector2i) -> Combatant:
 		if c.is_alive() and cell in c.footprint():
 			return c
 	return null
+
+
+## Puts the place's fight rules (place_rules) on `c`, once.
+func apply_place_rules(c: Combatant) -> void:
+	if place_rules.is_empty() or c.creature.effects.any(func(fx: Effect) -> bool: return fx.stack_key == PLACE_RULES):
+		return
+	var fx := Effect.new(str(place_rules.get("name", "This place")), &"feature", "place_rules")
+	fx.stack_key = PLACE_RULES
+	fx.ends = Effect.Ends.NEVER
+	for md: Variant in place_rules.get("modifiers", []):
+		var mdd := (md as Dictionary).duplicate()
+		var stat := str(mdd["stat"])
+		mdd.erase("stat")
+		fx.with_modifier(stat, mdd)
+	c.creature.add_effect(fx)
 
 
 func distance(a: Combatant, b: Combatant) -> int:

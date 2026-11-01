@@ -193,6 +193,8 @@
             "darkvision",
             "sense",
             "crit_range",
+            "crit_widen",
+            "fumble_range",
             "attacks_per_action",
             "damage_die_min",
             "bonus_die",

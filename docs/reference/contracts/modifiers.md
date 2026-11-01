@@ -194,3 +194,5 @@ in a fight, and the class tab offers Automatic and Off for it (Rallying Cry, Fam
 `exhaustion_relief`: `when_spent` (a resource) and `value`: spending that resource also removes that many levels of
 Exhaustion (Necromancer's Grave Power with Arcane Recovery).
 
+`crit_widen` (value): attack rolls score a Critical Hit on a d20 that much lower, stacking with `crit_range` (Improved
+Critical). `fumble_range` (value): an attack roll's d20 at or below it always misses (the highest one counts).
