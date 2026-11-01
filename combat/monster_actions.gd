@@ -504,11 +504,15 @@ func area_cells(c: Combatant, act: Dictionary, t: Combatant) -> Array[Vector2i]:
 		var origin := e.center_of(c)
 		if str(area["shape"]) == "cone":
 			cells = e.grid.cone_from(c.cell, c.size_cells, e.center_of(t), size)
-		elif str(area["shape"]) == "line":
-			# Straight at the target, at whatever angle, from where that leaves the monster's space.
+		elif str(area["shape"]) in ["line", "path"]:
+			# Straight at the target, at whatever angle, from where that leaves the monster's space; a `path` (a charge
+			# through whoever is in the way) is as wide as the monster.
 			var dir := e.center_of(t) - origin
-			cells = e.grid.area_cells("line", size, CombatGrid.line_origin(c.cell, c.size_cells, dir,
-				int(area.get("width", 5))), dir, int(area.get("width", 5)))
+			var width := c.size_cells * CombatGrid.FEET if str(area["shape"]) == "path" else int(area.get("width", 5))
+			cells = e.grid.area_cells("line", size, CombatGrid.line_origin(c.cell, c.size_cells, dir, width), dir, width)
+		elif str(area["shape"]) in ["sphere", "cube", "cylinder"] and int((act.get("targets", {}) as Dictionary).get("range", 0)) > 0:
+			# Thrown or hurled at a point within range (a giant's boulder): the area is round its target, not the thrower.
+			cells = e.grid.area_cells(str(area["shape"]), size, e.center_of(t), Vector2.ZERO, 5, t.cell, t.size_cells)
 		else:
 			cells = e.grid.area_cells(str(area["shape"]), size, origin, e.center_of(t) - origin, 5, c.cell, c.size_cells)
 	return cells
@@ -561,6 +565,8 @@ func save_action(c: Combatant, act: Dictionary, t: Combatant, r: CombatResult, p
 	spend(c, act)
 	var victims := save_victims(c, act, t)
 	e.log.add("info", "%s uses %s%s" % [c.name(), act.get("name", ""), (" on %s" % t.name()) if victims.size() == 1 and victims[0] == t else ""], c.id)
+	if str((act.get("area", {}) as Dictionary).get("shape", "")) == "path":
+		_charge(c, act, t)
 	# For the view's effect (emit-only): which action, on whom.
 	e.events.append({"type": "ability", "source": "monster", "by": c.id, "key": action_key(c, act),
 		"targets": victims.map(func(v: Combatant) -> String: return v.id), "cells": []})
@@ -570,6 +576,32 @@ func save_action(c: Combatant, act: Dictionary, t: Combatant, r: CombatResult, p
 			_save_one(c, act, v, r, rolled_once, false)
 		return r
 	return e.each(victims, func(v: Variant) -> CombatResult: return _save_one(c, act, v as Combatant, r, rolled_once, true), func() -> CombatResult: return r)
+
+
+## A charge (an area `path`): the monster goes straight at `t` up to the path's length, through whoever is in the way and
+## without Opportunity Attacks, to the farthest square along it where it fits (those it passed make the save).
+func _charge(c: Combatant, act: Dictionary, t: Combatant) -> void:
+	var e := enc()
+	var dir := e.center_of(t) - e.center_of(c)
+	if dir.length() < 0.01:
+		return
+	dir = dir.normalized()
+	var reach := area_size(c, act.get("area", {}) as Dictionary) / CombatGrid.FEET
+	var from := c.cell
+	for d in range(reach, 0, -1):
+		var at := from + Vector2i(roundi(dir.x * d), roundi(dir.y * d))
+		if at == from:
+			continue
+		var clear := true
+		for f in CombatGrid.footprint(at, c.size_cells):
+			var who := e.occupant_at(f)
+			if not e.grid.in_bounds(f) or e.grid.is_solid(f) or (who != null and who != c):
+				clear = false
+		if clear:
+			c.cell = at
+			e.events.append({"type": "move", "id": c.id, "from": from, "to": at, "forced": false, "charge": true})
+			e.log.add("move", "%s charges through" % c.name(), c.id)
+			return
 
 
 ## What's added to the DCs a monster's own actions set: its `spell_dc` modifiers (Tactician's +2, combat/difficulty.gd).
