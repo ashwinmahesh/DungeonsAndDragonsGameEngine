@@ -206,6 +206,12 @@ static func _check_cell_events(view: LocationView) -> bool:
 				if view._queue.is_empty() and not view._on_arrive.is_valid():
 					view.narration.emit(str(exit.get("locked_text", "The way is barred.")))
 				return false
+			# A hero an affliction holds here (its `holds_at`: a curse that won't let them leave the casino).
+			var held := Afflictions.holding(view.st.party, view.loc_id, str(view.loc.get("region", "")), str(exit["to"]))
+			if held != "":
+				if view._queue.is_empty() and not view._on_arrive.is_valid():
+					view.narration.emit(held)
+				return false
 			view._save_positions()
 			if str(exit["to"]) == "travel":
 				view.travel_requested.emit(Travel.exit_destination(view.loc, exit, view.st))

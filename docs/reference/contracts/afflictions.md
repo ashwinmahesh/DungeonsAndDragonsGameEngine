@@ -18,6 +18,7 @@ creature's effects and needs no save change. Its modifiers are rebuilt whenever 
 | `symptoms.table[].on_hurt` | `{dice, type}`: each time the creature takes damage it takes that much more, once a blow (EncounterDamage) |
 | `conditions` | conditions it holds the creature under while afflicted (a charm); `thresholds[].conditions` add more at that level |
 | `blocked_by` | a condition id: a creature immune to it can't gain levels. Missing: nothing keeps it out (poison immunity doesn't, unless the definition names `poisoned`) |
+| `holds_at` | `{locations, regions, min_level (1), text}`: a living hero who has it at `min_level` or more can't leave those places (Afflictions.holding: the place's exits and the road are barred with `text`, `{name}` the hero), though they may go between the `locations` it names. Gone with the affliction |
 
 API (static, pure): `Afflictions.level_of(cr, id)`, `of(cr)` ({id: level}), `set_level(cr, id, level)`, `add(cr, id, n)`,
 `clear(cr, id)`, `cure_by_spell(cr, spell_id, conditions)`, `after_long_rest(cr, dice)` (the lines for the rest screen).
