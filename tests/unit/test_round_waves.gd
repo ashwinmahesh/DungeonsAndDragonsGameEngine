@@ -65,7 +65,5 @@ func test_it_reaches_only_so_many() -> void:
 	TestCombat.punching_bag(e, Vector2i(11, 7), 500)
 	e.legendary.set_round_events([{"id": "test_ribbon", "kind": "effect", "affects": "party", "count": 2, "at": 20, "every": 1,
 		"modifiers": [{"stat": "speed_set", "value": 0}]}])
-	TestCombat.start_with(e, e.combatants[0])
-	e.legendary.round_events.act(e.legendary.round_events.events[0], false)
-	var bound := e.combatants.filter(func(c: Combatant) -> bool: return c.creature.effects.any(func(fx: Effect) -> bool: return fx.source_id.begins_with("round_event:")))
-	assert_eq(bound.size(), 2, "two of the four")
+	assert_eq(e.legendary.round_events._reached(e.legendary.round_events.events[0]).size(), 2, "two of the four")
+	assert_eq(e.legendary.round_events._reached({"affects": "party"}).size(), 4, "without a count, all four")
