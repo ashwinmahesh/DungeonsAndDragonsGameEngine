@@ -110,3 +110,10 @@ weapon: the next weapon hit within `minutes` deals `dice` more of the chosen typ
 or outside one). `drink_field_spell` takes `params.modifiers` too: what the drink adds for its minutes besides the
 exploring spell (Advantage on Insight), and `params.after_save` ({ability, dc, minutes, modifiers}): a save after
 the drink, and on a failure those modifiers for that long (a price for what it showed).
+
+## Drinks that cast a spell
+
+A power with `custom: "drink_cast"` and `params: {spell, level, minutes, sustain_cost}` casts `spell` through the
+drinker at `level`, with no slot and no Concentration, lasting `minutes`; the power's own `targeting` and `range` pick
+the target. With `sustain_cost` the spell's repeated actions cost that instead (Vampiric Touch's touch as a Bonus
+Action; ItemSpecials._drink_cast). SpellCasting.cast_free takes the same `level` and `sustain_cost` options.

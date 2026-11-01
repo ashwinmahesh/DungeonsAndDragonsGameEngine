@@ -461,7 +461,8 @@ func _queue_readied(c: Combatant, s: Dictionary) -> void:
 
 
 ## Casts a spell without a slot or the usual action (War God's Blessing, features that cast spells): opts may say
-## no_concentration (it lasts its `minutes` instead).
+## no_concentration (it lasts its `minutes` instead), `level` (cast as if at that level) and `sustain_cost` (what its
+## repeated actions cost instead: a drink's Vampiric Touch repeated as a Bonus Action).
 func cast_free(c: Combatant, spell_id: String, targets: Array, point: Vector2, opts: Dictionary = {}) -> CombatResult:
 	var spells := sp()
 	if bool(opts.get("splintered", false)):
@@ -474,7 +475,7 @@ func cast_free(c: Combatant, spell_id: String, targets: Array, point: Vector2, o
 		return CombatResult.fail("Not automated yet")
 	if spells.specials.high.in_antimagic(c):
 		return CombatResult.fail("Can't cast spells inside an Antimagic Field")
-	var level := int(s.get("level", 0))
+	var level := maxi(int(s.get("level", 0)), int(opts.get("level", 0)))
 	var check := spells._check_targets(c, s, level, targets, point, opts)
 	if str(check["why"]) != "":
 		return CombatResult.fail(str(check["why"]))
