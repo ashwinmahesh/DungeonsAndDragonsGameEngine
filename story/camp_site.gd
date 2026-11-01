@@ -40,9 +40,9 @@ const ROUGH := CombatGrid.WALL | CombatGrid.LOW | CombatGrid.VOID | CombatGrid.W
 ## Whether a Long Rest at `loc` makes camp: wherever the place's own rest is risky (decided on the place's own rule,
 ## not the Story difficulty's safe rests). A safe place (an inn, a house that takes the party in, a sanctuary) keeps
 ## the rest screen, and a place that allows no rest allows none. The rest screen also keeps it for a room booked for
-## the night, the tutorial and the magic items' rests.
-static func makes_camp(loc: Dictionary) -> bool:
-	return loc.has("map") and str(loc.get("rest", "risky")) == "risky"
+## the night, the tutorial and the magic items' rests. With `st`, the place's rule as the story stands (RestRules.rule_of).
+static func makes_camp(loc: Dictionary, st: StoryState = null) -> bool:
+	return loc.has("map") and RestRules.rule_of(loc, st) == "risky"
 
 
 ## Where a camp at `loc` is: INDOORS (under a roof, or in a dungeon), WILD (an open place: WILD_THEMES), else TOWN (a

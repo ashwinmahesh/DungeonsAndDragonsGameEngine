@@ -124,6 +124,8 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   or `no` (no Long Rest: its card says `rest_text`); default risky. A Short Rest is taken in any of them, `no`
   included, unless a fight on the map was begun and not won or foes are in plain view of the party
   (story/rest_rules.gd).
+  `rest_when` ([{when, rest, rest_text?}]) changes that with the story: the first whose condition holds is the rule
+  (RestRules.rule_of), as a village's one house the hunting mob fears is `safe` while the hunt lasts.
 - **Crime (F8, docs/rules/stealth.md):** a container's `owner` (an npc id) makes taking from it stealing when somebody
   sees; an area's `private` (an npc id) makes it a private room, with `open` (a condition) for when it may be entered;
   the location's `watch` names the guard who answers a crime here ("" for nobody; unset, the region's watch).

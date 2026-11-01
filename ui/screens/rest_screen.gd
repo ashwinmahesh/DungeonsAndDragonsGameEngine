@@ -42,7 +42,7 @@ func open(root_: Node, state: StoryState, _index: int) -> void:
 	st = state
 	var frame := UiKit.screen_frame(self, "Rest", Vector2(1160, 760))
 	var loc := Compendium.shared().get_entry("locations", st.location)
-	var rule := str(loc.get("rest", "risky"))
+	var rule := RestRules.rule_of(loc, st)
 	# Story difficulty: a Long Rest in a risky place is never interrupted (combat/difficulty.gd).
 	if rule == "risky" and Difficulty.of_options(st.options).safe_rests:
 		rule = "safe"
@@ -171,7 +171,7 @@ func _camp() -> LocationCamp:
 func _can_camp() -> bool:
 	var view := _view()
 	return view != null and not view.in_combat and Services.booked(st) == "" \
-		and CampSite.makes_camp(Compendium.shared().get_entry("locations", st.location))
+		and CampSite.makes_camp(Compendium.shared().get_entry("locations", st.location), st)
 
 
 ## Why the party sleeps on the screen when it meant to make camp.
