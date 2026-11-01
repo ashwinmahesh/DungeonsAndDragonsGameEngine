@@ -24,12 +24,14 @@ Numbers are the 2024 stat block's. These machine-readable keys sit next to the p
 `{do, save, until, not_types, only_types, not_species, max_size, immune_on_success, ...}`:
 `condition` (with `until`: target_turn_end, target_turn_start, source_turn_start, source_turn_end, minute, permanent;
 optional `modifiers`), `grapple` (`escape_dc`, `limit`), `pull` / `push` (`feet`), `drain_max_hp` and `heal_self`
-(`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`).
+(`type`), `ability_drain` (`ability`, `dice`), `curse` (lycanthropy), `engulf` (`escape_dc`, `damage`, `conditions`), `afflict` (`id`, `levels`: levels of an affliction,
+docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that burn and then rot).
 
 ## Traits read by code
 
 `aura` (`radius`, `trigger: start_turn`, `save`, `condition`, `until`, `immune_on_success`, `affects`): Stench,
-Festering Aura. `absorb`: Lightning Absorption. `sunlight`: `sensitivity`, `weakness`, `hypersensitivity`.
+Festering Aura. `dreads_item` (`items`, `damage`, `riders`): at the start of its turn, if it can see a creature carrying one of
+`items`, it takes the damage and the riders land on it (a likeness of a lost love). `absorb`: Lightning Absorption. `sunlight`: `sensitivity`, `weakness`, `hypersensitivity`.
 Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb`, `swarm`, `flyby`,
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
