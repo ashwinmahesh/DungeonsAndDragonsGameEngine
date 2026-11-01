@@ -1174,6 +1174,16 @@
     "field_utility": {
       "type": "boolean",
       "description": "Helpful non-damaging self/creature handler available through FieldCasting."
+    },
+    "rest_ward": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modifiers"],
+      "description": "A ward drawn on by finishing a Long Rest where the spell was cast (Wards.after_long_rest): the spell ends, and its caster and up to `others` more (default its spellcasting modifier, at least 1) gain `modifiers` for what is left of its duration.",
+      "properties": {
+        "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}},
+        "others": {"type": "integer", "minimum": 0}
+      }
     }
   }
 }

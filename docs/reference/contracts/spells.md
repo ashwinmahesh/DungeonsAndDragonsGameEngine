@@ -147,3 +147,10 @@ Spell `roll_response` describes failed-D20 or incoming-attack reactions: `scope`
 Splintered Summons supplies two `opts.points` plus `splintered: true`. Both full footprints, visibility, range and non-overlap are validated before payment. A real slot and feature use are required; both creatures have half HP, keep the same form, and share the casting's concentration. The action catalog exposes the two-point choice while retaining form and slot choices.
 
 Subclass `cast_level_boost` recipes select an explicit spell variant (`opts.slot_boost`). Eligibility checks school, optional extra-target upcasting or absence of attack/save mechanics, resource availability, and actual slot expenditure before any costs. The spell resolves with effective `slot + 1`; `paid_slot` retains the spent slot for post-cast benefits such as Arcane Ward or school Adept features. Free castings and cantrips cannot use the variant.
+
+## Wards drawn on by resting (`rest_ward`)
+
+`rest_ward: {modifiers, others}` on an exploring spell: cast while exploring (FieldCasting.cast_utility pays its slot
+and component), it is recorded where it was cast (Wards.cast_here). A Long Rest finished there (Wards.after_long_rest,
+from LongRest's benefits) ends the spell, and its caster and up to `others` more (default its spellcasting modifier for
+the spell's class, at least 1), the party first, gain `modifiers` for what is left of the spell's duration.
