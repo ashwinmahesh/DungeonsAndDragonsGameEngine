@@ -1597,6 +1597,7 @@
               }
             }
           },
+          "rearm_minutes": {"type": "integer", "minimum": 1, "description": "Once won, the fight comes back after this many minutes of the clock (a beaten mob gathers again): LocationFights.rearm."},
           "ends_when": {
             "type": "object",
             "additionalProperties": false,

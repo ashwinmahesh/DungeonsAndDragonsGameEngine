@@ -167,6 +167,7 @@ static func create(location_id: String, state: StoryState, narrator_: Narrator, 
 
 func _ready() -> void:
 	assert(not loc.is_empty(), "No location %s" % loc_id)
+	LocationFights.rearm(st, loc_id, loc)   # a beaten mob back after its hours
 	grid = grid_for(loc)
 	board = ArenaBoard.build(grid, ArenaBoard.theme_for(loc["map"] as Dictionary), loc_id)
 	add_child(board)
