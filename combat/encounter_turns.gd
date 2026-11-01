@@ -134,6 +134,7 @@ func _begin_turn() -> CombatResult:
 	e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
 	if c.readied.has("spell"):
 		e.log.add("info", "%s lets the readied spell go" % c.name(), c.id)
+	c.swimming = e.grid.swimmable and c.altitude <= 0 and c.footprint().any(func(f: Vector2i) -> bool: return e.grid.has_flag(f, CombatGrid.WATER))
 	c.reset_turn()
 	if c.creature.has_flag("hasted"):
 		c.haste_action = true

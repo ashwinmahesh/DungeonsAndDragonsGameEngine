@@ -122,6 +122,8 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	LocationNpcs.clear_for_fight(view)   # the house's people keep out of it (`steps_aside`)
 	var grid := _combat_grid(view)
 	var sitting := keep_back(view, grid, _starting_squares(view, spec))   # before the encounter, so her square blocks
+	if bool(view.loc["map"].get("swim", false)):
+		grid.make_swimmable()   # deep water to swim in, not a void (docs: Swimming in fights)
 	var e := Encounter.new(grid, view.dice)
 	e.title = str(spec.get("text", ""))
 	# Bosses (ADR 0014): the place (a Misty Escape's resting place), the lair's actions, a foe that withdraws.
@@ -603,6 +605,8 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		view.in_combat = false
 		ModeController.force(ModeController.Mode.EXPLORATION)
 		return false
+	if bool(view.loc["map"].get("swim", false)):
+		e.grid.make_swimmable()
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.ends_when = ends_when_for(view, spec)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.

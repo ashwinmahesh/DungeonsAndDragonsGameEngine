@@ -74,6 +74,10 @@
             "dark"
           ]
         },
+        "swim": {
+          "type": "boolean",
+          "description": "Its deep water (w) can be swum in fights: double cost without a Swim Speed; water-only creatures stay in it (docs/reference/contracts/locations.md)."
+        },
         "outdoors": {
           "type": "boolean"
         }
