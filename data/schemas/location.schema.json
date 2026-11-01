@@ -79,6 +79,22 @@
         }
       }
     },
+    "hazard": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Air that harms whoever stays here, on the exploration clock (PlaceHazards): a save on entering and every `every_min` minutes, a condition, then saves every `lasting.every_min` minutes that add Exhaustion until one succeeds.",
+      "properties": {
+        "name": {"type": "string"},
+        "every_min": {"type": "integer", "minimum": 1},
+        "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
+          "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
+        "condition": {"type": "string"},
+        "lasting": {"type": "object", "additionalProperties": false, "properties": {
+          "every_min": {"type": "integer", "minimum": 1}, "exhaustion": {"type": "integer", "minimum": 0}}},
+        "immune_flags": {"type": "array", "items": {"type": "string"}},
+        "when": {"type": "string", "description": "A story condition: the air is bad only while it holds."}
+      }
+    },
     "areas": {
       "type": "array",
       "items": {

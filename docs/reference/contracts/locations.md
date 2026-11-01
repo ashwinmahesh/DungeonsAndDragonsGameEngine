@@ -127,6 +127,12 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
 - **Crime (F8, docs/rules/stealth.md):** a container's `owner` (an npc id) makes taking from it stealing when somebody
   sees; an area's `private` (an npc id) makes it a private room, with `open` (a condition) for when it may be entered;
   the location's `watch` names the guard who answers a crime here ("" for nobody; unset, the region's watch).
+- **Bad air (PlaceHazards):** a location's `hazard` ({name, every_min, save, condition, lasting: {every_min,
+  exhaustion}, immune_flags, when}) runs on the exploration clock while its story `when` holds: each living hero
+  without one of `immune_flags` makes the `save` on entering and every `every_min` (10) minutes inside, gaining
+  `condition` (Poisoned) on a failure; a hero holding it saves again every `lasting.every_min` (60) minutes wherever
+  they are, failing for `lasting.exhaustion` (1) levels of Exhaustion, succeeding to end it. The world shows what
+  happens as toasts (StoryState.hazard_news).
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open

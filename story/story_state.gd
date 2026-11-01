@@ -573,6 +573,7 @@ func advance_minutes(minutes: int) -> void:
 	for g in guests:
 		g.advance_minutes(minutes)
 	_item_time(start, minutes)
+	PlaceHazards.tick(self, start, minutes)   # a place whose air harms whoever stays (a location's `hazard`)
 
 
 ## Magic items and the clock (ADR 0012): charges come back at dawn (or dusk), regeneration heals as time passes. The
@@ -596,6 +597,8 @@ func _item_time(start: int, minutes: int) -> void:
 
 ## Things items did while time passed (charges back at dawn), for the world to show; drained by whoever shows them.
 var item_news: Array[String] = []
+## What a place's air did to the party (PlaceHazards), waiting for the world to show it; not saved.
+var hazard_news: Array[String] = []
 
 
 ## Whether an exploring spell is still running (`spell:light` in conditions).
