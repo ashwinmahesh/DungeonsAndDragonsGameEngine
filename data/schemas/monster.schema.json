@@ -392,9 +392,11 @@
       "additionalProperties": false,
       "description": "A machine-readable rider (combat/monster_actions.gd).",
       "properties": {
+        "id": {"type": "string", "description": "afflict: the affliction (data/afflictions)."},
+        "levels": {"type": "integer", "description": "afflict: how many levels (1)."},
         "do": {
           "$ref": "common.schema.json#/$defs/id",
-          "description": "condition, grapple, pull, push, drain_max_hp, heal_self, ability_drain, curse, engulf, burning, possess (the engine's), or the game's own, which its features module runs (`rider`)."
+          "description": "condition, grapple, pull, push, drain_max_hp, heal_self, ability_drain, curse, engulf, burning, possess, afflict (the engine's), or the game's own, which its features module runs (`rider`)."
         },
         "condition": {
           "$ref": "common.schema.json#/$defs/condition"

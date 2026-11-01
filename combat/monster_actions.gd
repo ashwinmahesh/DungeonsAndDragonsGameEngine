@@ -170,6 +170,12 @@ func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, a
 				t.set_meta("grip_damage", rd["grip_damage"])
 		"burning":
 			set_burning(src, t)
+		"afflict":
+			# Levels of an affliction (Afflictions: a rot, a plague): `id`, `levels` (1).
+			var lv := Afflictions.add(t.creature, str(rd.get("id", "")), int(rd.get("levels", 1)))
+			if lv > 0:
+				e.log.add("condition", "%s's %s grows (level %d, %s)" % [t.name(),
+					str(Afflictions.definition(str(rd.get("id", ""))).get("name", rd.get("id", ""))), lv, act_name], t.id)
 		"possess":
 			possess(src, t, act_name)
 		"pull", "push":
@@ -878,6 +884,7 @@ func turn_start(c: Combatant) -> CombatResult:
 				if o2 != c and not o2.is_down():
 					auras.append([c, o2, tr2])
 	var rest := func() -> CombatResult:
+		_dreads(c)
 		# Regeneration (the Slaad spirit): Hit Points back at the start of its turn while it has at least 1.
 		for tr3: Variant in traits(c):
 			var regen := int((tr3 as Dictionary).get("regenerate", 0))
@@ -923,6 +930,41 @@ func turn_start(c: Combatant) -> CombatResult:
 		if src.is_down() or not src.is_alive():
 			return CombatResult.new()
 		return _aura_on(src, at[1] as Combatant, at[2] as Dictionary, true), rest)
+
+
+## A thing it can't bear to see (a trait's `dreads_item`: {items, damage: [{amount or dice, type}], riders}): at the start
+## of its turn, if a creature it can see carries one of `items`, it takes the damage and the riders land on it (itself
+## their source: `until: target_turn_start` lasts to its next turn).
+func _dreads(c: Combatant) -> void:
+	var e := enc()
+	if not c.is_alive() or c.creature.hp <= 0:
+		return
+	for tr: Variant in traits(c):
+		var dread := (tr as Dictionary).get("dreads_item", {}) as Dictionary
+		if dread.is_empty():
+			continue
+		var seen := false
+		for o in e.combatants:
+			if o == c or not o.is_alive() or o.has_meta("left_fight") or not o.creature is Character or not e.can_see(c, o):
+				continue
+			for item: Variant in dread.get("items", []):
+				if not (o.creature as Character).entry_of(str(item)).is_empty():
+					seen = true
+		if not seen:
+			continue
+		var label := str((tr as Dictionary).get("name", "Dread"))
+		var parts: Array = []
+		for raw: Variant in dread.get("damage", []):
+			var d := raw as Dictionary
+			var amount := int(d.get("amount", 0))
+			if d.has("dice"):
+				amount = int(e._roll_damage_dice(str(d["dice"]), false, 0, label)["total"])
+			parts.append({"amount": amount, "type": str(d.get("type", "psychic"))})
+		e.log.add("info", "%s sees what it dreads (%s)" % [c.name(), label], c.id)
+		if not parts.is_empty():
+			e.deal_damage(null, c, parts, false, label)
+		if c.is_alive():
+			apply_riders(c, c, dread.get("riders", []) as Array, {}, label)
 
 
 ## One aura from `o` reaching `c`: a save, then a timed condition or hindrance (Stench, Festering Aura, Stony Lethargy)
