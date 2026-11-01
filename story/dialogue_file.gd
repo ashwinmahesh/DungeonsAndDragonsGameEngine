@@ -221,8 +221,8 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				return {"t": "heal", "dice": parts[1], "party": "party" in words, "temp": "temp" in words}
 		"damage":
 			# `damage <dice> <type> [party]`: never below 1 Hit Point (docs/contracts/dialogue.md).
-			if parts.size() >= 3 and _is_dice(parts[1]) and parts[2] in DAMAGE_TYPES and _words_of(Array(parts.slice(3)), ["party"]):
-				return {"t": "damage", "dice": parts[1], "type": parts[2], "party": parts.size() == 4}
+			if parts.size() >= 3 and _is_dice(parts[1]) and parts[2] in DAMAGE_TYPES and _words_of(Array(parts.slice(3)), ["party", "failed"]):
+				return {"t": "damage", "dice": parts[1], "type": parts[2], "party": parts.size() == 4 and parts[3] == "party", "failed": parts.size() == 4 and parts[3] == "failed"}
 		"advantage", "disadvantage":
 			# `advantage <skill|checks> [next|<n>m|<n>h][: why]` (story/check_edges.gd).
 			var me := RegEx.create_from_string("^(?:dis)?advantage\\s+([a-z_]+)(?:\\s+(next|\\d+[mh]))?(?::\\s*(.+))?$").search(line)
@@ -231,6 +231,15 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				var mins := 0 if span in ["", "next"] else int(span.left(-1)) * (60 if span.ends_with("h") else 1)
 				return {"t": "edge", "kind": "dis" if parts[0] == "disadvantage" else "adv", "skill": me.get_string(1), "minutes": mins,
 					"why": me.get_string(3).strip_edges()}
+		"exhaust":
+			# `exhaust <+n|-n> [party|failed]`: Exhaustion levels gained or lost (docs/contracts/dialogue.md).
+			if parts.size() >= 2 and RegEx.create_from_string("^[+-][1-6]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party", "failed"]):
+				return {"t": "exhaust", "levels": int(parts[1]), "party": parts.size() == 3 and parts[2] == "party", "failed": parts.size() == 3 and parts[2] == "failed"}
+		"save":
+			# `save <Ability> DC <n> party -> ok | fail`: every living hero rolls; `ok` when all of them save.
+			var msave := RegEx.create_from_string("^save\\s+([A-Za-z]+)\\s+DC\\s+(\\d+)\\s+party\\s*->\\s*([A-Za-z0-9_:/]+|END)(?:\\s*\\|\\s*([A-Za-z0-9_:/]+|END))?$").search(line)
+			if msave != null and msave.get_string(1).to_lower() in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]:
+				return {"t": "party_save", "ability": msave.get_string(1).to_lower(), "dc": int(msave.get_string(2)), "ok": msave.get_string(3), "fail": msave.get_string(4)}
 		"hit_dice":
 			# `hit_dice restore <n|all> [party]` / `hit_dice grant <n> [party]`.
 			if parts.size() >= 3 and parts[1] in ["restore", "grant"] and (parts[2].is_valid_int() and int(parts[2]) > 0 or (parts[2] == "all" and parts[1] == "restore")) \

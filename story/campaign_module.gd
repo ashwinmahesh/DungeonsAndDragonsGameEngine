@@ -10,9 +10,23 @@ extends RefCounted
 
 # --- Text and facts the story data reaches for ------------------------------------------------------------------
 
-## `text` with the campaign's {placeholders} filled from the story (quest journals, hints, warnings).
-func fill(text: String, _st: StoryState) -> String:
-	return text
+## `text` with the campaign's {placeholders} filled from the story (quest journals, hints, warnings). The base fills
+## `{flag.<id>}` with the flag's value (0 while unset: "The plague has taken {flag.plague_toll} souls"); a campaign that
+## overrides it calls fill_flags for the same.
+func fill(text: String, st: StoryState) -> String:
+	return fill_flags(text, st)
+
+
+static func fill_flags(text: String, st: StoryState) -> String:
+	if not text.contains("{flag.") or st == null:
+		return text
+	var re := RegEx.create_from_string("\\{flag\\.([a-z0-9_]+)\\}")
+	var out := text
+	for m in re.search_all(text):
+		var v: Variant = st.get_flag(m.get_string(1), 0)
+		var shown := str(int(v)) if v is float and is_equal_approx(float(v), roundf(float(v))) else str(v)
+		out = out.replace(m.get_string(0), shown)
+	return out
 
 
 ## One fact of the campaign's own state, by dotted path (`ally.npc`); "" when there is none.

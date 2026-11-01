@@ -312,3 +312,9 @@ They skip his wards (`Wards.hides_from_strahd`) and his attention tier's shorter
 `gap_hours`, and keep `quiet_regions` and holy ground. Each needs a unique id (across all visit files), a `dialogue` and
 a limit (`once`, `max` or `cooldown_hours`). The story bot answers their conversations by the exit
 (`tests/support/ally_visit_answer.gd`).
+
+## Text fills
+
+`CampaignModule.fill(text, st)` fills the {placeholders} of quest journals, hints and warnings. The base fills
+`{flag.<id>}` with the flag's value (0 while unset); a campaign that overrides `fill` calls `CampaignModule.fill_flags`
+to keep it.

@@ -71,6 +71,11 @@
             "type": "object",
             "description": "Flags it sets when it happens, wherever the party is."
           },
+          "add": {
+            "type": "object",
+            "additionalProperties": {"type": "integer"},
+            "description": "Counters it moves each time it happens, wherever the party is (flag -> amount, negative to count down)."
+          },
           "narration": {
             "type": "string",
             "description": "A Narrator line when it happens where the party is."

@@ -12,7 +12,7 @@ moved while the party is in a location, outside fights and conversations.
 
 - **When:** `hour` (and `minute`), every day or every `every_days` days from `first_day`, while `when` holds (checked
   when the event comes due). `once` events happen a single time.
-- **What it does:** sets its `set` flags wherever the party is. If the party is at its `location` (or it has none),
+- **What it does:** sets its `set` flags and moves the counters in `add` (`{"moon_days_left": -1}`) wherever the party is. If the party is at its `location` (or it has none),
   within an hour of its time, it also plays a Narrator `narration` line or starts a `dialogue`.
 - **Catching up:** a long wait (a Long Rest, a journey) brings each event round once, at its latest time in the wait,
   not once per day missed. `here_only` events wait for a day the party is there to see them.
