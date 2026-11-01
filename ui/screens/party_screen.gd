@@ -247,6 +247,8 @@ func _column(ch: Character, i: int) -> Control:
 		tags.add_child(UiParts.pill(str(c).capitalize(), "rose"))
 	if ch.exhaustion > 0:
 		tags.add_child(UiParts.pill("Exhaustion %d" % ch.exhaustion, "rose"))
+	for a in Afflictions.shown(ch):
+		tags.add_child(UiParts.pill(str(a["label"]), "rose"))
 	if ch.concentration != null:
 		tags.add_child(UiParts.pill("Concentrating: %s" % ch.concentration.name, "moonlight"))
 	if tags.get_child_count() > 0:

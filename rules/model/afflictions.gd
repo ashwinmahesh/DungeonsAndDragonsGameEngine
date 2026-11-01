@@ -110,6 +110,20 @@ static func eased_by(cr: Creature, spell_id: String, conditions: Array) -> bool:
 	return false
 
 
+## What the UI shows for `cr`'s afflictions, in the order they came: [{id, name, level, summary, label ("<name> <level>")}].
+static func shown(cr: Creature) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for fx in cr.effects:
+		if fx.source_kind != SOURCE:
+			continue
+		var def := definition(fx.source_id)
+		var name := str(def.get("name", fx.source_id.capitalize()))
+		var level := int(fx.data.get("level", 0))
+		out.append({"id": fx.source_id, "name": name, "level": level, "summary": str(def.get("summary", "")),
+			"label": "%s %d" % [name, level]})
+	return out
+
+
 ## The highest level of `id` among `creatures` (0 when none has it).
 static func highest(creatures: Array, id: String) -> int:
 	var top := 0
