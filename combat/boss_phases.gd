@@ -215,6 +215,12 @@ func enter(c: Combatant, phase_id: String) -> bool:
 			e.grapples.erase(c.id)
 	if bool(ph.get("lair", false)):
 		e.lair = true
+	# The creatures it takes with it as it begins (`destroys`: stat block ids), after its Hit Points counted them.
+	for bid: Variant in ph.get("destroys", []):
+		for o in e.combatants:
+			if o != c and o.is_alive() and o.creature.hp > 0 and not o.has_meta("left_fight") and o.creature is Monster \
+					and str((o.creature as Monster).data.get("id", "")) == str(bid):
+				leg().vanish(o, str(ph.get("destroys_narration", "")))   # gone with it, whatever it resists
 	if ph.has("flag"):
 		leg().story_flags[str(ph["flag"])] = true
 	var sm := ph.get("summon", {}) as Dictionary

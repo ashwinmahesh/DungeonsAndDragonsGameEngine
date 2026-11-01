@@ -856,6 +856,12 @@
             }
           ]
         },
+        "destroys": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Stat blocks whose living creatures go with it as the phase begins (after `hp` or `heal` counted them)."
+        },
+        "destroys_narration": {"type": "string"},
         "heal": {
           "anyOf": [
             {"type": "integer", "minimum": 1},

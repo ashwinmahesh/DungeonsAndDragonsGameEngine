@@ -352,7 +352,8 @@ many creatures of a stat block dead, down or off the board, caught or vanished o
 each falls or leaves), `round: N` (from that round's turn on), or `flag` (one this fight set: a game module's set
 piece, another phase, a catch's flag). With two triggers it begins on whichever is met first. What begins with it: `hp` ("full",
 "half" or a number) or `heal` (a number may count the fight: "40 + 10 * alive:<stat block>", how many of that block
-are still up, Legendary.counted); `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
+are still up, Legendary.counted; dice too, a count of them in brackets: "(alive:<stat block>)d12"); `destroys` (stat
+block ids: their living creatures go as it begins, after the heal counted them); `legendary_resistance` ("refill", or the uses left); `legendary_refill` (its legendary
 actions back at once); `end_conditions`; `lair: true` (a lair fight from now on); `flag` for the story;
 `summon: {monster, count}`; `say` (a Narrator key: the fight's view speaks its line as it begins, as any Narrator line in
 a fight) and `cutscene` (a cutscene id played over the fight with that line as its caption; without it, a cutscene whose

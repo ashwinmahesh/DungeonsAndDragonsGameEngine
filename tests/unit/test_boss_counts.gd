@@ -47,3 +47,17 @@ func test_a_second_life_healed_by_the_living() -> void:
 	boss.creature.hp = 1
 	e.legendary.phases.enter(boss, "test_again")
 	assert_eq(boss.creature.hp, 21, "1 + 10 x 2")
+
+
+func test_a_second_life_that_takes_its_minions_and_rolls_for_each() -> void:
+	var got := _fight()
+	var e := got[0] as Encounter
+	var boss := got[2] as Combatant
+	var minions := got[3] as Array[Combatant]
+	(boss.creature as Monster).data["phases"] = [{"id": "test_harvest", "when": {"at_zero": true}, "heal": "(alive:test_minion)d12",
+		"destroys": ["test_minion"]}]
+	boss.creature.hp = 1
+	e.legendary.phases.enter(boss, "test_harvest")
+	assert_true(boss.creature.hp >= 3 and boss.creature.hp <= 25, "1 + 2d12 (%d)" % boss.creature.hp)
+	assert_true(minions.all(func(m: Combatant) -> bool: return m.creature.dead), "its minions are taken")
+	assert_eq(e.legendary.alive_of("test_minion"), 0)

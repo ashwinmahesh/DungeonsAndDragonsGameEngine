@@ -1266,8 +1266,8 @@ func after_restore() -> void:
 
 
 ## A number a stat block may count the fight for (a second life's heal, a damage threshold): an int, or arithmetic over
-## `alive:<stat block id>` (how many of that block are still up on the board): "40 + 10 * alive:rotweaver". 0 when it
-## can't be read.
+## `alive:<stat block id>` (how many of that block are still up on the board) and dice: "40 + 10 * alive:minion",
+## "(alive:minion)d12". 0 when it can't be read.
 func counted(v: Variant) -> int:
 	if v is int or v is float:
 		return int(v)
@@ -1275,6 +1275,16 @@ func counted(v: Variant) -> int:
 	var re := RegEx.create_from_string("alive:([a-z0-9_]+)")
 	for m in re.search_all(text):
 		text = text.replace(m.get_string(0), str(alive_of(m.get_string(1))))
+	# Dice, a count of them given in brackets as it may be counted: "(alive:minion)d12" (rolled with the fight's dice).
+	var dice_re := RegEx.create_from_string("\\(?(\\d+)\\)?d(\\d+)")
+	var found := dice_re.search(text)
+	while found != null:
+		var n := int(found.get_string(1))
+		var total := 0
+		for i in n:
+			total += enc().dice.roll_one(int(found.get_string(2)), "counted dice")
+		text = text.substr(0, found.get_start()) + str(total) + text.substr(found.get_end())
+		found = dice_re.search(text)
 	var ex := Expression.new()
 	if ex.parse(text) != OK:
 		return 0
