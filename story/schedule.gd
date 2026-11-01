@@ -3,7 +3,7 @@ extends RefCounted
 ## Things that happen on a day and an hour (F2): the herald's call before a festival, the Baron's arrests at dawn, a
 ## prisoner let out of the stocks at dusk. Each event is data (data/schedule/<region>.json): `hour` (and `minute`), on
 ## every day or every `every_days` from `first_day`, while its `when` holds; `once` events happen a single time. When
-## it happens it sets its flags wherever the party is, and if the party is at its `location` it also plays: a Narrator
+## it happens it sets its flags (and moves the counters in `add`) wherever the party is, and if the party is at its `location` it also plays: a Narrator
 ## `narration` line or a `dialogue`. A `here_only` event waits for a day the party is there to see it.
 ## Pure logic: LocationClock asks catch_up() as the clock moves; what has happened is kept in
 ## StoryState.flags["_schedule"] ({last: minute, fired: {id: times}}), so it survives saves. People keeping hours is
@@ -79,6 +79,10 @@ static func catch_up(st: StoryState, location: String) -> Array[Dictionary]:
 		var flags := e.get("set", {}) as Dictionary
 		for f: String in flags:
 			st.set_flag(f, flags[f])
+		# `add`: counters it moves each time (a clock ticking down: {"moon_days_left": -1}).
+		var adds := e.get("add", {}) as Dictionary
+		for f2: String in adds:
+			st.set_flag(f2, int(st.get_flag(f2, 0)) + int(adds[f2]))
 		if here and fresh and (e.has("narration") or e.has("dialogue")):
 			shown.append(d)
 	mem["last"] = now

@@ -98,7 +98,7 @@ gold +25 / gold -10                Party money in gp. `gold +5 each` is that muc
 heal 1d6 [party] [temp]            One roll heals the hero in the conversation, or with `party` every hero who isn't dead
                                    (dice like 2d4+2, or a number); with `temp` the part past a hero's Hit Point maximum
                                    becomes Temporary Hit Points. A notice says how much.
-damage 1d6 psychic [party]         One roll of damage to the hero in the conversation, or with `party` every hero who
+damage 1d6 psychic [party|failed]  One roll of damage to the hero in the conversation, or with `party` every hero who
                                    isn't dead, through Resistance and Immunity, from Temporary Hit Points first. It never
                                    drops a hero below 1 Hit Point (out of a fight nothing would make their Death Saving
                                    Throws: a story's hurt wounds, it doesn't fell). A notice says how much.
@@ -109,6 +109,17 @@ disadvantage checks 1h: the fog   Advantage (or Disadvantage) the story grants o
 hit_dice restore 2 [party]         Spent Hit Point Dice back to the hero in the conversation or every living hero (the
 hit_dice restore all [party]       biggest first, never past their own); `grant n` gives n of the hero's biggest kind
 hit_dice grant 1 [party]           beyond them, kept until their next Long Rest. A notice says who.
+exhaust +1 [party|failed]          Levels of Exhaustion (+1 to +6 gained, through any immunity; -1 to -6 lost) for the
+                                   hero in the conversation, every living hero (`party`) or those who failed the last
+                                   party save (`failed`). A notice says who.
+save Constitution DC 13 party -> ok | fail
+                                   Every living hero makes the saving throw; `ok` when all of them saved (check.last),
+                                   else `fail` (left out: `ok` either way). One notice names each roll. The heroes who
+                                   failed are the `failed` of the lines after it: `damage 2d6 poison failed`, `exhaust +1 failed`.
+check Ranged Attack DC 15 -> ok | fail
+                                   An attack roll as a check (`Melee Attack` too; options too: `[Ranged Attack DC 15]`):
+                                   the best such weapon attack of whoever has the best one (a thrown weapon counts as
+                                   ranged), or an improvised throw or swing (the ability modifier alone); no Guidance.
 temp_hp 1d6 [party]                One roll of Temporary Hit Points for the hero in the conversation, or with `party` every
                                    hero who isn't dead; a hero who already has more keeps theirs (they don't stack).
 bless [party] [30m|2h]             Bless's bonus (1d4 on attack rolls and saving throws) from the story: on the hero in the

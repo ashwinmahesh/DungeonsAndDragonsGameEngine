@@ -53,6 +53,7 @@ var _gift := ""                ## the dark gift on offer (`dark_gift`)
 var _last_option_key := ""     ## the spent-option key of the last social check (see choose)
 var _last_check: Dictionary = {}        ## {who, test, skill, said} of the last check rolled
 var _check_jumps: Array[String] = []    ## [ok, fail] targets of the last check
+var _failed_save: Array[Character] = []    ## the heroes who failed the last `save ... party` (the `failed` receivers)
 var _queued: Array[Dictionary] = []   ## beats a statement produced beyond its first (a Tarokka card, then the verse)
 var _cards_read: Dictionary = {}      ## the reading's slots `reading read` has turned in this conversation
 var _reading_told := false            ## the campaign has heard this conversation finished the reading
@@ -285,6 +286,16 @@ func next() -> Dictionary:
 				var healed := _heal(s)
 				if healed != "":
 					return {"kind": "notice", "text": healed}
+			"exhaust":
+				pc += 1
+				var tired := _exhaust(s)
+				if tired != "":
+					return {"kind": "notice", "text": tired}
+			"party_save":
+				pc += 1
+				var saved := _party_save(s)
+				_pending_jump = str(s["ok"]) if st.last_check or str(s["fail"]) == "" else str(s["fail"])
+				return {"kind": "notice", "text": saved}
 			"damage":
 				pc += 1
 				var hurt := _damage(s)
@@ -481,7 +492,9 @@ func _heal(s: Dictionary) -> String:
 
 
 ## Who a story's gift goes to: the hero in the conversation, or with `party` every hero who isn't dead.
-func _receivers(party: bool) -> Array[Character]:
+func _receivers(party: bool, failed: bool = false) -> Array[Character]:
+	if failed:
+		return _failed_save.filter(func(ch: Character) -> bool: return not ch.dead)
 	if party:
 		return _living()
 	var out: Array[Character] = []
@@ -495,7 +508,7 @@ func _receivers(party: bool) -> Array[Character]:
 ## of a fight nothing would make their Death Saving Throws, so a story's hurt wounds but never fells. Returns the
 ## notice, or "".
 func _damage(s: Dictionary) -> String:
-	var who := _receivers(bool(s["party"]))
+	var who := _receivers(bool(s["party"]), bool(s.get("failed", false)))
 	if who.is_empty():
 		return ""
 	var rolled := int(dice.roll_expr(str(s["dice"]), "Damage")["total"])
@@ -1001,7 +1014,67 @@ static func _skill_key(skill: String) -> StringName:
 	return StringName(skill)
 
 
+## `exhaust <+n|-n> [party|failed]`: levels of Exhaustion gained (through immunity's refusal) or lost, by the hero in the
+## conversation, every living hero, or those who failed the last party save. Returns the notice, or "".
+func _exhaust(s: Dictionary) -> String:
+	var n := int(s["levels"])
+	var got: Array[String] = []
+	for ch in _receivers(bool(s["party"]), bool(s.get("failed", false))):
+		var before := ch.exhaustion
+		if n > 0:
+			ch.add_exhaustion(n)
+		else:
+			ch.exhaustion = maxi(0, ch.exhaustion + n)
+		if ch.exhaustion != before:
+			got.append(_first(ch))
+	if got.is_empty():
+		return ""
+	var amount := absi(n)
+	return "%s %s %d level%s of Exhaustion" % [_names(got), ("gains" if n > 0 else "loses") if got.size() == 1 else ("gain" if n > 0 else "lose"),
+		amount, "" if amount == 1 else "s"]
+
+
+## `save <Ability> DC <n> party`: every living hero makes the saving throw; check.last is whether all of them saved, and
+## those who failed are the `failed` receivers of the lines after it. Returns the notice naming each roll.
+func _party_save(s: Dictionary) -> String:
+	var ab := ABILITIES[str(s["ability"])] as StringName
+	var dc := int(s["dc"])
+	_failed_save.clear()
+	var said: Array[String] = []
+	for ch in _living():
+		var t := ch.roll_save(dice, ab, dc)
+		if not t.success:
+			_failed_save.append(ch)
+		said.append("%s %d%s" % [_first(ch), t.total, "" if t.success else " (fails)"])
+	st.last_check = _failed_save.is_empty()
+	return "%s save, DC %d: %s." % [Creature.ABILITY_NAMES[ab], dc, ", ".join(said)]
+
+
+## The weapon attack a dialogue check names (`ranged_attack`, `melee_attack`: a dart thrown at a board, a swing at a
+## post): `ch`'s best such attack, or null for any other skill.
+static func attack_for(ch: Character, skill: String) -> WeaponProfile:
+	if not skill in ["ranged_attack", "melee_attack"]:
+		return null
+	var best: WeaponProfile = null
+	for p in ch.attacks():
+		var fits := (not p.melee or p.thrown) if skill == "ranged_attack" else p.melee
+		if fits and (best == null or p.attack.total() > best.attack.total()):
+			best = p
+	return best
+
+
+## A hero with no such weapon throws or swings what comes to hand: the ability modifier alone (no Proficiency Bonus).
+static func _improvised(ch: Character, skill: String) -> Breakdown:
+	var ab := &"dex" if skill == "ranged_attack" else &"str"
+	var b := Breakdown.new("Attack")
+	b.add("%s modifier (improvised)" % Creature.ABILITY_SHORT[ab], ch.ability_mod(ab))
+	return b
+
+
 static func _bonus(ch: Character, skill: String) -> int:
+	if skill in ["ranged_attack", "melee_attack"]:
+		var p := attack_for(ch, skill)
+		return p.attack.total() if p != null else _improvised(ch, skill).total()
 	var key := _skill_key(skill)
 	if Abilities.SKILLS.has(key):
 		return ch.skill_bonus(key).total()
@@ -1098,7 +1171,7 @@ func _best_for(skill: String) -> Character:
 ## `edge`: the check's own "adv" or "dis" (`[Persuasion DC 12 adv]`), or "".
 func _check(who: Character, skill: String, dc: int, said: String, then: Callable, edge: String = "") -> Dictionary:
 	var extra: Array = []
-	if offer_guidance and who != null:
+	if offer_guidance and who != null and not skill in ["ranged_attack", "melee_attack"]:   # Guidance is for checks
 		var offer := GuidanceOffer.offer(st, who, _skill_key(skill), dc)
 		if GuidanceOffer.asks(offer):
 			_guidance_wait = {"offer": offer, "who": who, "skill": skill, "dc": dc, "said": said, "then": then, "edge": edge}
@@ -1132,7 +1205,15 @@ func _roll(who: Character, skill: String, dc: int, said: String, extra: Array = 
 		adv.append("The moment favours it")
 	elif edge == "dis":
 		dis.append("The odds are against it")
-	var test := who.roll_check(dice, _skill_key(skill), dc, adv, dis, "", [], extra)
+	var test: D20Test
+	var weapon := attack_for(who, skill)
+	if skill in ["ranged_attack", "melee_attack"]:
+		# An attack roll against the DC (a target's AC), with the hero's best such weapon (or an improvised throw).
+		var bonus := weapon.attack if weapon != null else _improvised(who, skill)
+		var keys: Array[String] = ["attack", "attack:ranged" if skill == "ranged_attack" else "attack:melee"]
+		test = who.roll_d20(dice, D20Test.Kind.ATTACK_ROLL, bonus, dc, keys, adv, dis, "")
+	else:
+		test = who.roll_check(dice, _skill_key(skill), dc, adv, dis, "", [], extra)
 	st.last_check = test.success
 	_last_check = {"who": who, "test": test, "skill": skill, "said": said}
 	return _check_beat()
