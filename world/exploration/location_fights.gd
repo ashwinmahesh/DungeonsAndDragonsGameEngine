@@ -141,7 +141,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		e.weather = Weather.kind(e.weather_id)
 	e.legendary.set_withdraw(spec.get("withdraw", {}))
 	e.ends_when = ends_when_for(view, spec)
-	e.meters.setup(spec.get("meters", []) as Array)   # a guide's loyalty, a rite's pips (a saved round keeps their values)
+	e.meters.setup(FightMeters.for_story(spec.get("meters", []) as Array, view.st))   # a guide's loyalty, a rite's pips (a saved round keeps their values)
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
@@ -623,7 +623,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.ends_when = ends_when_for(view, spec)
-	e.meters.setup(spec.get("meters", []) as Array)   # a guide's loyalty, a rite's pips (a saved round keeps their values)
+	e.meters.setup(FightMeters.for_story(spec.get("meters", []) as Array, view.st))   # a guide's loyalty, a rite's pips (a saved round keeps their values)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):

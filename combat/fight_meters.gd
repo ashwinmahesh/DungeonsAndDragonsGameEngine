@@ -6,8 +6,9 @@ extends RefCounted
 ## the story or ends the fight. Kept in a round's save (EncounterSnapshot).
 ##
 ## A meter: {id, label, start (0), min (0), max, actions: [{id, label, cost (action or bonus), near (an object id or a
-## creature's name; anywhere when missing), range (5), check: {skill, dc}, success (+1), failure (0), failure_damage:
-## {dice, type} (to whoever failed)}], marks: [{value, falling (reached going down to it; else going up), flag, outcome
+## creature's name; anywhere when missing), range (5), check: {skill, dc} (none: it simply works, a word said plainly),
+## success (+1), failure (0), failure_damage: {dice, type, or a list of types one is rolled from} (to whoever failed),
+## once (once a fight), when (a story condition, read as the fight starts: for_story)}], marks: [{value, falling (reached going down to it; else going up), flag, outcome
 ## (victory, defeat or ended), say}]}.
 
 var _enc: WeakRef
@@ -17,6 +18,12 @@ var defs: Dictionary = {}
 var values: Dictionary = {}
 ## "<meter id>:<mark index>" for the marks already reached.
 var reached: Dictionary = {}
+## "<meter id>:<action id>" for the `once` actions already taken.
+var used: Dictionary = {}
+## Rounds the fight's clock (`ends_when.rounds`) has lost or gained (a round event's `clock`: a fire burst that catches
+## the captive), and whether it has run out (EncounterTurns.clock_left).
+var clock_lost: int = 0
+var clock_rang: bool = false
 
 
 func _init(encounter: Encounter) -> void:
@@ -38,6 +45,18 @@ func setup(list: Array) -> void:
 		defs[id] = d.duplicate(true)
 		if not values.has(id):
 			values[id] = int(d.get("start", 0))
+
+
+## `list` (an encounter's `meters`) with each action whose `when` doesn't hold in `st` left out (a word only a hero who
+## found the token can say).
+static func for_story(list: Array, st: StoryState) -> Array:
+	var out: Array = []
+	for raw: Variant in list:
+		var d := (raw as Dictionary).duplicate(true)
+		d["actions"] = (d.get("actions", []) as Array).filter(func(a: Variant) -> bool:
+			return st == null or StoryConditions.check(str((a as Dictionary).get("when", "")), st))
+		out.append(d)
+	return out
 
 
 func value(id: String) -> int:
@@ -97,7 +116,7 @@ func entries(c: Combatant) -> Array[Dictionary]:
 			var a := raw as Dictionary
 			var check := a.get("check", {}) as Dictionary
 			out.append({"id": "meter:%s:%s" % [id, str(a.get("id", ""))], "label": str(a.get("label", "Help")),
-				"sub": "DC %d %s" % [int(check.get("dc", 10)), str(check.get("skill", "athletics")).capitalize()],
+				"sub": "DC %d %s" % [int(check.get("dc", 10)), str(check.get("skill", "athletics")).capitalize()] if not check.is_empty() else "No check",
 				"cost": "bonus" if str(a.get("cost", "action")) == "bonus" else "action", "why": why_not(c, a),
 				"help": "%s %+d on a success%s." % [str((defs[id] as Dictionary).get("label", id)), int(a.get("success", 1)),
 					(", %+d on a failure" % int(a["failure"])) if int(a.get("failure", 0)) != 0 else ""]})
@@ -117,6 +136,8 @@ func why_not(c: Combatant, a: Dictionary) -> String:
 	var why := e._bonus_check(c) if str(a.get("cost", "action")) == "bonus" else e._action_check(c)
 	if why != "":
 		return why
+	if bool(a.get("once", false)) and used.has(_key(a)):
+		return "Done already this fight"
 	var near := str(a.get("near", ""))
 	if near == "":
 		return ""
@@ -143,9 +164,16 @@ func take(c: Combatant, meter_id: String, action_id: String) -> CombatResult:
 		c.bonus_available = false
 	else:
 		e.spend_action(c)
+	if bool(a.get("once", false)):
+		used[_key(a)] = true
 	var check := a.get("check", {}) as Dictionary
 	var skill := StringName(str(check.get("skill", "athletics")))
 	var label := str(a.get("label", "Help"))
+	if check.is_empty():   # no check: it simply works
+		e.events.append({"type": "ability", "source": "feature", "by": c.id, "key": "meter:%s:%s" % [meter_id, action_id], "targets": [], "cells": []})
+		e.log.add("info", "%s: %s" % [c.name(), label], c.id)
+		change(meter_id, int(a.get("success", 1)))
+		return CombatResult.new()
 	var t := c.creature.roll_check(e.dice, skill, int(check.get("dc", 10)), [], [], "%s: %s check (%s)" % [label,
 		str(skill).capitalize(), c.name()])
 	e.events.append({"type": "ability", "source": "feature", "by": c.id, "key": "meter:%s:%s" % [meter_id, action_id], "targets": [], "cells": []})
@@ -157,16 +185,37 @@ func take(c: Combatant, meter_id: String, action_id: String) -> CombatResult:
 	var hurt := a.get("failure_damage", {}) as Dictionary
 	if not hurt.is_empty():
 		var rolled := e.damage._roll_damage_dice(str(hurt.get("dice", "1d6")), false, 0, label)
-		e.deal_damage(c, c, [{"amount": int(rolled["total"]), "type": str(hurt.get("type", "force"))}], false, label,
+		var type: Variant = hurt.get("type", "force")
+		if type is Array:   # one of several (a torch, an apple or a crown: fire, poison or piercing)
+			type = (type as Array)[e.dice.roll_one((type as Array).size(), "%s: damage type" % label) - 1]
+		e.deal_damage(c, c, [{"amount": int(rolled["total"]), "type": str(type)}], false, label,
 			["%s %s: %s" % [label, str(hurt.get("dice", "1d6")), str(rolled["text"])]])
 	change(meter_id, int(a.get("failure", 0)))
 	return CombatResult.new()
 
 
+func _key(a: Dictionary) -> String:
+	for id: String in defs:
+		if ((defs[id] as Dictionary).get("actions", []) as Array).has(a):
+			return "%s:%s" % [id, a.get("id", "")]
+	return str(a.get("id", ""))
+
+
+## Moves the fight's clock by `rounds` (negative: it runs out sooner).
+func shift_clock(rounds: int) -> void:
+	clock_lost -= rounds
+	var e := enc()
+	e.events.append({"type": "clock_shift", "rounds": rounds, "left": e.turns.clock_left()})
+
+
 func to_dict() -> Dictionary:
-	return {"values": values.duplicate(), "reached": reached.duplicate()}
+	return {"values": values.duplicate(), "reached": reached.duplicate(), "used": used.duplicate(), "clock_lost": clock_lost,
+		"clock_rang": clock_rang}
 
 
 func from_dict(d: Dictionary) -> void:
 	values = (d.get("values", {}) as Dictionary).duplicate()
 	reached = (d.get("reached", {}) as Dictionary).duplicate()
+	used = (d.get("used", {}) as Dictionary).duplicate()
+	clock_lost = int(d.get("clock_lost", 0))
+	clock_rang = bool(d.get("clock_rang", false))

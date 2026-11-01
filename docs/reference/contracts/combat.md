@@ -414,6 +414,14 @@ off once, when the count reaches `value` going up (or down to it with `falling`)
 "<label> <value> / <max>". `Encounter.meters.change(id, delta)` lets a game module or round event move one. Kept in a
 round's save; LocationFights reads the entry's `meters` for a new fight and a saved one alike.
 
+For rescues: an action with no `check` simply works (a word said plainly); `once` allows it once a fight; `when` (a
+story condition) keeps it off the hotbar unless it holds as the fight starts (FightMeters.for_story: a hero who found
+the token). A `failure_damage` `type` may be a list, one rolled each time. A round event (or table entry) with `one`
+reaches a single creature of those it would, at random; with `clock` it moves the fight's clock that many rounds
+(negative: sooner), when it reaches one of `clock_if` (names or stat blocks; anyone when empty): a fire burst that
+catches the captive costs a round (FightMeters.shift_clock, event `clock_shift` {rounds, left}). The clock rings once,
+as the round its rounds left reach 0 ends; both are kept in a round's save with the meters.
+
 ### Round events (combat/round_events.gd)
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
