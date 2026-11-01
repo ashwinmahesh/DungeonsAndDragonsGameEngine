@@ -83,6 +83,9 @@ static func for_action(action: Dictionary) -> Texture2D:
 			return spell(id.get_slice(":", 0))
 		"escape_effect":
 			return _load("features", "escape")
+		"offer":
+			# What a monster's trait lets anyone try against it (TraitOffers): the offer's own key's icon.
+			return feature(str(action.get("icon_key", id.get_slice(":", 2))))
 		"feat", "rider":
 			var key := ActionCatalog.ability_key(action) if id.begins_with("feat:") else id.substr(6)
 			return feature(ACTION_ALIASES.get(key, key) as String)

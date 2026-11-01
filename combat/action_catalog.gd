@@ -404,7 +404,9 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 				"One of your attacks: %s makes a Str or Dex save or you have it, out of the fight." % t.name()))
 	# What a monster's trait lets anyone else try against it (TraitOffers): a dance it can't bear to watch.
 	for o in e.trait_offers.entries(c):
-		out.append(_entry(str(o["id"]), COMMON, str(o["label"]), str(o["sub"]), str(o["cost"]), str(o["why"]), "none", str(o["help"])))
+		var offer_entry := _entry(str(o["id"]), COMMON, str(o["label"]), str(o["sub"]), str(o["cost"]), str(o["why"]), "none", str(o["help"]))
+		offer_entry["icon_key"] = str(o.get("icon_key", ""))   # its icon and effect: the offer's own key (Icons.for_action)
+		out.append(offer_entry)
 	# What moves the fight's meters (FightMeters): calming a guide, adding to a rite.
 	for m in e.meters.entries(c):
 		out.append(_entry(str(m["id"]), COMMON, str(m["label"]), str(m["sub"]), str(m["cost"]), str(m["why"]), "none", str(m["help"])))
