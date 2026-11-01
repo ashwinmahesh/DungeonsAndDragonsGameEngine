@@ -181,6 +181,10 @@ func attack(c: Combatant, target: Combatant, option_id: String, opts: Dictionary
 	# Loading: one shot per action, whatever the number of attacks (Crossbow Expert ignores it).
 	if "loading" in p.properties and not e.features.has_feat(c, "crossbow_expert"):
 		c.set_meta("loading_fired", "%d:%d" % [e.round_no, e.turn_index])
+	# An illusory decoy body (DecoyImages): the blow touches nothing, and the attacker makes of it what they will.
+	if DecoyImages.is_image(target):
+		e.images.struck(c, target, "%s's %s" % [c.name(), str(option.get("name", "attack"))], "attack")
+		return CombatResult.new()
 	var echo := e.echo_knight.attack_origin(c, target, option)
 	return e.echo_knight.strike(c, echo, func() -> CombatResult: return _resolve_attack(c, target, option, opts))
 

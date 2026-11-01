@@ -34,6 +34,17 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Decoy images
+
+A trait's `decoy_image` ({name, size, move_ft, save, while_flag, study, gone_flag}; DecoyImages): as initiative is
+rolled, an image of the creature (`name`, default its own; `size`, default small) is put down beside it. It has no
+turn and doesn't count for the fight's end; nothing harms it and no condition takes. At the start of its maker's turn
+the AI sends it up to `move_ft` (60) toward the foe it wants. An attack or spell aimed at it, or an area it is caught in,
+does nothing to it; while `while_flag` is set (always, when unset) the one who aimed it makes the `save` (Int DC 15):
+failing, the log tells it as a miss, a spell shrugged off or a blow that may have landed; succeeding, they see through
+it, and from then on it passes straight through. The Study action within 30 ft and the `study` check ({skill, dc})
+unmask it, as `gone_flag` being set does (a boss phase's `flag`): it fades.
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve

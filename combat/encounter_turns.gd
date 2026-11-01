@@ -61,6 +61,8 @@ func start(surprised_ids: Array = []) -> void:
 	e.game.initiative_rolled()
 	e.echo_knight.initiative_rolled()
 	_order_by_initiative()
+	# Decoy images come after the order is set: they have no turns (DecoyImages).
+	e.images.initiative_rolled()
 	# Portent (Diviner): the two (Greater Portent: three) foreseen d20s for this fight.
 	for c in e.combatants:
 		if CombatFeatures.has_feature(c, "portent") and c.creature is Character:
@@ -99,6 +101,7 @@ func _order_by_initiative() -> void:
 	var e := enc()
 	_clear_shared()   # a new order: the next turn to begin makes its own group
 	e.order = e.combatants.duplicate()
+	e.order.assign(e.order.filter(func(c: Combatant) -> bool: return not DecoyImages.is_image(c)))   # images have no turns
 	e.order.sort_custom(func(a: Combatant, b: Combatant) -> bool:
 		if a.initiative != b.initiative:
 			return a.initiative > b.initiative
@@ -460,6 +463,7 @@ func _advance_index() -> void:
 			e.legendary.round_started()
 			e.game.round_started(e.round_no)
 			e.objects.round_started()
+			e.images.check_flags()
 		if e.current().is_alive() and not e.current().has_meta("left_fight"):
 			break
 
@@ -501,7 +505,7 @@ func _check_over() -> void:
 	for c in e.combatants:
 		# A creature that fell out of the fight (EncounterMovement.leave_grid) no longer counts for either side, nor one
 		# knocked out (it's out until a Short Rest is over), nor a foe that surrendered (F13).
-		if not c.is_alive() or c.creature.hp <= 0 or c.creature.has_flag("spell_object") or c.has_meta("left_fight") \
+		if not c.is_alive() or c.creature.hp <= 0 or c.creature.has_flag("spell_object") or c.has_meta("left_fight") or DecoyImages.is_image(c) \
 				or c.creature.has_flag("knocked_out") or c.creature.has_flag("surrendered"):
 			continue
 		if c.side in [&"party", &"guest"]:

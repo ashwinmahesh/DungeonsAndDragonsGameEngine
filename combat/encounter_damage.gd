@@ -211,6 +211,8 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		details: Array = [], log_it: bool = true, responses_resolved: Array = []) -> DamageResult:
 	var e := enc()
 	target = e.monster_actions.redirect_shared(target)
+	if DecoyImages.is_image(target):
+		return DamageResult.new()   # an illusion: nothing harms it
 	# Time Stop ends when the caster affects anyone else.
 	if source != null and source != target:
 		e.spells.specials.high.time_stop_broken(source, "it affected another creature")
