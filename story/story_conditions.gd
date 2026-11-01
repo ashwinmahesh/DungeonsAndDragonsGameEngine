@@ -223,6 +223,12 @@ func _term() -> bool:
 			if StoryState.member_matches(ch, "name:" + t.substr(7)) and not ch.dark_gifts().is_empty():
 				return true
 		return false
+	if t.begins_with("became:"):
+		# A hero who left the party changed into that creature (`leave_party ... becomes <monster>`).
+		for f: Dictionary in st.fallen:
+			if str(f.get("becomes", "")) == t.substr(7):
+				return true
+		return false
 	if t.begins_with("fallen:"):
 		# A hero lost for good (StoryState.lose_member), by pregen id: their personal quest can't be finished.
 		for f: Dictionary in st.fallen:
