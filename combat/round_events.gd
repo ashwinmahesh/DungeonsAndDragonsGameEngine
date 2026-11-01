@@ -144,7 +144,58 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 			for t in reached:
 				if t.is_alive():
 					_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
+		"possess":
+			for t in reached:
+				if t.is_alive():
+					_possess(outcome, t, label)
 	return done_fn.call() as CombatResult
+
+
+## A `possess` outcome (a spirit of the damned): the creature saves (`save`), and on a failure turns on its own side
+## for up to `rounds` rounds, played as the ghost's possession plays a body (MonsterActions.possess: the other side,
+## the AI in control). It repeats the save as each of its turns ends; a success ends it and leaves it immune to this
+## event for the fight. Falling to 0 Hit Points ends it too (MonsterActions.body_dropped).
+func _possess(o: Dictionary, t: Combatant, label: String) -> void:
+	var e := enc()
+	var immune := "possess_immune:" + label
+	if t.has_meta("possessed_by") or t.has_meta(immune) or t.creature.has_flag("no_possession"):
+		return
+	var sv := o.get("save", {}) as Dictionary
+	var ab := StringName(str(sv.get("ability", "cha")))
+	var dc := int(sv.get("dc", 15))
+	var test := t.creature.roll_save(e.dice, ab, dc, [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], label, t.name()])
+	if test.success:
+		leg()._log("info", "%s resists %s" % [t.name(), label], t, [test.describe()])
+		return
+	t.set_meta("possessed_by", "round_event:" + label)
+	t.set_meta("possessed_from", [str(t.side), str(t.controller)])
+	t.set_meta("possessed_rule", {"ability": str(ab), "dc": dc, "rounds": int(o.get("rounds", 10)), "label": label})
+	t.side = &"party" if t.side == &"enemy" else &"enemy"
+	t.controller = &"ai"
+	var fx := Effect.new("Possessed (%s)" % label, &"round_event", "possession:" + label)
+	fx.ends = Effect.Ends.NEVER
+	t.creature.add_effect(fx)
+	leg()._log("condition", "%s is possessed (%s)" % [t.name(), label], t, [test.describe()])
+	e.events.append({"type": "condition", "id": t.id})
+
+
+## As `c`'s turn ends: a possession's repeated save, and its rounds running out.
+func turn_end(c: Combatant) -> void:
+	var e := enc()
+	if not c.has_meta("possessed_rule") or not c.has_meta("possessed_by"):
+		return
+	var rule := c.get_meta("possessed_rule") as Dictionary
+	var ab := StringName(str(rule["ability"]))
+	var left := int(rule["rounds"]) - 1
+	rule["rounds"] = left
+	var test := c.creature.roll_save(e.dice, ab, int(rule["dc"]), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], rule["label"], c.name()])
+	if test.success or left <= 0:
+		if test.success:
+			c.set_meta("possess_immune:" + str(rule["label"]), true)
+		c.remove_meta("possessed_rule")
+		e.monster_actions.end_possession(c)
+		leg()._log("info", "%s is %s" % [c.name(), "free of it" if test.success else "let go"], c, [test.describe()])
+		e.events.append({"type": "condition", "id": c.id})
 
 
 ## A `take` outcome: the first creature still on the board whose name or stat block is in `who` is taken out of the
