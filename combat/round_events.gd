@@ -101,6 +101,17 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	leg()._log("spell", "Initiative %d: %s" % [int(ev.get("at", 20)), label], null, [str(outcome.get("summary", ev.get("summary", "")))])
 	var r := CombatResult.new()
 	var reached := _reached(outcome)
+	# `one`: a single creature of those reached, at random (a fire burst on a random hero, or the captive).
+	if bool(outcome.get("one", false)) and reached.size() > 1:
+		var one: Array[Combatant] = [reached[e.dice.roll_one(reached.size(), "%s: who" % label) - 1]]
+		reached = one
+	# `clock`: rounds on the fight's clock (negative takes some off), when it reaches one of `clock_if` (names or stat
+	# blocks; anyone when empty).
+	if int(outcome.get("clock", 0)) != 0:
+		var names := (outcome.get("clock_if", []) as Array).map(func(x: Variant) -> String: return str(x))
+		if names.is_empty() or reached.any(func(c: Combatant) -> bool:
+				return c.name() in names or (c.creature is Monster and str((c.creature as Monster).data.get("id", "")) in names)):
+			e.meters.shift_clock(int(outcome["clock"]))
 	e.events.append({"type": "round_event", "event": id, "outcome": str(outcome.get("id", "")), "name": label,
 		"say": str(outcome.get("say", "")), "targets": reached.map(func(c: Combatant) -> String: return c.id)})
 	var done_fn := func() -> CombatResult:

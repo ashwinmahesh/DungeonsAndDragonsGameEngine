@@ -643,7 +643,7 @@ func _wards_out() -> bool:
 func clock_left() -> int:
 	var e := enc()
 	var rounds := int(e.ends_when.get("rounds", 0))
-	return maxi(0, rounds - maxi(1, e.round_no) + 1) if rounds > 0 else -1
+	return maxi(0, rounds - e.meters.clock_lost - maxi(1, e.round_no) + 1) if rounds > 0 else -1
 
 
 ## As a round ends: the clock's last round is over, so the fight ends as the clock says (the mill falls, the rite is
@@ -651,8 +651,10 @@ func clock_left() -> int:
 func _clock_runs_out() -> void:
 	var e := enc()
 	var rounds := int(e.ends_when.get("rounds", 0))
-	if rounds <= 0 or e.round_no != rounds:
+	# A round lost to the fight (FightMeters.shift_clock) brings the end nearer; it rings once.
+	if rounds <= 0 or e.meters.clock_rang or e.round_no < rounds - e.meters.clock_lost:
 		return
+	e.meters.clock_rang = true
 	var outcome := str(e.ends_when.get("rounds_outcome", "ended"))
 	if not outcome in ["victory", "defeat", "ended", "none"]:
 		outcome = "ended"
