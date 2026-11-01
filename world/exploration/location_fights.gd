@@ -193,6 +193,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	Difficulty.of_options(view.st.options).prepare(e)
 	EncounterSetup.bring_familiars(e, party_cbs)
 	EncounterSetup.bring_steeds(e, party_cbs)
+	EncounterSetup.bring_companions(e, party_cbs, companions_for(view))   # bonded companions (Companions)
 	Wards.bring_circle(e, view.st, view.loc_id)   # a Magic Circle cast here within the hour
 	FieldCasting.bring_risen(e, view.st)   # Animate Dead's and Create Undead's dead, for their day
 	_light_the_fight(view, e)
@@ -510,6 +511,18 @@ static func _fewer_attacks(actions: Array, n: int) -> Array:
 		var cut := act.duplicate()
 		cut["multiattack"] = kept
 		out.append(cut)
+	return out
+
+
+## A fresh creature for each living hero's bonded companion (Companions): {hero id: Monster}.
+static func companions_for(view: LocationView) -> Dictionary:
+	var out := {}
+	for ch in view.st.party:
+		if ch.dead or Companions.of(view.st, ch.id).is_empty():
+			continue
+		var mon := Companions.creature_for(view.st, ch.id)
+		if mon != null:
+			out[ch.id] = mon
 	return out
 
 
@@ -1072,6 +1085,13 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		view.place_guests()
 		for who in released:
 			view.toast.emit("%s fades from the party: the one battle they stayed for is over." % who)
+	# A bonded companion killed in the fight is gone: the bond ends (Companions).
+	for c in e.combatants:
+		if c.has_meta("companion_of") and c.creature.dead:
+			var keeper := e.get_c(str(c.get_meta("companion_of")))
+			if keeper != null and Companions.release(view.st, keeper.creature.id):
+				view.toast.emit("%s is gone." % c.name())
+				LocationParty.place_guests(view)
 	# What the fight hands back to the story, whatever the outcome (ADR 0014): Misty Escape's flag, a withdrawal's
 	# flag, Strahd destroyed and his quest's stage.
 	hand_back_flags(view.st, e.legendary.story_flags)

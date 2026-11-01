@@ -70,6 +70,32 @@ static func bring_familiars(e: Encounter, party: Array[Combatant]) -> void:
 			e.faerun.pocket_familiar(c)
 
 
+## Bonded companions come along (Companions, the story's): `companions` is {hero id: creature} for the living heroes
+## in `party`; each starts the fight on the party's side beside its hero (the nearest open square), played by the player,
+## marked `companion_of` its hero.
+static func bring_companions(e: Encounter, party: Array[Combatant], companions: Dictionary) -> void:
+	for c in party:
+		if c.creature.dead or not companions.has(c.creature.id):
+			continue
+		var mon := companions[c.creature.id] as Monster
+		var at := _open_beside(e, c.cell)
+		if at.x < 0:
+			continue
+		var cb := e.add(mon, &"party", at)
+		cb.controller = &"player"
+		cb.set_meta("companion_of", c.id)
+
+
+static func _open_beside(e: Encounter, cell: Vector2i) -> Vector2i:
+	for r in range(1, 4):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var at := cell + Vector2i(dx, dy)
+				if maxi(absi(dx), absi(dy)) == r and e.grid.in_bounds(at) and not e.grid.is_solid(at) and e.occupant_at(at) == null:
+					return at
+	return Vector2i(-1, -1)
+
+
 ## Otherworldly Steeds come along too: a party member whose Find Steed steed is still with them (Character.steed)
 ## starts the fight with it beside them, of the type and level it was called with. Nothing is spent; a steed whose
 ## caster has died is gone (2024).

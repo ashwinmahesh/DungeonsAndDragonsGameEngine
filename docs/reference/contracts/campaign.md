@@ -352,3 +352,13 @@ a limit (`once`, `max` or `cooldown_hours`). The story bot answers their convers
 `CampaignModule.fill(text, st)` fills the {placeholders} of quest journals, hints and warnings. The base fills
 `{flag.<id>}` with the flag's value (0 while unset); a campaign that overrides `fill` calls `CampaignModule.fill_flags`
 to keep it.
+
+## Companions
+
+A creature bonded to one hero, not by a spell (story/companions.gd): `companion bond <monster> [<name>]` in a
+conversation bonds a stat block to the hero speaking (one each; a new bond replaces the old), `companion release` ends it.
+The bond lives in the story's flags (`_companions`: {hero id: {monster, name}}), so saves keep it unchanged. It walks at
+the back of the line (LocationParty.place_guests, `companion_of` its hero), comes into every fight beside its hero on
+the party's side at full Hit Points, played by the player (EncounterSetup.bring_companions), and a companion killed in a
+fight is gone (the bond ends, with a notice). Its own powers are the game's (GameFeatures), as any creature's.
+
