@@ -33,3 +33,25 @@ func test_none_while_enough_stand() -> void:
 	for i in 12:
 		e.end_turn()
 	assert_eq(_count(e, "rat"), 2, "joins until there are two")
+
+
+func test_a_pelting_with_no_save_for_a_round() -> void:
+	var e := _fight([{"id": "test_pelt", "kind": "effect", "affects": "party", "one": true, "at": 20, "every": 1, "until": "round",
+		"modifiers": [{"stat": "attack", "value": -2}]}])
+	var hero := e.combatants[0]
+	e.legendary.round_events.act(e.legendary.round_events.events[0], false)
+	assert_true(hero.creature.effects.any(func(fx: Effect) -> bool: return fx.source_id.begins_with("round_event:")), "pelted")
+
+
+func test_ribbons_that_hold_until_a_save() -> void:
+	var e := _fight([{"id": "test_ribbon", "kind": "save", "affects": "party", "at": 20, "every": 1, "save": {"ability": "str", "dc": 40},
+		"repeat_save": true, "modifiers": [{"stat": "speed_set", "value": 0}]}])
+	var hero := e.combatants[0]
+	e.legendary.round_events.act(e.legendary.round_events.events[0], false)
+	var fx: Effect = null
+	for f in hero.creature.effects:
+		if f.source_id.begins_with("round_event:"):
+			fx = f
+	assert_true(fx != null, "bound")
+	assert_eq(hero.speed(), 0)
+	assert_eq(str(fx.repeat_save.get("ability", "")), "str", "the save comes again")

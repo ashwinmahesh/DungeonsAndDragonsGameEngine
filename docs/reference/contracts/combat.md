@@ -548,3 +548,6 @@ there (`range_why`, in `target_why`, `FeatureActions.perform` and the view's pla
 Round events: a table's `pick` may also be `sequence` (each entry once, in turn, then nothing: one arrival a round), and
 an outcome's `unless_count: {who, at_least}` does nothing while at least that many of the creatures it names stand
 (another herald dances in only when fewer than three are left). `random` never repeats the outcome used last time.
+An outcome's `kind: "effect"` lands with no save on whoever it reaches; a save or effect outcome can carry `modifiers`
+as well as a `condition`, `until: "round"` (one round), and `repeat_save: true` (the save again at the end of each of
+the creature's turns ends it).
