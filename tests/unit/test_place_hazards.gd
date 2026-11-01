@@ -60,3 +60,14 @@ func test_the_marked_are_spared() -> void:
 	PlaceHazards.entered(st)
 	assert_false((st.party[0] as Character).has_condition(&"poisoned"))
 	assert_true((st.party[1] as Character).has_condition(&"poisoned"))
+
+
+func test_story_allies_breathe_it_too() -> void:
+	_place(40)
+	var st := _party()
+	var ally := TestChars.pregen("silvain_aster", 5)
+	st.guests.append(ally)
+	PlaceHazards.entered(st)
+	assert_true(ally.has_condition(&"poisoned"), "a guest saves as well")
+	st.advance_minutes(60)
+	assert_eq(ally.exhaustion, 1)

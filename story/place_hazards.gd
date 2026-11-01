@@ -2,11 +2,12 @@ class_name PlaceHazards
 extends RefCounted
 ## Places whose air harms whoever stays (a location's `hazard`, on the exploration clock): a haze, a miasma.
 ## `{name, every_min, save, condition, lasting: {every_min, exhaustion}, immune_flags, when}`:
-## - On entering the place and every `every_min` (10) minutes inside, while its story `when` holds, each living hero
-##   not carrying one of `immune_flags` makes the `save` or gains `condition` (Poisoned).
+## - On entering the place and every `every_min` (10) minutes inside, while its story `when` holds, each living hero and
+##   story ally travelling with them (st.guests) not carrying one of `immune_flags` makes the `save` or gains `condition`
+##   (Poisoned).
 ## - A hero holding that condition from the place makes the save again every `lasting.every_min` (60) minutes, wherever
 ##   they are: failing adds `lasting.exhaustion` (1) levels of Exhaustion, succeeding ends it.
-## Rolls are seeded from the playthrough and the minute, so the same walk gives the same result. What happens is queued
+## Rolls go through a DiceRoller seeded from the playthrough and the minute, so the same walk gives the same result. What happens is queued
 ## on StoryState (hazard_news) for the world to show. Bookkeeping lives in underscore flags (saved with the story).
 
 const CHECKS := "_place_hazard_at"     ## location id -> the minute of its last check
@@ -76,7 +77,7 @@ static func tick(st: StoryState, start: int, minutes: int) -> void:
 static func _check_all(st: StoryState, loc_id: String, hz: Dictionary, at: int) -> void:
 	var cond := StringName(str(hz.get("condition", "poisoned")))
 	var held := st.flags.get(HELD, {}) as Dictionary
-	for ch in st.party:
+	for ch in _everyone(st):
 		if ch.dead or held.has(ch.id):
 			continue
 		if (hz.get("immune_flags", []) as Array).any(func(f: Variant) -> bool: return ch.has_flag(str(f))):
@@ -90,18 +91,27 @@ static func _check_all(st: StoryState, loc_id: String, hz: Dictionary, at: int) 
 	st.flags[HELD] = held
 
 
-static func _save(st: StoryState, ch: Character, hz: Dictionary, at: int) -> D20Test:
+static func _save(st: StoryState, ch: Creature, hz: Dictionary, at: int) -> D20Test:
 	var sv := hz.get("save", {"ability": "con", "dc": 10}) as Dictionary
 	var dice := DiceRoller.new(hash("%d:%d:%s:place_hazard" % [st.playthrough_seed, at, ch.id]))
 	return ch.roll_save(dice, StringName(str(sv["ability"])), int(sv["dc"]), [], [], "%s save vs %s (%s)" % [
 		str(sv["ability"]).to_upper(), str(hz.get("name", "the air")), ch.name])
 
 
-static func _hero(st: StoryState, id: String) -> Character:
-	for ch in st.party:
+static func _hero(st: StoryState, id: String) -> Creature:
+	for ch in _everyone(st):
 		if ch.id == id:
 			return ch
 	return null
+
+
+## The party and the story allies travelling with it.
+static func _everyone(st: StoryState) -> Array[Creature]:
+	var out: Array[Creature] = []
+	for ch in st.party:
+		out.append(ch)
+	out.append_array(st.guests)
+	return out
 
 
 static func _news(st: StoryState, line: String) -> void:
