@@ -79,6 +79,18 @@ static func long_rest_refusals(st: StoryState) -> Array[String]:
 ## moving on. `picks` is PrepareScreen.snapshot(st, "short_rest") when the caller has it.
 static func note_short_rest(st: StoryState, picks: Dictionary = {}) -> void:
 	st.flags[SHORT_CHANGE] = {"at": st.total_minutes(), "location": st.location, "picks": picks}
+	if bool(Campaign.setting("search_again_after_rest", false)):
+		forget_missed_finds(st)
+
+
+## Rested eyes look again: every hero who searched for a find and missed it (LocationTraps' `missed:` marks) may search
+## for it once more. Only under the campaign's `search_again_after_rest`; the first game's missed find stays missed.
+static func forget_missed_finds(st: StoryState) -> void:
+	for loc: Variant in st.location_states.values():
+		var found := (loc as Dictionary).get("found", {}) as Dictionary
+		for k: Variant in found.keys():
+			if str(k).begins_with("missed:"):
+				found.erase(k)
 
 
 ## The Short Rest whose changes are still on offer ({} if none): the party is where it finished, under an hour has gone, and
