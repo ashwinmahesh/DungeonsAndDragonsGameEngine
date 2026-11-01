@@ -95,6 +95,44 @@
         "swim": {
           "type": "boolean",
           "description": "Its deep water (w) can be swum in fights: double cost without a Swim Speed; water-only creatures stay in it (docs/reference/contracts/locations.md)."
+        },
+        "window_view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "What the windows of a moving place show outside (a train's carriages, a boat's cabins; WindowView): smoke or mist streaming past every hung window's glass at three speeds. Without it nothing changes.",
+          "properties": {
+            "colours": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": {
+                "type": "string"
+              },
+              "description": "Palette names from the deepest to the lightest."
+            },
+            "streams": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              },
+              "description": "The way the outside moves past in world x and z (a train heading east sees it stream west: [-1, 0])."
+            },
+            "speed": {
+              "type": "number",
+              "description": "World units a second for the nearest bank."
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rise": {
+              "type": "number",
+              "description": "The smoke's slow drift upward."
+            }
+          }
         }
       }
     },
