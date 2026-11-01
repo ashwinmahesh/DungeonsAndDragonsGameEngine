@@ -853,7 +853,7 @@ func _review_step() -> void:
 			built.append(mate)
 	built.append_array(mates)
 	if built.size() >= 2:
-		var cov := PartyCoverage.analyze(built)
+		var cov := PartyCoverage.analyze(built, Campaign.module().coverage_words())
 		_body.add_child(UiParts.section("Party composition"))
 		var grid := GridContainer.new()
 		grid.columns = 2

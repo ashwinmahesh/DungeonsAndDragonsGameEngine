@@ -9,11 +9,15 @@ const HEALING_SPELLS: Array[String] = ["cure_wounds", "healing_word", "mass_heal
 	"aura_of_vitality", "goodberry"]
 const LIGHT_SPELLS: Array[String] = ["light", "dancing_lights", "produce_flame", "continual_flame", "daylight"]
 const LIGHT_ITEMS: Array[String] = ["torch", "lamp", "hooded_lantern", "bullseye_lantern", "candle"]
+## The campaign's words for the gaps that name its land (CampaignModule.coverage_words can replace them): `dark` follows
+## "N of M characters can't see in the dark;", `radiant` is the whole line for a party with no Radiant damage.
+const WORDS := {"dark": "Barovia is dark, so bring light.", "radiant": "No Radiant damage, which many Barovian undead fear."}
 
 
 ## Returns {roles: {healing, front_line, arcane, divine}: [names], skills: {skill: {name, bonus}},
-## damage_types: {type: [names]}, darkvision: [names], light: [names], gaps: [sentences]}.
-static func analyze(party: Array[Character]) -> Dictionary:
+## damage_types: {type: [names]}, darkvision: [names], light: [names], gaps: [sentences]}. `words` replaces WORDS' lines
+## the campaign has its own for (CampaignModule.coverage_words).
+static func analyze(party: Array[Character], words: Dictionary = {}) -> Dictionary:
 	var roles := {"healing": [], "front_line": [], "arcane": [], "divine": []}
 	var skills := {}
 	var damage := {}
@@ -74,11 +78,12 @@ static func analyze(party: Array[Character]) -> Dictionary:
 	if not unskilled.is_empty():
 		gaps.append("Nobody is proficient in %s." % ", ".join(unskilled))
 	if darkvision.size() < party.size():
-		gaps.append("%d of %d characters can't see in the dark; Barovia is dark, so bring light." % [party.size() - darkvision.size(), party.size()])
+		gaps.append("%d of %d characters can't see in the dark; %s" % [party.size() - darkvision.size(), party.size(),
+			str(words.get("dark", WORDS["dark"]))])
 	if light.is_empty():
 		gaps.append("Nobody has a light source or a light cantrip.")
 	if not damage.has("radiant"):
-		gaps.append("No Radiant damage, which many Barovian undead fear.")
+		gaps.append(str(words.get("radiant", WORDS["radiant"])))
 	if not damage.has("fire"):
 		gaps.append("No Fire damage.")
 	return {"roles": roles, "skills": skills, "damage_types": damage, "darkvision": darkvision, "light": light,
