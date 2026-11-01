@@ -63,6 +63,8 @@ var _worn: Array[String] = []
 var _params: Dictionary = {}
 ## Wearing its close-up look (set_close_up).
 var _close_up := false
+## How much wider (and deeper) than made the model is drawn (the entry's `broad`); pieces held apart keep their shape.
+var _broad := 1.0
 ## Pieces that follow a bone without being its child (a part's `follow` "place" or "turn", or `upright`): their
 ## holder -> [the bone, whether it turns with it], moved there each time the pose is set.
 var _upright: Dictionary = {}
@@ -138,7 +140,9 @@ func _build() -> void:
 	var box := rest_box(model)
 	_rest_height = maxf(box.size.y, 0.001)
 	_scale = _height / _rest_height * float(_info.get("scale", 1.0))
-	model.scale = Vector3.ONE * _scale
+	# `broad`: wider and deeper than the model was made, at the same height (a heavier build on one rigged body).
+	_broad = maxf(float(_info.get("broad", 1.0)), 0.1)
+	model.scale = Vector3(_scale * _broad, _scale, _scale * _broad)
 	model.rotation.y = deg_to_rad(float(_info.get("turn", 0.0)))
 	model.position.y = -box.position.y * _scale + float(_info.get("lift", 0.0))
 	_fit_layers()
@@ -579,10 +583,11 @@ func _follow_bones() -> void:
 ## (never scaled) when it `turns`.
 func _place_holder(hold: Node3D, bone: int, turns: bool, at_rest := false) -> void:
 	var pose := _skeleton.get_bone_global_rest(bone) if at_rest else _skeleton.get_bone_global_pose(bone)
-	if turns:
-		hold.transform = Transform3D(pose.basis.orthonormalized(), pose.origin)
-	else:
-		hold.position = pose.origin
+	# A broad figure's model is stretched sideways; a held piece (a head, a lantern) isn't: its turn is taken as the
+	# stretched bone shows it, then the stretch is undone on it, so it stays its own shape at any turn.
+	var wide := Basis.from_scale(Vector3(_broad, 1.0, _broad))
+	var turn := (wide * pose.basis).orthonormalized() if turns else Basis.IDENTITY
+	hold.transform = Transform3D(wide.inverse() * turn, pose.origin)
 
 
 ## A part that is a ghost of its own (a part's `ghost`, a look as set_ghost_look takes it: a familiar's spirit beside a
