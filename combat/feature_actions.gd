@@ -954,6 +954,10 @@ func before_d20(cr: Creature, kind: D20Test.Kind, keys: Array[String], _target: 
 	if sun != "" and e.in_sunlight(c):
 		if sun == "weakness" or kind != D20Test.Kind.SAVING_THROW:
 			out["disadvantage"] = ["Sunlight"]
+	# A guest's warding light (WardLights): the creatures it names have Disadvantage in it.
+	var warded := WardLights.disadvantage(e, c)
+	if not warded.is_empty():
+		out["disadvantage"] = (out.get("disadvantage", []) as Array) + warded
 	if c.has_meta("portent_next"):
 		out["natural"] = int(c.get_meta("portent_next"))
 		c.remove_meta("portent_next")

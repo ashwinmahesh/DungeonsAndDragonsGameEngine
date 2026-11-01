@@ -164,6 +164,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	FieldCasting.bring_risen(e, view.st)   # Animate Dead's and Create Undead's dead, for their day
 	_light_the_fight(view, e)
 	_ward_the_fight(view, e)
+	ward_guests(view, e)   # a guest's lantern that keeps the dark back (WardLights)
 	BattleScenery.for_location(view, e)   # doors, furniture and chandeliers that can be broken (F5)
 	BattleScenery.for_spec(view, e, spec)   # what the fight puts down itself (a boss's food, a jar holding a ghost)
 	LocationTraps.into_fight(view, e)   # traps that haven't gone off go off under whoever steps on them
@@ -799,6 +800,24 @@ static func _combat_token(c: Combatant) -> CombatToken:
 ## The fight sees what the party sees (vision rules live in the encounter): outdoors the hour sets the light (an
 ## overcast Barovian day is bright but not true sunlight; night is dark), indoors the map's light does; the
 ## location's lamps and candles, and the party's lantern when it's lit, are light sources on the grid.
+## Each guest with a `ward_light` on its NPC entry (WardLights) lights it round where the guest stands: smaller while its
+## `small.when` holds, and not at all at a place in its `off_at`.
+static func ward_guests(view: LocationView, e: Encounter) -> void:
+	for i in view.st.guests.size():
+		var npc := Compendium.shared().get_entry("npcs", view.st.guest_ids[i]) if i < view.st.guest_ids.size() else {}
+		var spec := (npc.get("ward_light", {}) as Dictionary).duplicate(true)
+		if spec.is_empty() or view.loc_id in (spec.get("off_at", []) as Array):
+			continue
+		var small := spec.get("small", {}) as Dictionary
+		if not small.is_empty() and StoryConditions.check(str(small.get("when", "")), view.st):
+			for k: String in ["radius", "bright", "dim"]:
+				if small.has(k):
+					spec[k] = small[k]
+		for g in view.guest_members:
+			if g.creature == view.st.guests[i] and not g.creature.dead:
+				WardLights.place(e, g.cell, spec, str(npc.get("name", g.name())))
+
+
 static func _light_the_fight(view: LocationView, e: Encounter) -> void:
 	if bool(view.loc["map"].get("outdoors", false)):
 		e.ambient_light = {"day": "bright", "dusk": "dim", "dawn": "dim"}.get(view.time_phase(), "dark") as String
