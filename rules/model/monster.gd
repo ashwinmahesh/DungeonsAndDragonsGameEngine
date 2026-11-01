@@ -124,6 +124,11 @@ func action(action_id: String) -> Dictionary:
 		for a: Variant in data.get(list_name, []):
 			if str((a as Dictionary).get("id", "")) == action_id:
 				return a as Dictionary
+	# Its Multiattack, whatever the block calls it (a form's own, "human_multiattack", that a phase swaps for another).
+	if action_id == "multiattack":
+		for a2: Variant in data.get("actions", []):
+			if str((a2 as Dictionary).get("kind", "")) == "multiattack":
+				return a2 as Dictionary
 	return {}
 
 
