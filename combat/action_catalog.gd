@@ -446,6 +446,7 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	out.append_array(e.ground.entries(c))
 	out.append_array(e.objects.actions.entries(c))
 	out.append_array(e.objects.carry.entries(c))
+	out.append_array(e.images.entries(c))
 
 
 ## FeatureActions' entries as hotbar actions.

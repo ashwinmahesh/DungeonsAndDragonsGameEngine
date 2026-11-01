@@ -191,6 +191,9 @@ func begin_turn(c: Combatant) -> CombatResult:
 	# A weapon it dropped lying within reach: back in hand with its free object interaction.
 	e.ground.ai_pick_up(c)
 	_move_mark(c)
+	var sent := e.images.owner_turn(c)
+	if sent != null and sent.is_paused():
+		return sent
 	# The difficulty's kit and morale: a Bloodied foe drinks its potion; a broken side flees (combat/ai/ai_tactics.gd).
 	if c.side == &"enemy":
 		# F13: a Bloodied talker whose side broke gives up, in every mode (story/captives.gd takes it from there).

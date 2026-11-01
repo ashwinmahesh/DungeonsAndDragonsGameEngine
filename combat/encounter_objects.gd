@@ -1310,6 +1310,8 @@ func perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2) -
 	var carried := carry.perform(c, id)
 	if carried != null:
 		return carried
+	if id.begins_with("study_image:"):
+		return e.images.study(c, e.get_c(id.substr(12)))
 	match id:
 		"oil:throw":
 			var t: Combatant = targets[0] as Combatant if not targets.is_empty() and targets[0] is Combatant else null

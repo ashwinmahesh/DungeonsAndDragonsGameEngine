@@ -548,6 +548,13 @@ func _resolve(ctx: Dictionary, tgt: Array[Combatant], cells: Array[Vector2i], r:
 		return r
 	# Cube of Force (spells face), Scroll of Protection: creatures the spell can't reach.
 	tgt.assign(tgt.filter(func(t: Combatant) -> bool: return enc().items.spell_blocked(c, t) == ""))
+	# An illusory decoy body (DecoyImages) the spell takes in: nothing happens to it.
+	var images := tgt.filter(func(t: Combatant) -> bool: return DecoyImages.is_image(t))
+	for img: Combatant in images:
+		enc().images.struck(c, img, str(s.get("name", "The spell")), "spell")
+		tgt.erase(img)
+	if not images.is_empty() and tgt.is_empty():
+		return r
 	if spells.specials.resolve(ctx, tgt, cells, r, pausable):
 		return r
 	if enc().faerun.resolve_spell(ctx, tgt, cells, r):
