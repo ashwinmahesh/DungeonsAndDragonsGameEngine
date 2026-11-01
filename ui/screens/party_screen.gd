@@ -369,7 +369,7 @@ func _skill_table() -> Control:
 	box.add_theme_constant_override("separation", 6)
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_child(UiParts.section("Best at each skill"))
-	var cov := PartyCoverage.analyze(st.party)
+	var cov := PartyCoverage.analyze(st.party, Campaign.module().coverage_words())
 	var grid := GridContainer.new()
 	grid.columns = 1 if MobileDevice.enabled() else 3
 	grid.add_theme_constant_override("h_separation", 22)

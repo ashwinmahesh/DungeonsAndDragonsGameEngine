@@ -199,6 +199,12 @@ func open_way(_st: StoryState, _location_id: String, _cell: Vector2i, _ft: int =
 	return {}
 
 
+## The campaign's own words for the party composition's gaps that name its land (PartyCoverage.WORDS: `dark`, after
+## "N of M characters can't see in the dark;", and `radiant`); {} keeps the engine's.
+func coverage_words() -> Dictionary:
+	return {}
+
+
 ## What the campaign says when the party falls; shared by desktop and mobile.
 func defeat_text() -> String:
 	return "The adventure is not over. Load a save to try again."
