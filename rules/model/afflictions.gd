@@ -59,7 +59,7 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	# What the clock keeps on it (AfflictionClock): dormant_until, successes, held, max_hp_lost.
 	var kept := {}
 	if old != null:
-		for k: String in ["dormant_until", "successes", "held", "max_hp_lost"]:
+		for k: String in ["dormant_until", "successes", "held", "max_hp_lost", "suppress_hours", "suppressed_until", "dead_seen"]:
 			if old.data.has(k):
 				kept[k] = old.data[k]
 	if old != null:
@@ -75,10 +75,12 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	# Hit Points lost for good to it (`long_rest.max_hp_loss`), while it lasts.
 	if int(kept.get("max_hp_lost", 0)) > 0:
 		fx.modifiers.append(Modifier.make({"stat": "hp_max", "value": -int(kept["max_hp_lost"])}, name, SOURCE))
+	# Asleep (`onset_hours` not yet passed) or held down by a spell (`suppressed_by`): none of what it does, for now.
+	var dormant := int(kept.get("dormant_until", -1)) >= 0 or int(kept.get("suppress_hours", 0)) > 0 \
+		or int(kept.get("suppressed_until", -1)) >= 0
 	# Exhaustion it won't let go of (`exhaustion_lock`): a Long Rest takes none away while it lasts.
-	if bool(def.get("exhaustion_lock", false)):
+	if bool(def.get("exhaustion_lock", false)) and not dormant:
 		fx.modifiers.append(Modifier.make({"stat": "flag", "value": "exhaustion_locked"}, name, SOURCE))
-	var dormant := int(kept.get("dormant_until", -1)) >= 0
 	for raw: Variant in ([] if dormant else def.get("modifiers", [])):
 		fx.modifiers.append(_scaled(raw as Dictionary, new_level, name))
 	for raw: Variant in ([] if dormant else def.get("thresholds", [])):
@@ -224,6 +226,13 @@ static func cure_by_spell(cr: Creature, spell_id: String, conditions: Array) -> 
 	for id: String in of(cr).keys():
 		var def := definition(id)
 		var remove := 0
+		# A spell that holds it down (`suppressed_by` {spells, hours}): none of what it does for that long (AfflictionClock
+		# starts the hours at its next look).
+		var sup := def.get("suppressed_by", {}) as Dictionary
+		if spell_id in (sup.get("spells", []) as Array):
+			effect_of(cr, id).data["suppress_hours"] = int(sup.get("hours", 24))
+			set_level(cr, id, level_of(cr, id), def)
+			lines.append("%s's %s is held down for %d hours." % [cr.name, str(def.get("name", id)), int(sup.get("hours", 24))])
 		# A spell that holds it off (`held_off_by`): the next daily save doesn't come (AfflictionClock).
 		if spell_id in (def.get("held_off_by", []) as Array):
 			effect_of(cr, id).data["held"] = true
@@ -275,6 +284,13 @@ static func after_long_rest(cr: Creature, dice: DiceRoller) -> Array[String]:
 			set_level(cr, id, before, def)
 			cr.hp = mini(cr.hp, cr.max_hp())
 			lines.append("%s's %s takes %d from their Hit Point maximum." % [cr.name, str(def.get("name", id)), lost])
+			# Nothing left: it kills (a maximum worn down to 0).
+			if cr.max_hp() <= 0:
+				cr.hp = 0
+				cr.dead = true
+				cr.log_event({"type": "died", "creature": cr.id, "of": id})
+				lines.append("%s dies of the %s." % [cr.name, str(def.get("name", id))])
+				continue
 		if remove <= 0:
 			continue
 		var after := set_level(cr, id, before - remove, def)
