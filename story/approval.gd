@@ -8,8 +8,10 @@ extends RefCounted
 ##
 ## Saved in StoryState.approval: companion id -> {score: int, memories: [{delta, why, day}]}.
 
-## The six roster companions (data/pregens with `roster: true`), in the order the party screen lists them.
-const COMPANIONS: Array[String] = ["godrick_pendlebrook", "liriel_dawnsong", "thistle", "ratatoille", "wren_featherfoot",
+## The campaign's roster companions in the order the party screen lists them: data/campaign.json `approval.companions`,
+## else these six (Curse of Strahd's: data/pregens with `roster: true`). A campaign's `approval` block is
+## {companions: [ids], romances: [{flag, pair}], tier_says: {tier id: what the tier says}}; each part absent keeps these.
+const STRAHD_COMPANIONS: Array[String] = ["godrick_pendlebrook", "liriel_dawnsong", "thistle", "ratatoille", "wren_featherfoot",
 	"kip_smudgewick"]
 
 const LOWEST := -100
@@ -35,8 +37,8 @@ const TIERS: Array[Dictionary] = [
 
 ## Romances between the six (owner, 2026-10-07: approval includes romances; camp/romance_<pair>.dialogue): each pair's
 ## string flag is "spark", "courting", "together", or "over" when the party steered them apart. Thistle walks one at a
-## time (each spark waits for the other to be unset or over).
-const ROMANCES: Array[Dictionary] = [
+## time (each spark waits for the other to be unset or over). A campaign's `approval.romances` replaces them.
+const STRAHD_ROMANCES: Array[Dictionary] = [
 	{"flag": "romance_thistle_wren", "pair": ["thistle", "wren_featherfoot"]},
 	{"flag": "romance_godrick_thistle", "pair": ["godrick_pendlebrook", "thistle"]},
 	{"flag": "romance_liriel_ratatoille", "pair": ["liriel_dawnsong", "ratatoille"]},
@@ -52,8 +54,47 @@ const MEMORY := 8
 
 # --- Reading --------------------------------------------------------------------------------------
 
+static func _cfg() -> Dictionary:
+	return (Campaign.config().get("approval", {}) as Dictionary)
+
+
+## The roster companions, in party-screen order (the campaign's `approval.companions`, else Curse of Strahd's six).
+static func companions() -> Array[String]:
+	var out: Array[String] = []
+	if _cfg().has("companions"):
+		for id: Variant in _cfg()["companions"]:
+			out.append(str(id))
+		return out
+	return STRAHD_COMPANIONS
+
+
+## The romances between them: [{flag, pair}] (the campaign's `approval.romances`, else Curse of Strahd's three).
+static func romances() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if _cfg().has("romances"):
+		for r: Variant in _cfg()["romances"]:
+			out.append(r as Dictionary)
+		return out
+	return STRAHD_ROMANCES
+
+
+## The tiers, from the top, with the campaign's own words for any of them (`approval.tier_says`: Devoted's mentions
+## Strahd's castle).
+static func tiers() -> Array[Dictionary]:
+	var says := _cfg().get("tier_says", {}) as Dictionary
+	if says.is_empty():
+		return TIERS
+	var out: Array[Dictionary] = []
+	for t in TIERS:
+		var d := t.duplicate()
+		if says.has(str(t["id"])):
+			d["says"] = str(says[str(t["id"])])
+		out.append(d)
+	return out
+
+
 static func is_companion(id: String) -> bool:
-	return id in COMPANIONS
+	return id in companions()
 
 
 static func score(st: StoryState, id: String) -> int:
@@ -62,10 +103,11 @@ static func score(st: StoryState, id: String) -> int:
 
 ## The tier a score falls in: {id, name, min, colour, says}.
 static func tier_for(value: int) -> Dictionary:
-	for t in TIERS:
+	var all := tiers()
+	for t in all:
 		if value >= int(t["min"]):
 			return t
-	return TIERS[TIERS.size() - 1]
+	return all[all.size() - 1]
 
 
 static func tier(st: StoryState, id: String) -> Dictionary:
@@ -99,7 +141,7 @@ static func memories(st: StoryState, id: String) -> Array[Dictionary]:
 ## A companion's romance as it stands: {partner: id, stage: spark | courting | together}, or {} when there's none (or
 ## it's over).
 static func romance(st: StoryState, id: String) -> Dictionary:
-	for r in ROMANCES:
+	for r in romances():
 		var pair := r["pair"] as Array
 		var stage := str(st.get_flag(str(r["flag"]), ""))
 		if id in pair and ROMANCE_WORDS.has(stage):

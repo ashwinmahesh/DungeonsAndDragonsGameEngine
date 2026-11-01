@@ -94,7 +94,7 @@ static func meter(value: int, width: float = BAR_WIDTH, height: float = 14.0) ->
 		var at := x_of.call(float(value)) as float
 		var run := Rect2(Vector2(minf(mid, at), r.position.y + 2), Vector2(absf(at - mid), r.size.y - 4))
 		c.draw_rect(run, Color(Look.color(colour), 0.85))
-		for tier_info in Approval.TIERS:
+		for tier_info in Approval.tiers():
 			var m := int(tier_info["min"])
 			if m <= Approval.LOWEST:
 				continue
@@ -109,7 +109,7 @@ static func meter(value: int, width: float = BAR_WIDTH, height: float = 14.0) ->
 static func _tip(st: StoryState, ch: Character) -> Control:
 	var t := Approval.tier(st, ch.id)
 	var facts: Array = []
-	for tier_info in Approval.TIERS:
+	for tier_info in Approval.tiers():
 		var here := str(tier_info["id"]) == str(t["id"])
 		facts.append([("▸ " if here else "") + str(tier_info["name"]), str(tier_info["says"])])
 	var lines: Array[String] = []

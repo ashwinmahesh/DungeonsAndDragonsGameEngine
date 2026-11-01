@@ -46,6 +46,17 @@ What each of them cares about, as tagged across the campaign:
 - **Kip:** fair dealing, paying what's owed, children and families, reading the small print. Hates fiendish bargains
   above everything (the Dark Gifts, Bella's pact, Vladimir's oath of hate), theft and cheating.
 
+A campaign names its own roster in data/campaign.json `approval` (Approval.companions, romances, tiers):
+
+```json
+"approval": {"companions": ["hero_a", "hero_b"], "romances": [{"flag": "romance_a_b", "pair": ["hero_a", "hero_b"]}],
+  "tier_says": {"devoted": "Would follow you anywhere."}}
+```
+
+`companions` (party-screen order) are the ones who keep a score, see choices and survive a load; `romances` replaces the
+pairs; `tier_says` gives any tier its own words (Devoted's speaks of Strahd's castle). Each part left out keeps Curse of
+Strahd's (Approval.STRAHD_COMPANIONS, STRAHD_ROMANCES, TIERS).
+
 ## What approval opens and closes
 
 **Camp talks** (`narrative/camp/<who>.dialogue`): each file offers its first talk that holds, so they come in this
