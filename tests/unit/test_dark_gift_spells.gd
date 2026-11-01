@@ -3,6 +3,8 @@ extends TestCase
 ## intrinsic_modifiers(), not the build's own list, so Character._collect_granted_spells never saw a gift's `spell` modifier and
 ## no gift's spell reached the spell list; it reads them now, with the gift's own casting ability and its uses a Long Rest.
 ## The gifts here are the ones the test builds (six, one per spell below) plus whatever dark gifts the host game has.
+## A host's gift may grant its spell from one of its benefit's features (with a choice of casting ability) and have no
+## `modifiers` of its own; those are checked too, the hero making the gift's choices as a player would.
 
 var _fx := FixtureContent.new()
 
@@ -31,18 +33,32 @@ func after_each() -> void:
 	_fx.restore()
 
 
+## gift id -> the `spell` modifier its benefit grants: on the benefit itself, or on one of its features (a gift whose
+## spell comes with a choice of casting ability: `@spellcasting_ability`, and the feature's `choice` holds the options).
 func _gift_spells() -> Dictionary:
 	var out := {}
 	for id: String in Compendium.shared().table("dark_gifts") as Dictionary:
-		for m: Variant in ((Compendium.shared().get_entry("dark_gifts", id)["benefit"] as Dictionary)["modifiers"] as Array):
-			if str((m as Dictionary)["stat"]) == "spell":
-				out[id] = m
+		var benefit := Compendium.shared().get_entry("dark_gifts", id).get("benefit", {}) as Dictionary
+		var holders: Array = [benefit]
+		holders.append_array(benefit.get("features", []) as Array)
+		for h: Variant in holders:
+			for m: Variant in ((h as Dictionary).get("modifiers", []) as Array):
+				if str((m as Dictionary)["stat"]) == "spell":
+					var md := (m as Dictionary).duplicate(true)
+					if str(md.get("ability", "")).begins_with("@"):
+						md["ability_from"] = ((h as Dictionary).get("choice", {}) as Dictionary).get("from", [])
+					out[id] = md
 	return out
 
 
+## A hero who takes `gift`, making its choices as a player would (the first option of each: a free casting's ability).
 func _hero_with(gift: String, level: int = 5) -> Character:
 	var ch := TestChars.pregen("hedda_ironvow", level)
 	ch.accept_dark_gift(gift)
+	for c: Choice in ch.pending_choices():
+		if c.source_kind == "dark_gift" and not c.from.is_empty():
+			ch.build["choices"][c.key] = [c.from[0]]
+	ch.refresh()
 	return ch
 
 
@@ -65,8 +81,11 @@ func test_every_gifts_spell_reaches_the_one_who_carries_it() -> void:
 		assert_false(g.is_empty(), "%s grants %s" % [gift, spell])
 		if g.is_empty():
 			continue
-		assert_eq(str(g["ability"]), str(m["ability"]), "%s: cast with its own ability" % gift)
-		assert_eq(str(g["recharge"]), "long", "%s: once a Long Rest, as it says" % gift)
+		if m.has("ability_from"):
+			assert_true(str(g["ability"]) in (m["ability_from"] as Array), "%s: cast with one of the abilities it offers (%s)" % [gift, g["ability"]])
+		else:
+			assert_eq(str(g["ability"]), str(m["ability"]), "%s: cast with its own ability" % gift)
+		assert_eq(str(g["recharge"]), str((m["uses"] as Dictionary)["recharge"]), "%s: its uses come back as it says" % gift)
 		var want := int(m["uses"]["count"]) if (m["uses"] as Dictionary)["count"] is float or (m["uses"] as Dictionary)["count"] is int else ch.proficiency_bonus()
 		assert_eq(int(g["uses"]), want, "%s: its uses" % gift)
 		assert_eq(ch.resource_left("spell:%s" % spell), want, "%s: a free casting for each" % gift)
