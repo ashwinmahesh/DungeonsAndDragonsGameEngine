@@ -678,6 +678,7 @@ func refresh() -> void:
 	_walk_languages()
 	_walk_classes()
 	_walk_gifts()
+	_walk_story_feats()
 	_fix_dynamic_counts()
 	_build_spellcasting()
 	_collect_granted_spells()
@@ -758,6 +759,15 @@ func _walk_background() -> void:
 			"default": own, "walk": false}, "background.feat_choice", src, "Origin Feat" if not fc.is_empty() else "Origin Feat or Ravenloft Dark Gift")
 		var pick := fp[0] if not fp.is_empty() else own
 		_walk_feat(pick, "background.feat", src, bg.get("feat_params", {}) as Dictionary if pick == own else {})
+
+
+## Feats the story gave the hero for good (StoryBoons.grant_feat: the build's `story_feats`, [{id, source}]), each
+## named for where it came from.
+func _walk_story_feats() -> void:
+	for fv: Variant in build.get("story_feats", []):
+		var f := fv as Dictionary
+		var fid := str(f.get("id", ""))
+		_walk_feat(fid, "story.%s" % fid, _source("story", fid, str(f.get("source", "The story"))))
 
 
 func _walk_languages() -> void:
