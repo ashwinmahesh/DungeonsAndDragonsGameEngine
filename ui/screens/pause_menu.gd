@@ -438,6 +438,12 @@ func _game_rows() -> void:
 	_choice_row(y, "Narration", ["Fades", "Stays"], 1 if GameSettings.narration_stays() else 0, func(i: int) -> void:
 		GameSettings.set_narration_stays(i == 1), "Whether the Narrator's box fades on its own or stays until you close it.")
 	y += ROW_PITCH
+	# Talking close-ups (Crooked Moon plan gap 9): offered only in a game that has them.
+	if CameraRig.game_has_close_ups():
+		_choice_row(y, "Close-ups", ["On", "Off"], 0 if GameSettings.talk_close_ups() else 1, func(i: int) -> void:
+			GameSettings.set_talk_close_ups(i == 0),
+			"On: in a conversation the camera comes in close on whoever is speaking, and they turn to face you. Off: it stays back on the whole group.")
+		y += ROW_PITCH
 	# Turn-based exploring (F7): the same switch as its key and the hotbar's Turn-based button.
 	_choice_row(y, "Exploring", ["Real time", "Turn-based"], 1 if GameSettings.turn_based() else 0, func(i: int) -> void:
 		_set_turn_based(i == 1),

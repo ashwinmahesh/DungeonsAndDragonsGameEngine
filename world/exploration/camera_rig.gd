@@ -146,9 +146,15 @@ static func _camera_setting(key: String, default: Variant) -> Variant:
 	return (cam as Dictionary).get(key, default) if cam is Dictionary else default
 
 
-## Whether conversations come in close on whoever is speaking (data/campaign.json "camera" "talk_close_ups";
-## TalkCamera.speaker).
+## Whether conversations come in close on whoever is speaking (TalkCamera.speaker): when the game has close-ups
+## (game_has_close_ups) and the player hasn't turned them off (GameSettings.talk_close_ups).
 static func talk_close_ups() -> bool:
+	return game_has_close_ups() and GameSettings.talk_close_ups()
+
+
+## Whether this game's conversations have close-ups at all (data/campaign.json "camera" "talk_close_ups"); the
+## settings offer the switch only then.
+static func game_has_close_ups() -> bool:
 	return bool(_camera_setting("talk_close_ups", false))
 
 

@@ -158,6 +158,16 @@ static func set_narration_stays(on: bool) -> void:
 	set_value("narration_stays", on)
 
 
+## Whether a conversation comes in close on whoever is speaking (on by default), where the game has close-ups at all
+## (CameraRig.talk_close_ups).
+static func talk_close_ups() -> bool:
+	return bool(value("talk_close_ups", true))
+
+
+static func set_talk_close_ups(on: bool) -> void:
+	set_value("talk_close_ups", on)
+
+
 ## The Modern look's depth blur (on by default): the world softens toward the screen's edges, most in the corners.
 static func depth_blur() -> bool:
 	return bool(value("depth_blur", true))

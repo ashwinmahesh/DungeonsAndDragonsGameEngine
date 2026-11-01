@@ -254,3 +254,19 @@ func test_skirmish_offers_every_pregen_by_default_and_only_the_roster_when_asked
 	assert_eq(roster.size(), Pregens.roster_ids().size(), "only the roster when the campaign asks")
 	for d in roster:
 		assert_true(bool(d.get("roster", false)), "%s is on the roster" % d["id"])
+
+# --- Talking close-ups -------------------------------------------------------------------------------------------
+
+func test_close_ups_need_the_game_and_the_players_say_so() -> void:
+	var was := GameSettings.talk_close_ups()
+	_use({"camera": {"talk_close_ups": true}})
+	GameSettings.set_value("talk_close_ups", true, false)
+	assert_true(CameraRig.game_has_close_ups(), "the game has them")
+	assert_true(CameraRig.talk_close_ups(), "and they're on until the player turns them off")
+	GameSettings.set_value("talk_close_ups", false, false)
+	assert_false(CameraRig.talk_close_ups(), "turned off in the settings")
+	_use({"camera": {"talk_close_ups": false}})
+	GameSettings.set_value("talk_close_ups", true, false)
+	assert_false(CameraRig.game_has_close_ups(), "a game without them")
+	assert_false(CameraRig.talk_close_ups(), "never comes in close, whatever the setting")
+	GameSettings.set_value("talk_close_ups", was, false)
