@@ -401,7 +401,12 @@ static func monsters_for(view: LocationView, spec: Dictionary) -> Array[Dictiona
 		elif int(counts[str(md["monster"])]) > 1:
 			numbered[str(md["monster"])] = int(numbered.get(str(md["monster"]), 0)) + 1
 			mon.name = "%s %d" % [mon.name, numbered[str(md["monster"])]]
-		out.append({"creature": mon, "side": StringName(str(md.get("side", "enemy"))), "cell": LocationView._cell(md["cell"])})
+		# A patrol starts its fight where its round has taken it (LocationStealth.tick_patrols).
+		var cell := LocationView._cell(md["cell"])
+		for w: Dictionary in view.waiting:
+			if str(w["encounter"]) == str(spec.get("id", "")) and (w["foe"] as Combatant).id == "waiting_%s_%d" % [spec.get("id", ""), out.size()]:
+				cell = (w["foe"] as Combatant).cell
+		out.append({"creature": mon, "side": StringName(str(md.get("side", "enemy"))), "cell": cell})
 	return out
 
 
