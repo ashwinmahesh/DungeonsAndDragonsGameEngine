@@ -120,6 +120,10 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   more, no 20 ft burst catches them all, nor more than three quarters of eight or more, and none starts on a wall, low
   cover or another foe (tests/unit/test_fight_spread.gd, which lists the rooms too small for it). Road fights are held
   to the same on every ground they can play out on.
+- **A fight that comes back (`rearm_minutes`):** once an encounter with `rearm_minutes: n` is won, the minute is kept
+  (the place's state, `rearm`), and after n minutes of the clock it isn't done any more: entering the place, or the
+  clock running on while the party is there, brings it back to wait and trigger as at first (LocationFights.rearm; a
+  beaten mob that gathers again in four hours).
 - **Rest:** `safe`, `risky` (a Long Rest is interrupted on a 1 in 6, and makes camp on the map: docs/story/camp.md)
   or `no` (no Long Rest: its card says `rest_text`); default risky. A Short Rest is taken in any of them, `no`
   included, unless a fight on the map was begun and not won or foes are in plain view of the party

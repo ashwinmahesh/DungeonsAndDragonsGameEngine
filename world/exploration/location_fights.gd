@@ -5,6 +5,26 @@ extends RefCounted
 ## begins and resuming from it, the switch into combat without a jump, and what a won fight leaves.
 
 
+## Brings back the place's won fights whose `rearm_minutes` have passed on the clock since (the loc_state's `rearm`:
+## encounter id -> the minute it was won): each is not done any more, so it waits and triggers again as at first.
+## True if any came back.
+static func rearm(st: StoryState, loc_id: String, loc: Dictionary) -> bool:
+	var state := st.loc_state(loc_id)
+	var rearm_at := state.get("rearm", {}) as Dictionary
+	if rearm_at.is_empty():
+		return false
+	var back := false
+	for en: Variant in loc.get("encounters", []):
+		var spec := en as Dictionary
+		var id := str(spec.get("id", ""))
+		var after := int(spec.get("rearm_minutes", 0))
+		if after > 0 and rearm_at.has(id) and st.total_minutes() - int(rearm_at[id]) >= after:
+			rearm_at.erase(id)
+			(state["encounters"] as Dictionary).erase(id)
+			back = true
+	return back
+
+
 ## Starts any encounter of this location whose trigger matches and whose condition holds. True if one started. (Not a
 ## fight waiting in plain view that a sneaking party steps into unnoticed: LocationStealth.step_in.)
 static func _trigger_encounter(view: LocationView, trigger: String) -> bool:
@@ -937,6 +957,11 @@ static func _end_encounter(view: LocationView, encounter_id: String, spec: Dicti
 		_ended_without_winner(view, encounter_id, spec)
 	if outcome == "victory":
 		(view.st.loc_state(view.loc_id)["encounters"] as Dictionary)[encounter_id] = true
+		# A fight that comes back after a while (`rearm_minutes`: a beaten mob gathers again): when it was won.
+		if int(spec.get("rearm_minutes", 0)) > 0:
+			var rearm := view.st.loc_state(view.loc_id).get("rearm", {}) as Dictionary
+			rearm[encounter_id] = view.st.total_minutes()
+			view.st.loc_state(view.loc_id)["rearm"] = rearm
 		# XP levelling: the foes overcome are worth XP, a road meeting, a night at camp or Strahd's visit (custom) every time
 		# but lost over the ceiling (story/xp.gd).
 		var earned := Xp.fight(view.st, e, encounter_id, bool(spec.get("custom", false)))

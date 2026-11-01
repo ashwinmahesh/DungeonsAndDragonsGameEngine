@@ -48,6 +48,8 @@ func _process(_delta: float) -> void:
 	if now == _minute:
 		return
 	var turned := _minute >= 0 and turns(view.loc, _minute, now)
+	if LocationFights.rearm(view.st, view.loc_id, view.loc):
+		turned = true   # a fight came back here while the party waited: its foes stand again
 	if _minute >= 0 and now > _minute:
 		LocationNpcs.pass_minutes(view, now - _minute)   # spells on the people run down (Sleep's minute)
 	_minute = now
