@@ -132,7 +132,7 @@ func _matches(text: String) -> bool:
 
 func _fill_heroes() -> void:
 	MobileUi.clear(list)
-	for entry in Compendium.shared().all("pregens"):
+	for entry in SkirmishScreen.offered_pregens():
 		var id := str(entry["id"])
 		if _matches(str(entry["name"])):
 			var button := MobileUi.button(str(entry["name"]), func() -> void:

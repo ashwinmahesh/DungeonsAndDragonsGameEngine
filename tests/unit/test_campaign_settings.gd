@@ -241,3 +241,16 @@ func test_a_story_boon_raises_a_score_to_the_campaigns_limit() -> void:
 	for i in 6:
 		StoryBoons.raise_ability(other, "int", 2, "A gift")
 	assert_eq(other.ability_score(&"int"), 20, "the engine's limit without the setting")
+
+
+# --- Skirmish's pregens --------------------------------------------------------------------------------------------
+
+func test_skirmish_offers_every_pregen_by_default_and_only_the_roster_when_asked() -> void:
+	_without(["skirmish_pregens"])
+	var every := SkirmishScreen.offered_pregens()
+	assert_eq(every.size(), Compendium.shared().all("pregens").size(), "the default offers every pregen")
+	_use({"skirmish_pregens": "roster"})
+	var roster := SkirmishScreen.offered_pregens()
+	assert_eq(roster.size(), Pregens.roster_ids().size(), "only the roster when the campaign asks")
+	for d in roster:
+		assert_true(bool(d.get("roster", false)), "%s is on the roster" % d["id"])

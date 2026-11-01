@@ -38,6 +38,7 @@ engine's default, which is how the first game (Curse of Strahd) played.
 | `quest_regions` | the first game's | `{order, names}`: the journal's region headings and their order; a campaign that gives them never falls back to the first game's (QuestRegions) |
 | `weather` | the first game's | The climates file (story/weather.gd) |
 | `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
+| `skirmish_pregens` | `"all"` | Which pregens Skirmish's Add page offers: `"all"`, or `"roster"` for only those with `roster: true` (`SkirmishScreen.offered_pregens()`) |
 | `reading` | the first game's deck | See "The reading" below (`ReadingDeck`) |
 | `calendar` | the engine's day | Night 19:00-06:00, dusk 18:00, dawn 06:00, a 18:00 start, no hour names, one moon. Under `eternal_night` it is always night (no sun); named hours show in every clock ("22:15 · the Witching Hour"), may set their own look (`phase`: day, dusk, night, dawn) and may be used in an NPC's `hours`; `dawn` and `dusk` are when items' charges come back, `words` what the screens call them; the moon's `nights` cycle one a day and size its disc and brighten its key light outdoors (`Calendar`) |
 
