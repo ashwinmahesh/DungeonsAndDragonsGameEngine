@@ -1712,6 +1712,20 @@
               }
             }
           },
+          "defeat": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Losing this fight means being taken, not killed (DefeatCapture): the outcome is captured, the fallen heroes come round at hp, `set` flags are stamped with the minute, and the party is jailed (Jail) or moved there.",
+            "properties": {
+              "jail": {"type": "string", "description": "<location>[:<spawn>]: locked up there (gear kept by the jailers unless keep_gear)."},
+              "move": {"type": "string", "description": "<location>[:<spawn>]: carried there, gear and all."},
+              "until": {"type": "string", "description": "jail: a condition that lets the party out."},
+              "keep_gear": {"type": "boolean"},
+              "hp": {"type": "integer", "minimum": 1, "description": "The Hit Points the fallen come round at (1)."},
+              "set": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}], "description": "Flags set to the minute the party was taken (for a clock, days_since)."},
+              "say": {"type": "string", "description": "A Narrator key for the moment (default combat:captured)."}
+            }
+          },
           "ends_when": {
             "type": "object",
             "additionalProperties": false,

@@ -360,6 +360,13 @@ the fight's `story_flags`; the event `{type: "clock", outcome, label, rounds}` c
 counter adds the rounds left (`EncounterTurns.clock_left`, the current one counted) and `rounds_label` as its tooltip. A
 fight won or lost before then never runs out.
 
+Taken, not killed: an encounter's `defeat` (`{jail or move: "<location>[:<spawn>]", until, keep_gear, hp, set, say}`,
+story/defeat_capture.gd) turns a wipe into the outcome `captured`: the heroes still alive come round at `hp` (1), with
+their death saves cleared; each flag in `set` is stamped with the minute (for a clock: `minutes_since`, `days_since`);
+the Narrator says `say` (else `combat:captured`); and the party is jailed there as a conversation's `jail` does (its gear
+kept unless `keep_gear`, let out by `until` or `jail release`) or, with `move`, carried there with its gear, through the
+view's `exit_requested`. A host treats `captured` as no game over (the game's `_after_combat`).
+
 What a fight hands back to the story (`Encounter.legendary`): `story_flags` (flag -> value: Misty Escape's flag, a
 withdrawal's flag, `strahd_destroyed`), `story_quests` (quest -> stage), `departed` (creature id -> `mist` or
 `withdraw`). LocationView applies them when the fight ends, whatever the outcome; a creature that departed leaves no
