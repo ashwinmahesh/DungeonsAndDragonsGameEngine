@@ -954,6 +954,10 @@ func before_d20(cr: Creature, kind: D20Test.Kind, keys: Array[String], _target: 
 	if sun != "" and e.in_sunlight(c):
 		if sun == "weakness" or kind != D20Test.Kind.SAVING_THROW:
 			out["disadvantage"] = ["Sunlight"]
+	# What it can't abide in sight (a mirror held up to it): Disadvantage on its D20 Tests.
+	var shunned := e.monster_actions.shunned_in_sight(c)
+	if not shunned.is_empty():
+		out["disadvantage"] = (out.get("disadvantage", []) as Array) + shunned
 	if c.has_meta("portent_next"):
 		out["natural"] = int(c.get_meta("portent_next"))
 		c.remove_meta("portent_next")

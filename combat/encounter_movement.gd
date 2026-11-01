@@ -96,6 +96,8 @@ func _move_blocks(c: Combatant) -> Dictionary:
 		blocked[cell4] = true
 	for cell5: Vector2i in MagicCircle.blocks(e, c):
 		blocked[cell5] = true
+	for cell7: Vector2i in e.monster_actions.water_blocks(c):   # it won't go into running water
+		blocked[cell7] = true
 	# Compelled Duel: no square more than 30 ft from the duellist.
 	var anchor := e.spells.specials.duel_anchor(c)
 	if anchor != null:

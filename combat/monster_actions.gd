@@ -846,10 +846,63 @@ func spend_reaction_spell(c: Combatant, spell_id: String) -> int:
 ## Start of `c`'s turn: Recharge, Berserk, the auras of nearby monsters reaching it (Stench, Festering Aura) and its own
 ## (Whispering Aura), Regeneration, grips, Engulf and Sunlight Hypersensitivity. An aura's save stops for the choices
 ## after its roll, so the rest waits on Encounter.then.
+## The squares a creature that shuns running water (a trait's `shuns_running_water`) won't step or fly into: every deep
+## water square, unless it is in the water already.
+func water_blocks(c: Combatant) -> Dictionary:
+	var e := enc()
+	var out := {}
+	if not traits(c).any(func(tr: Variant) -> bool: return (tr as Dictionary).has("shuns_running_water")) or e.movement.in_running_water(c):
+		return out
+	for z in e.grid.depth:
+		for x in e.grid.width:
+			if e.grid.has_flag(Vector2i(x, z), CombatGrid.WATER):
+				out[Vector2i(x, z)] = true
+	return out
+
+
+## Starting its turn in running water, a creature that shuns it takes the trait's damage and gains its condition until
+## the start of its next turn (`shuns_running_water`: {damage, type, condition}).
+func _water_hurts(c: Combatant) -> void:
+	var e := enc()
+	if not e.movement.in_running_water(c):
+		return
+	for tr: Variant in traits(c):
+		var w := (tr as Dictionary).get("shuns_running_water", null)
+		if not w is Dictionary:
+			continue
+		var wd := w as Dictionary
+		if int(wd.get("damage", 0)) > 0:
+			e.deal_damage(null, c, [{"amount": int(wd["damage"]), "type": str(wd.get("type", "acid"))}], false, str((tr as Dictionary).get("name", "Running water")))
+		if str(wd.get("condition", "")) != "" and c.is_alive():
+			var fx := Effect.new(str((tr as Dictionary).get("name", "Running water")), &"feature", "running_water").with_condition(StringName(str(wd["condition"])))
+			fx.ends = Effect.Ends.START_OF_TURN
+			fx.turn_owner_id = c.id
+			c.creature.add_effect(fx)
+
+
+## What `c` shuns in sight (a trait's `shuns_item`: {items, range}): the names of those it would have Disadvantage for,
+## a foe within `range` ft it can see carrying one of `items` (a mirror showing it its reflection).
+func shunned_in_sight(c: Combatant) -> Array[String]:
+	var e := enc()
+	var out: Array[String] = []
+	for tr: Variant in traits(c):
+		var sh := (tr as Dictionary).get("shuns_item", {}) as Dictionary
+		if sh.is_empty():
+			continue
+		for o in e.hostiles_of(c):
+			if o.is_down() or e.distance(c, o) > int(sh.get("range", 30)) or not e.can_see(c, o) or not o.creature is Character:
+				continue
+			if (sh.get("items", []) as Array).any(func(i: Variant) -> bool: return (o.creature as Character).carries(str(i))):
+				out.append(str((tr as Dictionary).get("name", "Shunned")))
+				break
+	return out
+
+
 func turn_start(c: Combatant) -> CombatResult:
 	var e := enc()
 	if c.creature is Monster:
 		roll_recharges(c)
+		_water_hurts(c)
 	# Berserk (flesh golem): starting a turn Bloodied, a 6 on a d6 sends it into a rage until it's no longer Bloodied.
 	if has_trait(c, "berserk"):
 		if not c.creature.is_bloodied():

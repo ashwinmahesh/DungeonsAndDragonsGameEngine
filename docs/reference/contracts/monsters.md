@@ -34,6 +34,13 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Things it shuns
+
+`shuns_running_water: {damage, type, condition}`: the creature won't step or fly into deep water (unless it's already
+in it); starting its turn in it, it takes the damage and gains the condition until the start of its next turn.
+`shuns_item: {items, range}`: while it can see a foe within `range` ft carrying one of `items` (a mirror showing its
+reflection), it has Disadvantage on D20 Tests (MonsterActions.water_blocks, shunned_in_sight).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
