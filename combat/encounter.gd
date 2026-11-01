@@ -97,6 +97,8 @@ var images: DecoyImages
 var zones: AreaHazards
 ## Openings a creature can be thrown out of (combat/fight_openings.gd).
 var openings: FightOpenings
+## Paired squares that lead into each other (combat/fight_portals.gd).
+var portals: FightPortals
 ## The attack whose damage is being dealt right now: {attacker, target, melee} (Zhentarim Tactics answers a melee hit).
 var hit_context: Dictionary = {}
 ## Magic items: the Items tab, item powers and the hooks below (combat/combat_items.gd, ADR 0012).
@@ -203,6 +205,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	images = DecoyImages.new(self)
 	zones = AreaHazards.new(self)
 	openings = FightOpenings.new(self)
+	portals = FightPortals.new(self)
 	triggered_features = TriggeredFeatures.new(self)
 	items = CombatItems.new(self)
 	legendary = Legendary.new(self)

@@ -170,6 +170,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
 - **Allies in a fight:** a monster entry's `side: "ally"` fights on the party's side as a guest the player controls, like
   every party member and guest (militia standing with the heroes): foes treat it as one of the party's, and it counts
   for the party in the fight's end; it isn't a hero, so it leaves with the fight.
+
+- **Portals (FightPortals):** an encounter's `portals` ([{name, cells: [a, b], when_flag, broken}]) are paired
+  squares: a creature that steps onto one, walking or pushed, comes out on the other (or the nearest free square) and
+  that move ends. A pair works always, or while the fight flag `when_flag` is set, or once the object the scenery made
+  from prop `broken` is broken (a demiplane's windows opening onto the one opposite).
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open

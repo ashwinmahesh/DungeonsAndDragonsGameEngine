@@ -150,6 +150,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	view.st.flags.erase(DialogueRunner.STORED_D20S)
 	e.openings.set_openings(spec.get("openings", []))   # windows a creature can be thrown out of (FightOpenings)
 	e.free_fall = bool(spec.get("free_fall", false))   # all falling together: no flight, levitation or teleport
+	e.portals.set_portals(spec.get("portals", []))   # squares that lead into each other (FightPortals)
 	e.legendary.set_round_events(LocationFights.round_events_for(view.st, spec))
 	if str(spec.get("final_battle", "")) != "":
 		Campaign.module().final_battle_begun(view.st)
@@ -653,6 +654,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 	e.sight_rule = sight_rule_for(view)
 	e.openings.set_openings(spec.get("openings", []))
 	e.free_fall = bool(spec.get("free_fall", false))
+	e.portals.set_portals(spec.get("portals", []))
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):

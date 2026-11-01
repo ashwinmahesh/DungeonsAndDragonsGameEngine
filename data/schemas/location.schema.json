@@ -1050,6 +1050,9 @@
           "openings": {
             "type": "array",
             "description": "Openings a creature can be thrown out of (FightOpenings): a creature with a `throws_out` trait throws a held foe by one out of it; the foe falls the drop and climbs back in on its turn.",
+          "portals": {
+            "type": "array",
+            "description": "Paired squares that lead into each other (FightPortals): a creature stepping onto one, walking or pushed, comes out on the other and its move ends.",
             "items": {
               "type": "object",
               "additionalProperties": false,
@@ -1068,6 +1071,11 @@
           "free_fall": {
             "type": "boolean",
             "description": "Everyone falls together on one plane (a pit with no bottom): nobody flies up or down, levitates or teleports (Encounter.free_fall)."
+                "cells": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/cell"}},
+                "when_flag": {"type": "string", "description": "Only while this fight flag is set."},
+                "broken": {"type": "string", "description": "Only once the object the scenery made from this prop is broken (a window)."}
+              }
+            }
           },
           "objects": {
             "type": "array",
