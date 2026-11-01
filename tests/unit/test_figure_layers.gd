@@ -165,7 +165,7 @@ func test_the_other_hand_holds_a_part_mirrored() -> void:
 func test_a_characters_figure_wears_what_they_hold_and_changes_with_it() -> void:
 	FigureModels.register_part(LANTERN, {"bone": "Spine", "size": 0.25}, _lantern())
 	FigureModels.manifest()
-	FigureModels._gear["hooded_lantern"] = LANTERN
+	FigureModels._gear = {"hooded_lantern": LANTERN}   # only this: a game's own map (its longsword, say) is not the test's
 	FigureModels.register(ID, {"gear": ["main_hand", "off_hand"]}, Figure.model())
 	var ch := Character.new()
 	ch.name = "Test Figure"
