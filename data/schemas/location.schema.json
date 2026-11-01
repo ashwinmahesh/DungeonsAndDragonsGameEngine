@@ -105,6 +105,19 @@
             },
             "description": "Two corners of a rectangle, inclusive."
           },
+          "crowd": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Bystanders milling about this area (Crowds): figures that aren't NPCs and never block; with push_to, they jostle the party toward that square while it stands here.",
+            "properties": {
+              "count": {"type": "integer", "minimum": 1},
+              "name": {"type": "string"},
+              "sprites": {"type": "array", "items": {"type": "string"}, "description": "The figures' art (stand-ins until the place has its own)."},
+              "push_to": {"$ref": "#/$defs/cell"},
+              "push_every": {"type": "number", "minimum": 0.5},
+              "when": {"type": "string"}
+            }
+          },
           "light": {
             "type": "string",
             "enum": [

@@ -207,6 +207,7 @@ func _ready() -> void:
 	if left != "":
 		for said in QuestClosures.sweep(st, {"leaving": left}):
 			toast.emit(said)   # (data/quests `closes` with `leave`: the party walked away with it open)
+	add_child(Crowds.create(self))   # bystanders milling about an area (a festival's dancers)
 	add_child(HiddenAreas.create(self))   # rooms behind undiscovered secret doors stay out of sight
 	add_child(FoundGlow.create(self))   # what a Search or a check turns up glows orange until it's used
 	add_child(SightOverlay.create(self))   # who can see the party while it sneaks or plans (U10)
