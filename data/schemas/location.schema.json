@@ -1117,6 +1117,9 @@
                 "start": {"type": "integer"},
                 "min": {"type": "integer"},
                 "max": {"type": "integer"},
+                "on": {"type": "array", "description": "Fight events that move it: [{event: defeat, crit or failed_save, who: [names or stat blocks], side: party or enemy, delta}].",
+                  "items": {"type": "object", "required": ["event"], "properties": {"event": {"enum": ["defeat", "crit", "failed_save"]},
+                    "who": {"type": "array", "items": {"type": "string"}}, "side": {"enum": ["party", "enemy", "neutral"]}, "delta": {"type": "integer"}}}},
                 "actions": {
                   "type": "array",
                   "items": {
@@ -1149,7 +1152,8 @@
                       "falling": {"type": "boolean"},
                       "flag": {"type": "string"},
                       "outcome": {"enum": ["victory", "defeat", "ended"]},
-                      "say": {"type": "string"}
+                      "say": {"type": "string"},
+                      "take": {"type": "array", "items": {"type": "string"}, "description": "Names or stat blocks the mark frees: out of the fight, rescued."}
                     }
                   }
                 }
@@ -1550,6 +1554,10 @@
               "rounds_flag": {
                 "type": "string",
                 "description": "A flag set for the story when the clock runs out."
+              },
+              "foes_end_it": {
+                "type": "boolean",
+                "description": "False: beating the foes (or having none) doesn't end the fight; only its clock, objects, wards or meters do (a rite with no one to fight)."
               },
               "rounds_label": {
                 "type": "string",

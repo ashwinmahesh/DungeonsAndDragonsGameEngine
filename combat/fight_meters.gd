@@ -24,6 +24,10 @@ var used: Dictionary = {}
 ## the captive), and whether it has run out (EncounterTurns.clock_left).
 var clock_lost: int = 0
 var clock_rang: bool = false
+## How far into the encounter's events the meters' `on` rules have looked (scan); back to 0 as the view drains them.
+var _scanned := 0
+## Creature ids already counted as defeated (a fall and then a death count once).
+var _defeated: Dictionary = {}
 
 
 func _init(encounter: Encounter) -> void:
@@ -98,6 +102,11 @@ func change(id: String, delta: int) -> void:
 		if str(m.get("flag", "")) != "":
 			e.legendary.story_flags[str(m["flag"])] = true
 		e.events.append({"type": "meter_mark", "id": id, "value": after, "say": str(m.get("say", ""))})
+		# The ones the mark frees (`take`: names or stat blocks): out of the fight, rescued.
+		for c in e.combatants.duplicate():
+			if c.is_alive() and not c.has_meta("left_fight") and _named(c, m.get("take", []) as Array):
+				e.log.add("info", "%s is free" % c.name(), c.id)
+				e.movement.leave_grid(c, "rescued")
 		var outcome := str(m.get("outcome", ""))
 		if outcome in ["victory", "defeat", "ended"] and e.state == Encounter.State.ACTIVE:
 			e.turns._finish(outcome)
@@ -206,6 +215,65 @@ func shift_clock(rounds: int) -> void:
 	clock_lost -= rounds
 	var e := enc()
 	e.events.append({"type": "clock_shift", "rounds": rounds, "left": e.turns.clock_left()})
+
+
+# --- Fight events ---------------------------------------------------------------------------------
+
+## Reads the encounter's new events for the meters' `on` rules ([{event: defeat, crit or failed_save, who: [names or
+## stat blocks], side: party or enemy, delta}]): a creature falling, an attacker's critical hit, a failed save, each
+## moving the meter by `delta`. Called as each turn ends and before the view drains the events.
+func scan() -> void:
+	var e := enc()
+	if defs.is_empty():
+		_scanned = e.events.size()
+		return
+	while _scanned < e.events.size():
+		var ev := e.events[_scanned] as Dictionary
+		_scanned += 1
+		var kind := ""
+		var who: Combatant = null
+		match str(ev.get("type", "")):
+			"down", "death":
+				if _defeated.has(str(ev.get("id", ""))):
+					continue
+				_defeated[str(ev.get("id", ""))] = true
+				kind = "defeat"
+				who = e.get_c(str(ev.get("id", "")))
+			"attack":
+				if bool(ev.get("critical", false)):
+					kind = "crit"
+					who = e.get_c(str(ev.get("attacker", "")))
+			"save":
+				var t := ev.get("test") as D20Test
+				if t != null and not t.success:
+					kind = "failed_save"
+					who = e.get_c(str(ev.get("id", "")))
+		if kind == "" or who == null:
+			continue
+		for id: String in defs.keys():
+			for rv: Variant in (defs[id] as Dictionary).get("on", []):
+				var rule := rv as Dictionary
+				if str(rule.get("event", "")) != kind:
+					continue
+				if rule.has("who") and not _named(who, rule["who"] as Array):
+					continue
+				if rule.has("side") and _side(who) != str(rule["side"]):
+					continue
+				change(id, int(rule.get("delta", 1)))
+
+
+## The view has taken the events: the next scan starts from the top.
+func drained() -> void:
+	_scanned = 0
+
+
+static func _named(c: Combatant, names: Array) -> bool:
+	var block := str((c.creature as Monster).data.get("id", "")) if c.creature is Monster else ""
+	return names.has(c.name()) or (block != "" and names.has(block))
+
+
+static func _side(c: Combatant) -> String:
+	return "party" if c.side in [&"party", &"guest"] else str(c.side)
 
 
 func to_dict() -> Dictionary:

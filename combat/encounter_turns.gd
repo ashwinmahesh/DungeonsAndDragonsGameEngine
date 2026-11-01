@@ -246,6 +246,8 @@ func _turn_end_rest(c: Combatant) -> CombatResult:
 	e.triggered_features.turn_end(c)
 	return e.then(e.spells.turn_end(c), func() -> CombatResult:
 		e.objects.turn_end(c)
+		e.legendary.round_events.turn_end(c)   # a possession's repeated save (`possess`)
+		e.meters.scan()   # what the turn did that moves a meter (`on`: a foe falling, a crit, a failed save)
 		e.spells.zones.prune()
 		e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
 		_step_out(c)
@@ -515,7 +517,7 @@ func _check_over() -> void:
 		e.state = Encounter.State.OVER
 		e.outcome = "ended" if str(e.ends_when.get("ward_lost", "defeat")) == "ended" else "defeat"
 		e.log.add("info", "%s is lost" % _ward_fallen().name(), "")
-	elif not enemies_up or _wards_out():
+	elif (not enemies_up and bool(e.ends_when.get("foes_end_it", true))) or _wards_out():
 		e.state = Encounter.State.OVER
 		e.outcome = "victory"
 	elif _party_left():

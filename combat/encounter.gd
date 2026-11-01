@@ -370,8 +370,10 @@ func each(list: Array, body: Callable, done: Callable, from: int = 0) -> CombatR
 ## Drains scene events (moves, attacks, damage, turns) for animation.
 func drain_events() -> Array[Dictionary]:
 	spells.zones.prune()
+	meters.scan()   # the meters' `on` rules read the events before they go
 	var out := events.duplicate()
 	events.clear()
+	meters.drained()
 	return out
 
 

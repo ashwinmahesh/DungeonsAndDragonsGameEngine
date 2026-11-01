@@ -408,6 +408,18 @@ reaches a single creature of those it would, at random; with `clock` it moves th
 catches the captive costs a round (FightMeters.shift_clock, event `clock_shift` {rounds, left}). The clock rings once,
 as the round its rounds left reach 0 ends; both are kept in a round's save with the meters.
 
+A meter's `on` ([{event, who, side, delta}]) moves it on what happens in the fight: `defeat` (a creature falls or dies,
+once each), `crit` (an attacker's Critical Hit), `failed_save` (a failed saving throw), each for the creature named in
+`who` (names or stat blocks) or on `side` (party, enemy), by `delta` (1). FightMeters.scan reads the encounter's events
+as each turn ends and before the view drains them. A mark's `take` (names or stat blocks) frees those creatures: out of
+the fight (`vanish`, left: `rescued`). `ends_when.foes_end_it: false` keeps a fight going with no foes standing (or
+none at all): it ends only by its clock, objects, wards or meters, or the party falling.
+
+A round event's `possess` outcome (a spirit of the damned): each creature it reaches (`one` for a single one) makes
+the `save`; failing, it turns on its own side for up to `rounds` rounds (10), played as the ghost's possession plays a
+body (the other side, the AI in control: MonsterActions.end_possession restores it). It repeats the save as each of its
+turns ends; a success frees it and leaves it immune to that event for the fight; falling to 0 Hit Points frees it too.
+
 ### Round events (combat/round_events.gd)
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a
