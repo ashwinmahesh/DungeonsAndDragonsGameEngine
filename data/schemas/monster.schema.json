@@ -1732,6 +1732,7 @@
           "type": "integer",
           "minimum": 5
         },
+        "hungry_at": {"type": "number", "minimum": 0, "description": "How much of `heal` must be missing before it eats (0.5: half the heal, the default; 1: all of it)."},
         "heal": {
           "type": "integer",
           "minimum": 0
