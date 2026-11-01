@@ -143,3 +143,9 @@ time). One with `in_zone: <spell id>` works only when its user stands in a live 
 (Misty Step into or out of fog). The flag `sees_through_fog` lets a creature see through Heavily Obscured zones that
 aren't magical darkness (EncounterSight.can_see). A power's `grants` can carry `modifiers` too: they last as long as
 the granted powers.
+
+## Marks on a weapon
+
+A power with `custom: "weapon_mark"` and `params: {mark, minutes}` marks the user's weapon (salt wiped on a blade) for
+`minutes` or until a weapon hit uses it up. A creature with a trait `vulnerable_to_mark: <mark>` takes double the
+weapon's damage from that hit (EncounterAttacks, ItemSpecials.weapon_mark).
