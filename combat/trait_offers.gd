@@ -9,7 +9,9 @@ extends RefCounted
 ## `offers`: {key (the event's key; the trait's id when missing), label (the trait's name), cost (action or bonus;
 ## action), range (feet from the holder; 60), check: {skill, dc}, damage: [{amount or dice, type}], on_success: [riders]}
 ## A contest instead of a set DC (`contest: {save}`): the check's total is the DC of the holder's save, and the damage and
-## riders land when the holder fails it. `needs` (a tool kind, such as musical_instrument): the user must carry one, and
+## riders land when the holder fails it. `save: {ability, dc}`: the holder saves against that DC instead, and the offer
+## lands when it fails; `auto`: it simply lands. `needs_item` (item ids): the user must carry one of them (a memento, a
+## bottle), and `consumes` uses it up. `needs` (a tool kind, such as musical_instrument): the user must carry one, and
 ## has Advantage when proficient with the one they play. `influence: true` files it under the Influence action.
 
 const DEFAULT_RANGE := 60
@@ -81,6 +83,19 @@ func why_not(c: Combatant, holder: Combatant, offer: Dictionary) -> String:
 		return "Get within %d ft of %s first" % [reach, holder.name()]
 	if offer.has("needs") and tool_for(c, str(offer["needs"])) == "":
 		return "Needs a %s" % str(offer["needs"]).capitalize()
+	if offer.has("needs_item") and item_for(c, offer["needs_item"] as Array) == "":
+		var names := (offer["needs_item"] as Array).map(func(i: Variant) -> String: return str(Compendium.shared().item_data(str(i)).get("name", str(i))))
+		return "Needs %s" % " or ".join(names)
+	return ""
+
+
+## The first of `ids` that `c` carries, or "".
+static func item_for(c: Combatant, ids: Array) -> String:
+	if not c.creature is Character:
+		return ""
+	for id: Variant in ids:
+		if (c.creature as Character).carries(str(id)):
+			return str(id)
 	return ""
 
 
@@ -132,8 +147,27 @@ func take(c: Combatant, holder: Combatant, trait_id: String) -> CombatResult:
 	var played := tool_for(c, str(offer["needs"])) if offer.has("needs") else ""
 	if played != "" and ((c.creature as Character).proficiencies.get("tools", {}) as Dictionary).has(played):
 		adv.append("%s proficiency" % str(Compendium.shared().item_data(played).get("name", played)))
+	# What it takes in hand: a memento shown, a bottle splashed (`needs_item`; `consumes` uses one up).
+	var used := item_for(c, offer["needs_item"] as Array) if offer.has("needs_item") else ""
+	if used != "" and bool(offer.get("consumes", false)):
+		(c.creature as Character).remove_one(used)
 	if offer.get("contest", null) is Dictionary:
 		return _contest(c, holder, offer, label, skill, adv)
+	# The holder saves against a set DC instead (`save: {ability, dc}`: flattery it must resist), or it simply lands (`auto`).
+	if offer.get("save", null) is Dictionary:
+		var sv := offer["save"] as Dictionary
+		var ab0 := StringName(str(sv.get("ability", "cha")))
+		var st := holder.creature.roll_save(e.dice, ab0, int(sv.get("dc", 10)), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab0], label, holder.name()])
+		if st.success:
+			e.log.add("info", "%s shrugs off %s" % [holder.name(), label], c.id, [st.describe()])
+			return CombatResult.new()
+		e.log.add("info", "%s falls for %s" % [holder.name(), label], c.id, [st.describe()])
+		land(c, holder, offer, label)
+		return CombatResult.new()
+	if bool(offer.get("auto", false)):
+		e.log.add("info", "%s: %s on %s" % [c.name(), label, holder.name()], c.id)
+		land(c, holder, offer, label)
+		return CombatResult.new()
 	var test := c.creature.roll_check(e.dice, skill, int(check.get("dc", 10)), adv, [], "%s: %s check (%s)" % [label,
 		str(skill).capitalize(), c.name()])
 	if not test.success:
