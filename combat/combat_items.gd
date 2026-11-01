@@ -585,6 +585,11 @@ func _grant(c: Combatant, who: Combatant, p: Dictionary) -> void:
 		fx.turn_owner_id = who.id
 	fx.data["powers"] = (g.get("powers", []) as Array).duplicate(true)
 	fx.data["id"] = str(p["item_id"])
+	for md: Variant in g.get("modifiers", []):   # what it gives besides its powers for the time (eyes that see through fog)
+		var mdd := (md as Dictionary).duplicate()
+		var stat := str(mdd["stat"])
+		mdd.erase("stat")
+		fx.modifiers.append(Modifier.of(stat, mdd, fx.name, &"item"))
 	who.creature.add_effect(fx)
 
 

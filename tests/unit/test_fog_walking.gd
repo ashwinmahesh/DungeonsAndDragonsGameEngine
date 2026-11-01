@@ -42,3 +42,14 @@ func test_eyes_that_see_through_fog() -> void:
 	assert_false(e.can_see(hero, bag), "the fog hides it")
 	hero.creature.add_effect(Effect.new("Test Eyes", &"item", "test_eyes").with_modifier("flag", {"value": "sees_through_fog"}))
 	assert_true(e.can_see(hero, bag), "not from these eyes")
+
+
+func test_a_drink_grants_modifiers_with_its_powers() -> void:
+	var e := TestCombat.open_field(3)
+	var hero := TestCombat.hero(e, "hedda_ironvow", Vector2i(2, 3), 5)
+	TestCombat.punching_bag(e, Vector2i(10, 3), 300)
+	TestCombat.start_with(e, hero)
+	var p := {"item_id": "test_elixir", "data": {"name": "Test Elixir"}, "entry": {},
+		"power": {"id": "drink", "grants": {"minutes": 10, "powers": [], "modifiers": [{"stat": "flag", "value": "sees_through_fog"}]}}}
+	e.items._grant(hero, hero, p)
+	assert_true(hero.creature.has_flag("sees_through_fog"))

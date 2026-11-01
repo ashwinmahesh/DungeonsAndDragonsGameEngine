@@ -690,8 +690,13 @@
           },
           "grants": {
             "type": "object",
-            "description": "Powers the user (or whoever drinks it) gains for a while: {powers: [...], hours|minutes}.",
+            "description": "Powers the user (or whoever drinks it) gains for a while: {powers: [...], modifiers: [...], hours|minutes}.",
             "properties": {
+              "modifiers": {
+                "type": "array",
+                "items": {"$ref": "common.schema.json#/$defs/modifier"},
+                "description": "What it gives besides its powers for the same time."
+              },
               "powers": {
                 "type": "array",
                 "items": {
