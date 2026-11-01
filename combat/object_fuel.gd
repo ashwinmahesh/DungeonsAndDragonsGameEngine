@@ -2,9 +2,9 @@ class_name ObjectFuel
 extends RefCounted
 ## Things on the battlefield a creature eats, and things that hold a creature (docs/reference/contracts/combat.md
 ## "Fuel and what breaks open"), owned by EncounterObjects as `fuel`:
-## - A stat block's `devours` {fuel: [words], within (ft, default 10), heal, hungry_at, advantage, seeks, name}: it eats
-##   only when hungry (hungry): with `heal`, when it has lost at least `hungry_at` x `heal` Hit Points (half the heal by
-##   default), so a can isn't wasted on a creature near its full Hit Points. At the start of its
+## - A stat block's `devours` {fuel: [words], within (ft, default 10), heal, hungry_at, advantage, seeks, name}: with
+##   `hungry_at`, it eats only once it has lost at least `hungry_at` x `heal` Hit Points (hungry: a heal it saves for
+##   when it's hurt); without it, food is fuel and it eats whenever it can (a locomotive's Soul Cans). At the start of its
 ##   turn, a creature within `within` feet of a standing object whose `fuel` is one of its words eats the nearest: the
 ##   object is gone, it regains `heal` Hit Points, and with `advantage` its attacks have Advantage until its next turn
 ##   starts. One a turn. The AI walks it to food it can reach this turn ahead of a foe, and with `seeks` toward the
@@ -52,15 +52,15 @@ func food_for(c: Combatant) -> Array[BattleObject]:
 	return out
 
 
-## Whether `c` would gain from eating: always when its `devours` heals nothing; else once it has lost at least
-## `hungry_at` (a fraction of the heal, 0.5 by default) x `heal` Hit Points.
+## Whether `c` eats now: always, unless its `devours` sets `hungry_at` (a fraction of `heal`) and it has lost less than
+## `hungry_at` x `heal` Hit Points. Food that heals nothing is always eaten.
 static func hungry(c: Combatant) -> bool:
 	var dv := devours_of(c)
 	var heal := int(dv.get("heal", 0))
-	if heal <= 0:
+	if heal <= 0 or not dv.has("hungry_at"):
 		return true
 	var missing := c.creature.max_hp() - c.creature.hp
-	return float(missing) >= float(heal) * float(dv.get("hungry_at", 0.5))
+	return float(missing) >= float(heal) * float(dv["hungry_at"])
 
 
 ## How near `c` must be to eat.
