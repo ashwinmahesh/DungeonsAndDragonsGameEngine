@@ -59,7 +59,7 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 	# What the clock keeps on it (AfflictionClock): dormant_until, successes, held, max_hp_lost.
 	var kept := {}
 	if old != null:
-		for k: String in ["dormant_until", "successes", "held", "max_hp_lost", "suppress_hours", "suppressed_until", "dead_seen"]:
+		for k: String in ["dormant_until", "successes", "held", "max_hp_lost", "suppress_hours", "suppressed_until", "dead_seen", "repeat_at"]:
 			if old.data.has(k):
 				kept[k] = old.data[k]
 	if old != null:
@@ -83,11 +83,17 @@ static func set_level(cr: Creature, id: String, level: int, def: Dictionary = {}
 		fx.modifiers.append(Modifier.make({"stat": "flag", "value": "exhaustion_locked"}, name, SOURCE))
 	for raw: Variant in ([] if dormant else def.get("modifiers", [])):
 		fx.modifiers.append(_scaled(raw as Dictionary, new_level, name))
+	# Conditions it holds the creature under (a charm), and more at a threshold (captivated).
+	for cond: Variant in ([] if dormant else def.get("conditions", [])):
+		fx.conditions.append(StringName(str(cond)))
 	for raw: Variant in ([] if dormant else def.get("thresholds", [])):
 		var th := raw as Dictionary
 		if new_level >= int(th.get("at", 0)):
 			for md: Variant in th.get("modifiers", []):
 				fx.modifiers.append(_scaled(md as Dictionary, new_level, name))
+			for cond2: Variant in th.get("conditions", []):
+				if not StringName(str(cond2)) in fx.conditions:
+					fx.conditions.append(StringName(str(cond2)))
 	for sid: Variant in symptoms:
 		var sym := symptom(def, str(sid))
 		for md: Variant in sym.get("modifiers", []):

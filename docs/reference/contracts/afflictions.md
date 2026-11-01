@@ -16,6 +16,7 @@ creature's effects and needs no save change. Its modifiers are rebuilt whenever 
 | `symptoms` | `{when, save: {ability, dc}, table: [{id, name, summary, conditions, modifiers}]}`: where `when` holds (the story checks it; `afflict` does), each level gained brings, after a failed `save` (or always without one), a symptom from the table the creature hasn't got, picked by DiceRoller; its conditions and modifiers join the affliction's effect. They stack, and any reduction of the level clears them all (`Afflictions.roll_symptom`, `symptoms_of`) |
 | `symptoms.table[].on_initiative` | `{save {ability, dc}, flag ("confused"), rounds (10)}`: as Initiative is rolled, a failed save puts the creature under that flag for the fight (`confused`: it acts as Confusion makes it; EncounterTurns) |
 | `symptoms.table[].on_hurt` | `{dice, type}`: each time the creature takes damage it takes that much more, once a blow (EncounterDamage) |
+| `conditions` | conditions it holds the creature under while afflicted (a charm); `thresholds[].conditions` add more at that level |
 | `blocked_by` | a condition id: a creature immune to it can't gain levels. Missing: nothing keeps it out (poison immunity doesn't, unless the definition names `poisoned`) |
 
 API (static, pure): `Afflictions.level_of(cr, id)`, `of(cr)` ({id: level}), `set_level(cr, id, level)`, `add(cr, id, n)`,
@@ -45,3 +46,7 @@ thresholds, the Exhaustion lock) for that many hours from the clock's next look,
 `{hour, becomes, flag, only_types}`: a hero who died with it (and is of one of `only_types`, if given) is lost for good at
 the next `hour` o'clock, their body become that creature (StoryState.fallen keeps `becomes`: the condition
 `became:<monster>`), and `flag` counts it.
+`repeat` `{every_minutes, save {ability, dc}, failure (1)}`: every so many minutes of the clock after it is first seen,
+each living hero who has it saves again: a success ends it, a failure adds levels; at `max_level` no more saves come
+(AfflictionClock._repeat). A curse that captivates for good after two failed repeats is `max_level: 3` with the
+captivation in a threshold `at: 3`.

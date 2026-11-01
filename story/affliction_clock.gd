@@ -64,6 +64,8 @@ static func catch_up(st: StoryState, dice: DiceRoller) -> Array[String]:
 			lines.append_array(_wake(st, ch, id, def))
 			if def.get("daily", null) is Dictionary:
 				lines.append_array(_daily(ch, id, def, from, now, dice))
+			if def.get("repeat", null) is Dictionary:
+				lines.append_array(_repeat(ch, id, def, from, now, dice))
 		if def.get("exposure", null) is Dictionary:
 			lines.append_array(_exposure(st, id, def, from, now, dice))
 	return lines
@@ -165,6 +167,37 @@ static func _daily(ch: Character, id: String, def: Dictionary, from: int, now: i
 		else:
 			var after := Afflictions.add(ch, id, int(d.get("failure", 1)), def)
 			lines.append("The %s worsens in %s (level %d)." % [name, first, after])
+	return lines
+
+
+## The save again every so often (`repeat`: {every_minutes, save, failure (1)}): a success ends it, a failure adds levels;
+## at its `max_level` no more saves come (captivated for good, until something cures it). The first is `every_minutes`
+## after the start of the time the clock's first look at it covers.
+static func _repeat(ch: Character, id: String, def: Dictionary, from: int, now: int, dice: DiceRoller) -> Array[String]:
+	var lines: Array[String] = []
+	var rp := def["repeat"] as Dictionary
+	var every := maxi(1, int(rp.get("every_minutes", 10)))
+	var first := ch.name.get_slice(" ", 0)
+	var name := str(def.get("name", id))
+	var top := int(def.get("max_level", 0))
+	for i in MOST:
+		var fx := Afflictions.effect_of(ch, id)
+		if fx == null or (top > 0 and int(fx.data.get("level", 0)) >= top) or int(fx.data.get("dormant_until", -1)) >= 0:
+			break
+		if not fx.data.has("repeat_at"):
+			fx.data["repeat_at"] = from + every   # counted from the start of the time this look covers
+		if int(fx.data["repeat_at"]) > now:
+			break
+		fx.data["repeat_at"] = int(fx.data["repeat_at"]) + every
+		var sv := rp.get("save", {}) as Dictionary
+		var ab := StringName(str(sv.get("ability", "wis")))
+		var t := ch.roll_save(dice, ab, int(sv.get("dc", 10)), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], name, ch.name])
+		if t.success:
+			Afflictions.clear(ch, id)
+			lines.append("%s shakes off %s." % [first, name])
+			break
+		var after := Afflictions.add(ch, id, int(rp.get("failure", 1)), def)
+		lines.append("%s sinks deeper into %s (level %d)." % [first, name, after])
 	return lines
 
 
