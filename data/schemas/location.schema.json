@@ -1357,6 +1357,8 @@
                     "summon",
                     "take",
                     "text"
+                    "text",
+                    "effect"
                   ]
                 },
                 "who": {
@@ -1447,7 +1449,8 @@
                   "enum": [
                     "target_turn_end",
                     "minute",
-                    "permanent"
+                    "permanent",
+                    "round"
                   ]
                 },
                 "skip_if_resists": {
@@ -1503,11 +1506,16 @@
                   "type": "integer",
                   "minimum": 1
                 },
+                "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
+                "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
+                "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                 "pick": {
                   "enum": [
                     "random",
-                    "cycle"
-                  ]
+                    "cycle",
+                    "sequence"
+                  ],
+                  "description": "random (never the same twice running), cycle (in turn, round and round) or sequence (each once in turn, then nothing)."
                 },
                 "table": {
                   "type": "array",
@@ -1517,6 +1525,9 @@
                       "id"
                     ],
                     "properties": {
+                      "modifiers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/modifier"}, "description": "Rule changes on whoever it lands on, with or instead of a condition."},
+                      "repeat_save": {"type": "boolean", "description": "The save again at the end of each of the creature's turns; a success ends it."},
+                      "unless_count": {"type": "object", "additionalProperties": false, "required": ["who", "at_least"], "description": "Only while fewer than at_least of the creatures named in who (names or stat block ids) stand.", "properties": {"who": {"type": "array", "items": {"type": "string"}}, "at_least": {"type": "integer", "minimum": 1}}},
                       "id": {
                         "type": "string"
                       },
@@ -1532,6 +1543,8 @@
                           "summon",
                           "take",
                           "text"
+                          "text",
+                          "effect"
                         ]
                       },
                       "who": {
@@ -1619,7 +1632,8 @@
                         "enum": [
                           "target_turn_end",
                           "minute",
-                          "permanent"
+                          "permanent",
+                          "round"
                         ]
                       },
                       "skip_if_resists": {

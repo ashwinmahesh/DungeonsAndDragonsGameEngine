@@ -92,13 +92,21 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	var id := str(ev["id"])
 	var st := (done.get(id, {}) as Dictionary).duplicate()
 	var times := int(st.get("times", 0))
-	var outcome := _pick(ev, str(st.get("last", "")))
+	var outcome := _pick(ev, str(st.get("last", "")), times)
 	st["round"] = e.round_no
 	st["times"] = times + 1
 	st["last"] = str(outcome.get("id", ""))
 	done[id] = st
+	if outcome.is_empty():
+		return CombatResult.new()   # a sequence that has run its course
 	var label := str(outcome.get("name", ev.get("name", id.capitalize())))
 	leg()._log("spell", "Initiative %d: %s" % [int(ev.get("at", 20)), label], null, [str(outcome.get("summary", ev.get("summary", "")))])
+	# Only while fewer than `at_least` of the creatures named in `who` stand (`unless_count`: another herald dances in
+	# only when fewer than three are left).
+	var cap := outcome.get("unless_count", {}) as Dictionary
+	if not cap.is_empty() and _count_of(cap.get("who", []) as Array) >= int(cap.get("at_least", 1)):
+		leg()._log("info", "%s: enough of them already" % label, null)
+		return CombatResult.new()
 	var r := CombatResult.new()
 	var reached := _reached(outcome)
 	# `one`: a single creature of those reached, at random (a fire burst on a random hero, or the captive).
@@ -164,9 +172,35 @@ func _take(o: Dictionary) -> void:
 ## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn, else at random and
 ## never the one used last time).
 func _pick(ev: Dictionary, last: String) -> Dictionary:
+		"effect":
+			# No save: it just lands on whoever it reaches (a pelting that throws them off their aim).
+			for t in reached:
+				if t.is_alive():
+					_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
+	return done_fn.call() as CombatResult
+
+
+## The creatures on the board named in `who` (names or stat block ids), up.
+func _count_of(who: Array) -> int:
+	var n := 0
+	for c in enc().living():
+		if c.has_meta("left_fight") or c.is_down():
+			continue
+		var block := str((c.creature as Monster).data.get("id", "")) if c.creature is Monster else ""
+		if c.name() in who or (block != "" and block in who):
+			n += 1
+	return n
+
+
+## The outcome this time: the event itself, or one entry of its `table` (`pick`: "cycle" in turn; "sequence" each in
+## turn once, then nothing ({}): arrivals one a round; else at random and never the one used last time). `times`: how
+## often it has acted before.
+func _pick(ev: Dictionary, last: String, times: int = 0) -> Dictionary:
 	var table := ev.get("table", []) as Array
 	if table.is_empty():
 		return ev
+	if str(ev.get("pick", "random")) == "sequence":
+		return table[times] as Dictionary if times < table.size() else {}
 	if str(ev.get("pick", "random")) == "cycle":
 		var at := 0
 		for i in table.size():
@@ -197,6 +231,10 @@ func _reached(o: Dictionary) -> Array[Combatant]:
 				skip = true
 		if not skip:
 			out.append(c)
+	# Only so many of them (`count`, or `one: true` for a single one), picked at random through the dice.
+	var n := int(o.get("count", 1 if bool(o.get("one", false)) else 0)) if str(o.get("kind", "")) != "summon" else 0
+	while n > 0 and out.size() > n:
+		out.remove_at(e.dice.roll_one(out.size(), "Who it reaches") - 1)
 	return out
 
 
@@ -247,8 +285,8 @@ func _save(o: Dictionary, t: Combatant, dc: int, label: String, pausable: bool) 
 			for i in int(o["exhaustion"]):
 				t.creature.add_exhaustion(1)
 			leg()._log("condition", "%s gains Exhaustion (%s)" % [t.name(), label], t, details)
-		if str(o.get("condition", "")) != "":
-			_condition(t, str(o["condition"]), str(o.get("until", "target_turn_end")), label)
+		if str(o.get("condition", "")) != "" or o.has("modifiers"):
+			_condition(t, str(o.get("condition", "")), str(o.get("until", "target_turn_end")), label, o)
 		e.events.append({"type": "condition", "id": t.id})
 		return r
 	if pausable:
@@ -256,11 +294,25 @@ func _save(o: Dictionary, t: Combatant, dc: int, label: String, pausable: bool) 
 	return after.call(roll.call() as D20Test) as CombatResult
 
 
-func _condition(t: Combatant, cond: String, until: String, label: String) -> void:
+## An outcome's hold on `t`: its condition (if any) and `modifiers`, until `until` ("target_turn_end", "minute",
+## "round": until this count comes round again, else for good). With `repeat_save` the save comes again at the end of
+## each of its turns and a success ends it (ribbons it can struggle out of).
+func _condition(t: Combatant, cond: String, until: String, label: String, o: Dictionary = {}) -> void:
 	var e := enc()
-	var fx := Effect.new("%s (%s)" % [cond.capitalize(), label], &"round_event", "round_event:%s" % label)
-	fx.conditions.append(StringName(cond))
+	var fx := Effect.new("%s (%s)" % [cond.capitalize() if cond != "" else label, label], &"round_event", "round_event:%s" % label)
+	if cond != "":
+		fx.conditions.append(StringName(cond))
+	for md: Variant in o.get("modifiers", []):
+		var mdd := (md as Dictionary).duplicate()
+		var stat := str(mdd["stat"])
+		mdd.erase("stat")
+		fx.with_modifier(stat, mdd)
+	if bool(o.get("repeat_save", false)) and o.has("save"):
+		fx.repeat_save = {"ability": str((o["save"] as Dictionary)["ability"]), "dc": int((o["save"] as Dictionary)["dc"]), "when": "end"}
+		fx.turn_owner_id = t.id
 	match until:
+		"round":
+			fx.lasting_rounds(1, t.id)
 		"target_turn_end":
 			fx.ends = Effect.Ends.END_OF_TURN
 			fx.turn_owner_id = t.id
@@ -271,7 +323,7 @@ func _condition(t: Combatant, cond: String, until: String, label: String) -> voi
 		_:
 			fx.ends = Effect.Ends.NEVER
 	if t.creature.add_effect(fx):
-		leg()._log("condition", "%s is %s (%s)" % [t.name(), cond.capitalize(), label], t)
+		leg()._log("condition", "%s is %s (%s)" % [t.name(), cond.capitalize() if cond != "" else "struck", label], t)
 
 
 ## Reinforcements: `monster` x `count` on the enemies' side, at `cells` (else near the first enemy), joining the order
