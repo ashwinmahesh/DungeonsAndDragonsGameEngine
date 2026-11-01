@@ -1,8 +1,8 @@
 class_name StoryBoons
 extends RefCounted
 ## Gifts the story gives a hero for good (plan E1, E13): a score raised past the usual 20, up to the campaign's
-## `boon_ability_max` (Campaign.boon_ability_max; 20 when a game names none). Kept like a manual's gift (the build's
-## `item_boons`), so the score's breakdown names where it came from and a save keeps it.
+## `boon_ability_max` (Campaign.boon_ability_max; 20 when a game names none), and a feat (grant_feat). Kept in the build
+## like a manual's gift (`item_boons`, `story_feats`), so the sheet names where it came from and a save keeps it.
 
 
 ## Raises `ability` ("str" .. "cha") of `ch` by `amount`, never past the campaign's limit. Returns how much it rose.
@@ -20,6 +20,21 @@ static func raise_ability(ch: Character, ability: String, amount: int, source: S
 		"source": source})
 	ch.refresh()
 	return ch.ability_score(StringName(ability)) - before
+
+
+## Gives `ch` the feat `feat_id` for good, named for `source` ("A gift of the Lady"). False if there is no such feat,
+## or the hero already has it and it can't be taken twice (its `repeatable`).
+static func grant_feat(ch: Character, feat_id: String, source: String) -> bool:
+	var feat := ch.compendium.feat_data(feat_id)
+	if feat.is_empty():
+		return false
+	if not bool(feat.get("repeatable", false)) and ch.feats_taken.any(func(f: Dictionary) -> bool: return str(f["id"]) == feat_id):
+		return false
+	if not ch.build.has("story_feats"):
+		ch.build["story_feats"] = []
+	(ch.build["story_feats"] as Array).append({"id": feat_id, "source": source})
+	ch.refresh()
+	return true
 
 
 ## A spell's own bonus given by the story (a blessing from a reading, a shrine, a priest): the `modifiers` of spell

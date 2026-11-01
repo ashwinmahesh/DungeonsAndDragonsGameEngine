@@ -217,6 +217,13 @@ Each ally card's NPC (outcomes.json `ally.<card>.npc`) has `"guest": true`, a `g
 region that reaches `join <npc>` when `tarokka.ally.npc == <npc>`. The darklord card has no ally; the marionette
 (Pidlwick II) waits in the castle (Phase 6).
 
+## Story boons (story/story_boons.gd)
+
+What the story gives a hero for good, kept in their build so a save and every rebuild keep it: a score raised past 20
+(`raise_ability`, up to `boon_ability_max`; the build's `item_boons`), a feat (`grant_feat(ch, feat_id, source)`: the
+build's `story_feats`, [{id, source}], walked after the dark gifts with the sheet naming `source`; false for an unknown
+feat or one the hero has that isn't `repeatable`), and a spell's bonus for a while (`spell_boon`).
+
 ## Dark gifts (Phase 5)
 
 `data/dark_gifts/<id>.json`:
