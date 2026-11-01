@@ -608,7 +608,8 @@ static func _blend_layers_of(src: ShaderMaterial, surface: String) -> Dictionary
 		else:
 			out["relief"] = 0.0
 		var orm := src.get_shader_parameter("orm_tex") as Texture2D
-		var one_o := _one_layer(orm) if bool(src.get_shader_parameter("use_orm")) else null
+		var uses_orm: Variant = src.get_shader_parameter("use_orm")   # (unset on a surface with no ORM map: null)
+		var one_o := _one_layer(orm) if uses_orm != null and bool(uses_orm) else null
 		if one_o != null:
 			out["orm"] = one_o
 			out["use_orm"] = true
