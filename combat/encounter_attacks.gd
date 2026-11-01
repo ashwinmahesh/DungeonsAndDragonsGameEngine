@@ -992,13 +992,18 @@ func monster_attack(c: Combatant, target: Combatant, action_id: String) -> Comba
 	return _resolve_attack(c, target, option, {})
 
 
+func e_heads(c: Combatant) -> int:
+	return maxi(1, enc().monster_actions.heads_of(c))
+
+
 ## The attacks a stat-block creature's Multiattack lists, added up (1 for one without a Multiattack).
 func multiattack_total(c: Combatant) -> int:
 	if not c.creature is Monster:
 		return 1
 	var total := 0
 	for entry: Variant in (c.creature as Monster).action("multiattack").get("multiattack", []):
-		total += int((entry as Dictionary).get("count", 1))
+		# A bite for each head it has (`per_head`: Multiple Heads).
+		total += e_heads(c) if bool((entry as Dictionary).get("per_head", false)) else int((entry as Dictionary).get("count", 1))
 	return maxi(1, total)
 
 
@@ -1040,6 +1045,9 @@ func begin_multiattack(c: Combatant) -> Array[Dictionary]:
 				break
 			d = d.duplicate()
 			d["count"] = 1
+		if bool(d.get("per_head", false)) and not one_attack:
+			d = d.duplicate()
+			d["count"] = e_heads(c)   # a bite for each head it has (Multiple Heads)
 		count += int(d["count"])
 		out.append(d)
 	c.attacks_left = count

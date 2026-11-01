@@ -1206,6 +1206,9 @@
                 "narration": {
                   "type": "string",
                   "description": "take: the line the view shows as the creature goes (the blue mist)."
+                "one": {
+                  "type": "boolean",
+                  "description": "It strikes one creature it reaches, picked at random (a neutral one too, with affects all)."
                 },
                 "affects": {
                   "enum": [
@@ -1376,6 +1379,8 @@
                       },
                       "narration": {
                         "type": "string"
+                      "one": {
+                        "type": "boolean"
                       },
                       "affects": {
                         "enum": [

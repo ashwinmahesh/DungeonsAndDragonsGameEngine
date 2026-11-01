@@ -152,6 +152,7 @@
                 "type": "integer",
                 "minimum": 1
               },
+                "per_head": {"type": "boolean", "description": "As many as it has heads now (Multiple Heads)."},
               "or": {
                 "type": "array",
                 "items": {

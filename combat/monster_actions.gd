@@ -1022,6 +1022,7 @@ func turn_end(c: Combatant) -> void:
 			for o in e.living():
 				if o != c and not o.is_down():
 					_aura_on(c, o, tr as Dictionary)
+	heads_regrow(c)
 	if has_trait(c, "incorporeal_movement"):
 		for cell in c.footprint():
 			if e.grid.is_solid(cell):
@@ -1622,3 +1623,88 @@ func death_burst(c: Combatant) -> void:
 			var sv := o.creature.roll_save(e.dice, &"dex", int((b["save"] as Dictionary)["dc"]), [], [], "Dexterity save vs Death Throes (%s)" % o.name())
 			var amt := int(rolled["total"]) / 2 if sv.success else int(rolled["total"])
 			e.deal_damage(c, o, [{"amount": amt, "type": str(dmg["type"])}], false, "Death Throes", [sv.describe(), str(rolled["text"])])
+
+
+# --- Multiple Heads (a trait's `heads`) ---------------------------------------------------------------------------
+
+## The trait that gives `c` heads (`heads`: how many it starts with; `head_damage` (25): damage taken in one turn that
+## kills a head; `regrow` (2) heads for each lost, at the end of its turn, unless it took damage of a `stops_regrowth`
+## type (fire) since its last turn; or `regrow_one`: one dead head back each turn, up to `heads`; `regrow_heal` (20)
+## Hit Points when it grows them), or {}.
+func heads_trait(c: Combatant) -> Dictionary:
+	for tr: Variant in traits(c):
+		if int((tr as Dictionary).get("heads", 0)) > 0:
+			return tr as Dictionary
+	return {}
+
+
+## The heads `c` has now (0 for a creature without them).
+func heads_of(c: Combatant) -> int:
+	var tr := heads_trait(c)
+	if tr.is_empty():
+		return 0
+	return int(c.get_meta("heads", int(tr["heads"])))
+
+
+## `c` took `amount` of `types` damage: in one creature's turn, enough of it kills a head; no heads left is death.
+func heads_hurt(c: Combatant, amount: int, types: Array) -> void:
+	var e := enc()
+	var tr := heads_trait(c)
+	if tr.is_empty() or amount <= 0 or not c.is_alive():
+		return
+	for ty: Variant in types:
+		if str(ty) in (tr.get("stops_regrowth", ["fire"]) as Array):
+			c.set_meta("heads_seared", true)
+	var turn := "%d:%d" % [e.round_no, e.turn_index]
+	if str(c.get_meta("heads_turn", "")) != turn:
+		c.set_meta("heads_turn", turn)
+		c.set_meta("heads_taken", 0)
+		c.set_meta("heads_cut", false)
+	c.set_meta("heads_taken", int(c.get_meta("heads_taken", 0)) + amount)
+	if bool(c.get_meta("heads_cut", false)) or int(c.get_meta("heads_taken")) < int(tr.get("head_damage", 25)):
+		return
+	c.set_meta("heads_cut", true)
+	var left := heads_of(c) - 1
+	c.set_meta("heads", left)
+	c.set_meta("heads_lost", int(c.get_meta("heads_lost", 0)) + 1)
+	e.log.add("info", "One of %s's heads dies (%d left)" % [c.name(), left], c.id)
+	e.events.append({"type": "heads", "id": c.id, "heads": left})
+	if left <= 0 and not c.creature.dead:
+		c.creature.hp = 0
+		c.creature.dead = true
+		e.log.add("death", "%s dies with its last head" % c.name(), c.id)
+		e.events.append({"type": "death", "id": c.id})
+		e._check_over()
+
+
+## The end of `c`'s turn: heads lost since its last turn grow back two for one (and heal it), unless seared.
+func heads_regrow(c: Combatant) -> void:
+	var e := enc()
+	var tr := heads_trait(c)
+	if tr.is_empty() or not c.is_alive() or heads_of(c) <= 0:
+		return
+	var lost := int(c.get_meta("heads_lost", 0))
+	var seared := bool(c.get_meta("heads_seared", false))
+	c.set_meta("heads_lost", 0)
+	c.set_meta("heads_seared", false)
+	# One dead head back a turn, never past how many it started with (`regrow_one`), whenever any is dead.
+	if bool(tr.get("regrow_one", false)):
+		if heads_of(c) < int(tr["heads"]) and not seared:
+			c.set_meta("heads", heads_of(c) + 1)
+			var back := c.creature.heal(int(tr.get("regrow_heal", 20)), str(tr.get("name", "Multiple Heads")))
+			e.log.add("heal", "One of %s's heads lives again (%d now)" % [c.name(), heads_of(c)], c.id)
+			e.events.append({"type": "heads", "id": c.id, "heads": heads_of(c)})
+			if back > 0:
+				e.events.append({"type": "heal", "id": c.id, "amount": back})
+		return
+	if lost <= 0 or seared:
+		if lost > 0:
+			e.log.add("info", "%s's burned stumps don't grow back" % c.name(), c.id)
+		return
+	var now := heads_of(c) + lost * int(tr.get("regrow", 2))
+	c.set_meta("heads", now)
+	var healed := c.creature.heal(int(tr.get("regrow_heal", 20)), str(tr.get("name", "Multiple Heads")))
+	e.log.add("heal", "%s grows new heads (%d now)" % [c.name(), now], c.id)
+	e.events.append({"type": "heads", "id": c.id, "heads": now})
+	if healed > 0:
+		e.events.append({"type": "heal", "id": c.id, "amount": healed})

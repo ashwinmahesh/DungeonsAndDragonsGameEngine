@@ -12,6 +12,7 @@ Numbers are the 2024 stat block's. These machine-readable keys sit next to the p
 | `save`, `targets`, `on_fail` | a saving-throw action: who it can target (`range`, `count`, `max_size`, `in_space`, `requires`: grappled / incapacitated / restrained / willing), damage, riders on a failure |
 | `area` on a save action | `{shape, size, width}`: `space`, `cone`, `line`, `emanation` and the rest; everyone in it is caught (MonsterActions.area_cells, save_victims). A creature's meta `area_bonus_ft` (an int of feet, 0 when missing or negative) grows its emanations, cones and lines, and how far it can aim them (`targets.range`), by that much, its legendary options' areas with them (MonsterActions.area_size) |
 | `multiattack[].or` | alternatives for that slot (Scimitar or Pistol); the AI picks what reaches, a save action first when it has a target |
+| `multiattack[].per_head` | as many of that attack as the creature has heads now (Multiple Heads) |
 | `multiattack[].count` | the AI begins the Multiattack itself (`begin_multiattack`). A creature the player runs (a summon, a shaped or dominated creature, a story ally) begins it with its first listed attack: `attacks_per_action` is the total, an attack the Multiattack doesn't list is one attack, and a listed save action (a Draconic Spirit's Breath Weapon) takes the place of one attack |
 | `recharge`, `uses` | Recharge X-6 rolled at the start of the monster's turn; uses per day |
 | `forms` | Shape-Shift forms that can use it (the Werewolf's Bite) |
@@ -51,6 +52,15 @@ carry one, and has Advantage on the check when proficient with the one they play
 "Influence: <label>", a variant of the Influence action. `save: {ability, dc}`: the holder saves against that DC instead of a check (flattery
 it must resist), and the offer lands when it fails; `auto: true`: no roll, it simply lands. `needs_item` (item ids): the
 user must carry one of them (a memento shown, a bottle splashed), and `consumes: true` uses that one up.
+
+## Multiple Heads
+
+A trait's `heads` (how many it starts with), with `head_damage` (25: damage taken during one creature's turn that kills a
+head, once a turn), `regrow` (2 for each head lost, at the end of its own turn, unless it took damage of a
+`stops_regrowth` type since, fire by default; or `regrow_one`: one dead head back each turn, up to how many it started
+with) and `regrow_heal` (20 Hit Points when they grow). No heads left is death.
+A Multiattack entry with `per_head` makes that many of the attack. Events: `heads` {id, heads}. (MonsterActions.heads_*;
+the MM Hydra's.)
 
 ## Spellcasting
 
