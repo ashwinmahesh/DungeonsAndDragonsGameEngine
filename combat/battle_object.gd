@@ -69,6 +69,13 @@ var fuel: String = ""
 ## The creature that comes out when it breaks or is eaten (ObjectFuel.release): {monster, name, art, hp ("half" or a
 ## number), side, minion_of}; {} for none.
 var releases: Dictionary = {}
+## Damage Threshold (2024 DMG): damage less than this from one source does nothing to it (a captive's chains).
+var threshold: int = 0
+## A check that takes it off or apart without breaking it by force (ObjectActions.undo): {skill, dc, label}, as the
+## Utilize action by a creature within 5 ft; {} for none.
+var undo: Dictionary = {}
+## The story flag set when it is gone, broken or undone ("" for none).
+var flag: String = ""
 
 
 ## A new object of `kind_id` from the kinds table (data/objects/kinds.json).
@@ -158,7 +165,8 @@ func to_dict() -> Dictionary:
 		"hangs": hangs, "holds": holds, "hold_source": hold_source, "oil_rounds": oil_rounds, "destroyed": destroyed,
 		"open": open, "locked": locked, "moves": moves, "move_dc": move_dc, "topple": topple.duplicate(true), "throwable": throwable,
 		"bursts": bursts.duplicate(true), "wreck": wreck.map(func(c: Vector2i) -> Array: return [c.x, c.y]), "home": [home.x, home.y],
-		"model": model, "fuel": fuel, "releases": releases.duplicate(true)}
+		"model": model, "fuel": fuel, "releases": releases.duplicate(true),
+		"threshold": threshold, "undo": undo.duplicate(true), "flag": flag}
 
 
 static func from_dict(d: Dictionary) -> BattleObject:
@@ -197,6 +205,9 @@ static func from_dict(d: Dictionary) -> BattleObject:
 	o.topple = (d.get("topple", {}) as Dictionary).duplicate(true)
 	o.throwable = bool(d.get("throwable", false))
 	o.bursts = (d.get("bursts", {}) as Dictionary).duplicate(true)
+	o.threshold = int(d.get("threshold", 0))
+	o.undo = (d.get("undo", {}) as Dictionary).duplicate(true)
+	o.flag = str(d.get("flag", ""))
 	for c2: Variant in d.get("wreck", []):
 		o.wreck.append(Vector2i(int((c2 as Array)[0]), int((c2 as Array)[1])))
 	var h := d.get("home", [-1, -1]) as Array

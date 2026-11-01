@@ -483,6 +483,10 @@ static func ends_when_for(view: LocationView, spec: Dictionary) -> Dictionary:
 			if StoryConditions.check(str(exit.get("when", "")), view.st):
 				var cell := LocationView._cell(exit["cell"])
 				(out["exits"] as Array).append([cell.x, cell.y])
+	# The objects the fight is about (its `objects` by id): getting rid of them all ends it.
+	if ends.has("objects_gone"):
+		out["objects_gone"] = (ends["objects_gone"] as Array).duplicate()
+		out["objects_outcome"] = str(ends.get("objects_outcome", "victory"))
 	return out
 
 

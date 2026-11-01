@@ -997,6 +997,26 @@
                   "type": "string",
                   "description": "The props catalog model the scene draws it with."
                 },
+                "threshold": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Damage Threshold: damage less than this from one source does nothing to it (a captive's chains)."
+                },
+                "undo": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["dc"],
+                  "description": "A check that takes it off without breaking it by force: the Utilize action within 5 ft (ObjectActions.undo).",
+                  "properties": {
+                    "skill": {"type": "string", "description": "The skill or ability checked (default athletics)."},
+                    "dc": {"type": "integer"},
+                    "label": {"type": "string", "description": "The verb on the hotbar (default Free)."}
+                  }
+                },
+                "flag": {
+                  "type": "string",
+                  "description": "A story flag set when it is gone, broken or undone."
+                },
                 "fuel": {
                   "type": "string",
                   "description": "What a creature whose stat block `devours` this word eats (ObjectFuel)."
@@ -1100,8 +1120,18 @@
                   "enum": [
                     "save",
                     "summon",
+                    "take",
                     "text"
                   ]
+                },
+                "who": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "take: the names or stat-block ids it may take, the first still on the board each time."
+                },
+                "narration": {
+                  "type": "string",
+                  "description": "take: the line the view shows as the creature goes (the blue mist)."
                 },
                 "affects": {
                   "enum": [
@@ -1262,8 +1292,16 @@
                         "enum": [
                           "save",
                           "summon",
+                          "take",
                           "text"
                         ]
+                      },
+                      "who": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                      },
+                      "narration": {
+                        "type": "string"
                       },
                       "affects": {
                         "enum": [
@@ -1425,6 +1463,15 @@
               "trigger_hero_down": {
                 "type": "boolean",
                 "description": "It ends when the first hero to hurt a foe in it drops to 0 Hit Points."
+              },
+              "objects_gone": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Object ids (the fight's `objects`): once every one is broken or undone, the fight ends with objects_outcome."
+              },
+              "objects_outcome": {
+                "enum": ["victory", "ended"],
+                "description": "What getting rid of them all means: victory (the default) or ended."
               },
               "flag": {
                 "type": "string",

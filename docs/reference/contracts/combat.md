@@ -326,6 +326,12 @@ and a waiting foe waits again on its square as its entry says (asleep with `surp
 Encounter holds what the fight reads (`Encounter.ends_when`: `exits` as squares, `trigger_hero_down`); a fight picked
 up from a round's save reads it from the entry again.
 
+Set pieces: an encounter's `objects` entry can carry `threshold` (Damage Threshold: damage less than it from one source
+does nothing), `undo` (`{skill, dc, label}`: the Utilize action within 5 ft and that check take it away without force,
+"<label> <the object>" on the Common tab) and `flag` (set in the fight's `story_flags` when it is gone, broken or
+undone). `ends_when.objects_gone` (object ids) ends the fight once every one is gone, with `objects_outcome`
+(`victory`, the default, or `ended`); the event `objects_gone` comes before `over`. All three are kept in a round's save.
+
 What a fight hands back to the story (`Encounter.legendary`): `story_flags` (flag -> value: Misty Escape's flag, a
 withdrawal's flag, `strahd_destroyed`), `story_quests` (quest -> stage), `departed` (creature id -> `mist` or
 `withdraw`). LocationView applies them when the fight ends, whatever the outcome; a creature that departed leaves no
@@ -377,7 +383,8 @@ allow, as itself or as one entry of its `table` (`pick`:
 enemies or all, inside `area` and not resistant or immune to `skip_if_resists`, saves against `save.dc` plus `dc_step`
 for each time it has acted before; a failure takes `damage` (half on a success with `half`), `exhaustion` levels and
 `condition` until `until`), a `summon` (`monster` x `count` at `cells`, joining the order on the event's count), or
-`text`. `dc_from: {flag, base, step}` sets the DC from the story as the fight starts (LocationFights.round_events_for).
+`text`, or a `take`: the first creature still on the board named (or of a stat block) in `who` is taken out of the fight
+(`vanish`, left: `taken`, with `narration`: a captive gone in the mist), setting `flag` (then `flag`_2, _3 for the next ones). `dc_from: {flag, base, step}` sets the DC from the story as the fight starts (LocationFights.round_events_for).
 Legendary runs them with the lair's turn (`lair_due`, `lair_turn`, `round_ending`), so an event below every creature's
 count acts as the round ends; each sends `{type: "round_event", event, outcome, name, say, targets}`.
 

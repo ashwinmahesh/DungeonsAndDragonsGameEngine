@@ -96,6 +96,9 @@ func put(entry: Dictionary) -> BattleObject:
 	if entry.has("hp"):
 		o.hp_max = int(entry["hp"])
 		o.hp = o.hp_max
+	o.threshold = int(entry.get("threshold", 0))
+	o.undo = (entry.get("undo", {}) as Dictionary).duplicate(true)
+	o.flag = str(entry.get("flag", ""))
 	for k2: String in ["immune", "resist", "vulnerable"]:
 		if entry.has(k2):
 			var to: Array[String] = []
@@ -266,6 +269,9 @@ func damage(o: BattleObject, parts: Array, by: Combatant, label: String, details
 	if total > 0 and by != null and by.creature.has_flag("siege_monster"):
 		total *= 2
 		notes.append("Siege Monster: double damage to objects")
+	if total > 0 and total < o.threshold:
+		notes.append("Damage Threshold %d: %d isn't enough" % [o.threshold, total])
+		total = 0
 	if total <= 0:
 		e.log.add("info", "%s takes no damage from %s" % [o.title(), label], by.id if by != null else "", notes)
 		return 0
@@ -296,6 +302,9 @@ func _break(o: BattleObject) -> void:
 	var e := enc()
 	o.destroyed = true
 	o.hp = 0
+	if o.flag != "":
+		e.legendary.story_flags[o.flag] = true
+	e.turns.objects_gone_check()
 	if o.burning:
 		o.burning = false
 		_fires_dirty = true

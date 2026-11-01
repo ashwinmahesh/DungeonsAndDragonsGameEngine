@@ -523,17 +523,33 @@ func _check_over() -> void:
 		e.outcome = "ended"
 		e.log.add("info", "%s is down, and the fight goes out of the foes" % _first_to_hurt_down().name(), "")
 	if e.state == Encounter.State.OVER:
-		# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
-		e.ground.fight_over()
-		# A relic spent in the fight crumbles (Saint Markovia's Thighbone, once it has hit a vampire).
-		e.items.fight_over()
-		# An Antimagic Field doesn't outlast the fight: magic items wake up again.
-		for c in e.combatants:
-			for who: Creature in [c.creature, e.shapes.original(c)]:
-				if who is Character:
-					(who as Character).magic_suppressed = false
-		e.log.add("info", {"victory": "Victory!", "ended": "The fight is over."}.get(e.outcome, "The party has fallen.") as String, "")
-		e.events.append({"type": "over", "outcome": e.outcome})
+		_wrap_up()
+
+
+## Ends the fight now with `outcome` (the clock running out).
+func _finish(outcome: String) -> void:
+	var e := enc()
+	if e.state != Encounter.State.ACTIVE:
+		return
+	e.state = Encounter.State.OVER
+	e.outcome = outcome
+	_wrap_up()
+
+
+## What every fight's end does, however it ended.
+func _wrap_up() -> void:
+	var e := enc()
+	# The party gathers what it dropped or threw; the foes' weapons left lying are loot.
+	e.ground.fight_over()
+	# A relic spent in the fight crumbles (Saint Markovia's Thighbone, once it has hit a vampire).
+	e.items.fight_over()
+	# An Antimagic Field doesn't outlast the fight: magic items wake up again.
+	for c in e.combatants:
+		for who: Creature in [c.creature, e.shapes.original(c)]:
+			if who is Character:
+				(who as Character).magic_suppressed = false
+	e.log.add("info", {"victory": "Victory!", "ended": "The fight is over."}.get(e.outcome, "The party has fallen.") as String, "")
+	e.events.append({"type": "over", "outcome": e.outcome})
 
 
 # --- Fights that end with no winner (Encounter.ends_when) -----------------------------------------------------------
@@ -568,6 +584,22 @@ func _first_to_hurt_down() -> Combatant:
 		if c.has_meta(FIRST_TO_HURT):
 			return c if c.is_down() else null
 	return null
+
+
+## An object the fight is about is gone: with every one of `ends_when.objects_gone` (object ids) broken or undone, the
+## fight ends (`objects_outcome`: victory, the default, or ended). EncounterObjects calls it as each breaks.
+func objects_gone_check() -> void:
+	var e := enc()
+	var ids := e.ends_when.get("objects_gone", []) as Array
+	if ids.is_empty() or e.state != Encounter.State.ACTIVE:
+		return
+	for id: Variant in ids:
+		var o := e.objects.get_object(str(id))
+		if o != null and not o.destroyed:
+			return
+	e.log.add("info", "Everything the fight was for is done", "")
+	e.events.append({"type": "objects_gone"})
+	_finish("ended" if str(e.ends_when.get("objects_outcome", "victory")) == "ended" else "victory")
 
 
 ## A hero who ends their turn up on one of `ends_when.exits` steps out of the fight there.
