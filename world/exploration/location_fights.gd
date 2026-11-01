@@ -164,6 +164,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 	FieldCasting.bring_risen(e, view.st)   # Animate Dead's and Create Undead's dead, for their day
 	_light_the_fight(view, e)
 	_ward_the_fight(view, e)
+	e.zones.from_location(view.loc)   # blood pools, rot bogs: areas whose `hazard` harms whoever stays (AreaHazards)
 	BattleScenery.for_location(view, e)   # doors, furniture and chandeliers that can be broken (F5)
 	BattleScenery.for_spec(view, e, spec)   # what the fight puts down itself (a boss's food, a jar holding a ghost)
 	LocationTraps.into_fight(view, e)   # traps that haven't gone off go off under whoever steps on them
@@ -605,6 +606,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		return false
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.ends_when = ends_when_for(view, spec)
+	e.zones.from_location(view.loc)
 	# The people who stepped down into this fight (StepDown) are named by its entry; a saved fight remembers only the foes.
 	for md: Variant in spec.get("monsters", []):
 		if (md as Dictionary).has("steps_down"):

@@ -772,6 +772,7 @@ func _after_step(c: Combatant, from: Vector2i) -> void:
 	e.game.entered_cell(c, c.cell)
 	e.spells.on_enter_cell(c, from)
 	e.objects.on_moved(c, from)
+	e.zones.on_moved(c)
 	e.traps.stepped(c)   # a trap under it goes off (EncounterTraps)
 
 

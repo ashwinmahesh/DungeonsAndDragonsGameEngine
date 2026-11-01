@@ -127,6 +127,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
 - **Crime (F8, docs/rules/stealth.md):** a container's `owner` (an npc id) makes taking from it stealing when somebody
   sees; an area's `private` (an npc id) makes it a private room, with `open` (a condition) for when it may be entered;
   the location's `watch` names the guard who answers a crime here ("" for nobody; unset, the region's watch).
+- **Hazardous areas (AreaHazards):** an area's `hazard` ({difficult, on, save, condition, damage, except_types,
+  while_in}) is ground that harms whoever stays in it in a fight: its squares are Difficult Terrain with `difficult`; at
+  the end of a turn in it (`on: "start"` for the start) a creature on the ground whose type isn't in `except_types`
+  makes the `save` or takes the `damage` and gains the `condition`, which with `while_in` (the default) lasts only until
+  it steps out. Read from the place whenever a fight starts or is picked up, so nothing of it is saved.
 - **Antimagic areas (Dungeon Expansion Plan V1):** an area's `antimagic` (true, or the notice a caster is shown) makes it a place where no
   spell is cast: from the character sheet, scrolls and the `cast` statement when the party's leader stands in it
   (`Wards.antimagic_notice`, `FieldCasting.cast`, `cast_utility`, `revive`, `cast_from_scroll`), and in a fight there, where its open

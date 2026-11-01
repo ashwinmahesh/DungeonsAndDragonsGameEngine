@@ -105,6 +105,22 @@
             },
             "description": "Two corners of a rectangle, inclusive."
           },
+          "hazard": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Ground that harms whoever stays in it in a fight (AreaHazards): a pool of blood, a bog of rot.",
+            "properties": {
+              "difficult": {"type": "boolean", "description": "Its squares are Difficult Terrain."},
+              "on": {"enum": ["start", "end"], "description": "When it bites: the end of a turn in it (default) or the start."},
+              "save": {"type": "object", "additionalProperties": false, "required": ["ability", "dc"], "properties": {
+                "ability": {"enum": ["str", "dex", "con", "int", "wis", "cha"]}, "dc": {"type": "integer"}}},
+              "condition": {"type": "string", "description": "Gained on a failed save."},
+              "damage": {"type": "object", "additionalProperties": false, "required": ["dice"], "properties": {
+                "dice": {"type": "string"}, "type": {"type": "string"}}},
+              "except_types": {"type": "array", "items": {"type": "string"}, "description": "Creature types it spares (fiend, undead)."},
+              "while_in": {"type": "boolean", "description": "The condition lasts only while the creature stays in it (default true)."}
+            }
+          },
           "light": {
             "type": "string",
             "enum": [

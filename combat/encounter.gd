@@ -87,6 +87,8 @@ var faerun: FaerunFeatures
 var game: GameFeatures
 ## The Echo Knight's echoes, and attacks from their spaces (combat/echo_knight.gd).
 var echo_knight: EchoKnight
+## Ground that harms whoever stays in it: a place's areas with a `hazard` (combat/area_hazards.gd).
+var zones: AreaHazards
 ## The attack whose damage is being dealt right now: {attacker, target, melee} (Zhentarim Tactics answers a melee hit).
 var hit_context: Dictionary = {}
 ## Magic items: the Items tab, item powers and the hooks below (combat/combat_items.gd, ADR 0012).
@@ -171,6 +173,7 @@ func _init(grid_: CombatGrid, dice_: DiceRoller) -> void:
 	faerun = FaerunFeatures.new(self)
 	game = GameFeatures.make(self)
 	echo_knight = EchoKnight.new(self)
+	zones = AreaHazards.new(self)
 	triggered_features = TriggeredFeatures.new(self)
 	items = CombatItems.new(self)
 	legendary = Legendary.new(self)

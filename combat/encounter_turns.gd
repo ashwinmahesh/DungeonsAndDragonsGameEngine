@@ -148,6 +148,7 @@ func _begin_turn() -> CombatResult:
 		func() -> CombatResult: return e.spells.turn_start(c),
 		func() -> CombatResult:
 			e.objects.turn_start(c)
+			e.zones.turn_start(c)
 			e.feature_actions.turn_start(c)
 			return none,
 		func() -> CombatResult: return e.class_features.turn_start(c),
@@ -246,6 +247,7 @@ func _turn_end_rest(c: Combatant) -> CombatResult:
 	e.triggered_features.turn_end(c)
 	return e.then(e.spells.turn_end(c), func() -> CombatResult:
 		e.objects.turn_end(c)
+		e.zones.turn_end(c)
 		e.spells.zones.prune()
 		e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
 		_step_out(c)
