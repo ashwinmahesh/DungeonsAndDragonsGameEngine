@@ -413,14 +413,23 @@
         },
         "until": {
           "type": "string",
+          "description": "condition and grapple: when it ends; drain_max_hp and ability_drain: long_rest (default), short_rest or fight (gone when the fight is).",
           "enum": [
             "target_turn_end",
             "target_turn_start",
             "source_turn_start",
             "source_turn_end",
             "minute",
-            "permanent"
+            "permanent",
+            "long_rest",
+            "short_rest",
+            "fight"
           ]
+        },
+        "floor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "drain_max_hp and ability_drain: the lowest the Hit Point maximum or score can be drained to (0, the default: the 2024 rule, where 0 is death)."
         },
         "not_types": {
           "type": "array",
