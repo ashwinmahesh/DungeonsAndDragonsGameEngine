@@ -169,7 +169,9 @@ static func hd2d_settings() -> Dictionary:
 ##   moon_water: the moon mirrored in any water on screen, at night (moon_water_size its angular size, moon_water_bite
 ##   a crescent's bite, moon_water_ripple how much the ripples break it up).
 ##   moon_face: a picture of the game's own moon (a res:// path; alpha its shape) drawn in the sky and the water in
-##   place of the plain disc, moon_face_size its angular radius in the sky.
+##   place of the plain disc, moon_face_size its angular radius in the sky. Or a list of {"when": "<story condition>",
+##   "face": "res://...", "size": <radius>} for a moon that changes with the story: the first entry whose condition holds
+##   wins (one with no "when" always does), and a swap shows within half a second (PaintedFinish.moon_face_for).
 ##   lightning_cutout: a close lightning strike's first instant drawn as a cut-out, lit faces pale and the rest ink.
 ##   wakes: rings spreading across the water round figures standing in it, foam at their legs (FigureWake);
 ##   plants_part: how far reeds, grass and bushes lean aside as figures walk through (world units at a plant's top).
