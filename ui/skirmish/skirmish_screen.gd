@@ -345,10 +345,7 @@ func _add_page(box: VBoxContainer) -> void:
 	grid.columns = 5
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
-	var pregens := Compendium.shared().all("pregens")
-	pregens.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return bool(a.get("roster", false)) and not bool(b.get("roster", false)) if bool(a.get("roster", false)) != bool(b.get("roster", false)) else str(a["name"]) < str(b["name"]))
-	for d in pregens:
+	for d in offered_pregens():
 		grid.add_child(_pregen_card(d))
 	box.add_child(grid)
 	box.add_child(UiParts.section("A quick hero of any class"))
@@ -368,6 +365,20 @@ func _add_page(box: VBoxContainer) -> void:
 	own.tooltip_text = "Looks, voice, class and the rest, as for the story. They join at level 1; the Lab levels them up."
 	own.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	box.add_child(own)
+
+
+## The pregens the Add page offers, the roster first, then by name. A game whose campaign sets `skirmish_pregens` to
+## "roster" offers only its roster (data/pregens with `roster: true`), keeping the others for its tests; the default,
+## "all", offers every pregen, as the first game always has.
+static func offered_pregens() -> Array[Dictionary]:
+	var only_roster := str(Campaign.setting("skirmish_pregens", "all")) == "roster"
+	var out: Array[Dictionary] = []
+	for d in Compendium.shared().all("pregens"):
+		if not only_roster or bool(d.get("roster", false)):
+			out.append(d)
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return bool(a.get("roster", false)) and not bool(b.get("roster", false)) if bool(a.get("roster", false)) != bool(b.get("roster", false)) else str(a["name"]) < str(b["name"]))
+	return out
 
 
 func _pregen_card(d: Dictionary) -> Control:
