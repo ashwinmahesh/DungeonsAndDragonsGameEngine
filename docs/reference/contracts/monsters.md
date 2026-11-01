@@ -34,6 +34,16 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Offered actions (`traits[].offers`)
+
+A trait can offer an action to every other creature in the fight (combat/trait_offers.gd): it shows on their hotbar as
+"<label> (<holder>)" while they are within `range` feet of the holder. `{key, label, cost, range, check, damage,
+on_success}`: `key` names the `ability` event the view hears (source `feature`, by the user, the holder its target;
+the trait's id when missing), `label` the trait's name when missing, `cost` `action` (default) or `bonus`, `range` 60
+by default, `check` `{skill, dc}` the user's ability check, `damage` `[{amount or dice, type}]` dealt to the holder on
+a success, `on_success` riders (above) landing on the holder with the user as their source (so `until:
+source_turn_start` means the start of the user's next turn). The event is sent whether the check succeeds or not.
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
