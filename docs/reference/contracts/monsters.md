@@ -34,6 +34,13 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Throwing foes out
+
+A trait's `throws_out` ({needs, reach}; FightOpenings): with its action the creature throws a foe within `reach` (5 ft)
+that has one of the `needs` conditions (Paralyzed or Restrained) and stands within 5 ft of one of the fight's
+`openings` out of it (docs/reference/contracts/locations.md). The foe falls the opening's drop (1d6 per 10 ft, Prone)
+and is outside until a `climb` check at the start of one of its turns brings it back in. The AI throws whenever it can.
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
