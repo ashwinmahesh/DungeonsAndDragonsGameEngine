@@ -986,10 +986,10 @@ func before_d20(cr: Creature, kind: D20Test.Kind, keys: Array[String], _target: 
 	if sun != "" and e.in_sunlight(c):
 		if sun == "weakness" or kind != D20Test.Kind.SAVING_THROW:
 			out["disadvantage"] = ["Sunlight"]
-	# A warding light round a cleansed set piece (ObjectCarry): the creatures it names have Disadvantage in it.
+	# A warding light round a cleansed set piece (ObjectCarry), and a guest's warding light (WardLights): the creatures
+	# they name have Disadvantage in them.
 	var warded := e.objects.carry.ward_disadvantage(c)
-	# A guest's warding light (WardLights): the creatures it names have Disadvantage in it.
-	var warded := WardLights.disadvantage(e, c)
+	warded.append_array(WardLights.disadvantage(e, c))
 	if not warded.is_empty():
 		out["disadvantage"] = (out.get("disadvantage", []) as Array) + warded
 	# What it can't abide in sight (a mirror held up to it): Disadvantage on its D20 Tests.
