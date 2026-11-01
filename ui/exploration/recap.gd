@@ -76,7 +76,7 @@ static func road_ahead(st: StoryState) -> Array[String]:
 static func last_choice(st: StoryState) -> String:
 	var best := ""
 	var day := -1
-	for id: String in Approval.COMPANIONS:
+	for id: String in Approval.companions():
 		var mem := Approval.memories(st, id)
 		if not mem.is_empty() and int(mem[0].get("day", 0)) > day:
 			day = int(mem[0].get("day", 0))
