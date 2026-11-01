@@ -1,0 +1,70 @@
+{
+  "$id": "night_events.schema.json",
+  "title": "Named night events: what comes for a Long Rest in certain places while a story condition holds (story/night_events.gd, docs/reference/story/camp.md)",
+  "type": "object",
+  "required": [
+    "id",
+    "events"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "dialogue"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Regions whose places it comes in (with locations: either)."
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Map ids it comes in."
+          },
+          "when": {
+            "type": "string",
+            "description": "A story condition that must hold."
+          },
+          "once": {
+            "type": "boolean",
+            "description": "Comes a single time (default true)."
+          },
+          "chance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "A d100's chance on a night it's due (default 1)."
+          },
+          "dialogue": {
+            "type": "string",
+            "description": "The conversation the game plays (file:node); it may start a fight."
+          },
+          "text": {
+            "type": "string",
+            "description": "The line as the rest breaks (default: the watch wakes everyone)."
+          }
+        }
+      }
+    }
+  }
+}
