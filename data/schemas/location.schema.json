@@ -1122,17 +1122,19 @@
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["id", "check"],
+                    "required": ["id"],
                     "properties": {
                       "id": {"type": "string"},
                       "label": {"type": "string"},
                       "cost": {"enum": ["action", "bonus"]},
                       "near": {"type": "string", "description": "An object id or a creature's name it must be done beside."},
                       "range": {"type": "integer"},
-                      "check": {"type": "object"},
+                      "check": {"type": "object", "description": "{skill, dc}. None: it simply works (a word said plainly)."},
                       "success": {"type": "integer"},
                       "failure": {"type": "integer"},
-                      "failure_damage": {"type": "object"}
+                      "failure_damage": {"type": "object", "description": "{dice, type}; type may be a list, one rolled each time."},
+                      "once": {"type": "boolean", "description": "Once a fight."},
+                      "when": {"type": "string", "description": "A story condition: the action is offered only if it holds as the fight starts."}
                     }
                   }
                 },
