@@ -98,6 +98,8 @@ func _move_blocks(c: Combatant) -> Dictionary:
 		blocked[cell5] = true
 	for cell6: Vector2i in WardLights.blocks(e, c):   # a guest's warding light keeps them out
 		blocked[cell6] = true
+	for cell7: Vector2i in e.monster_actions.water_blocks(c):   # it won't go into running water
+		blocked[cell7] = true
 	# Compelled Duel: no square more than 30 ft from the duellist.
 	var anchor := e.spells.specials.duel_anchor(c)
 	if anchor != null:

@@ -111,6 +111,13 @@ it is Frightened of that one until the start of its next turn (MonsterActions._f
 the shape). `fear_modifiers` add to it while it lasts (Disadvantage on saves). A familiar that can't abide canines lists
 the canine stat blocks.
 
+## Things it shuns
+
+`shuns_running_water: {damage, type, condition}`: the creature won't step or fly into deep water (unless it's already
+in it); starting its turn in it, it takes the damage and gains the condition until the start of its next turn.
+`shuns_item: {items, range}`: while it can see a foe within `range` ft carrying one of `items` (a mirror showing its
+reflection), it has Disadvantage on D20 Tests (MonsterActions.water_blocks, shunned_in_sight).
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
