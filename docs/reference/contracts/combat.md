@@ -445,6 +445,16 @@ the `save`; failing, it turns on its own side for up to `rounds` rounds (10), pl
 body (the other side, the AI in control: MonsterActions.end_possession restores it). It repeats the save as each of its
 turns ends; a success frees it and leaves it immune to that event for the fight; falling to 0 Hit Points frees it too.
 
+For a rite (vault "Design - Final Rites as a fight objective"): `ends_when.meters_needed` ([{meter, value}]) holds the
+win back until those meters are full, and beating the foes doesn't win before (EncounterTurns.meters_met); once both
+hold it ends with `meters_outcome` (victory). An action's `check` may name `skills` (the hero rolls the best of them,
+named on the hotbar) or `any_skill`; `advantage_when` (a story condition read as the fight starts) gives the check
+Advantage ("Remembered"); `brilliant` ({by: 5, meter}) moves a second meter on a success by that much. A
+`failure_event` bursts on a failure: everyone it reaches (`affects`, `area`, as a round event) saves; a failure takes
+`damage` and has `condition` until the end of its next turn, and a hero the player controls is asked whether to take
+the `instead` damage rather than the condition (reaction kind `rite_burst`; foes and Automatic keep the condition). A
+meter's `store` sets a story flag to its value as the fight ends, however it ends; `pips` draws it as pips on the HUD. A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
+
 ### Round events (combat/round_events.gd)
 
 An encounter's `round_events` (location schema) happen on an initiative count with no creature behind them: fumes, a

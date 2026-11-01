@@ -1659,6 +1659,15 @@
               "objects_outcome": {
                 "enum": ["victory", "ended"],
                 "description": "What getting rid of them all means: victory (the default) or ended."
+              },
+              "meters_needed": {
+                "type": "array",
+                "items": {"type": "object", "required": ["meter"], "properties": {"meter": {"type": "string"}, "value": {"type": "integer"}}},
+                "description": "Meters that must reach their value as well as the foes beaten before the fight is won (a rite's six successes and its guardians dead)."
+              },
+              "meters_outcome": {
+                "enum": ["victory", "ended"],
+                "description": "What the fight ends with once the needed meters are full and the foes are down: victory (the default) or ended."
               }
             }
           },
@@ -1693,12 +1702,15 @@
                       "cost": {"enum": ["action", "bonus"]},
                       "near": {"type": "string", "description": "An object id or a creature's name it must be done beside."},
                       "range": {"type": "integer"},
-                      "check": {"type": "object", "description": "{skill, dc}. None: it simply works (a word said plainly)."},
+                      "check": {"type": "object", "description": "{skill, dc}, or {skills: [...], dc} (the hero's best of them), or {any_skill: true, dc}. None: it simply works."},
                       "success": {"type": "integer"},
                       "failure": {"type": "integer"},
                       "failure_damage": {"type": "object", "description": "{dice, type}; type may be a list, one rolled each time."},
                       "once": {"type": "boolean", "description": "Once a fight."},
-                      "when": {"type": "string", "description": "A story condition: the action is offered only if it holds as the fight starts."}
+                      "when": {"type": "string", "description": "A story condition: the action is offered only if it holds as the fight starts."},
+                      "advantage_when": {"type": "string", "description": "A story condition: the check has Advantage if it holds as the fight starts (a theme the party remembers)."},
+                      "brilliant": {"type": "object", "required": ["meter"], "properties": {"by": {"type": "integer"}, "meter": {"type": "string"}}, "description": "A success by `by` (5) or more also moves this meter by 1."},
+                      "failure_event": {"type": "object", "description": "A burst on a failure: {affects, area, save: {ability, dc}, damage: {dice, type}, condition (until the end of the target's next turn), instead: {damage: {dice, type}} (a hero who failed may take this rather than the condition)}."}
                     }
                   }
                 },
@@ -1717,7 +1729,10 @@
                       "take": {"type": "array", "items": {"type": "string"}, "description": "Names or stat blocks the mark frees: out of the fight, rescued."}
                     }
                   }
-                }
+                },
+                "store": {"type": "string", "description": "A story flag set to the meter's value as the fight ends."},
+                "pips": {"type": "boolean", "description": "The HUD draws the count as pips up to max."},
+                "menu": {"type": "string", "description": "Its actions fold under one hotbar entry of this name (a rite's Honour the Fallen)."}
               }
             }
           },
