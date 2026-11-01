@@ -409,6 +409,7 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 		var meter_entry := _entry(str(m["id"]), COMMON, str(m["label"]), str(m["sub"]), str(m["cost"]), str(m["why"]), "none", str(m["help"]))
 		if str(m.get("menu", "")) != "":
 			meter_entry["menu"] = str(m["menu"])   # a rite's themes under one entry (the meter's `menu`)
+			meter_entry["menu_sub"] = str(m.get("menu_sub", ""))   # its skill, DC and Advantage, shown in that menu
 		out.append(meter_entry)
 	if e.grapples.has(c.id):
 		out.append(_entry("escape", COMMON, "Escape Grapple", "Athletics or Acrobatics", "action", why, "none"))

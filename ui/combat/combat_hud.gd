@@ -1649,6 +1649,9 @@ func open_group(a: Dictionary, at: Vector2, arrange: bool = true) -> void:
 		var ok := bool(m["legal"]) and now
 		var why := "" if ok else (str(m.get("reason", "")) if now else "Not this character's turn")
 		var label := str(m["mode_label"]) if toggle else catalog.variant_name(m, key)
+		# A meter's way in a folded menu (a rite's Honour the Fallen) says what it rolls: "His oath · Religion DC 15 (Adv)".
+		if str(m.get("menu_sub", "")) != "":
+			label = label.left(1).to_upper() + label.substr(1) + " · " + str(m["menu_sub"])
 		if toggle and k == int(a["current"]):
 			label = "✓ " + label
 		if bool(m.get("armed", false)):

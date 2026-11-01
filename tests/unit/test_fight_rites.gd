@@ -103,3 +103,6 @@ func test_the_themes_fold_under_one_hotbar_entry() -> void:
 			group = a
 	assert_false(group.is_empty(), "one entry for the rite")
 	assert_eq((group.get("items", []) as Array).size(), 2, "its two ways in it")
+	var feats := (group["items"] as Array)[0] as Dictionary
+	assert_true(str(feats.get("menu_sub", "")).ends_with("DC 15 (Adv)") or str(feats.get("menu_sub", "")).contains("DC 15"),
+		"the menu says what it rolls")

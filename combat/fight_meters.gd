@@ -136,7 +136,9 @@ func entries(c: Combatant) -> Array[Dictionary]:
 				"cost": "bonus" if str(a.get("cost", "action")) == "bonus" else "action", "why": why_not(c, a),
 				"help": "%s %+d on a success%s." % [str((defs[id] as Dictionary).get("label", id)), int(a.get("success", 1)),
 					(", %+d on a failure" % int(a["failure"])) if int(a.get("failure", 0)) != 0 else ""],
-				"menu": str((defs[id] as Dictionary).get("menu", ""))})
+				"menu": str((defs[id] as Dictionary).get("menu", "")),
+				"menu_sub": ("%s DC %d%s" % [str(skill_for(c, check)).replace("_", " ").capitalize(), int(check.get("dc", 10)),
+					" (Adv)" if bool(a.get("advantage", false)) else ""]) if not check.is_empty() else "No check"})
 	return out
 
 
