@@ -47,6 +47,31 @@ func why(c: Combatant, p: Dictionary) -> String:
 	return w if w != "" else _arcana_why(c, p)
 
 
+## A drink that wraps the drinker in a spell's area (`drink_zone`: params {spell, minutes}): the spell's zone round them,
+## moving with them, for `minutes`, with no Concentration (a silence that walks with you).
+func _drink_zone(c: Combatant, p: Dictionary) -> CombatResult:
+	var e := enc()
+	var params := (p["power"] as Dictionary).get("params", {}) as Dictionary
+	var spell_id := str(params.get("spell", ""))
+	var s := Compendium.shared().spell_data(spell_id)
+	if s.is_empty() or not s.has("area"):
+		return CombatResult.fail("No such area")
+	_pay(c, p)
+	e.log.add("info", "%s drinks %s" % [c.name(), str((p["data"] as Dictionary).get("name", ""))], c.id)
+	var before := e.spells.zones.objects.size()
+	var r := e.spells.cast_free(c, spell_id, [], e.center_of(c), {"no_concentration": true, "minutes": int(params.get("minutes", 10))})
+	for i in range(before, e.spells.zones.objects.size()):
+		var o := e.spells.zones.objects[i]
+		if o.caster_id == c.id and o.spell_id == spell_id:
+			o.follows_caster = true
+			o.rules["size"] = int((s["area"] as Dictionary).get("size", 15))
+			o.rules["caster_square"] = true
+			for f in c.footprint():
+				if not f in o.cells:
+					o.cells.append(f)
+	return r
+
+
 ## Carries out a custom power (CombatItems has already checked charges, uses and attunement; this pays the action).
 func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vector2, level: int, opts: Dictionary) -> CombatResult:
 	var power := p["power"] as Dictionary
@@ -59,6 +84,8 @@ func use(c: Combatant, p: Dictionary, targets: Array, point: Vector2, dir: Vecto
 			return _drink(c, p, t, id)
 		"end_granted_effect":
 			return _end_granted(c, p)
+		"drink_zone":
+			return _drink_zone(c, p)
 	if id.begins_with("fr_"):
 		return fr.use(c, p, targets, point, dir, level, opts)
 	return _use_more(c, p, targets, point, dir, level, opts)

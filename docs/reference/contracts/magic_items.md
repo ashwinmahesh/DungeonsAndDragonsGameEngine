@@ -101,3 +101,9 @@ for its `duration`); a Spell Scroll an implicit "Read"; an Ioun Stone (`worn: "i
   Ravenloft's protection from fiends and undead within 30 ft of whoever carries it); `attack_blocked` and
   `spell_blocked` also keep lesser blights from the staff's attuned bearer; the modifier stat `turn_dc`
   (docs/contracts/modifiers.md); and the field power `icon_augury` (story/field_items.gd).
+
+## Drinks that wrap the drinker in an area
+
+A power with `custom: "drink_zone"` and `params: {spell, minutes}` casts the spell's area round the drinker for
+`minutes`, with no Concentration, and the area moves with them (a 20-ft Silence that goes where they go;
+ItemSpecials._drink_zone).
