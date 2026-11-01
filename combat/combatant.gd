@@ -132,7 +132,10 @@ func turn_is_a_choice() -> bool:
 
 ## Speed for moving on the grid: walking, or flying when that's faster (Fly, flying monsters, Gaseous Form).
 func speed() -> int:
-	return maxi(creature.speed().total(), creature.speed("fly").total())
+	var best := maxi(creature.speed().total(), creature.speed("fly").total())
+	if swimming:
+		best = maxi(best, creature.speed("swim").total())   # in deep water a Swim Speed serves (EncounterTurns sets it)
+	return best
 
 
 ## Reach for melee attacks and Opportunity Attacks (5 ft, more with Reach weapons or stat-block reach).
@@ -148,6 +151,10 @@ func reach_ft() -> int:
 	for m in creature.modifiers_for(&"reach"):
 		best += int(m.number("value"))
 	return best
+
+
+## In deep water on a swimmable board as its turn began (EncounterTurns): its Swim Speed counts for the turn.
+var swimming := false
 
 
 func clear_run() -> void:

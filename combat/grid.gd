@@ -46,6 +46,8 @@ var occupant: Dictionary = {}
 ## How far the map's open void falls (a chasm, a tower's well), from the map's `drop_ft`: a creature forced over
 ## the edge into a void square falls this far and out of the fight. 0: the void is the map's edge and nothing crosses.
 var drop_ft: int = 0
+## A board whose deep water can be swum (a location map's `swim`; make_swimmable).
+var swimmable := false
 ## The ceiling's height in feet over a floor at 0 (a room's, a cave's); 0 under the open sky, where flyers go up to
 ## SKY_FT.
 var ceiling_ft: int = 0
@@ -200,6 +202,22 @@ func set_height(c: Vector2i, feet: int) -> void:
 
 
 ## Squares a creature can never stand in.
+## Opens the deep water to swimmers (a map's `swim`): its squares stop being void, and cost double to anyone without a
+## Swim Speed (step_cost).
+func make_swimmable() -> void:
+	swimmable = true
+	for z in depth:
+		for x in width:
+			var c := Vector2i(x, z)
+			if has_flag(c, WATER):
+				set_flag(c, VOID, false)
+
+
+## Whether `c` is deep water a creature can swim in now.
+func swim_water(c: Vector2i) -> bool:
+	return swimmable and has_flag(c, WATER)
+
+
 func is_solid(c: Vector2i) -> bool:
 	return (flags(c) & (WALL | LOW | VOID)) != 0
 
@@ -266,6 +284,10 @@ const MOVE_UNHINDERED := 8
 const MOVE_TERRAIN := 16
 ## Flying 5 ft or more off the floor: over low walls, crates and furniture (with MOVE_FLY).
 const MOVE_ALOFT := 32
+## A Swim Speed: deep water at normal cost on a swimmable board.
+const MOVE_SWIM := 64
+## Only in water (a Swim Speed and no Walk Speed, or `water_only`): no stepping out onto land.
+const MOVE_WATER_ONLY := 128
 
 
 func step_cost(from: Vector2i, to: Vector2i, size_cells: int, blocked: Callable, slowed: Callable, mode: int = 0) -> int:
@@ -292,6 +314,12 @@ func step_cost(from: Vector2i, to: Vector2i, size_cells: int, blocked: Callable,
 			continue
 		if (is_solid(c) and not _flies_over(c, mode)) or bool(blocked.call(c)):
 			return -1
+		# Swimming (2024): deep water costs 1 extra foot a foot without a Swim Speed; a water-only creature stays in it.
+		if swimmable and (mode & MOVE_FLY) == 0:
+			if (mode & MOVE_WATER_ONLY) != 0 and not has_flag(c, WATER):
+				return -1
+			if has_flag(c, WATER) and (mode & MOVE_SWIM) == 0:
+				mult = maxi(mult, 2)
 		if (mode & MOVE_UNHINDERED) != 0:
 			continue
 		if has_flag(c, DIFFICULT) and (mode & (MOVE_FLY | MOVE_TERRAIN)) == 0:

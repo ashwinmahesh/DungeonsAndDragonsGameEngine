@@ -132,6 +132,10 @@ func move_mode(c: Combatant) -> int:
 		mode |= CombatGrid.MOVE_UNHINDERED
 	if c.creature.has_flag("ignore_natural_difficult"):
 		mode |= CombatGrid.MOVE_TERRAIN
+	if c.creature.speed("swim").total() > 0:
+		mode |= CombatGrid.MOVE_SWIM
+		if c.creature.speed().total() <= 0 or c.creature.has_flag("water_only"):
+			mode |= CombatGrid.MOVE_WATER_ONLY
 	return mode
 
 
@@ -1531,7 +1535,7 @@ func _fall_into_water(c: Combatant, feet: int) -> void:
 		var amount := int(rolled["total"]) / (2 if halve else 1)
 		if amount > 0:
 			e.deal_damage(null, c, [{"amount": amount, "type": "bludgeoning"}], false, "Falling %d ft into water" % feet, [str(rolled["text"])])
-	if c.is_alive():
+	if c.is_alive() and not e.grid.swimmable:
 		var was := c.cell
 		c.cell = e.spells._free_cell_near(c.cell, c.size_cells)
 		e.events.append({"type": "move", "id": c.id, "from": was, "to": c.cell, "forced": true})

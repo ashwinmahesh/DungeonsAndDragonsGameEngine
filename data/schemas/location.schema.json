@@ -88,6 +88,9 @@
               "names": {"type": "array", "items": {"type": "string"}, "description": "Creature names or stat block ids."}}},
             "when": {"type": "string", "description": "A story condition: the rules hold only while it does (until a beacon is lit)."}
           }
+        "swim": {
+          "type": "boolean",
+          "description": "Its deep water (w) can be swum in fights: double cost without a Swim Speed; water-only creatures stay in it (docs/reference/contracts/locations.md)."
         },
         "outdoors": {
           "type": "boolean"
