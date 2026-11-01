@@ -416,7 +416,7 @@ Advantage ("Remembered"); `brilliant` ({by: 5, meter}) moves a second meter on a
 `failure_event` bursts on a failure: everyone it reaches (`affects`, `area`, as a round event) saves; a failure takes
 `damage` and has `condition` until the end of its next turn, and a hero the player controls is asked whether to take
 the `instead` damage rather than the condition (reaction kind `rite_burst`; foes and Automatic keep the condition). A
-meter's `store` sets a story flag to its value as the fight ends, however it ends; `pips` draws it as pips on the HUD.
+meter's `store` sets a story flag to its value as the fight ends, however it ends; `pips` draws it as pips on the HUD. A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
 
 ### Round events (combat/round_events.gd)
 

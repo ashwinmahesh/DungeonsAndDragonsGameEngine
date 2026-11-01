@@ -404,7 +404,10 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 				"One of your attacks: %s makes a Str or Dex save or you have it, out of the fight." % t.name()))
 	# What moves the fight's meters (FightMeters): calming a guide, adding to a rite.
 	for m in e.meters.entries(c):
-		out.append(_entry(str(m["id"]), COMMON, str(m["label"]), str(m["sub"]), str(m["cost"]), str(m["why"]), "none", str(m["help"])))
+		var meter_entry := _entry(str(m["id"]), COMMON, str(m["label"]), str(m["sub"]), str(m["cost"]), str(m["why"]), "none", str(m["help"]))
+		if str(m.get("menu", "")) != "":
+			meter_entry["group"] = str(m["menu"])   # a rite's themes under one entry (the meter's `menu`)
+		out.append(meter_entry)
 	if e.grapples.has(c.id):
 		out.append(_entry("escape", COMMON, "Escape Grapple", "Athletics or Acrobatics", "action", why, "none"))
 	# Whoever it holds: it drags them as it moves (1 extra foot per foot), or lets go for free.

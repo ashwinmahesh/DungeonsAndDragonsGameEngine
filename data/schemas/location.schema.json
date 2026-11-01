@@ -1119,6 +1119,7 @@
                 "max": {"type": "integer"},
                 "store": {"type": "string", "description": "A story flag set to the meter's value as the fight ends."},
                 "pips": {"type": "boolean", "description": "The HUD draws the count as pips up to max."},
+                "menu": {"type": "string", "description": "Its actions fold under one hotbar entry of this name (a rite's Honour the Fallen)."},
                 "actions": {
                   "type": "array",
                   "items": {

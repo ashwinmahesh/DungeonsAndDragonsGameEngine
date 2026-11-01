@@ -3,7 +3,7 @@ extends TestCase
 ## meter full and the foes down, themes roll the hero's best skill with Advantage from what the party remembers, a
 ## brilliant success moves a second meter, a failure bursts on everyone with a choice, and the story keeps the count.
 
-const RITE := {"id": "test_rite", "label": "Rite", "max": 3, "pips": true, "store": "test_rite_brilliance_never",
+const RITE := {"id": "test_rite", "label": "Rite", "max": 3, "pips": true, "menu": "Honour the Fallen", "store": "test_rite_brilliance_never",
 	"actions": [
 		{"id": "feats", "label": "Honour his feats", "check": {"skills": ["acrobatics", "athletics"], "dc": 15},
 			"advantage_when": "flag.test_memory", "brilliant": {"by": 5, "meter": "test_brilliance"},
@@ -90,3 +90,16 @@ func test_any_skill_uses_the_heros_best() -> void:
 		if hero.creature.skill_bonus(s).total() > hero.creature.skill_bonus(best).total():
 			best = s
 	assert_eq(e.meters.skill_for(hero, {"any_skill": true, "dc": 18}), best)
+
+
+func test_the_themes_fold_under_one_hotbar_entry() -> void:
+	var got := _fight(StoryState.new())
+	var e := got[0] as Encounter
+	var hero := got[1] as Combatant
+	var bar := ActionCatalog.new(e).slots(hero, ActionCatalog.COMMON)
+	var group: Dictionary = {}
+	for a: Dictionary in bar:
+		if bool(a.get("group", false)) and str(a.get("label", "")) == "Honour the Fallen":
+			group = a
+	assert_false(group.is_empty(), "one entry for the rite")
+	assert_eq((group.get("items", []) as Array).size(), 2, "its two ways in it")

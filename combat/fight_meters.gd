@@ -13,7 +13,8 @@ extends RefCounted
 ## condition: Advantage), brilliant ({by, meter}: a success by that much moves a second meter), failure_event ({affects,
 ## save: {ability, dc}, damage, condition, instead: {damage}}: a burst on everyone it reaches, a hero who failed may
 ## take the `instead` damage rather than the condition)}], store (a story flag the value is set to as the fight ends),
-## pips (the HUD draws pips), marks: [{value, falling (reached going down to it; else going up), flag, outcome
+## pips (the HUD draws pips), menu (its actions fold under one hotbar entry of that name: a rite's Honour the Fallen),
+## marks: [{value, falling (reached going down to it; else going up), flag, outcome
 ## (victory, defeat or ended), say}]}.
 
 var _enc: WeakRef
@@ -134,7 +135,8 @@ func entries(c: Combatant) -> Array[Dictionary]:
 					" (Advantage)" if bool(a.get("advantage", false)) else ""]) if not check.is_empty() else "No check",
 				"cost": "bonus" if str(a.get("cost", "action")) == "bonus" else "action", "why": why_not(c, a),
 				"help": "%s %+d on a success%s." % [str((defs[id] as Dictionary).get("label", id)), int(a.get("success", 1)),
-					(", %+d on a failure" % int(a["failure"])) if int(a.get("failure", 0)) != 0 else ""]})
+					(", %+d on a failure" % int(a["failure"])) if int(a.get("failure", 0)) != 0 else ""],
+				"menu": str((defs[id] as Dictionary).get("menu", ""))})
 	return out
 
 
