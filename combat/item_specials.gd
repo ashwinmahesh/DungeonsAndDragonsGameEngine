@@ -116,6 +116,24 @@ func _drink(c: Combatant, p: Dictionary, t: Combatant, id: String) -> CombatResu
 				mdd.erase("stat")
 				fx.modifiers.append(Modifier.of(stat, mdd, label, &"item"))
 			t.creature.add_effect(fx)
+			# The price after (`after_save`: {ability, dc, minutes, modifiers}): a save, and on a failure the modifiers for
+			# that long (the Green Man's nectar clouds the mind for eight hours).
+			var after := params.get("after_save", {}) as Dictionary
+			if not after.is_empty():
+				var ab := StringName(str(after.get("ability", "wis")))
+				var sv := t.creature.roll_save(e.dice, ab, int(after.get("dc", 10)), [], [], "%s save after %s (%s)" % [str(ab).to_upper(), label, t.name()])
+				if sv.success:
+					e.log.add("info", "%s keeps a clear head" % t.name(), t.id, [sv.describe()])
+				else:
+					var cost := Effect.new("%s (after)" % label, &"item", str(p["item_id"]) + ":after")
+					cost.lasting({"kind": "minutes", "amount": int(after.get("minutes", 60))})
+					for md2: Variant in after.get("modifiers", []):
+						var m2 := (md2 as Dictionary).duplicate()
+						var st2 := str(m2["stat"])
+						m2.erase("stat")
+						cost.modifiers.append(Modifier.of(st2, m2, label, &"item"))
+					t.creature.add_effect(cost)
+					e.log.add("condition", "%s pays for %s" % [t.name(), label], t.id, [sv.describe()])
 		"potion_of_vitality":
 			if t.creature.exhaustion > 0:
 				e.log.add("heal", "%s shakes off %d levels of Exhaustion" % [t.name(), t.creature.exhaustion], t.id)
