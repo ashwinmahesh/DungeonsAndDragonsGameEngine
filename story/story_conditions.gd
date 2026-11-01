@@ -223,6 +223,12 @@ func _term() -> bool:
 			if StoryState.member_matches(ch, "name:" + t.substr(7)) and not ch.dark_gifts().is_empty():
 				return true
 		return false
+	if t.begins_with("became:"):
+		# A hero who left the party changed into that creature (`leave_party ... becomes <monster>`).
+		for f: Dictionary in st.fallen:
+			if str(f.get("becomes", "")) == t.substr(7):
+				return true
+		return false
 	if t.begins_with("fallen:"):
 		# A hero lost for good (StoryState.lose_member), by pregen id: their personal quest can't be finished.
 		for f: Dictionary in st.fallen:
@@ -276,6 +282,9 @@ func _term() -> bool:
 			return _truthy(value)
 		# A flag can be held against the size of the company (`flag.horned_bargains >= party_size`).
 		return _compare(value, op, _company(rhs))
+	if t.begins_with("affliction."):
+		# The highest level of an affliction among the living heroes (Afflictions): `affliction.rot >= 6`; bare, above 0.
+		return _compare(Afflictions.highest(st.party, t.substr(11)), op if op != "" else ">", _literal(rhs) if op != "" else 0)
 	if t.begins_with("quest_days."):
 		var passed := st.quest_days(t.substr(11))
 		return passed >= 0 and _compare(passed, op if op != "" else ">", _literal(rhs) if op != "" else 0)

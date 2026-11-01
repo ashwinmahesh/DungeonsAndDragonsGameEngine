@@ -40,6 +40,7 @@ item's step by its bearer's level: 1 below 7, 2 from 7, 3 from 13; `"value": "ti
 | `speed` | value, kind (default walk), when | +value ft; `when` sees the armor worn (Fast Movement: `{"armor":"not_heavy"}`, Unarmored Movement: `{"armor":"none","shield":false}`) |
 | `speed_set` | value, kind | speed becomes value (Grappled: 0). `kind` may be `fly` etc. to grant a speed; value `"walk"` = equal to the walking Speed (Potion of Flying). A value of 0 without `kind` stops every speed, flying too (Speed 0); with `kind`, only that one |
 | `hp_max` | value | + to Hit Point maximum (formulas recompute on level up) |
+| `hp_max_percent` | value | the Hit Point maximum becomes value percent of itself (after every other source; at least 1): an affliction's threshold halving it (50) |
 | `proficiency` | kind, value | kind = skill, save, armor, weapon, tool, language. value = id (`heavy`, `martial`, `thieves_tools`, `perception`, `str`, `common`) |
 | `expertise` | value | double Proficiency Bonus with that skill or tool |
 | `advantage` / `disadvantage` | on | on = `initiative`, `attack`, `attack:melee`, `attack:ranged`, `save:<ability>`, `save:all`, `save_vs:<condition>` (saves to avoid or end it), `check:<skill or ability>`, `check:all`, `check:choice` (one check the creature picks, e.g. Guidance), `death_save`, `concentration` |
@@ -57,6 +58,7 @@ item's step by its bearer's level: 1 below 7, 2 from 7, 3 from 13; `"value": "ti
 | `cantrip_damage` | value, when | add to cantrip damage (Potent Spellcasting: `mod:wis`) |
 | `spell_damage` | value, when | add to one damage roll of a spell (Empowered Evocation: `mod:int`, when school evocation) |
 | `healing_bonus` | value | add to healing from spells with a slot (Disciple of Life: `2+slot_level`) |
+| `healing_received` | value | added to every healing the creature receives (negative: an affliction taking its level off), never below 0 |
 | `carry_size_step` | value | count as this many sizes larger for carrying capacity (Powerful Build: 1) |
 | `reach` | value | + reach in ft |
 | `spell` | value, ability, uses, always_prepared, at_will, at_level, at_class_level | grants a spell. `ability` is an ability id or `choice` (the player picks; species list it in `spellcasting_ability_choice`); from a class or subclass feature it defaults to that class's spellcasting ability and the spell uses that class's DC and attack. `uses: {"count":1,"recharge":"long"}` = once free per rest; `count` may be a formula (`"mod:wis"` with `"min": 1`), or `"count_column": "favored_enemy"` reads the class table `at_will: true` casts it without a slot whenever you like (Boon of Magic School Mastery). |

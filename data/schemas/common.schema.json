@@ -200,6 +200,8 @@
             "cantrip_damage",
             "spell_damage",
             "healing_bonus",
+            "healing_received",
+            "hp_max_percent",
             "turn_dc",
             "carry_size_step",
             "reach",

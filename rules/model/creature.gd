@@ -630,6 +630,11 @@ func _add_hp_modifiers(b: Breakdown) -> void:
 	var ctx := formula_context()
 	for m in modifiers_for(&"hp_max"):
 		b.add_nonzero(m.source_name, mod_value(m, ctx))
+	# A share of the maximum after everything else (an affliction's level halving it: 50), never under 1.
+	for m in modifiers_for(&"hp_max_percent"):
+		var whole := b.total()
+		var kept := maxi(1, floori(whole * mod_value(m, ctx) / 100.0))
+		b.add_nonzero("%s (%d%%)" % [m.source_name, mod_value(m, ctx)], kept - whole)
 
 
 func is_bloodied() -> bool:
@@ -813,6 +818,11 @@ func _log_damage(r: DamageResult) -> void:
 ## Regains Hit Points (never above the maximum). Healing a creature at 0 HP wakes it; it stays Prone.
 func heal(amount: int, source: String = "") -> int:
 	if dead or amount <= 0:
+		return 0
+	# Healing received changes by these (an affliction's level taken off every healing), never below 0.
+	for m in modifiers_for(&"healing_received"):
+		amount += mod_value(m, formula_context())
+	if amount <= 0:
 		return 0
 	var before := hp
 	# Hit Points a Sword of Wounding took come back only with a Short or Long Rest.

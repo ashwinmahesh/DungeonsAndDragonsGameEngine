@@ -36,7 +36,7 @@ One edit was made on copying: a voice account's balance was removed from `plans/
 ## Contracts: what data the engine reads
 
 [modifiers](contracts/modifiers.md) (the stat vocabulary) · [combat](contracts/combat.md) ·
-[spells](contracts/spells.md) (spell recipes) · [monsters](contracts/monsters.md) · [magic_items](contracts/magic_items.md) ·
+[spells](contracts/spells.md) (spell recipes) · [monsters](contracts/monsters.md) · [afflictions](contracts/afflictions.md) · [magic_items](contracts/magic_items.md) ·
 [dialogue](contracts/dialogue.md) (the dialogue and Narrator format) · [locations](contracts/locations.md) (maps, NPCs,
 quests, flags) · [campaign](contracts/campaign.md) (the reading, travel, encounters, shops, guests) ·
 [schedule](contracts/schedule.md) (things on a clock) · [events](contracts/events.md) (EventBus signals)
