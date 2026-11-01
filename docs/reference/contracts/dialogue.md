@@ -204,14 +204,14 @@ inspire name:thistle: spoke her mind
 
 ## Conditions
 
-`flag.<id>` (truthy), `not flag.<id>`, `flag.<id> == 3` / `!= >= <= > <`, `class:cleric`, `species:elf`,
+`flag.<id>` (truthy), `not flag.<id>`, `flag.<id> == 3` / `!= >= <= > <`, one flag against another (`flag.a <= flag.b`; an unset one counts 0 on the right), `flag?.<id>` (the same read for a flag another chapter sets: the game's flag lint doesn't ask for it to be registered here), `class:cleric`, `species:elf`,
 `background:acolyte`, `subclass:oath_of_vengeance`, `feature:<id>` (a trait, feature, feat benefit or gift part a party
 member has, by id), `feat:<id>`, `tag:pious`, `item:holy_symbol_amulet` (anyone carries it; `item:spell_scroll_level_1` and `item:spell_scroll_cantrip` mean any Spell Scroll of that level, since a scroll is always carried as a particular spell, and `take spell_scroll_level_1` takes one), `quest.<id> == stage_id`,
 `quest_days.<id> >= 3` (whole days since the quest last moved to its current stage; false before the quest begins),
 `days_since.<flag> >= 2` (whole days since the flag was stamped with `set <flag> = now`; false while it hasn't been),
 `minutes_since.<flag> >= 10` (game minutes since the same stamp; a place with `recheck_minutes` re-checks its
 placements that often, so a `when` on it flips while the party stands there),
-`attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `graphic` (the player shows graphic scenes: the
+`party_alive` / `party_size` (heroes still travelling / everyone who set out, the fallen included; `party_alive == 0`, and a flag held against the company: `flag.horned_bargains >= party_size`), `attitude.<npc> == friendly`, `standing.<faction> >= 3` (a faction's standing; bare, above 0), `graphic` (the player shows graphic scenes: the
 playthrough option `graphic_scenes`, on unless switched off in the pause menu; put a gory line in `if graphic` with a
 tamer one under `else`, or prefix a Narrator variant with `[graphic]`), `jailed` (the party is locked up, `jail`), `visited:<location_id>`, `night`, `day`, `indoors` (the party's map is under a roof or
 a dungeon; a night's line written for sleeping behind walls carries it, so a camp out of doors skips it), `hour >= 20`,
