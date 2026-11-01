@@ -6,6 +6,7 @@ extends CanvasLayer
 ## it the one picked: the journal text of every stage reached, its current objectives, a
 ## Hint button for what to do next and Track, which makes it the quest the HUD follows (Ashwin, 2026-10-09). Then the
 ## books, letters and notes the party has read, and what it has learned of the creatures it fought (BestiaryPage, U8).
+## Then the campaign's own pages (JournalPages: data/journal/, a page of secrets, a chart of the townsfolk).
 ## The reading text follows the player's text size (UiScale.text). On a pad LB/RB change the page, LT/RT Main and
 ## Other, Y goes to the search box and A there opens the pad's keyboard.
 ##
@@ -71,8 +72,10 @@ func _draw() -> void:
 		var c := _frame.get_child(0)
 		_frame.remove_child(c)
 		c.queue_free()
-	_frame.add_child(UiParts.tab_strip(TABS, tab, func(t: String) -> void: _turn_to(t),
-		{"Quests": "journal", "Codex": "search", "Bestiary": "attack"}))
+	var icons := {"Quests": "journal", "Codex": "search", "Bestiary": "attack"}
+	for page in JournalPages.shown(st):
+		icons[str(page["title"])] = str(page.get("icon", "journal"))
+	_frame.add_child(UiParts.tab_strip(_tabs(), tab, func(t: String) -> void: _turn_to(t), icons))
 	var pane := UiParts.pane(14)
 	pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_frame.add_child(pane)
@@ -87,11 +90,40 @@ func _draw() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
 	pane.add_child(UiParts.fill_scroll(box))
-	_codex(box)
+	if tab == "Codex":
+		_codex(box)
+	else:
+		_campaign_page(box, JournalPages.by_title(st, tab))
+
+
+## The journal's pages: its own three, then the campaign's that show now (JournalPages).
+func _tabs() -> Array[String]:
+	var out := TABS.duplicate()
+	for page in JournalPages.shown(st):
+		if not out.has(str(page["title"])):
+			out.append(str(page["title"]))
+	return out
+
+
+## A campaign page: each group under its heading, each entry's title and text.
+func _campaign_page(box: VBoxContainer, page: Dictionary) -> void:
+	var groups := JournalPages.groups(page, st)
+	if groups.is_empty():
+		box.add_child(UiKit.label(JournalPages.empty_text(page), 16, "bone"))
+	for group in groups:
+		if str(group["title"]) != "":
+			box.add_child(UiKit.header(str(group["title"])))
+		for entry: Dictionary in group["entries"]:
+			var col := VBoxContainer.new()
+			col.add_theme_constant_override("separation", 6)
+			if str(entry["title"]) != "":
+				col.add_child(UiKit.label(str(entry["title"]), UiScale.text(16), "gilt_light", 1060))
+			col.add_child(UiKit.label(str(entry["text"]), UiScale.text(15), "vellum", 1060))
+			box.add_child(UiParts.row(col, Callable(), false, 12))
 
 
 func _turn_to(t: String) -> void:
-	var forward := TABS.find(t) > TABS.find(tab)
+	var forward := _tabs().find(t) > _tabs().find(tab)
 	tab = t
 	_mobile_reading = ""
 	_draw()
@@ -101,7 +133,8 @@ func _turn_to(t: String) -> void:
 
 ## LB/RB: the journal's pages (its own, so the Main and Other tabs under them don't take the shoulders).
 func pad_tab(step: int) -> void:
-	_turn_to(TABS[posmod(TABS.find(tab) + step, TABS.size())])
+	var tabs := _tabs()
+	_turn_to(tabs[posmod(tabs.find(tab) + step, tabs.size())])
 
 
 ## LT/RT: Main and Other, on the Quests page.
@@ -592,7 +625,7 @@ static func _codex_entry(id: String) -> Dictionary:
 
 func _mobile_build() -> void:
 	MobileUi.clear(_frame)
-	_frame.add_child(MobileUi.tabs(TABS, tab, _turn_to))
+	_frame.add_child(MobileUi.tabs(_tabs(), tab, _turn_to))
 	var input := LineEdit.new()
 	input.name = "QuestSearch"
 	_search_box = input
@@ -662,6 +695,20 @@ func _mobile_fill() -> void:
 				_mobile_content.add_child(MobileUi.button(label, func() -> void: _mobile_read(id)))
 			if _mobile_content.get_child_count() == 0:
 				_mobile_content.add_child(MobileUi.text("No known creatures match this view."))
+		_:
+			var page := JournalPages.by_title(st, tab)
+			var groups := JournalPages.groups(page, st)
+			for group in groups:
+				if str(group["title"]) != "":
+					_mobile_content.add_child(MobileUi.text(str(group["title"]), "gilt_light"))
+				for entry: Dictionary in group["entries"]:
+					if search != "" and not (str(entry["title"]) + " " + str(entry["text"])).to_lower().contains(search.to_lower()):
+						continue
+					if str(entry["title"]) != "":
+						_mobile_content.add_child(MobileUi.text(str(entry["title"]), "gilt_light"))
+					_mobile_content.add_child(TermText.make(str(entry["text"]), UiScale.text(18)))
+			if groups.is_empty():
+				_mobile_content.add_child(MobileUi.text(JournalPages.empty_text(page)))
 
 
 func _mobile_read(id: String) -> void:

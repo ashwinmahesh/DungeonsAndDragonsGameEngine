@@ -1,0 +1,73 @@
+{
+  "$id": "journal_page.schema.json",
+  "title": "A campaign's own journal page (story/journal_pages.gd): a tab after the Bestiary that fills in as the story goes",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "groups"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "title": {
+      "type": "string",
+      "description": "The tab's name (not Quests, Codex or Bestiary)."
+    },
+    "summary": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string",
+      "description": "The tab's icon (UiParts icons; journal by default)."
+    },
+    "order": {
+      "type": "integer",
+      "description": "Pages go by order, then id."
+    },
+    "when": {
+      "type": "string",
+      "description": "The page shows while this holds."
+    },
+    "empty": {
+      "type": "string",
+      "description": "What the page says while none of its entries shows."
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Filled from the story ({placeholders}: CampaignModule.fill)."
+                },
+                "when": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
