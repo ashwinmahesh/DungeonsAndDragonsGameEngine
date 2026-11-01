@@ -258,6 +258,14 @@ func next() -> Dictionary:
 			"time":
 				pc += 1
 				st.advance_minutes(int(s["minutes"]))
+			"campaign":
+				pc += 1
+				var args: Array[String] = []
+				for a: Variant in s["args"]:
+					args.append(str(a))
+				var said := Campaign.module().statement(st, str(s["verb"]), args, dice)
+				if said != "":
+					return {"kind": "notice", "text": said}
 			"time_until":
 				pc += 1
 				var target := int(s["hour"]) * 60

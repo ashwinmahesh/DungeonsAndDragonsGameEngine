@@ -269,6 +269,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			return {"t": "services"}
 		"respec":
 			return {"t": "respec"}
+		"campaign":
+			# `campaign <verb> [args...]`: the campaign's own statement (CampaignModule.statement).
+			if parts.size() >= 2:
+				return {"t": "campaign", "verb": parts[1], "args": Array(parts.slice(2))}
 		"end_game":
 			if parts.size() == 1:
 				return {"t": "end_game"}
