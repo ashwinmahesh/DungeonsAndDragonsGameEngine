@@ -241,3 +241,20 @@ func test_a_story_boon_raises_a_score_to_the_campaigns_limit() -> void:
 	for i in 6:
 		StoryBoons.raise_ability(other, "int", 2, "A gift")
 	assert_eq(other.ability_score(&"int"), 20, "the engine's limit without the setting")
+
+
+# --- Talking close-ups -------------------------------------------------------------------------------------------
+
+func test_close_ups_need_the_game_and_the_players_say_so() -> void:
+	var was := GameSettings.talk_close_ups()
+	_use({"camera": {"talk_close_ups": true}})
+	GameSettings.set_value("talk_close_ups", true, false)
+	assert_true(CameraRig.game_has_close_ups(), "the game has them")
+	assert_true(CameraRig.talk_close_ups(), "and they're on until the player turns them off")
+	GameSettings.set_value("talk_close_ups", false, false)
+	assert_false(CameraRig.talk_close_ups(), "turned off in the settings")
+	_use({"camera": {"talk_close_ups": false}})
+	GameSettings.set_value("talk_close_ups", true, false)
+	assert_false(CameraRig.game_has_close_ups(), "a game without them")
+	assert_false(CameraRig.talk_close_ups(), "never comes in close, whatever the setting")
+	GameSettings.set_value("talk_close_ups", was, false)
