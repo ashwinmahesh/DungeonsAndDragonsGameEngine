@@ -12,6 +12,13 @@
     "id": {
       "$ref": "common.schema.json#/$defs/id"
     },
+    "leads": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["to"],
+      "description": "A guide who leads without a word, wherever it is placed (a placement's own `leads` wins): Follow on its menu while `when` holds; the party follows it to `to` as `lead` does, and `flag` is set once it has.",
+      "properties": {"to": {"type": "string"}, "when": {"type": "string"}, "flag": {"type": "string"}}
+    },
     "name": {
       "type": "string"
     },

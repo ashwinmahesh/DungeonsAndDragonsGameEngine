@@ -260,7 +260,13 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
 `id`, `name`, `title`, `summary`, `portrait` (art id), `sprite` (art id), `attitude` (starting: hostile,
 indifferent, friendly), `voice` (docs/voice/<id>.md), `monster` (stat block id if they can fight), `guest` (true if
 they can join as a guest ally), `tags`, `pockets` (F8: items a picked pocket holds beyond the coins their tags give,
-or false for a pocket nobody can pick).
+or false for a pocket nobody can pick), `leads` (below).
+
+A guide who leads without a word: `leads: {to, when, flag}` on an NPC entry, or on one placement in a location's `npcs`
+(the placement's wins), puts Follow on the figure's right-click menu while `when` holds (LocationInteraction.lead_of).
+Following it does what `lead <npc> to <to>` does in a conversation (the same `to`: a door, prop, container, exit or area
+here, `x,y`, or another place with a Follow-now prompt), with no conversation around it, and sets `flag` once the party
+has followed. The host walks it (the game's GameRoot).
 
 ## data/quests/<id>.json (schema: quest.schema.json)
 

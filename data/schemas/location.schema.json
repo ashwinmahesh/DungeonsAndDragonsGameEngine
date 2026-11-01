@@ -741,6 +741,13 @@
           "dialogue": {
             "type": "string"
           },
+          "leads": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["to"],
+            "description": "A guide who leads without a word: Follow on the figure's menu while `when` holds, then the party follows it to `to` as `lead <npc> to <where>` does, and `flag` is set once it has.",
+            "properties": {"to": {"type": "string"}, "when": {"type": "string"}, "flag": {"type": "string"}}
+          },
           "when": {
             "type": "string"
           },
