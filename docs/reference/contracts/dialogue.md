@@ -112,6 +112,10 @@ hit_dice grant 1 [party]           beyond them, kept until their next Long Rest.
 exhaust +1 [party|failed]          Levels of Exhaustion (+1 to +6 gained, through any immunity; -1 to -6 lost) for the
                                    hero in the conversation, every living hero (`party`) or those who failed the last
                                    party save (`failed`). A notice says who.
+condition Poisoned 60 [party|failed]
+                                   A condition on the hero in the conversation, every living hero (`party`) or those who
+                                   failed the last party save (`failed`), for that many minutes of the clock; immunities
+                                   turn it away. A notice says who and for how long.
 save Constitution DC 13 party [unless resists fire] -> ok | fail
                                    Every living hero makes the saving throw (with `unless resists <type>`, one with
                                    Resistance or Immunity to that damage type passes without rolling); `ok` when all of them saved (check.last),

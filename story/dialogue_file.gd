@@ -103,6 +103,9 @@ static func _approve(line: String) -> Dictionary:
 
 
 ## The damage types a `damage` statement takes.
+## The conditions a `condition` line can put on a hero for a while (Exhaustion has its own `exhaust`).
+const STORY_CONDITIONS: Array[String] = ["blinded", "charmed", "deafened", "frightened", "incapacitated", "invisible",
+	"paralyzed", "petrified", "poisoned", "prone", "restrained", "stunned", "unconscious"]
 const DAMAGE_TYPES: Array[String] = ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison",
 	"psychic", "radiant", "slashing", "thunder"]
 
@@ -235,6 +238,12 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			# `exhaust <+n|-n> [party|failed]`: Exhaustion levels gained or lost (docs/contracts/dialogue.md).
 			if parts.size() >= 2 and RegEx.create_from_string("^[+-][1-6]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party", "failed"]):
 				return {"t": "exhaust", "levels": int(parts[1]), "party": parts.size() == 3 and parts[2] == "party", "failed": parts.size() == 3 and parts[2] == "failed"}
+		"condition":
+			# `condition <Condition> <minutes> [party|failed]`: a condition for that long on the exploration clock.
+			if parts.size() >= 3 and parts[1].to_lower() in STORY_CONDITIONS and parts[2].is_valid_int() and int(parts[2]) > 0 \
+					and _words_of(Array(parts.slice(3)), ["party", "failed"]):
+				return {"t": "timed_condition", "condition": parts[1].to_lower(), "minutes": int(parts[2]),
+					"party": parts.size() == 4 and parts[3] == "party", "failed": parts.size() == 4 and parts[3] == "failed"}
 		"save":
 			# `save <Ability> DC <n> party [unless resists <type>] -> ok | fail`: every living hero rolls (one with Resistance or
 			# Immunity to <type> passes without rolling); `ok` when all of them save.

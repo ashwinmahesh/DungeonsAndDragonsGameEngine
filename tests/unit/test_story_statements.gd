@@ -63,6 +63,19 @@ func test_a_hero_who_resists_the_damage_passes_the_save() -> void:
 	assert_eq([st.party[0].exhaustion, st.party[1].exhaustion], [0, 1], "only the one without it failed")
 
 
+func test_a_condition_for_a_while_on_those_who_failed() -> void:
+	var st := _st()
+	st.party[0].add_effect(Effect.new("Test Ward", &"feature", "test_ward").with_modifier("resistance", {"value": "fire"}))
+	var beats := _beats(_run(st, "~ start\nsave Constitution DC 30 party unless resists fire -> ok | bad\n~ ok\n| Fine.\n~ bad\ncondition Poisoned 60 failed\n"))
+	assert_true(beats.any(func(b: Dictionary) -> bool: return str(b.get("text", "")).contains("Poisoned for 1 hour")), str(beats))
+	assert_false(st.party[0].has_condition(&"poisoned"), "the one who passed")
+	assert_true(st.party[1].has_condition(&"poisoned"), "the one who failed")
+	st.advance_minutes(59)
+	assert_true(st.party[1].has_condition(&"poisoned"))
+	st.advance_minutes(1)
+	assert_false(st.party[1].has_condition(&"poisoned"), "an hour on, it's gone")
+
+
 func test_an_attack_roll_check() -> void:
 	var st := _st()
 	var ch := st.party[0]
