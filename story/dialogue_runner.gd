@@ -369,6 +369,11 @@ func next() -> Dictionary:
 				pc += 1
 				if st.remove_guest(str(s["npc"])):
 					return {"kind": "notice", "text": "%s leaves the party" % Compendium.shared().display_name("npcs", str(s["npc"]))}
+			"leave_party":
+				pc += 1
+				var changed := _leave_party(str(s["who"]), str(s["monster"]))
+				if changed != "":
+					return {"kind": "notice", "text": changed}
 			"sacrifice":
 				pc += 1
 				st.last_check = true   # skipped with one left alive: the scene goes on as before
@@ -931,6 +936,30 @@ static func _npc_for(low: String) -> Dictionary:
 func _fill(text: String) -> String:
 	var who := speaker if speaker != null else st.leader_character()
 	return text.replace("{name}", _first(who)).replace("{leader}", _first(st.leader_character()))
+
+
+## `leave_party <speaker|selector> becomes <monster>`: the hero speaking (or the first living one the selector names,
+## `name:thistle`) leaves the party for good, changed into the stat block `monster` (an offer taken: a hero who becomes a
+## dragon). StoryState.fallen keeps them with `becomes` (the condition `became:<monster>`, an encounter that brings the
+## creature back with their name). Never the last hero standing. check.last says whether anyone left. Returns the notice.
+func _leave_party(who: String, monster: String) -> String:
+	st.last_check = false
+	var ch: Character = null
+	if who == "speaker":
+		ch = speaker if speaker != null and not speaker.dead else null
+	else:
+		for m in _living():
+			if StoryState.member_matches(m, who):
+				ch = m
+				break
+	if ch == null or _living().size() < 2:
+		return ""
+	st.lose_member(ch, "became:" + monster)
+	(st.fallen[-1] as Dictionary)["becomes"] = monster
+	if speaker == ch:
+		speaker = st.leader_character()
+	st.last_check = true
+	return "%s leaves the party, changed" % _first(ch)
 
 
 static func _first(ch: Character) -> String:

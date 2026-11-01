@@ -214,6 +214,10 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 			return {"t": "xp"}
 		"sacrifice":
 			return {"t": "sacrifice"}
+		"leave_party":
+			# `leave_party <speaker|selector> becomes <monster>`: a hero leaves for good, changed into a creature.
+			if parts.size() == 4 and parts[2] == "becomes" and (parts[1] == "speaker" or parts[1].contains(":")):
+				return {"t": "leave_party", "who": parts[1], "monster": parts[3]}
 		"heal":
 			# `heal <dice> [party] [temp]` (docs/contracts/dialogue.md).
 			var words := Array(parts.slice(2))
