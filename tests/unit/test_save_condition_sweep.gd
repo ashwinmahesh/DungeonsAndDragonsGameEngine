@@ -44,7 +44,13 @@ func test_every_monster_save_action_lands_its_condition_or_says_why() -> void:
 			e.monster_actions.save_action(foe, act, hero, CombatResult.new(), false)
 			checked += 1
 			for rd: Variant in riders:
-				var cond := str((rd as Dictionary)["condition"])
+				var cond := str((rd as Dictionary).get("condition", ""))
+				# A rider that hinders with modifiers alone (a slowing toll, no Speed): its effect, named for the action.
+				if cond == "":
+					if hero.creature.effects.any(func(x: Effect) -> bool: return x.source_kind == &"monster" and not x.modifiers.is_empty()):
+						continue
+					bad.append("%s.%s: no hindrance and no word of why: %s" % [id, str(act["id"]), " // ".join(e.log.texts().slice(-3))])
+					continue
 				if hero.creature.has_condition(StringName(cond)) or _told_immune(e, cond):
 					continue
 				bad.append("%s.%s: no %s and no word of why: %s" % [id, str(act["id"]), cond, " // ".join(e.log.texts().slice(-3))])
@@ -53,7 +59,7 @@ func test_every_monster_save_action_lands_its_condition_or_says_why() -> void:
 
 
 ## Each save spell whose failed save puts a condition on a creature, cast with a Difficulty Class no one can beat at a
-## dummy 5 or 15 ft away (a Humanoid, else a Beast). Zones that act at a turn's start (Stinking Cloud), spells that
+## dummy 5 or 15 ft away (a Humanoid, else a Beast; the kind a spell names when it names one). Zones that act at a turn's start (Stinking Cloud), spells that
 ## ride a weapon hit (the smites) and Suggestion to a creature with no language are left to their own tests.
 func test_every_condition_spell_lands_or_says_why() -> void:
 	var bad: Array[String] = []
@@ -75,11 +81,19 @@ func test_every_condition_spell_lands_or_says_why() -> void:
 		var e: Encounter = null
 		var target: Combatant = null
 		var res: CombatResult = null
-		for kind: String in ["humanoid", "beast"]:
+		# A spell that names the kind of creature it works on (Call of the Wild: each Beast in it) is cast at that kind.
+		var kinds: Array[String] = ["humanoid", "beast"]
+		var only := str((s.get("targets", {}) as Dictionary).get("creature_type", ""))
+		if only != "":
+			kinds = [only]
+		for kind: String in kinds:
 			for x: int in [4, 2]:
 				e = TestCombat.open_field(5)
 				var caster := e.add(TestChars.dummy(300), &"party", Vector2i(1, 3))
-				target = TestCombat.punching_bag(e, Vector2i(x, 3), 500, kind)
+				# Every save as low as it goes but a mind (Intelligence 10): a spell that only reaches a thinking creature
+				# (Harrowing Ballad: Intelligence 4 or higher) can reach it; the DC of 40 still fails every save.
+				target = e.add(TestChars.dummy(500, false, {"type": kind, "ac": 1,
+					"abilities": {"str": 1, "dex": 1, "con": 1, "int": 10, "wis": 1, "cha": 1}}), &"enemy", Vector2i(x, 3))
 				TestCombat.start_with(e, caster)
 				var point := e.center_of(target) if s.has("area") else Vector2.INF
 				res = e.spells.cast_with_numbers(caster, id, level, [target], point, nums)
