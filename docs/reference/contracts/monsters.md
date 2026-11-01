@@ -34,6 +34,12 @@ Flags: `pack_tactics`, `undead_fortitude`, `incorporeal_movement`, `spider_climb
 `pass_through_creatures`, `loathsome_limbs` (by trait id). `make validate` runs tools/data/check_implemented.py,
 which fails if a trait or feature says `"implemented": "engine"` and no code reads it.
 
+## Fears
+
+A trait's `fears` (names, stat block ids or creature types): when the creature starts its turn able to see one of them,
+it is Frightened of that one until the start of its next turn (MonsterActions._fears; a creature in a shape counts as
+the shape). A familiar that can't abide canines lists the canine stat blocks.
+
 ## Spellcasting
 
 `spellcasting: {ability, dc, attack, at_will, per_day: {"2": [...]}, levels: {spell: level}}`. Spells resolve
