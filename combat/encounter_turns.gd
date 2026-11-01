@@ -26,8 +26,8 @@ func start(surprised_ids: Array = []) -> void:
 	var group_rolls := {}
 	for c in e.combatants:
 		c.surprised = c.id in surprised_ids
-		var group := ""
-		if c.creature is Monster:
+		var group := c.initiative_group   # set before the fight began (a rider and its steed: EncounterMounts.seat)
+		if group == "" and c.creature is Monster:
 			group = str((c.creature as Monster).data.get("id", ""))
 		if group != "" and group_rolls.has(group):
 			c.initiative = int(group_rolls[group])

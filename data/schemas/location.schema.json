@@ -859,6 +859,10 @@
                     }
                   }
                 },
+                "rides": {
+                  "type": "string",
+                  "description": "The `name` of another monster in this fight it starts the fight riding: it sits in that creature's space, carried when it moves, and the two act on the same Initiative count (each still takes its own turn). The rider needs a `name` too."
+                },
                 "catch": {
                   "type": "object",
                   "additionalProperties": false,

@@ -96,6 +96,22 @@ func dismount(rider: Combatant, prone: bool = false, voluntary: bool = true) -> 
 	return CombatResult.new()
 
 
+## A rider in the saddle as the fight begins (a location monster entry's `rides`: a boss on her brute's back): `rider`
+## sits on `steed`'s space, carried when it moves, and the two act on the same Initiative count (one roll, their group).
+## The steed keeps its own turn (an independent mount, 2024): it moves and fights as itself.
+func seat(rider: Combatant, steed: Combatant) -> void:
+	var e := enc()
+	if rider == null or steed == null or rider == steed or rider_of(steed) != null:
+		return
+	rider.cell = steed.cell
+	rider.set_meta("mounted_on", steed.id)
+	steed.set_meta("ridden_by", rider.id)
+	var group := "rides:%s" % steed.id
+	rider.initiative_group = group
+	steed.initiative_group = group
+	e.log.add("move", "%s rides %s" % [rider.name(), steed.name()], rider.id)
+
+
 ## A controlled mount (Find Steed's, or any willing ally a creature rides): it moves when its rider moves.
 func controlled_mount(rider: Combatant) -> Combatant:
 	var m := mount_of(rider)
