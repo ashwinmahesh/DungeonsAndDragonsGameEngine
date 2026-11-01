@@ -3,6 +3,12 @@ extends TestCase
 ## 2026-10-12). Every potion is held to it, so a new one can't come in costing an Action. Oils and coatings are
 ## potions too but are applied, not drunk (an `oil_of_` id, or `applied` on the item), so they keep their own cost.
 
+## Morgan's potions that are flavour only (tools/content/build_potions.py): their effects aren't built yet, so the engine gives
+## them no Drink. Each one is taken off this list when its effects are built, and then it must be drunk as a Bonus Action.
+const FLAVOUR_ONLY: Array[String] = ["lilypad_tonic", "jinxed_rum", "silence_of_the_drowned", "elixir_of_fogwalking",
+	"harvest_brew", "nightwatcher_potion", "sight_of_sin", "tincture_of_mourning", "wytchwood_sap",
+	"nectar_of_the_green_man", "draught_of_the_red_hunger"]
+
 
 ## Every potion in the game: [{id, data}].
 func _potions() -> Array[Dictionary]:
@@ -24,6 +30,9 @@ func test_every_potion_is_drunk_as_a_bonus_action() -> void:
 				drink = p
 		if id.begins_with("oil_of_") or bool(d.get("applied", false)):
 			assert_true(drink.is_empty(), "%s is applied, not drunk" % id)
+			continue
+		if id in FLAVOUR_ONLY:
+			assert_true(drink.is_empty(), "%s has no Drink until its effects are built" % id)
 			continue
 		assert_false(drink.is_empty(), "%s is drunk" % id)
 		var sid := CombatItems.power_spell(id, drink)
