@@ -418,6 +418,15 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		e.spells.specials.mid.hand_destroyed(target)
 	if dr.final > 0 and source != null and source != target and target.is_alive():
 		e.reaction_flow._queue_damage_reactions(source, target)
+	# An affliction's symptom that hurts more with every wound (`on_hurt`: {dice, type}), once a blow.
+	if dr.final > 0 and target.is_alive() and not target.has_meta("symptom_hurt"):
+		for h in Afflictions.hooks(target.creature, "on_hurt"):
+			var hook := h["hook"] as Dictionary
+			var rolled := _roll_damage_dice(str(hook.get("dice", "1d10")), false, 0, str((h["symptom"] as Dictionary).get("name", "")))
+			target.set_meta("symptom_hurt", true)
+			deal_damage(null, target, [{"amount": int(rolled["total"]), "type": str(hook.get("type", "necrotic"))}], false,
+				str((h["symptom"] as Dictionary).get("name", h["affliction"])), ["%s: %s" % [str(hook.get("dice", "1d10")), str(rolled["text"])]])
+			target.remove_meta("symptom_hurt")
 	e.faerun.after_damage(source, target, dr.final, parts)
 	e.game.after_damage(source, target, dr.final, parts, dr)
 	e.echo_knight.after_damage(source, target)

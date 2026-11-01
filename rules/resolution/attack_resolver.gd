@@ -47,7 +47,7 @@ static func weapon_attack(dice: DiceRoller, attacker: Creature, profile: WeaponP
 			dis.append("long range")
 		if bool(opts.get("enemy_adjacent", false)):
 			dis.append("enemy within 5 ft")
-	var keys: Array[String] = ["attack", "attack:melee" if profile.melee else "attack:ranged"]
+	var keys: Array[String] = ["attack", "attack:melee" if profile.melee else "attack:ranged", "attack:%s" % profile.ability]
 	var label := "%s → %s" % [profile.name, target.name]
 	r.test = attacker.roll_d20(dice, D20Test.Kind.ATTACK_ROLL, profile.attack, target.ac_value(), keys, adv, dis,
 		label, profile.crit_range)

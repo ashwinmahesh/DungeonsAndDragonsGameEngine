@@ -43,7 +43,7 @@ item's step by its bearer's level: 1 below 7, 2 from 7, 3 from 13; `"value": "ti
 | `hp_max_percent` | value | the Hit Point maximum becomes value percent of itself (after every other source; at least 1): an affliction's threshold halving it (50) |
 | `proficiency` | kind, value | kind = skill, save, armor, weapon, tool, language. value = id (`heavy`, `martial`, `thieves_tools`, `perception`, `str`, `common`) |
 | `expertise` | value | double Proficiency Bonus with that skill or tool |
-| `advantage` / `disadvantage` | on | on = `initiative`, `attack`, `attack:melee`, `attack:ranged`, `save:<ability>`, `save:all`, `save_vs:<condition>` (saves to avoid or end it), `check:<skill or ability>`, `check:all`, `check:choice` (one check the creature picks, e.g. Guidance), `death_save`, `concentration` |
+| `advantage` / `disadvantage` | on | on = `initiative`, `attack`, `attack:melee`, `attack:ranged`, `attack:<ability>` (weapon attacks made with that ability: `attack:str`), `save:<ability>`, `save:all`, `save_vs:<condition>` (saves to avoid or end it), `check:<skill or ability>`, `check:all`, `check:choice` (one check the creature picks, e.g. Guidance), `death_save`, `concentration` |
 | `attacked_with` | value (`advantage`/`disadvantage`), if_seen, unless_sense | attack rolls against this creature (Faerie Fire only for attackers that see it; Blur not against Blindsight or Truesight) |
 | `auto_fail` | on | automatically fail those saves or checks (Paralyzed: `save:str`, `save:dex`) |
 | `d20` | value | added to every D20 Test (Exhaustion: `-2*exhaustion`) |
