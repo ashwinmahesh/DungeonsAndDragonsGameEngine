@@ -1,0 +1,219 @@
+# Downstream check: a game that uses this engine as its addons/dnd_core runs its quick check (TEST_SLOTS=1 make check)
+# against the engine at the commit pushed to main, at a pull request's head, or when run by hand (Actions tab, with an
+# optional game_ref), on GitHub's runners, so nobody keeps a local copy of the game to test it.
+# The game's own code and data stay as they are on its branch; only the engine moves, so the check is the game's
+# "engine changed" plan (lint, validate, every script compiling, the engine's changed test files).
+#
+# Setup (Settings → Secrets and variables → Actions):
+#   Variables tab: DOWNSTREAM_GAME_REPO = owner/name of another game repo to check (optional; GAME_REPO below names the
+#                  default).
+#                  DOWNSTREAM_GAME_REF = the game branch to check (optional, default: its default branch).
+#                  DOWNSTREAM_GODOT_VERSION and DOWNSTREAM_GODOT_SHA512 (optional, default 4.7.2 and its checksum).
+#   Secrets tab:   DOWNSTREAM_GAME_TOKEN, a fine-grained token with read-only Contents on the game repo (needed only when
+#                  the game repo is private; a public one is read with the workflow's own token).
+#
+# The first run imports every asset (hours, like the game's own release builds); later runs start from the cached import
+# and LFS objects (keyed by the game's and the engine's commits, falling back to the newest).
+name: Downstream check
+
+# Not on every branch push: an uncached run pulls about 11 GB of Git LFS, which costs LFS bandwidth and Actions minutes.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      game_ref:
+        description: Game branch, tag or commit to check (empty = DOWNSTREAM_GAME_REF, else the game's default branch)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# A newer run for the same branch or pull request cancels the one it supersedes.
+concurrency:
+  group: downstream-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The game checked by default (owner, 2026-10-31); the DOWNSTREAM_GAME_REPO variable checks another instead.
+  GAME_REPO: ${{ vars.DOWNSTREAM_GAME_REPO || 'ashwinmahesh/CurseOfStrahd' }}
+  GAME_REF: ${{ inputs.game_ref || vars.DOWNSTREAM_GAME_REF }}
+  GODOT_VERSION: ${{ vars.DOWNSTREAM_GODOT_VERSION || '4.7.2' }}
+  GODOT_ZIP_SHA512: ${{ vars.DOWNSTREAM_GODOT_SHA512 || '9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65' }}
+  HAS_TOKEN: ${{ secrets.DOWNSTREAM_GAME_TOKEN != '' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Is a game set up?
+        id: setup
+        run: |
+          if [ -z "$GAME_REPO" ]; then
+            echo "::notice::No DOWNSTREAM_GAME_REPO variable: the downstream check is skipped (see the workflow file for its setup)"
+            echo "### Downstream check skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "No \`DOWNSTREAM_GAME_REPO\` repository variable is set." >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::notice::No DOWNSTREAM_GAME_TOKEN secret: reading $GAME_REPO with the workflow's own token (enough for a public repo)"
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Make room on the runner
+        if: steps.setup.outputs.run == 'true'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
+      - name: Check out the game
+        if: steps.setup.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GAME_REPO }}
+          ref: ${{ env.GAME_REF }}
+          token: ${{ secrets.DOWNSTREAM_GAME_TOKEN || github.token }}
+          path: game
+          lfs: false
+          submodules: false
+
+      - name: Put this engine where the game's submodule goes
+        if: steps.setup.outputs.run == 'true'
+        run: rm -rf game/addons/dnd_core && mkdir -p game/addons
+
+      - name: Check out the engine at the commit pushed
+        if: steps.setup.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          path: game/addons/dnd_core
+          # The whole history: the game's check diffs the engine against the commit the game pins.
+          fetch-depth: 0
+          lfs: false
+
+      - name: List the LFS files the game and the engine need
+        if: steps.setup.outputs.run == 'true'
+        id: lfs
+        run: |
+          # The game's raw generated art isn't used by the game (only what's made from it), as in its own release builds.
+          game="$(git -C game lfs ls-files -l -X "art/generated/**" | cut -d' ' -f1 | sort | sha256sum | cut -c1-16)"
+          engine="$(git -C game/addons/dnd_core lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -c1-16)"
+          echo "game=$game" >> "$GITHUB_OUTPUT"
+          echo "engine=$engine" >> "$GITHUB_OUTPUT"
+          echo "game_sha=$(git -C game rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "engine_sha=$(git -C game/addons/dnd_core rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "pin=$(git -C game ls-tree HEAD addons/dnd_core | cut -d' ' -f3 | cut -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore LFS objects
+        if: steps.setup.outputs.run == 'true'
+        id: lfs-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            game/.git/lfs/objects
+            game/addons/dnd_core/.git/lfs/objects
+          key: downstream-lfs-${{ steps.lfs.outputs.game }}-${{ steps.lfs.outputs.engine }}
+          restore-keys: downstream-lfs-
+
+      - name: Fetch the LFS files
+        if: steps.setup.outputs.run == 'true'
+        run: |
+          git -C game lfs pull -X "art/generated/**"
+          git -C game/addons/dnd_core lfs pull
+
+      - name: Save LFS objects
+        if: steps.setup.outputs.run == 'true' && steps.lfs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            game/.git/lfs/objects
+            game/addons/dnd_core/.git/lfs/objects
+          key: downstream-lfs-${{ steps.lfs.outputs.game }}-${{ steps.lfs.outputs.engine }}
+
+      - name: Restore Godot
+        if: steps.setup.outputs.run == 'true'
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-dl
+          key: downstream-godot-${{ env.GODOT_VERSION }}
+
+      - name: Download Godot (checksum pinned above)
+        if: steps.setup.outputs.run == 'true' && steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot-dl && cd ~/godot-dl
+          curl -fsSLO "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+
+      - name: Check Godot and install it
+        if: steps.setup.outputs.run == 'true'
+        run: |
+          cd ~/godot-dl
+          echo "${GODOT_ZIP_SHA512}  Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" | sha512sum -c -
+          mkdir -p ~/bin
+          unzip -o -q "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -d ~/bin
+          echo "GODOT=$HOME/bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: Restore the import cache
+        if: steps.setup.outputs.run == 'true'
+        id: import-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: game/.godot
+          key: downstream-import-${{ env.GODOT_VERSION }}-${{ steps.lfs.outputs.game_sha }}-${{ steps.lfs.outputs.engine_sha }}
+          restore-keys: |
+            downstream-import-${{ env.GODOT_VERSION }}-${{ steps.lfs.outputs.game_sha }}-
+            downstream-import-${{ env.GODOT_VERSION }}-
+
+      - name: The game's quick check (TEST_SLOTS=1 make check)
+        if: steps.setup.outputs.run == 'true'
+        id: check
+        working-directory: game
+        env:
+          IMPORT_HEADLESS: "1"
+          TEST_SLOTS: "1"
+        run: |
+          set +e
+          # BASE=HEAD: the game's own files are as on its branch, so what changed is the engine (the submodule's path).
+          make check BASE=HEAD GODOT="$GODOT" 2>&1 | tee "$RUNNER_TEMP/check.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit $status
+
+      - name: Save the import cache
+        if: always() && steps.setup.outputs.run == 'true' && steps.import-cache.outputs.cache-matched-key != format('downstream-import-{0}-{1}-{2}', env.GODOT_VERSION, steps.lfs.outputs.game_sha, steps.lfs.outputs.engine_sha) && hashFiles('game/.godot/.last_import') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: game/.godot
+          key: downstream-import-${{ env.GODOT_VERSION }}-${{ steps.lfs.outputs.game_sha }}-${{ steps.lfs.outputs.engine_sha }}
+
+      - name: Summary
+        if: always() && steps.setup.outputs.run == 'true'
+        env:
+          GAME_SHA: ${{ steps.lfs.outputs.game_sha }}
+          ENGINE_SHA: ${{ steps.lfs.outputs.engine_sha }}
+          PIN: ${{ steps.lfs.outputs.pin }}
+          STATUS: ${{ steps.check.outputs.status }}
+        run: |
+          log="$RUNNER_TEMP/check.log"
+          counts="$( (grep -E '^[0-9]+ tests, [0-9]+ passed, [0-9]+ failed' "$log" 2> /dev/null || true) | tail -1)"
+          verdict="$( (grep -E '^make check: (green|failed)' "$log" 2> /dev/null || true) | tail -1)"
+          {
+            echo "### Downstream check: $([ "$STATUS" = "0" ] && echo passed || echo failed)"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Game | \`$GAME_REPO\` at \`${GAME_SHA:0:9}\` |"
+            echo "| Engine | \`${ENGINE_SHA:0:9}\` (the game pins \`${PIN:0:9}\`) |"
+            echo "| Tests | ${counts:-none run} |"
+            echo "| Result | ${verdict:-make check did not finish} |"
+            fails="$( (grep -E '^\s+FAIL ' "$log" 2> /dev/null || true) | sort -u | head -40)"
+            if [ -n "$fails" ]; then
+              echo ""
+              echo '```'
+              echo "$fails"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
