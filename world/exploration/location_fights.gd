@@ -543,6 +543,9 @@ static func add_monsters(view: LocationView, e: Encounter, spec: Dictionary) -> 
 			added.set_meta(Encounter.NONLETHAL, true)
 		if bool(md.get("hostile_if_harmed", false)):
 			added.set_meta(Encounter.PROVOKED_BY_HARM, true)
+		# A bystander the foes hunt (`innocent`: a villager on the moor).
+		if bool(md.get("innocent", false)):
+			added.set_meta(Encounter.INNOCENT, true)
 	# A rider on another of the fight's creatures (`rides`: that entry's name): in the saddle, on one Initiative.
 	for md: Variant in entries:
 		var steed_name := str((md as Dictionary).get("rides", ""))
