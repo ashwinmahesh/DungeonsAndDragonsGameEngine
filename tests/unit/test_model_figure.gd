@@ -377,6 +377,34 @@ func test_a_dressing_wears_its_base_body_and_its_own_paint() -> void:
 	dressed.free()
 
 
+func test_a_tint_multiplies_the_surfaces_and_no_tint_changes_nothing() -> void:
+	FigureModels.register(ID, {}, model())
+	FigureModels.register(ID + "_dressed", {"base": ID, "tint": "#80c0ff"})
+	assert_eq(FigureModels.tint_of(ID), Color.WHITE, "no tint: white, no change")
+	assert_eq(FigureModels.tint_of(ID + "_dressed"), Color("#80c0ff"), "a hex colour")
+	FigureModels.register(ID + "_still", {"base": ID, "tint": "moonlight"})
+	assert_eq(FigureModels.tint_of(ID + "_still"), Look.color("moonlight"), "or a palette name")
+	var plain := DirectionalSprite.create(DirectionalSprite.frames_for(ID), 1.0) as ModelFigure
+	var dressed := DirectionalSprite.create(DirectionalSprite.frames_for(ID + "_dressed"), 1.0) as ModelFigure
+	add_child(plain)
+	add_child(dressed)
+	plain._show_modulate()
+	dressed._show_modulate()
+	var p: Vector4 = plain._meshes[0].get_instance_shader_parameter("tint")
+	var t: Vector4 = dressed._meshes[0].get_instance_shader_parameter("tint")
+	assert_eq(Vector3(p.x, p.y, p.z), Vector3.ONE, "the plain body is untinted")
+	assert_between(t.x, 0.49, 0.51, "the dressing's red is halved")
+	assert_between(t.y, 0.74, 0.76, "its green is three quarters")
+	assert_eq(t.z, 1.0, "its blue is full")
+	dressed.modulate = Color(1, 1, 1, 0.5)   # a fade on top (CombatToken) keeps the tint
+	dressed._show_modulate()
+	t = dressed._meshes[0].get_instance_shader_parameter("tint")
+	assert_between(t.w, 0.49, 0.51, "the fade still reaches it")
+	assert_between(t.x, 0.49, 0.51, "and the tint stays")
+	plain.free()
+	dressed.free()
+
+
 func test_a_figure_still_to_come_wears_its_stand_in_sprite() -> void:
 	FigureModels.manifest()[ID + "_coming"] = {"file": "art/figures/no_such_model.glb", "sprite": "specter"}
 	FigureModels.manifest()[ID + "_coming_dressed"] = {"base": ID + "_coming", "albedo": "art/ui/corner.png"}
