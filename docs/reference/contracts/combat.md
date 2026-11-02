@@ -471,7 +471,7 @@ for each time it has acted before; a failure takes `damage` (half on a success w
 `condition` until `until`), a `summon` (`monster` x `count` at `cells`, joining the order on the event's count), or
 `text`, or a `take`: the first creature still on the board named (or of a stat block) in `who` is taken out of the fight
 (`vanish`, left: `taken`, with `narration`: a captive gone in the mist), setting `flag` (then `flag`_2, _3 for the next
-ones). Any outcome with `one: true` strikes a single creature it reaches, at random (a neutral one too with `affects:
+ones). A `save` outcome's `spawn_on_fail` ({monster, max, side, name}) tears a creature out of each one who fails, in the free square nearest them, joining on the event's count, up to `max` for the event (Death from Within: a woodwarped from a hero). Any outcome with `one: true` strikes a single creature it reaches, at random (a neutral one too with `affects:
 all`: a table that answers to no master). `dc_from: {flag, base, step}` sets the DC from the story as the fight starts
 (LocationFights.round_events_for).
 

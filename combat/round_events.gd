@@ -130,11 +130,14 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	match str(outcome.get("kind", "save" if outcome.has("save") else "text")):
 		"save":
 			var dc := int((outcome["save"] as Dictionary)["dc"]) + int(outcome.get("dc_step", 0)) * times
+			var oc := outcome.duplicate()
+			oc["__at"] = int(ev.get("at", 20))
+			oc["__id"] = id
 			return e.each(reached, func(tv: Variant) -> CombatResult:
 				var t := tv as Combatant
 				if not t.is_alive() or e.state != Encounter.State.ACTIVE:
 					return r
-				return _save(outcome, t, dc, label, pausable), done_fn)
+				return _save(oc, t, dc, label, pausable), done_fn)
 		"summon":
 			_summon(outcome, int(ev.get("at", 20)))
 		"take":
@@ -321,6 +324,10 @@ func _save(o: Dictionary, t: Combatant, dc: int, label: String, pausable: bool) 
 				amount /= 2
 			details.append(str(rolled["text"]))
 			e.deal_damage(null, t, [{"amount": amount, "type": str(dmg["type"])}], false, label, details)
+		# A creature torn out of whoever failed (`spawn_on_fail`: {monster, max, side, name}: a woodwarped bursting from
+		# a hero), beside them, up to `max` for the event.
+		if not test.success:
+			_spawn_from(o, t)
 		if test.success or not t.is_alive():
 			return r
 		if int(o.get("exhaustion", 0)) > 0:
@@ -370,6 +377,34 @@ func _condition(t: Combatant, cond: String, until: String, label: String, o: Dic
 
 ## Reinforcements: `monster` x `count` on the enemies' side, at `cells` (else near the first enemy), joining the order
 ## on the event's count.
+func _spawn_from(o: Dictionary, t: Combatant) -> void:
+	var sp := o.get("spawn_on_fail", {}) as Dictionary
+	if sp.is_empty():
+		return
+	var e := enc()
+	var id := str(o.get("__id", ""))
+	var st := done.get(id, {}) as Dictionary
+	var made := int(st.get("spawned", 0))
+	if made >= int(sp.get("max", 99)):
+		return
+	var data := Compendium.shared().monster_data(str(sp.get("monster", "")))
+	if data.is_empty():
+		return
+	var cell := e.spells._free_cell_near(t.cell, CombatGrid.size_cells_for(StringName(str(data.get("size", "medium")))))
+	if cell.x < 0:
+		return
+	var m := Monster.from_data(data)
+	if str(sp.get("name", "")) != "":
+		m.name = str(sp["name"])
+	var sc := e.add(m, StringName(str(sp.get("side", "enemy"))), cell)
+	leg()._insert_at(sc, int(o.get("__at", 20)))
+	leg().phases.watch(sc)
+	st["spawned"] = made + 1
+	done[id] = st
+	e.events.append({"type": "summon_creature", "id": sc.id, "cell": sc.cell, "caster": t.id})
+	leg()._log("info", "%s tears out of %s" % [sc.name(), t.name()], sc)
+
+
 func _summon(o: Dictionary, at: int) -> void:
 	var e := enc()
 	var data := Compendium.shared().monster_data(str(o["monster"]))
