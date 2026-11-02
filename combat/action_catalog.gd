@@ -395,6 +395,12 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	var stab := _entry("stabilize", COMMON, "Stabilize", "DC 10 Medicine", "action", why, "dying", "Help a dying creature within 5 ft: a DC 10 Wisdom (Medicine) check makes it Stable (or brings round one that was knocked out).")
 	stab["range"] = 5
 	out.append(stab)
+	# Holding your breath, while a creature that senses breath is in the fight (HoldBreath): a free toggle.
+	if c.side in [&"party", &"guest"] and HoldBreath.matters(e):
+		var held := HoldBreath.holding(c)
+		out.append(_entry("hold_breath", COMMON, "Breathe again" if held else "Hold Breath", "free", "free",
+			"" if c.creature.hp > 0 else "Unconscious", "none",
+			"While you hold it, creatures that find the living by their breath can't see you. Damage may break it (Con save)."))
 	# A loose creature the heroes can catch and carry out of the fight (EncounterGrapples.catch_creature).
 	if c.side in [&"party", &"guest"]:
 		for t in e.grappling.catchable(c):
@@ -1445,6 +1451,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
 		"catch":
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
+		"hold_breath":
+			return HoldBreath.toggle(e, c)
 		"offer":
 			return e.trait_offers.take(c, e.get_c(id.get_slice(":", 1)), id.get_slice(":", 2))
 		"meter":

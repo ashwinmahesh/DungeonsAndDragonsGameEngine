@@ -32,6 +32,11 @@ held creature's next turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_s
 levels of an affliction, docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that
 burn and then rot).
 
+A trait's `senses_breath: true` (a Phantom Hearse): it finds the living by their breath, and can't see a hero holding
+theirs (HoldBreath). While such a creature is in the fight, each hero has Hold Breath on the Common tab, a free toggle:
+it lasts 1 + their Constitution modifier of their own turns (at least 1), and damage ends it on a failed Constitution
+save (DC 10 or half the damage).
+
 ## Traits read by code
 
 `aura` (`radius`, `trigger: start_turn`, `save`, `condition`, `until`, `immune_on_success`, `affects`): Stench,

@@ -301,6 +301,7 @@ func deal_damage(source: Combatant, target: Combatant, parts: Array, critical: b
 		e.spells.trigger_ends(source, "deal_damage")
 		e.turns.note_hurt(source, target)
 	if dr.final > 0:
+		HoldBreath.hurt(e, target, dr.final)   # a held breath may break
 		for fx: Effect in target.creature.effects.duplicate():
 			if fx.ends_on_damage:
 				target.creature.remove_effect(fx)

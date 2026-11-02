@@ -79,6 +79,9 @@ func can_see(a: Combatant, b: Combatant) -> bool:
 		return truesight > 0 and dist <= truesight and e.grid.can_see(a.cell, a.size_cells, b.cell, b.size_cells)
 	if not e.grid.can_see(a.cell, a.size_cells, b.cell, b.size_cells):
 		return false
+	# A creature that finds the living by their breath can't see one holding it (HoldBreath).
+	if HoldBreath.holding(b) and HoldBreath.senses_breath(e, a):
+		return false
 	if b.creature.has_flag("tracked_by:%s" % a.id):
 		return true
 	if blind > 0 and dist <= blind:

@@ -255,6 +255,7 @@ func _turn_end_rest(c: Combatant) -> CombatResult:
 		e.objects.turn_end(c)
 		e.zones.turn_end(c)
 		e.legendary.round_events.turn_end(c)   # a possession's repeated save (`possess`)
+		HoldBreath.turn_end(e, c)   # a held breath runs out
 		e.meters.scan()   # what the turn did that moves a meter (`on`: a foe falling, a crit, a failed save)
 		e.spells.zones.prune()
 		e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
