@@ -109,6 +109,9 @@ disadvantage checks 1h: the fog   Advantage (or Disadvantage) the story grants o
 hit_dice restore 2 [party]         Spent Hit Point Dice back to the hero in the conversation or every living hero (the
 hit_dice restore all [party]       biggest first, never past their own); `grant n` gives n of the hero's biggest kind
 hit_dice grant 1 [party]           beyond them, kept until their next Long Rest. A notice says who.
+boon con +2 [party]                An ability score raised for good for the hero in the conversation, or every living hero
+                                   (`party`): past 20 up to the campaign's `boon_ability_max` (StoryBoons.raise_ability),
+                                   named on the sheet for the speaker. A notice says who rose by how much.
 exhaust +1 [party|failed]          Levels of Exhaustion (+1 to +6 gained, through any immunity; -1 to -6 lost) for the
                                    hero in the conversation, every living hero (`party`) or those who failed the last
                                    party save (`failed`). A notice says who.

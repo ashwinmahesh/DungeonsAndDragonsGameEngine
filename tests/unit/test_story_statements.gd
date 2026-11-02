@@ -145,3 +145,13 @@ func test_twists_for_a_chosen_hero() -> void:
 	var second := st.party[1]
 	_beats(_run(st, "~ start\ntwist +2 hero:2\ntwist +1 name:%s\ntwist +1 hero:9\n" % second.id))
 	assert_eq([st.party[0].twists(), second.twists()], [0, 3], "the second hero, by place and by name; no ninth")
+
+
+func test_a_boon_raises_a_score_for_good() -> void:
+	var st := _st()
+	var before := [st.party[0].ability_score(&"con"), st.party[1].ability_score(&"con")]
+	_beats(_run(st, "~ start\nboon con +2\nboon wis +1 party\n"))
+	assert_eq(st.party[0].ability_score(&"con"), mini(int(before[0]) + 2, Campaign.boon_ability_max()), "the hero in the conversation")
+	assert_eq(st.party[1].ability_score(&"con"), int(before[1]), "only them")
+	var back := Character.from_build(st.party[0].build.duplicate(true))
+	assert_eq(back.ability_score(&"con"), st.party[0].ability_score(&"con"), "kept in the build")
