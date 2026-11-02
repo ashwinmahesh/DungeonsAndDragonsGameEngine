@@ -574,6 +574,7 @@ func advance_minutes(minutes: int) -> void:
 		g.advance_minutes(minutes)
 	_item_time(start, minutes)
 	PlaceHazards.tick(self, start, minutes)   # a place whose air harms whoever stays (a location's `hazard`)
+	Services.wake_the_stable(self, start, minutes)   # 0 Hit Points and Stable: 1 Hit Point after 1d4 hours (2024)
 
 
 ## Magic items and the clock (ADR 0012): charges come back at dawn (or dusk), regeneration heals as time passes. The
