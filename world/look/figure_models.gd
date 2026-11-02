@@ -23,6 +23,16 @@ extends RefCounted
 ## meshes join the figure's skeleton, bound bone by bone by name, so it moves with every clip. `hides` names the
 ## figure's own meshes the part covers. A figure entry's `layers` lists the parts it always wears, and
 ## ModelFigure.wear adds what it wears now (its gear).
+##
+## Rigs (docs/reference/art/figures.md, "Rigs"): the engine looks bones up by the names Mixamo and Tripo give them (Neck,
+## HeadTop_End, RightHand...). A body made on another rig (Quaternius's 65-joint one: neck_01, hand_r, no head-top bone)
+## names its rig in its entry, `"rig": "<id>"`, and the manifest's "rigs" says what that rig's bones are called:
+##   "rigs": {"<id>": {"bones": {"Neck": "neck_01", "RightHand": "hand_r", "HeadTop_End": ""},
+##                     "head_top": [0, 0.12, 0], "clips": {...}}}
+## `bones` maps the engine's names to the rig's (an empty name: the rig has no such bone); `head_top` is where the top of
+## the head is when the rig has no bone for it, an offset in figure heights from the Head bone, up being +y; `clips` is the
+## roles' clip names for every figure on the rig (under the entry's own `clips`, over the manifest's defaults). A figure
+## with no `rig` finds its bones by the engine's own names, as it always did.
 
 const MANIFEST_JSON := "art/figures/manifest.json"   # the core's, with the game's own entries merged over it (ArtPaths.json)
 ## The stand-in sprite frames' metadata naming the figure's art id (DirectionalSprite.create makes a ModelFigure for them).
@@ -60,6 +70,9 @@ static var _parts: Dictionary = {}
 static var _gear: Dictionary = {}
 ## The manifests' "bodies": species id ("*" for any) -> gender ("*" for any) -> the figure a made hero wears.
 static var _bodies: Dictionary = {}
+## The manifests' "rigs" (rig id -> {"bones", "head_top", "clips"}), and rigs added in code.
+static var _rigs: Dictionary = {}
+static var _registered_rigs: Dictionary = {}
 static var _registered_parts: Dictionary = {}
 static var _frames: Dictionary = {}
 static var _blank: ImageTexture
@@ -75,6 +88,7 @@ static func manifest() -> Dictionary:
 		_parts = all.get("parts", {}) as Dictionary
 		_gear = all.get("gear", {}) as Dictionary
 		_bodies = all.get("bodies", {}) as Dictionary
+		_rigs = all.get("rigs", {}) as Dictionary
 	return _manifest
 
 
@@ -100,7 +114,27 @@ static func _resolved(art_id: String, depth: int) -> Dictionary:
 	var base := str(own.get("base", ""))
 	if base != "" and base != art_id and depth < MAX_BASES:
 		return _laid_over(_resolved(base, depth + 1), own)
-	return own if registered else _laid_over(_defaults, own)
+	# The rig's clip names sit between the defaults and the entry's own.
+	var under := _rig_layer(str(own.get("rig", "")))
+	if not registered:
+		under = _laid_over(_defaults, under)
+	return _laid_over(under, own)
+
+
+## What a rig gives the figures on it to start from: its `clips`.
+static func _rig_layer(rig_id: String) -> Dictionary:
+	var clips := _rig(rig_id).get("clips", {}) as Dictionary
+	return {"clips": clips} if not clips.is_empty() else {}
+
+
+## The rig `rig_id` names ({} when none, or not in the manifest).
+static func _rig(rig_id: String) -> Dictionary:
+	if rig_id == "":
+		return {}
+	manifest()
+	if _registered_rigs.has(rig_id):
+		return _registered_rigs[rig_id] as Dictionary
+	return _rigs.get(rig_id, {}) as Dictionary
 
 
 ## `top` laid over `under`: its keys replace under's, its `clips` merged role by role.
@@ -302,10 +336,39 @@ static func mirrored(entry: Dictionary) -> Dictionary:
 	return out
 
 
+## The rig `art_id`'s entry names ({} for a figure on no rig).
+static func rig(art_id: String) -> Dictionary:
+	return _rig(str(info(art_id).get("rig", "")))
+
+
+## Its rig's bone names: the engine's name for a bone -> the rig's (see `bone`). {} when the figure names no rig.
+static func rig_bones(art_id: String) -> Dictionary:
+	return rig(art_id).get("bones", {}) as Dictionary
+
+
+## A rig added in code (tests, a game's own at run time).
+static func register_rig(rig_id: String, entry: Dictionary) -> void:
+	_registered_rigs[rig_id] = entry
+	_entries.clear()
+
+
+static func unregister_rig(rig_id: String) -> void:
+	_registered_rigs.erase(rig_id)
+	_entries.clear()
+
+
 ## The bone of `skeleton` that `name` means, or -1: the same name, else the same once an exporter's prefix is set aside
 ## and case ignored ("RightHand", "mixamorig:RightHand" and "mixamorig_RightHand" are one bone), so a part made on one
-## rig finds its bones on another rig of the same kind.
-static func bone(skeleton: Skeleton3D, name: String) -> int:
+## rig finds its bones on another rig of the same kind. `rig_bones` (a figure's rig, FigureModels.rig_bones) is asked
+## first: it says what this skeleton calls the bone `name` ("Neck" is "neck_01"), and an empty name there is a bone the
+## skeleton has none of. With none, the lookup is the plain one.
+static func bone(skeleton: Skeleton3D, name: String, rig_bones: Dictionary = {}) -> int:
+	if not rig_bones.is_empty():
+		var wanted := bone_key(name)
+		for k: Variant in rig_bones:
+			if bone_key(str(k)) == wanted:
+				var named := str(rig_bones[k])
+				return bone(skeleton, named) if named != "" else -1
 	var exact := skeleton.find_bone(name)
 	if exact >= 0:
 		return exact
