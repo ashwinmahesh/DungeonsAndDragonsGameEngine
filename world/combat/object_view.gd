@@ -22,6 +22,7 @@ var _hung: Dictionary = {}       ## object id -> the chandelier drawn here (no l
 var _moved_to: Dictionary = {}   ## object id -> the square its art stands on, once a shove has moved it
 var _placed: Dictionary = {}     ## object id -> the piece drawn for something the fight put down (its `model`)
 var _wards: Dictionary = {}      ## object id -> the warding light lit round it (ObjectCarry)
+var _walls: Dictionary = {}      ## wall index -> its ring of fire on the board, while it stands (FightWalls)
 var _rng := RandomNumberGenerator.new()
 
 
@@ -35,6 +36,7 @@ static func create(board_: ArenaBoard) -> ObjectView:
 
 ## Matches what's drawn to the encounter's objects and squares on fire.
 func sync(objects: EncounterObjects) -> void:
+	_sync_walls(objects.enc())
 	for o in objects.list:
 		# Shoved since the board was built (a fight resumed from a save): its art goes where it is now.
 		if o.home.x >= 0 and o.cells.size() == 1 and (_moved_to.get(o.id, o.home) as Vector2i) != o.cells[0]:
@@ -503,6 +505,27 @@ static func drop_piece(_board: ArenaBoard, node: Node3D, animate: bool) -> void:
 # --- Fire, oil and webs --------------------------------------------------------------------------------
 
 ## A burning object's flame (the flame art where it exists, else a few glowing cones) and its flickering light.
+## A standing wall's ring drawn as a spell's wall of fire is (FxZones.flames, the fire flavour's colours); it goes out
+## when the wall falls.
+func _sync_walls(e: Encounter) -> void:
+	if e == null:
+		return
+	for i in e.walls.size():
+		var w := e.walls[i] as Dictionary
+		var up := FightWalls.standing(e, w)
+		if up and not _walls.has(i):
+			var root := Node3D.new()
+			root.name = "Wall_%d" % i
+			add_child(root)
+			FxZones.flames(root, FightWalls.ring_cells(e, w), board, SpellFx.colours("fire"))
+			_walls[i] = root
+		elif not up and _walls.has(i):
+			var gone := _walls[i] as Node3D
+			_walls.erase(i)
+			if is_instance_valid(gone):
+				gone.queue_free()
+
+
 ## The warding light round a cleansed thing: its `color` (a hex string; the flame's colour when unset) out to its radius.
 func _ward_light(o: BattleObject, objects: EncounterObjects) -> Node3D:
 	var light := CandleFlicker.new()

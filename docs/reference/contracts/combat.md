@@ -331,7 +331,7 @@ up from a round's save reads it from the entry again.
 A fight's `walls` (FightWalls: R23's ring of fire), each {name, center: [x, y], radius (squares), damage: {dice, type},
 held_by: [object ids], falls_at}: while fewer than `falls_at` of its `held_by` objects are broken or undone, its ring
 (the squares `radius` from `center`) burns whoever steps onto it (once a turn) and keeps everyone inside it in; from
-outside it can be crossed inward, burning. When it falls the log says so (event `wall_down`). Read from the fight's
+outside it can be crossed inward, burning. The board draws a standing ring as a spell's wall of fire is drawn (FxZones.flames in the fire flavour's colours), and it goes out as the wall falls. When it falls the log says so (event `wall_down`). Read from the fight's
 entry when it starts or is picked up; whether it stands comes from its objects.
 
 Set pieces: an encounter's `objects` entry can carry `threshold` (Damage Threshold: damage less than it from one source

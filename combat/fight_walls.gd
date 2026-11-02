@@ -28,6 +28,18 @@ static func standing(e: Encounter, w: Dictionary) -> bool:
 	return gone < int(w.get("falls_at", 1))
 
 
+## The squares of a wall's ring (for the board to draw it).
+static func ring_cells(e: Encounter, w: Dictionary) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var r := int(w.get("radius", 5))
+	for x in e.grid.width:
+		for y in e.grid.depth:
+			var cell := Vector2i(x, y)
+			if _rings(w, cell) == r:
+				out.append(cell)
+	return out
+
+
 ## The squares a wall keeps `c` out of: from inside, the ring and everything past it.
 static func blocks(e: Encounter, c: Combatant) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
