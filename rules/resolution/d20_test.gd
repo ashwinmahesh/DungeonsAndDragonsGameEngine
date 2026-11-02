@@ -36,6 +36,8 @@ var disadvantage_sources: Array[String] = []
 ## Automatic failure (Paralyzed and a Dexterity save): no die is rolled.
 var auto_failed: bool = false
 var auto_fail_reason: String = ""
+## Passed without a roll (a held ward against one creature's power: `auto_succeed`).
+var auto_succeeded: bool = false
 ## Text for a d20 that was rolled again (Halfling Luck): "Luck: 1 → 14".
 var reroll_note: String = ""
 ## Every d20 rolled again or put in place of the roll, in order: {source, before (the dice as they lay), before_kept,
@@ -98,6 +100,18 @@ static func automatic_failure(kind_: Kind, target_: int, label_: String, reason:
 	t.auto_failed = true
 	t.auto_fail_reason = reason
 	t.success = false
+	return t
+
+
+## A save or check that passes without a roll (`auto_succeed`: a moth's wing held against a dream eater's wings).
+static func automatic_success(kind_: Kind, target_: int, label_: String, reason: String) -> D20Test:
+	var t := D20Test.new()
+	t.kind = kind_
+	t.target = target_
+	t.label = label_
+	t.auto_succeeded = true
+	t.auto_fail_reason = reason
+	t.success = true
 	return t
 
 
@@ -231,6 +245,8 @@ func describe() -> String:
 	var vs := "AC" if kind == Kind.ATTACK_ROLL else "DC"
 	if auto_failed:
 		return "%s: automatic failure (%s) vs %s %d" % [name, auto_fail_reason, vs, target]
+	if auto_succeeded:
+		return "%s: automatic success (%s) vs %s %d" % [name, auto_fail_reason, vs, target]
 	var die := "d20 %d" % kept
 	if rolls.size() == 2:
 		die = "d20 %s (%d, %d)" % ["adv" if advantage else "dis", rolls[0], rolls[1]]
