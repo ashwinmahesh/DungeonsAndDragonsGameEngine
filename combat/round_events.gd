@@ -127,28 +127,110 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 		if e.state == Encounter.State.ACTIVE:
 			return e.run_reaction_queue(r)
 		return r
-	match str(outcome.get("kind", "save" if outcome.has("save") else "text")):
-		"save":
-			var dc := int((outcome["save"] as Dictionary)["dc"]) + int(outcome.get("dc_step", 0)) * times
-			return e.each(reached, func(tv: Variant) -> CombatResult:
-				var t := tv as Combatant
-				if not t.is_alive() or e.state != Encounter.State.ACTIVE:
-					return r
-				return _save(outcome, t, dc, label, pausable), done_fn)
-		"summon":
-			_summon(outcome, int(ev.get("at", 20)))
-		"take":
-			_take(outcome)
-		"effect":
-			# No save: it just lands on whoever it reaches (a pelting that throws them off their aim).
-			for t in reached:
-				if t.is_alive():
-					_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
-		"possess":
-			for t in reached:
-				if t.is_alive():
-					_possess(outcome, t, label)
-	return done_fn.call() as CombatResult
+	var apply := func(targets: Array[Combatant]) -> CombatResult:
+		match str(outcome.get("kind", "save" if outcome.has("save") else "text")):
+			"save":
+				var dc := int((outcome["save"] as Dictionary)["dc"]) + int(outcome.get("dc_step", 0)) * times
+				return e.each(targets, func(tv: Variant) -> CombatResult:
+					var t := tv as Combatant
+					if not t.is_alive() or e.state != Encounter.State.ACTIVE:
+						return r
+					return _save(outcome, t, dc, label, pausable), done_fn)
+			"summon":
+				_summon(outcome, int(ev.get("at", 20)))
+			"take":
+				_take(outcome)
+			"effect":
+				# No save: it just lands on whoever it reaches (a pelting that throws them off their aim).
+				for t in targets:
+					if t.is_alive():
+						_condition(t, str(outcome.get("condition", "")), str(outcome.get("until", "round")), label, outcome)
+			"strike":
+				# No save (the bonfire's flame on a chained captive): `damage`, or `kill`.
+				for t in targets:
+					if not t.is_alive():
+						continue
+					if bool(outcome.get("kill", false)):
+						e.deal_damage(null, t, [{"amount": t.creature.hp + t.creature.max_hp(), "type": str((outcome.get("damage", {}) as Dictionary).get("type", "fire"))}], false, label, [])
+					else:
+						var sd := outcome.get("damage", {}) as Dictionary
+						var rr := e._roll_damage_dice(str(sd.get("dice", "1d6")), false, 0, label)
+						e.deal_damage(null, t, [{"amount": int(rr["total"]), "type": str(sd.get("type", "fire"))}], false, label, [str(rr["text"])])
+			"possess":
+				for t in targets:
+					if t.is_alive():
+						_possess(outcome, t, label)
+		return done_fn.call() as CombatResult
+	# A hero may throw themselves in the way (`intercept`: {save, damage, half}): the nearest within their Speed of the
+	# one it would strike, with their Reaction, moves beside them and takes it instead (the bonfire's gout of flame).
+	var icpt := outcome.get("intercept", {}) as Dictionary
+	if not icpt.is_empty() and reached.size() == 1 and pausable:
+		var victim := reached[0]
+		var guard := _interceptor(victim)
+		if guard != null:
+			var decision := e._reaction_decision(guard, "intercept")
+			if decision == "auto":
+				_intercept(guard, victim, icpt, label)
+				return done_fn.call() as CombatResult
+			if decision != "never":
+				var req := ReactionRequest.new("intercept", guard.id, victim.id)
+				req.title = "Intercept: %s" % label
+				req.text = "%s can throw themselves in the way and take it instead of %s (%s)." % [guard.name(), victim.name(),
+					_icpt_text(icpt)]
+				req.continuation = func(use: bool) -> CombatResult:
+					if use:
+						_intercept(guard, victim, icpt, label)
+						return done_fn.call() as CombatResult
+					return apply.call(reached) as CombatResult
+				e.pending = req
+				return r
+	return apply.call(reached) as CombatResult
+
+
+## The hero nearest `victim` who can reach it this turn's worth (their Speed) with a Reaction to spare, or null.
+func _interceptor(victim: Combatant) -> Combatant:
+	var e := enc()
+	var best: Combatant = null
+	for h in e.combatants:
+		if h == victim or not h.side in [&"party", &"guest"] or not h.is_alive() or h.is_down() or not h.reaction_available:
+			continue
+		var d := e.distance(h, victim)
+		if d > h.creature.speed().total() + 5:
+			continue
+		if best == null or d < e.distance(best, victim):
+			best = h
+	return best
+
+
+static func _icpt_text(icpt: Dictionary) -> String:
+	var sv := icpt.get("save", {}) as Dictionary
+	var dmg := icpt.get("damage", {}) as Dictionary
+	return "DC %d %s save, %s %s%s" % [int(sv.get("dc", 10)), str(sv.get("ability", "dex")).to_upper(), str(dmg.get("dice", "")),
+		str(dmg.get("type", "")), ", half on a success" if bool(icpt.get("half", true)) else ""]
+
+
+## `guard` takes the strike meant for `victim`: their Reaction, beside the victim, the save and the damage.
+func _intercept(guard: Combatant, victim: Combatant, icpt: Dictionary, label: String) -> void:
+	var e := enc()
+	guard.reaction_available = false
+	var cell := e.spells._free_cell_near(victim.cell, guard.size_cells)
+	if cell.x >= 0 and e.distance(guard, victim) > 5:
+		guard.cell = cell
+		e.events.append({"type": "move", "id": guard.id, "path": [cell]})
+	leg()._log("reaction", "%s throws themselves in the way of %s" % [guard.name(), label], guard)
+	var sv := icpt.get("save", {}) as Dictionary
+	var dmg := icpt.get("damage", {}) as Dictionary
+	var rolled := e._roll_damage_dice(str(dmg.get("dice", "1d6")), false, 0, label)
+	var amount := int(rolled["total"])
+	var details: Array = [str(rolled["text"])]
+	if not sv.is_empty():
+		var ab := StringName(str(sv.get("ability", "dex")))
+		var t := guard.creature.roll_save(e.dice, ab, int(sv.get("dc", 10)), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], label, guard.name()])
+		details.append(t.describe())
+		if t.success:
+			amount = amount / 2 if bool(icpt.get("half", true)) else 0
+	if amount > 0:
+		e.deal_damage(null, guard, [{"amount": amount, "type": str(dmg.get("type", "fire"))}], false, label, details)
 
 
 ## A `possess` outcome (a spirit of the damned): the creature saves (`save`), and on a failure turns on its own side
