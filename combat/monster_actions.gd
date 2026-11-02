@@ -159,11 +159,39 @@ func apply_riders(src: Combatant, t: Combatant, riders: Array, by_type: Dictiona
 	return e.each(riders, one, func() -> CombatResult: return r)
 
 
+## A `forced_attack` rider (a keeper's Frenzying Spores): `t` must use its Reaction to make one melee attack against a
+## creature of `src`'s choice within its reach: the one of `src`'s foes nearest `t` (the AI picks a hero's own ally).
+## Nothing happens if `t` has no Reaction left or nobody is within its reach.
+func _forced_attack(src: Combatant, t: Combatant, act_name: String) -> void:
+	var e := enc()
+	if not t.is_alive() or t.is_down() or not t.reaction_available:
+		return
+	var victim: Combatant = null
+	var best := 1 << 30
+	for o in e.combatants:
+		if o == t or o == src or not o.is_alive() or o.is_down() or o.has_meta("left_fight") or not src.hostile_to(o):
+			continue
+		var opt := e.best_melee_option(t, o)
+		if opt.is_empty() or e.attack_legal(t, o, opt) != "":
+			continue
+		var d := e.distance(t, o)
+		if d < best:
+			best = d
+			victim = o
+	if victim == null:
+		return
+	t.reaction_available = false
+	e.log.add("reaction", "%s is driven to strike %s (%s)" % [t.name(), victim.name(), act_name], t.id)
+	e.attacks._resolve_attack(t, victim, e.best_melee_option(t, victim), {"reaction": true})
+
+
 ## What one rider does once it lands: a condition for a while, a grapple, burning, possession, a push or pull, drained
 ## Hit Points or abilities, a curse, being engulfed.
 func _rider(src: Combatant, t: Combatant, rd: Dictionary, by_type: Dictionary, act_name: String) -> void:
 	var e := enc()
 	match str(rd["do"]):
+		"forced_attack":
+			_forced_attack(src, t, act_name)
 		"condition":
 			_timed_condition(src, t, str(rd.get("condition", "")), str(rd.get("until", "permanent")), act_name, rd.get("modifiers", []) as Array, rd)
 		"grapple":
