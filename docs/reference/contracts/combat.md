@@ -328,6 +328,12 @@ and a waiting foe waits again on its square as its entry says (asleep with `surp
 Encounter holds what the fight reads (`Encounter.ends_when`: `exits` as squares, `trigger_hero_down`); a fight picked
 up from a round's save reads it from the entry again.
 
+A fight's `walls` (FightWalls: R23's ring of fire), each {name, center: [x, y], radius (squares), damage: {dice, type},
+held_by: [object ids], falls_at}: while fewer than `falls_at` of its `held_by` objects are broken or undone, its ring
+(the squares `radius` from `center`) burns whoever steps onto it (once a turn) and keeps everyone inside it in; from
+outside it can be crossed inward, burning. When it falls the log says so (event `wall_down`). Read from the fight's
+entry when it starts or is picked up; whether it stands comes from its objects.
+
 Set pieces: an encounter's `objects` entry can carry `threshold` (Damage Threshold: damage less than it from one source
 does nothing), `undo` (`{skill, dc, label}`: the Utilize action within 5 ft and that check take it away without force,
 "<label> <the object>" on the Common tab) and `flag` (set in the fight's `story_flags` when it is gone, broken or

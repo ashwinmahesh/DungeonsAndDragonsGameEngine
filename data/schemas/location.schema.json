@@ -1739,6 +1739,11 @@
               }
             }
           },
+          "walls": {
+            "type": "array",
+            "description": "Walls the fight raises (FightWalls: a ring of fire held up by standing stones): {name, center: [x, y], radius (squares), damage: {dice, type}, held_by: [object ids], falls_at}. Its ring burns whoever steps onto it and lets nobody inside out, until falls_at of held_by are broken or undone.",
+            "items": {"type": "object", "required": ["center", "radius"]}
+          },
           "object_rules": {
             "type": "array",
             "description": "Set-piece rules for things the scenery made from the place's props (BattleScenery.for_spec, ObjectCarry): a brazier on the map given a hazard, things to put in it.",

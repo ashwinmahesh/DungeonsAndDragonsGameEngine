@@ -516,6 +516,7 @@ func undo(c: Combatant, oid: String) -> CombatResult:
 	e.log.add("info", "%s gets %s off" % [c.name(), o.the()], c.id, [t.describe()])
 	objs()._break(o)
 	e.game.object_broken(o, c)
+	FightWalls.after_break(e)   # a wall it held up may fall
 	return CombatResult.new()
 
 

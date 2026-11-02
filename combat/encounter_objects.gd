@@ -303,6 +303,7 @@ func damage(o: BattleObject, parts: Array, by: Combatant, label: String, details
 	if o.hp <= 0:
 		_break(o)
 		e.game.object_broken(o, by)
+		FightWalls.after_break(e)   # a wall it held up may fall
 	return total
 
 
@@ -878,6 +879,7 @@ func on_moved(c: Combatant, from: Vector2i) -> void:
 	var was := CombatGrid.footprint(from, c.size_cells)
 	var on_fire := c.creature.effects.any(func(fx: Effect) -> bool: return bool(fx.data.get("douse", false)))
 	carry.hazards(c, "enter", from)
+	FightWalls.entered(enc(), c, from)   # stepping onto a ring of fire burns
 	for sq: Dictionary in squares.duplicate():
 		if not _stands_in(c, sq) or sq["cell"] in was:
 			continue
