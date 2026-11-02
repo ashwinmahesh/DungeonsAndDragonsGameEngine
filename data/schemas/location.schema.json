@@ -1213,7 +1213,10 @@
                   "properties": {
                     "skill": {"type": "string", "description": "The skill or ability checked (default athletics)."},
                     "dc": {"type": "integer"},
-                    "label": {"type": "string", "description": "The verb on the hotbar (default Free)."}
+                    "label": {"type": "string", "description": "The verb on the hotbar (default Free)."},
+                    "ways": {"type": "array", "description": "Several ways at it, folded under one hotbar entry: [{label, skills, dc}], the hero's best of each way's skills.",
+                      "items": {"type": "object", "properties": {"label": {"type": "string"}, "skills": {"type": "array", "items": {"type": "string"}}, "dc": {"type": "integer"}}}},
+                    "backlash": {"type": "object", "description": "{save: {ability, dc}, damage: {dice, type}, half (true), on_hit}: what strikes the one whose try fails (and, with on_hit, whoever hits it)."}
                   }
                 },
                 "flag": {

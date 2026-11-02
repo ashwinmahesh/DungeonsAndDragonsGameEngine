@@ -470,7 +470,12 @@ func entries(c: Combatant) -> Array[Dictionary]:
 		if o.is_door() and not o.destroyed and objs().distance_ft(c, o) <= REACH:
 			out.append(_door_entry(c, o))
 		elif not o.undo.is_empty() and not o.destroyed:
-			out.append(_undo_entry(c, o))
+			# Several ways at it (`undo.ways`: a standing stone's four), folded under one hotbar entry.
+			if o.undo.has("ways"):
+				for i in (o.undo["ways"] as Array).size():
+					out.append(_way_entry(c, o, i))
+			else:
+				out.append(_undo_entry(c, o))
 	return out
 
 
@@ -499,24 +504,73 @@ func _undo_entry(c: Combatant, o: BattleObject) -> Dictionary:
 	return a
 
 
-## The Utilize action and `o`'s check; on a success it is gone (as broken: its flag, what it held let go).
+## One of `o`'s `undo.ways` ([{label, skills, dc}]): the hero's best of its skills, under the object's `undo.label`.
+func _way_entry(c: Combatant, o: BattleObject, i: int) -> Dictionary:
+	var way := (o.undo["ways"] as Array)[i] as Dictionary
+	var check := {"skills": way.get("skills", ["athletics"]), "dc": int(way.get("dc", o.undo.get("dc", 10)))}
+	var skill := str(enc().meters.skill_for(c, check)).replace("_", " ").capitalize()
+	var label := "%s: %s" % [str(o.undo.get("label", "Free")), str(way.get("label", skill))]
+	var a := objs()._entry("undo:%s|%d" % [o.id, i], label, "%s DC %d" % [skill, int(check["dc"])], "action", undo_why(c, o), "none",
+		"The Utilize action: a %s check against %s." % [skill, o.the()])
+	a["tab"] = ActionCatalog.COMMON
+	a["range"] = REACH
+	a["menu"] = "%s %s" % [str(o.undo.get("label", "Free")), o.the()]
+	a["menu_sub"] = "%s DC %d" % [skill, int(check["dc"])]
+	return a
+
+
+## The Utilize action and `o`'s check (or one of its `undo.ways`, after "|"); on a success it is gone (as broken: its
+## flag, what it held let go); on a failure its `backlash` strikes the one who tried.
 func undo(c: Combatant, oid: String) -> CombatResult:
 	var e := enc()
+	var way := -1
+	if oid.contains("|"):
+		way = int(oid.get_slice("|", 1))
+		oid = oid.get_slice("|", 0)
 	var o := objs().get_object(oid)
 	var why := undo_why(c, o)
 	if why != "":
 		return CombatResult.fail(why)
 	e.spend_action(c)
 	var skill := StringName(str(o.undo.get("skill", "athletics")))
-	var t := c.creature.roll_check(e.dice, skill, int(o.undo.get("dc", 10)), [], [], "%s %s (%s)" % [str(o.undo.get("label", "Free")),
+	var dc := int(o.undo.get("dc", 10))
+	if way >= 0 and way < (o.undo.get("ways", []) as Array).size():
+		var w := (o.undo["ways"] as Array)[way] as Dictionary
+		dc = int(w.get("dc", dc))
+		skill = e.meters.skill_for(c, {"skills": w.get("skills", ["athletics"]), "dc": dc})
+	var t := c.creature.roll_check(e.dice, skill, dc, [], [], "%s %s (%s)" % [str(o.undo.get("label", "Free")),
 		o.the(), c.name()])
 	if not t.success:
 		e.log.add("info", "%s can't get %s off" % [c.name(), o.the()], c.id, [t.describe()])
+		backlash(o, c)
 		return CombatResult.new()
 	e.log.add("info", "%s gets %s off" % [c.name(), o.the()], c.id, [t.describe()])
 	objs()._break(o)
 	e.game.object_broken(o, c)
 	return CombatResult.new()
+
+
+## `o`'s `backlash` ({save: {ability, dc}, damage: {dice, type}, half}) at `c`: a failed try at it, or a blow on it (a
+## standing stone's flame). A save halves it with `half`.
+func backlash(o: BattleObject, c: Combatant) -> void:
+	var e := enc()
+	var bl := o.undo.get("backlash", {}) as Dictionary
+	if bl.is_empty() or c == null or not c.is_alive():
+		return
+	var dmg := bl.get("damage", {}) as Dictionary
+	var rolled := e._roll_damage_dice(str(dmg.get("dice", "1d6")), false, 0, o.title())
+	var amount := int(rolled["total"])
+	var sv := bl.get("save", {}) as Dictionary
+	var details: Array = [str(rolled["text"])]
+	if not sv.is_empty():
+		var ab := StringName(str(sv.get("ability", "dex")))
+		var t := c.creature.roll_save(e.dice, ab, int(sv.get("dc", 10)), [], [], "%s save vs %s (%s)" % [Creature.ABILITY_NAMES[ab], o.title(), c.name()])
+		details.append(t.describe())
+		if t.success:
+			if not bool(bl.get("half", true)):
+				return
+			amount /= 2
+	e.deal_damage(null, c, [{"amount": amount, "type": str(dmg.get("type", "fire"))}], false, "%s lashes back" % o.title(), details)
 
 
 func _door_entry(c: Combatant, o: BattleObject) -> Dictionary:

@@ -297,6 +297,9 @@ func damage(o: BattleObject, parts: Array, by: Combatant, label: String, details
 		e.log.add("info", "%s takes no damage from %s" % [o.title(), label], by.id if by != null else "", notes)
 		return 0
 	o.hp = maxi(0, o.hp - total)
+	# A blow on it lashes back at whoever struck (`undo.backlash` with `on_hit`: a standing stone's flame).
+	if by != null and bool((o.undo.get("backlash", {}) as Dictionary).get("on_hit", false)):
+		actions.backlash(o, by)
 	e.log.add("hit", "%s takes %d damage (%s): %d/%d left" % [o.title(), total, label, o.hp, o.hp_max], by.id if by != null else "", notes)
 	e.events.append({"type": "object_damage", "id": o.id, "amount": total})
 	HeldObjects.hurt_owner(e, o, total, by)   # a kackle's lantern: half as Force to it
