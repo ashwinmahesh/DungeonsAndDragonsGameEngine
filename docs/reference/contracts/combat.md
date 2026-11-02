@@ -453,7 +453,11 @@ Advantage ("Remembered"); `brilliant` ({by: 5, meter}) moves a second meter on a
 `failure_event` bursts on a failure: everyone it reaches (`affects`, `area`, as a round event) saves; a failure takes
 `damage` and has `condition` until the end of its next turn, and a hero the player controls is asked whether to take
 the `instead` damage rather than the condition (reaction kind `rite_burst`; foes and Automatic keep the condition). A
-meter's `store` sets a story flag to its value as the fight ends, however it ends; `pips` draws it as pips on the HUD. A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
+meter's `store` sets a story flag to its value as the fight ends, however it ends; `pips` draws it as pips on the HUD. Innocents in peril (R23's villagers on the moor): a monster entry's `innocent: true` (side neutral) is a bystander the
+foes hunt: enemies count it as a foe (Combatant.hostile_to), it fights nobody, and the party counts it a friend. A meter
+action's `rescue: true` frees, on a success, the creature named in its `near` nearest the hero within its `range` (left:
+`rescued`); with the meter's `on: defeat` for those named creatures and `store_add`, the saved and the slain become
+tallies the story adds up across fights (`{"add": n}` handed back, a boss's resource later). A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
 
 ### Round events (combat/round_events.gd)
 

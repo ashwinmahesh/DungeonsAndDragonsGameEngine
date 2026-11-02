@@ -108,6 +108,9 @@ func is_down() -> bool:
 func hostile_to(other: Combatant) -> bool:
 	var a := _team(side)
 	var b := _team(other.side)
+	# An innocent the foes hunt (Encounter.INNOCENT): enemies go for it; it goes for nobody.
+	if a == &"enemy" and other.has_meta(Encounter.INNOCENT) and other.is_alive():
+		return true
 	return a != b and a != &"neutral" and b != &"neutral"
 
 

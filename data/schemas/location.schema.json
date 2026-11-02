@@ -1011,7 +1011,8 @@
                   }
                 },
                 "nonlethal": {"type": "boolean", "description": "Knocked out at 0 Hit Points, never killed (a charmed townsperson)."},
-                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."}
+                "hostile_if_harmed": {"type": "boolean", "description": "With side neutral: turns hostile once the party harms it or forces it to save."},
+                "innocent": {"type": "boolean", "description": "A bystander the foes hunt (side neutral): enemies go for it, it fights nobody, the party counts it a friend."}
               }
             }
           },
@@ -1707,6 +1708,7 @@
                       "failure": {"type": "integer"},
                       "failure_damage": {"type": "object", "description": "{dice, type}; type may be a list, one rolled each time."},
                       "once": {"type": "boolean", "description": "Once a fight."},
+                      "rescue": {"type": "boolean", "description": "On a success the creature named in `near` nearest the hero, within `range`, is out of the fight, saved."},
                       "when": {"type": "string", "description": "A story condition: the action is offered only if it holds as the fight starts."},
                       "advantage_when": {"type": "string", "description": "A story condition: the check has Advantage if it holds as the fight starts (a theme the party remembers)."},
                       "brilliant": {"type": "object", "required": ["meter"], "properties": {"by": {"type": "integer"}, "meter": {"type": "string"}}, "description": "A success by `by` (5) or more also moves this meter by 1."},
@@ -1731,6 +1733,7 @@
                   }
                 },
                 "store": {"type": "string", "description": "A story flag set to the meter's value as the fight ends."},
+                "store_add": {"type": "boolean", "description": "Add the value to the story flag instead (a tally kept across fights)."},
                 "pips": {"type": "boolean", "description": "The HUD draws the count as pips up to max."},
                 "menu": {"type": "string", "description": "Its actions fold under one hotbar entry of this name (a rite's Honour the Fallen)."}
               }

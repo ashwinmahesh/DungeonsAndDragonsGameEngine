@@ -200,6 +200,7 @@ func take(c: Combatant, meter_id: String, action_id: String) -> CombatResult:
 	if check.is_empty():   # no check: it simply works
 		e.events.append({"type": "ability", "source": "feature", "by": c.id, "key": "meter:%s:%s" % [meter_id, action_id], "targets": [], "cells": []})
 		e.log.add("info", "%s: %s" % [c.name(), label], c.id)
+		_rescue(c, a)
 		change(meter_id, int(a.get("success", 1)))
 		return CombatResult.new()
 	var adv: Array[String] = []
@@ -214,6 +215,7 @@ func take(c: Combatant, meter_id: String, action_id: String) -> CombatResult:
 		if not brilliant.is_empty() and t.total >= int(check.get("dc", 10)) + int(brilliant.get("by", 5)):
 			e.log.add("info", "A brilliant success", c.id)
 			change(str(brilliant["meter"]), 1)
+		_rescue(c, a)
 		change(meter_id, int(a.get("success", 1)))
 		return CombatResult.new()
 	e.log.add("info", "%s: %s fails" % [c.name(), label], c.id, [t.describe()])
@@ -304,7 +306,26 @@ func store_values() -> void:
 	for id: String in defs:
 		var flag := str((defs[id] as Dictionary).get("store", ""))
 		if flag != "":
-			e.legendary.story_flags[flag] = value(id)
+			# `store_add`: added to what the story has (a tally kept across fights: the innocents lost on the moors).
+			e.legendary.story_flags[flag] = {"add": value(id)} if bool((defs[id] as Dictionary).get("store_add", false)) else value(id)
+
+
+## A `rescue` action's success: the creature it names (`near`) nearest `c` and within its range is out of the fight,
+## saved (left: `rescued`).
+func _rescue(c: Combatant, a: Dictionary) -> void:
+	if not bool(a.get("rescue", false)):
+		return
+	var e := enc()
+	var reach := int(a.get("range", 5))
+	var best: Combatant = null
+	for t in e.combatants:
+		if t.name() != str(a.get("near", "")) or not t.is_alive() or t.has_meta("left_fight") or e.distance(c, t) > reach:
+			continue
+		if best == null or e.distance(c, t) < e.distance(c, best):
+			best = t
+	if best != null:
+		e.log.add("info", "%s is saved" % best.name(), best.id)
+		e.movement.leave_grid(best, "rescued")
 
 
 func _key(a: Dictionary) -> String:

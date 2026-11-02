@@ -128,6 +128,9 @@ var nonlethal := false
 const NONLETHAL := &"nonlethal"
 ## Meta on a neutral creature that turns hostile once the party harms it or forces it to save (`hostile_if_harmed`).
 const PROVOKED_BY_HARM := &"hostile_if_harmed"
+## On a bystander the foes hunt (a monster entry's `innocent`): enemies count it as a foe; it never fights back, and the
+## party counts it as a friend (Combatant.hostile_to).
+const INNOCENT := &"innocent"
 var ambient_light: String = "bright"
 var sunlit: bool = false
 ## Reactions waiting to be offered after the current attack or spell finishes (Hellish Rebuke): {kind, reactor, trigger}.
