@@ -9,8 +9,9 @@ extends RefCounted
 const DIR := "res://audio/voice/"
 const NARRATOR := "narrator"
 ## The prebuilt heroes speak in their own voices; a custom character (build.appearance.custom) in the one the player
-## picked for them (build.appearance.voice). The six on the roster (owner, 2026-10-06), then the first four, who stay
-## for older saves.
+## picked for them (build.appearance.voice). HEROES names an earlier roster (owner, 2026-10-06) and the first four, who stay
+## for older saves; today's roster is the campaign's own pregens marked `roster: true` (Pregens.roster_ids), so a game's
+## companions speak without the engine naming them.
 const HEROES: Array[String] = ["godrick_pendlebrook", "liriel_dawnsong", "thistle", "ratatoille", "wren_featherfoot",
 	"kip_smudgewick", "hedda_ironvow", "ilse_varga", "silvain_aster", "tamsin_tealeaf"]
 const HERO_VOICES: Array[String] = ["hero_female", "hero_male"]
@@ -62,8 +63,9 @@ static func say(speaker: String, text: String) -> float:
 static func voice_for(ch: Character) -> String:
 	if ch == null:
 		return ""
+	var roster := Pregens.roster_ids()
 	for k: String in [ch.id, ch.name.to_snake_case()]:
-		if k in HEROES:
+		if k in HEROES or k in roster:
 			return k
 	var voice := str((ch.build.get("appearance", {}) as Dictionary).get("voice", ""))
 	return voice if voice in HERO_VOICES else ""
