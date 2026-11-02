@@ -164,7 +164,9 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 	# A hero may throw themselves in the way (`intercept`: {save, damage, half}): the nearest within their Speed of the
 	# one it would strike, with their Reaction, moves beside them and takes it instead (the bonfire's gout of flame).
 	var icpt := outcome.get("intercept", {}) as Dictionary
-	if not icpt.is_empty() and reached.size() == 1 and pausable:
+	# At the round's end (count 0) nothing can wait for an answer: only a hero whose rule is Automatic steps in; an
+	# event that should ask goes on count 1 or above.
+	if not icpt.is_empty() and reached.size() == 1:
 		var victim := reached[0]
 		var guard := _interceptor(victim)
 		if guard != null:
@@ -172,7 +174,7 @@ func act(ev: Dictionary, pausable: bool = true) -> CombatResult:
 			if decision == "auto":
 				_intercept(guard, victim, icpt, label)
 				return done_fn.call() as CombatResult
-			if decision != "never":
+			if decision != "never" and pausable:
 				var req := ReactionRequest.new("intercept", guard.id, victim.id)
 				req.title = "Intercept: %s" % label
 				req.text = "%s can throw themselves in the way and take it instead of %s (%s)." % [guard.name(), victim.name(),

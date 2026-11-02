@@ -2,7 +2,7 @@ extends TestCase
 ## A round event's `intercept`: the nearest hero within their Speed may take the strike meant for a captive.
 
 const EVENT := {"id": "test_bonfire", "name": "The bonfire", "kind": "strike", "kill": true, "damage": {"type": "fire"},
-	"affects": "all", "area": {"cells": [[6, 3]]}, "one": true, "at": 0, "every": 1,
+	"affects": "all", "area": {"cells": [[6, 3]]}, "one": true, "at": 5, "every": 1,
 	"intercept": {"save": {"ability": "dex", "dc": 40}, "damage": {"dice": "2d6", "type": "fire"}, "half": true}}
 
 
