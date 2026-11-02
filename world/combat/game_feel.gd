@@ -18,12 +18,14 @@ extends RefCounted
 ##   shapes: drawn shapes (slash crescents, burst stars, ink splashes, speed lines) over blows and impacts, animated
 ##     on twos (shape_fps a second). The art comes from art/vfx/shapes/<kind>.png (the game's, else the engine's
 ##     procedural fallback); shape_size is times their size.
+##   cast_hands: a 3D figure casts from its hand: a glow gathers in its hand bone while its cast clip winds up, and the
+##     spell leaves from there (SpellFx.gather, SpellFx.hand). Off, spells leave from a spot before the chest, as before.
 const DEFAULTS := {
 	"hit_stop": {}, "kick": 0.0, "flash": 0.0, "flash_seconds": 0.12, "knockback": 1.0,
 	"dip": {}, "impact_frame": 0, "impact_ink": "void", "impact_paper": "parchment",
 	"breath": 1.0, "sway": 0.0,
 	"spell_light": 1.0, "spell_reach": 1.0, "spell_shadows": false,
-	"shapes": false, "shape_fps": 12.0, "shape_size": 1.0,
+	"shapes": false, "shape_fps": 12.0, "shape_size": 1.0, "cast_hands": false,
 }
 ## The share of a target's Hit Points a blow takes from which it is medium and heavy (under medium it is light).
 const MEDIUM_SHARE := 0.12

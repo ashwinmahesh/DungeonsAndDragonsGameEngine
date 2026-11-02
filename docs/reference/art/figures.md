@@ -77,6 +77,13 @@ tip-over, talk and greet to nothing.
   Footfalls (for footsteps) are where the root bone is lowest.
 - **Facing.** It turns to `facing` the short way round (`TURN_RATE`), at once the first time.
 - **Attack and cast** play once, `struck` at `hit` (45% of the window when none is given), `attack_finished` at the end.
+  A one-shot can have parts around its main clip, each a clip name or `{"clip", "from", "to", "seconds"}`: `lead` (a
+  lead-in), `hold` (a loop held `seconds`, 0.35 when none is given) and `after` (a follow-through); they play in that order
+  around the main clip, `hit` still counted in the main clip, and a part the model lacks is skipped. A cast on the
+  Universal Animation Library is `{"clip": "Spell_Simple_Shoot", "lead": "Spell_Simple_Enter", "hold":
+  "Spell_Simple_Idle", "after": "Spell_Simple_Exit"}`. With the game feel's `cast_hands`, a glow gathers in the figure's
+  `cast_hand` bone (`RightHand` when the entry names none, through its rig) until the spell leaves, and the spell flies
+  from that hand.
   Without a clip, `attack()` returns false and the token lunges, as for a sprite without an attack sheet.
 - **Hurt** plays its hurt clip with the white flash a game's feel asks for; without one (or while it swings) it recoils,
   a lean back from the feet, with the flash.

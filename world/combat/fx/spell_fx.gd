@@ -23,6 +23,10 @@ const MAGIC_TYPES: Array[String] = ["fire", "cold", "lightning", "thunder", "aci
 ## A creature's change of shape is being shown (shape_gather): `kind` is how it looks and sounds.
 signal shape_shown(id: String, kind: String)
 
+## A cast's hand glow (gather): its light's brightest, and the longest it waits for the throw (seconds).
+const GATHER_LIGHT := 1.2
+const GATHER_MAX := 3.0
+
 ## Captures turn the effects off for their "before" shots (tools/capture/vfx_capture.gd).
 static var enabled := true
 static var _data: Dictionary = {}
@@ -477,8 +481,56 @@ static func height_of(t: CombatToken) -> float:
 	return h * maxf(1.0, t.scale.y)
 
 
-## The caster's casting hand, a little toward `toward`.
+## A glow gathering in the caster's hand while its cast clip winds up (game_feel cast_hands; a figure with a cast clip
+## and a hand bone), following the hand, and fading as the spell leaves it. Not awaited: the cast plays on beside it.
+func gather(cue: Dictionary, caster: CombatToken) -> void:
+	if not GameFeel.flag("cast_hands") or cue.is_empty() or caster == null or caster.sprite == null \
+			or not caster.sprite.is_gathering() or caster.sprite.hand_position() == Vector3.INF:
+		return
+	var cols := cue["colours"] as Dictionary
+	var root := Node3D.new()
+	root.name = "Gather"
+	add_child(root)
+	root.global_position = caster.sprite.hand_position()
+	var motes := FxKit.particles({"amount": 28, "lifetime": 0.45, "one_shot": false, "emit": "shell", "radius": 0.28,
+		"speed": Vector2(0.0, 0.05), "radial": Vector2(-1.6, -1.0), "size": 0.07, "fade_in": true,
+		"colours": [cols["edge"], cols["glow"], cols["core"]], "material": FxKit.glow_material(FxKit.Shape.GLINT, cols["core"], 2.6)})
+	root.add_child(motes)
+	motes.emitting = true
+	var core := FxKit.particles({"amount": 6, "lifetime": 0.3, "one_shot": false, "emit": "point", "speed": Vector2(0.0, 0.02),
+		"size": 0.16, "grow": FxKit.curve(0.4, 1.0, 0.6, 0.4), "colours": [cols["core"], cols["glow"]],
+		"material": FxKit.glow_material(FxKit.Shape.GLOW, cols["core"], 3.0)})
+	root.add_child(core)
+	core.emitting = true
+	var light := OmniLight3D.new()
+	light.light_color = cols["light"]
+	light.omni_range = 1.4 * GameFeel.num("spell_reach")
+	light.light_energy = 0.0
+	root.add_child(light)
+	var held := 0.0
+	while is_instance_valid(caster) and caster.sprite != null and caster.sprite.is_gathering() and held < GATHER_MAX:
+		var at := caster.sprite.hand_position()
+		if at != Vector3.INF:
+			root.global_position = at
+		held += get_process_delta_time()
+		light.light_energy = clampf(held * 2.5, 0.0, 1.0) * GATHER_LIGHT * GameFeel.num("spell_light")
+		await get_tree().process_frame
+	if not is_instance_valid(root):
+		return
+	motes.emitting = false
+	core.emitting = false
+	var tw := root.create_tween()
+	tw.tween_property(light, "light_energy", 0.0, 0.25)
+	FxKit.free_after(root, 0.6)
+
+
+## The caster's casting hand, a little toward `toward`: the hand bone of a 3D figure where the game asks for it
+## (game_feel cast_hands), else a spot at the chest a step forward.
 static func hand(t: CombatToken, toward: Vector3) -> Vector3:
+	if GameFeel.flag("cast_hands") and t.sprite != null and t.sprite.visible:
+		var at := t.sprite.hand_position()
+		if at != Vector3.INF:
+			return at
 	var flat := Vector3(toward.x - t.global_position.x, 0, toward.z - t.global_position.z)
 	var d := flat.normalized() if flat.length() > 0.01 else Vector3.ZERO
 	return t.global_position + Vector3(0, height_of(t) * 0.6, 0) + d * 0.3

@@ -2354,7 +2354,10 @@ func _play_events() -> void:
 					# else casters whose attack is a spell gesture play that.
 					if caster.start_cast(aim):
 						cast_by = caster.combatant.id
-						await caster.wait_for_strike()
+						if SpellFx.enabled and not cue.is_empty():
+							fx.gather(cue, caster)   # a glow in the hand while the spell is gathered (game_feel cast_hands)
+						# A cast with a lead-in and a hold (ModelFigure's parts) takes longer than a swing to let go.
+						await caster.wait_for_strike(SpellFx.GATHER_MAX)
 					elif caster.casts_with_attack() and aim != Vector2.ZERO and caster.start_attack(aim):
 						cast_by = caster.combatant.id
 						await caster.wait_for_strike()

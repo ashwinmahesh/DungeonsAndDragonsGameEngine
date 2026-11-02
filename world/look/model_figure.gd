@@ -44,6 +44,12 @@ const IN_PLACE_PACE := 0.62
 const IDLE_STIR := 0.3
 ## Roles whose clips are all used, in turn, rather than the first found.
 const VARIED: Array[String] = ["talk", "greet"]
+## A one-shot's parts around its main clip, in the order they play: a lead-in, a held loop (`seconds` long, HOLD_SECONDS
+## when it gives none), the main clip (where the blow lands or the spell leaves), a follow-through.
+const PARTS: Array[String] = ["lead", "hold", "after"]
+const HOLD_SECONDS := 0.35
+## The hand a spell is cast from when the entry names no `cast_hand` (the engine's bone names; a rig maps them).
+const CAST_HAND := "RightHand"
 
 var art_id := ""
 var model: Node3D
@@ -685,6 +691,7 @@ func _read_clips() -> void:
 			if found == "":
 				continue
 			spec["name"] = found
+			_read_parts(spec, names)
 			specs.append(spec)
 			_ready_clip(found, role)
 			if not own.has(role) and not role in VARIED:
@@ -700,6 +707,25 @@ func _read_clips() -> void:
 			b["speed"] = float(spec.get("speed", 1.0)) * IDLE_STIR
 			stir.append(b)
 		_roles["idle"] = stir
+
+
+## A role's lead-in, hold and follow-through (`lead`, `hold`, `after`: a clip name or {"clip", "from", "to", "seconds"}),
+## each found among `names` and kept as {"name", "from", "to", "seconds"}; one the model lacks is dropped, so the role still
+## plays its main clip. A spell is gathered, held and thrown (Spell_Simple_Enter, its Idle loop, Shoot).
+func _read_parts(spec: Dictionary, names: PackedStringArray) -> void:
+	for part: String in PARTS:
+		if not spec.has(part):
+			continue
+		var pv: Variant = spec[part]
+		var ps := (pv as Dictionary).duplicate() if pv is Dictionary else {"clip": str(pv)}
+		var found := clip_named(names, str(ps.get("clip", "")))
+		if found == "":
+			spec.erase(part)
+			continue
+		ps["name"] = found
+		if part == "hold":
+			_player.get_animation(found).loop_mode = Animation.LOOP_LINEAR
+		spec[part] = ps
 
 
 ## The clip of `names` called `wanted`, ignoring case, a library prefix and the numbered suffix exporters add
@@ -721,6 +747,9 @@ static func plain(clip: String) -> String:
 	var dot := s.rfind(".")
 	if dot > 0 and s.substr(dot + 1).is_valid_int():
 		s = s.substr(0, dot)
+	# Godot's importer takes a "_Loop" suffix off a clip and loops it; a clip named either way is the one clip.
+	if s.ends_with("_loop") and s.length() > 5:
+		s = s.substr(0, s.length() - 5)
 	return s
 
 
@@ -883,10 +912,40 @@ func _play_role(role: String, lands: bool) -> bool:
 	moving = false
 	_loop = ""
 	_rise_to = -1.0   # a clip cuts a getting-up short
+	_clip["phase"] = ""
+	_next_part()
+	return true
+
+
+## Moves the one-shot on to its next part (lead, hold, main, after; PARTS), playing that part's clip; ends the one-shot
+## after the last.
+func _next_part() -> void:
+	var order: Array[String] = ["lead", "hold", "main", "after"]
+	var at := order.find(str(_clip.get("phase", ""))) + 1
+	while at < order.size() and order[at] != "main" and not _clip.has(order[at]):
+		at += 1
+	if at >= order.size():
+		_end_clip()
+		return
+	var phase := order[at]
+	_clip["phase"] = phase
+	var speed := float(_clip.get("speed", 1.0))
+	if phase == "main":
+		_start_clip(str(_clip["name"]), float(_clip["from"]), speed)
+		return
+	var part := _clip[phase] as Dictionary
+	var name := str(part["name"])
+	var length := _player.get_animation(name).length
+	part["from"] = clampf(float(part.get("from", 0.0)), 0.0, length)
+	part["to"] = clampf(float(part.get("to", length)), float(part["from"]), length)
+	part["until"] = _time + float(part.get("seconds", HOLD_SECONDS)) / maxf(speed, 0.01)
+	_start_clip(name, float(part["from"]), speed)
+
+
+func _start_clip(name: String, from: float, speed: float) -> void:
 	_player.play(name, BLEND)
 	_player.seek(from, true)
-	_player.speed_scale = float(spec.get("speed", 1.0))
-	return true
+	_player.speed_scale = speed
 
 
 func _end_clip() -> void:
@@ -936,6 +995,22 @@ func attack() -> bool:
 
 func cast() -> bool:
 	return _play_role("cast", true)
+
+
+## Casting now (its cast clip playing), and the spell not yet thrown.
+func is_gathering() -> bool:
+	return _one_shot == "cast" and _attacking and not _struck
+
+
+## Where the figure's casting hand is in the world: the entry's `cast_hand` bone (RightHand by default, through its rig),
+## else Vector3.INF when the skeleton has no such bone.
+func hand_position() -> Vector3:
+	if _skeleton == null:
+		return Vector3.INF
+	var b := FigureModels.bone(_skeleton, str(_info.get("cast_hand", CAST_HAND)), _rig_bones)
+	if b < 0:
+		return Vector3.INF
+	return _skeleton.global_transform * _skeleton.get_bone_global_pose(b).origin
 
 
 ## The hurt clip with a flash; the recoil's lean instead when there is no clip, or the figure is busy swinging.
@@ -1142,9 +1217,18 @@ func _lies_on_side() -> bool:
 	return str(_info.get("lie", "")) == "side"
 
 
-## The one-shot clip: its blow lands at `hit`; it ends at `to` (or when the clip runs out).
+## The one-shot clip: its blow lands at `hit`; it ends at `to` (or when the clip runs out). A lead-in or follow-through
+## part ends at its own `to`, a hold after its seconds (_next_part).
 func _clip_step() -> void:
 	var pos := _player.current_animation_position
+	var phase := str(_clip.get("phase", "main"))
+	if phase != "main":
+		var part := _clip[phase] as Dictionary
+		var done := _time >= float(part["until"]) if phase == "hold" else (_player.current_animation != str(part["name"]) \
+				or not _player.is_playing() or pos >= float(part["to"]) - 0.001)
+		if done:
+			_next_part()
+		return
 	var name := str(_clip.get("name", ""))
 	if _attacking and not _struck and pos >= float(_clip["hit"]):
 		_struck = true
@@ -1152,7 +1236,12 @@ func _clip_step() -> void:
 	if _player.current_animation != name or not _player.is_playing() or pos >= float(_clip["to"]) - 0.001:
 		if str(_clip.get("role")) == "die":
 			_player.pause()   # the fall's last frame is how it lies
-		_end_clip()
+			_end_clip()
+			return
+		if _attacking and not _struck:
+			_struck = true
+			struck.emit()
+		_next_part()
 
 
 ## A footfall each time the walk passes one of its low points (two a cycle when the clip shows none).

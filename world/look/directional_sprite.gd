@@ -330,6 +330,16 @@ func cast() -> bool:
 	return _play_once("cast", true)
 
 
+## Gathering a spell right now (a 3D figure's cast before it throws; ModelFigure). A drawn sprite says no.
+func is_gathering() -> bool:
+	return false
+
+
+## Where the casting hand is in the world (a 3D figure's hand bone; ModelFigure), Vector3.INF for a drawn sprite.
+func hand_position() -> Vector3:
+	return Vector3.INF
+
+
 ## Flinches from a blow and recovers (no hit frame). False when the sheet has no flinch or the figure is lying down.
 func hurt() -> bool:
 	recoil()
