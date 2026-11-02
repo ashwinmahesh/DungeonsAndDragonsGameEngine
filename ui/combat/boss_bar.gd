@@ -200,6 +200,13 @@ func _words(c: Combatant) -> String:
 	if resist > 0:
 		var used := int(c.get_meta("legendary_resistance_used", 0))
 		parts.append("Legendary Resistance %s" % ("◆".repeat(maxi(resist - used, 0)) + "◇".repeat(mini(used, resist))))
+	# A Damage Threshold that counts the living (Blazing Ardor: 10 x the Chosen left): shown so players learn to cut
+	# it down. Its name is the block's `damage_threshold_label` (else "Damage Threshold").
+	if e != null and c.creature is Monster and (c.creature as Monster).data.has("damage_threshold"):
+		var data := (c.creature as Monster).data
+		var now := e.legendary.counted(data["damage_threshold"])
+		if now > 0:
+			parts.append("%s %d" % [str(data.get("damage_threshold_label", "Damage Threshold")), now])
 	return "  ·  ".join(parts)
 
 

@@ -86,7 +86,8 @@ only while that head lives.
 
 `damage_threshold` on a stat block: less damage than that from one source does nothing (2024 DMG). A number, or
 arithmetic counting the living, "5 * alive:<stat block>" (Legendary.counted: a boss whose hide hardens with each minion
-still standing).
+still standing). A boss's bar shows it as it stands, named by `damage_threshold_label` ("Ardor 30"; else "Damage
+Threshold"), so players learn to cut it down.
 
 ## Decoy images
 

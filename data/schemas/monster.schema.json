@@ -1025,6 +1025,10 @@
       "description": "Damage Threshold: less damage than this from one source does nothing. A number, or arithmetic counting the living (\"5 * alive:<stat block>\").",
       "anyOf": [{"type": "integer", "minimum": 1}, {"type": "string", "pattern": "alive:"}]
     },
+    "damage_threshold_label": {
+      "type": "string",
+      "description": "What the boss bar calls its Damage Threshold (\"Ardor\"); \"Damage Threshold\" when unset."
+    },
     "id": {
       "$ref": "common.schema.json#/$defs/id"
     },
