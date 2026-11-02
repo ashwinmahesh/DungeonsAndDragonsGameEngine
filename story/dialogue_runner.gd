@@ -296,6 +296,15 @@ func next() -> Dictionary:
 				var healed := _heal(s)
 				if healed != "":
 					return {"kind": "notice", "text": healed}
+			"boon":
+				pc += 1
+				var raised: Array[String] = []
+				for ch in _receivers(bool(s["party"])):
+					var by := StoryBoons.raise_ability(ch, str(s["ability"]), int(s["amount"]), _boon_source())
+					if by > 0:
+						raised.append("%s %+d %s" % [_first(ch), by, str(s["ability"]).to_upper()])
+				if not raised.is_empty():
+					return {"kind": "notice", "text": ", ".join(raised)}
 			"exhaust":
 				pc += 1
 				var tired := _exhaust(s)
@@ -549,6 +558,12 @@ func _chosen(who: String) -> Array[Character]:
 			out.append(ch)
 			break
 	return out
+
+
+## What a story boon is named for on the sheet: the conversation's speaker, else the story.
+func _boon_source() -> String:
+	var who := Compendium.shared().display_name("npcs", npc_id) if npc_id != "" else ""
+	return "A gift (%s)" % who if who != "" else "A gift of the story"
 
 
 func _receivers(party: bool, failed: bool = false) -> Array[Character]:

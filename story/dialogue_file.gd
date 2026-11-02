@@ -250,6 +250,11 @@ static func _statement(line: String, re_line: RegEx, re_option: RegEx, re_tag: R
 				var mins := 0 if span in ["", "next"] else int(span.left(-1)) * (60 if span.ends_with("h") else 1)
 				return {"t": "edge", "kind": "dis" if parts[0] == "disadvantage" else "adv", "skill": me.get_string(1), "minutes": mins,
 					"why": me.get_string(3).strip_edges()}
+		"boon":
+			# `boon <ability> +<n> [party]`: an ability score raised for good, past 20 up to the campaign's limit (StoryBoons).
+			if parts.size() >= 3 and parts[1] in ["str", "dex", "con", "int", "wis", "cha"] \
+					and RegEx.create_from_string("^\\+[1-9]$").search(parts[2]) != null and _words_of(Array(parts.slice(3)), ["party"]):
+				return {"t": "boon", "ability": parts[1], "amount": int(parts[2]), "party": parts.size() == 4}
 		"exhaust":
 			# `exhaust <+n|-n> [party|failed]`: Exhaustion levels gained or lost (docs/contracts/dialogue.md).
 			if parts.size() >= 2 and RegEx.create_from_string("^[+-][1-6]$").search(parts[1]) != null and _words_of(Array(parts.slice(2)), ["party", "failed"]):
