@@ -162,3 +162,89 @@ func test_a_trackpad_pinches_to_zoom_and_swipes_to_turn() -> void:
 	rig._unhandled_input(swipe)
 	assert_between(rig.distance, before + 2 * CameraRig.PAN_ZOOM - 0.01, before + 2 * CameraRig.PAN_ZOOM + 0.01, "a swipe down zooms out")
 	rig.free()
+
+
+func test_a_game_of_3d_figures_tilts_from_the_ground_to_straight_down() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true, "tilt": [10, 85]}})
+	var rig := _rig()
+	assert_eq(rig.tilt_range, Vector2(10, 85), "a wide range is kept, not squeezed into the sprites' pitch range")
+	rig.tilt_by(200.0)
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -85.01, -84.99, "tilted down, no steeper than 85")
+	rig.tilt_by(-200.0)
+	rig.snap_to_target()
+	assert_between(rig.camera.rotation_degrees.x, -10.01, -9.99, "tilted up, no flatter than 10")
+	Campaign.use_config({"camera": {"tilt": [0, 120]}})
+	assert_eq(CameraRig.tilt_limits(), CameraRig.TILT_RANGE, "never under the ground or past straight down")
+	rig.free()
+
+
+func test_a_fight_keeps_the_view_steep_enough_for_the_grid() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true, "tilt": [10, 85], "fight_tilt": 25}})
+	assert_eq(CameraRig.fight_floor(), 25.0, "the campaign's floor")
+	var rig := _rig()
+	rig.tilt_by(-200.0)
+	assert_eq(rig.pitch_deg, -10.0, "exploring, it goes as low as the game allows")
+	rig.tilt_floor = CameraRig.fight_floor()
+	rig._process(2.0)
+	assert_eq(rig.pitch_deg, -25.0, "a fight eases it up to its floor")
+	rig.tilt_by(-200.0)
+	assert_eq(rig.pitch_deg, -25.0, "and the player can't tilt under it")
+	rig.tilt_by(100.0)
+	assert_eq(rig.pitch_deg, -85.0, "but can still look straight down")
+	rig.tilt_floor = 0.0
+	rig.tilt_by(-200.0)
+	assert_eq(rig.pitch_deg, -10.0, "after the fight, low again")
+	Campaign.use_config({"camera": {"pitch": 30, "fight_tilt": 25}})
+	assert_eq(CameraRig.fight_floor(), 0.0, "no tilt, no floor")
+	rig.free()
+
+
+func test_indoors_the_camera_stays_above_the_walls() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true, "tilt": [10, 85], "fight_tilt": 25, "indoor_tilt": 35}})
+	assert_eq(CameraRig.indoor_floor(), 35.0, "the campaign's indoor floor")
+	var rig := _rig()
+	rig.place_floor = CameraRig.indoor_floor()
+	rig._process(2.0)
+	assert_eq(rig.pitch_deg, -35.0, "arriving inside on a flat view, it eases up to the floor")
+	rig.tilt_floor = CameraRig.fight_floor()
+	rig.tilt_by(-200.0)
+	assert_eq(rig.pitch_deg, -35.0, "a fight inside keeps the steeper of the two")
+	rig.free()
+
+
+func test_the_free_camera_leaves_the_party_and_comes_back() -> void:
+	Campaign.use_config({"camera": {"pitch": 30, "free_turn": true, "free_move": true}})
+	var rig := _rig()
+	var party := Node3D.new()
+	add_child(party)
+	party.global_position = Vector3(5, 0, 5)
+	rig.follow = party
+	rig.bounds = Rect2(0, 0, 10, 10)
+	rig.snap_to_target()
+	var told: Array[bool] = []
+	rig.free_changed.connect(func(on: bool) -> void: told.append(on))
+	rig.toggle_free()
+	assert_true(rig.free_cam, "on")
+	Input.action_press(&"move_right")
+	for i in 60:
+		rig._process(0.1)
+	Input.action_release(&"move_right")
+	assert_true(rig.global_position.distance_to(party.global_position) > 3.0, "the walking keys moved the camera off the party")
+	assert_between(rig.global_position.x, -0.01, 10.01, "kept over the place")
+	assert_between(rig.global_position.z, -0.01, 10.01, "kept over the place")
+	rig.toggle_free()
+	for i in 60:
+		rig._process(0.1)
+	assert_true(rig.global_position.distance_to(party.global_position) < 0.05, "off, it comes back to the party")
+	assert_eq(told, [true, false] as Array[bool], "it says when it goes on and off")
+	party.free()
+	rig.free()
+
+
+func test_no_free_camera_without_the_setting() -> void:
+	Campaign.use_config({"camera": {"pitch": 30}})
+	var rig := _rig()
+	rig.toggle_free()
+	assert_false(rig.free_cam, "a game without free_move keeps the camera on the party")
+	rig.free()

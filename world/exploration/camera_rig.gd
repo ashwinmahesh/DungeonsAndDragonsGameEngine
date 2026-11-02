@@ -8,6 +8,9 @@ extends Node3D
 const PITCH_DEG := -40.0
 ## The pitches a campaign may ask for (degrees down): flatter shows the sky, steeper turns into a map.
 const PITCH_RANGE := Vector2(20.0, 60.0)
+## The tilt a campaign may allow the player (degrees down): from just over the ground to nearly straight down. A game
+## drawn in flat sprites keeps its "tilt" near its pitch (they squash past it); one of 3D figures can ask for all of it.
+const TILT_RANGE := Vector2(5.0, 88.0)
 const ZOOM_MIN := 7.0
 const ZOOM_MAX := 22.0
 ## Past the farthest zoom, the wheel tilts the camera toward the horizon over HORIZON_STEPS more steps (owner pick
@@ -28,8 +31,19 @@ const TACTICAL_ZOOM := 1.45
 const SHAKE_MAX := 0.16
 const SHAKE_FADE := 3.0
 
+## The free camera went on or off (toggle_free).
+signal free_changed(on: bool)
+
 var follow: Node3D
 var camera: Camera3D
+## The free camera (a campaign's "camera": {"free_move": true}; its key camera_free and the bar's button): while it is
+## on the camera leaves the party where it stands and the walking keys (or the left stick) move it over the place, kept
+## inside `bounds`; turning, tilting and zooming work as ever. Off, it eases back to whoever it follows.
+var free_cam := false
+## The place's ground the free camera keeps over (x and z, world units); empty: anywhere.
+var bounds := Rect2()
+## How fast the free camera moves, in its distances a second (further out, faster over the ground).
+const FREE_SPEED := 1.1
 ## This rig's play pitch (degrees, negative: down), the campaign's (play_pitch) unless a tool sets another.
 var pitch_deg := PITCH_DEG
 ## Free turning (a campaign's "camera": {"free_turn": true}): the camera turns to any heading, not in quarter turns.
@@ -42,12 +56,22 @@ const TURN_SPEED := 120.0
 const DRAG_TURN := 0.3
 var _free_yaw := 0.0
 ## How far the player may tilt the camera (degrees down, lowest and highest): a campaign's "camera": {"tilt": [22, 38]},
-## dragged up and down with the middle mouse button. Kept close to the pitch the sprites are drawn for, past which flat
-## figures look squashed or stretched. Zero (the default): no tilt, the pitch stays the campaign's.
+## within TILT_RANGE, dragged up and down with the middle mouse button. A game of flat sprites keeps it close to the
+## pitch they are drawn for, past which they look squashed or stretched. Zero (the default): no tilt, the pitch stays
+## the campaign's.
 var tilt_range := Vector2.ZERO
+## The flattest the camera may be while a fight is on (degrees down), so the battle grid stays readable: a campaign's
+## "camera": {"fight_tilt": 25}. CombatView sets it for the fight (fight_floor) and clears it after; while it is set
+## a flatter view eases up to it. Zero: no floor.
+var tilt_floor := 0.0
+## The flattest the camera may be in this place (degrees down): indoors a low camera looks through room after room of
+## walls, so a campaign's "camera": {"indoor_tilt": 25} keeps it above them where the map isn't outdoors (LocationView
+## sets it). Zero: no floor.
+var place_floor := 0.0
+const FLOOR_EASE := 90.0
 const DRAG_TILT := 0.15
 ## The tilt keys held (camera_tilt_up and camera_tilt_down), in degrees a second.
-const TILT_SPEED := 30.0
+const TILT_SPEED := 45.0
 ## A trackpad (a Mac's has no middle button or wheel; it sends gestures): pinching zooms, a two-finger swipe across turns
 ## the camera (in free turning) and one up or down zooms as the wheel does. Degrees and world units per unit of swipe.
 const PAN_TURN := 6.0
@@ -123,6 +147,20 @@ static func play_pitch() -> float:
 	return -clampf(absf(float((cam as Dictionary)["pitch"])), PITCH_RANGE.x, PITCH_RANGE.y)
 
 
+## Whether this game has the free camera: data/campaign.json's "camera" "free_move" (default false).
+static func free_moves() -> bool:
+	return bool(_camera_setting("free_move", false))
+
+
+## Turns the free camera on or off (`on`; omitted: the other way), in a game that has it.
+func toggle_free(on: Variant = null) -> void:
+	var want := (not free_cam) if on == null else bool(on)
+	if want == free_cam or (want and not free_moves()):
+		return
+	free_cam = want
+	free_changed.emit(free_cam)
+
+
 ## Whether this game's camera turns freely: data/campaign.json's "camera" "free_turn" (default false).
 static func turns_freely() -> bool:
 	var cam: Variant = Campaign.config().get("camera", {})
@@ -136,9 +174,27 @@ static func tilt_limits() -> Vector2:
 	var t: Variant = (cam as Dictionary).get("tilt", []) if cam is Dictionary else []
 	if not t is Array or (t as Array).size() != 2:
 		return Vector2.ZERO
-	var lo := clampf(absf(float((t as Array)[0])), PITCH_RANGE.x, PITCH_RANGE.y)
-	var hi := clampf(absf(float((t as Array)[1])), PITCH_RANGE.x, PITCH_RANGE.y)
+	var lo := clampf(absf(float((t as Array)[0])), TILT_RANGE.x, TILT_RANGE.y)
+	var hi := clampf(absf(float((t as Array)[1])), TILT_RANGE.x, TILT_RANGE.y)
 	return Vector2(minf(lo, hi), maxf(lo, hi))
+
+
+## The flattest a fight's camera may be (data/campaign.json "camera" "fight_tilt", degrees down within TILT_RANGE), or
+## zero for no floor. Only a game with a tilt has one: without it the pitch is the campaign's anyway.
+static func fight_floor() -> float:
+	return _floor_setting("fight_tilt")
+
+
+## The flattest the camera may be indoors (data/campaign.json "camera" "indoor_tilt", degrees down), or zero.
+static func indoor_floor() -> float:
+	return _floor_setting("indoor_tilt")
+
+
+static func _floor_setting(key: String) -> float:
+	var f := float(_camera_setting(key, 0.0))
+	if f <= 0.0 or tilt_limits() == Vector2.ZERO:
+		return 0.0
+	return clampf(absf(f), TILT_RANGE.x, TILT_RANGE.y)
 
 
 static func _camera_setting(key: String, default: Variant) -> Variant:
@@ -182,7 +238,12 @@ func sweep(degrees: float, seconds := 1.6) -> void:
 func tilt_by(degrees: float) -> void:
 	if tilt_range == Vector2.ZERO:
 		return
-	pitch_deg = -clampf(-pitch_deg + degrees, tilt_range.x, tilt_range.y)
+	pitch_deg = -clampf(-pitch_deg + degrees, maxf(tilt_range.x, minf(floor_now(), tilt_range.y)), tilt_range.y)
+
+
+## The flattest the camera may be now (degrees down): a fight's floor or the place's, whichever is steeper.
+func floor_now() -> float:
+	return maxf(tilt_floor, place_floor)
 
 
 ## Puts the view back: the campaign's pitch, the heading the view started on (a free turn or a touch twist undone; the
@@ -279,6 +340,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return   # exploring, the stick clicks sneak and switch turn-based; the right stick turns the camera
 	if event.is_action_pressed(&"camera_tactical"):
 		tactical = not tactical
+	elif InputMap.has_action(&"camera_free") and event.is_action_pressed(&"camera_free") and free_moves():
+		toggle_free()
 	elif event.is_action_pressed(&"camera_reset"):
 		reset_view()
 	elif free_turn and (event.is_action(&"camera_rotate_left") or event.is_action(&"camera_rotate_right")):
@@ -307,7 +370,12 @@ func _process(delta: float) -> void:
 		var tilting := Input.get_axis(&"camera_tilt_up", &"camera_tilt_down")
 		if tilting != 0.0:
 			tilt_by(tilting * TILT_SPEED * delta)
-	if follow:
+	var lowest := floor_now()
+	if lowest > 0.0 and -pitch_deg < lowest:
+		pitch_deg = move_toward(pitch_deg, -lowest, FLOOR_EASE * delta)   # a fight began, or the party went in, on a flat view
+	if free_cam:
+		_fly(delta)
+	elif follow:
 		global_position = global_position.lerp(follow.global_position + touch_offset, clampf(delta * 6.0, 0.0, 1.0))
 	var goal := _goal_yaw()
 	_yaw = lerp_angle(_yaw, goal, clampf(delta * 9.0, 0.0, 1.0))
@@ -316,6 +384,21 @@ func _process(delta: float) -> void:
 	tactical_shown = move_toward(tactical_shown, 1.0 if tactical else 0.0, delta * 3.0)
 	_shake(delta)
 	_apply()
+
+
+## The free camera this frame: the walking keys move it along the ground as the camera faces, inside `bounds`.
+func _fly(delta: float) -> void:
+	if not is_inside_tree() or not InputMap.has_action(&"move_left"):
+		return
+	var v := Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
+	if v.length() < 0.1:
+		return
+	var b := ground_basis()
+	var at := global_position + (b[0] * -v.y + b[1] * v.x) * distance * FREE_SPEED * delta
+	if bounds.has_area():
+		at.x = clampf(at.x, bounds.position.x, bounds.end.x)
+		at.z = clampf(at.z, bounds.position.y, bounds.end.y)
+	global_position = at
 
 
 ## The idle drift: the party still for a few seconds lets the view breathe; it settles as soon as anyone moves.

@@ -70,6 +70,11 @@ const TILT_CONTROL := "Camera: {camera_tilt_up} / {camera_tilt_down} tilt it (or
 var _controls: PanelContainer
 var _control_lines: Array[Label] = []
 
+## Added to the card when the campaign has the free camera (CameraRig.free_moves).
+const FREE_CONTROL := "Free camera: {camera_free} (or the bar's camera) lets the camera go from the party; {walk} move it, and {camera_free} again brings it back."
+## The bar's free camera button, in a game that has it (CameraRig.free_moves), before the Menu.
+const FREE_BUTTON := ["Free camera", "camera_free", "camera", "camera"]
+
 ## [label, key (an InputActions action, or the key itself), command, icon (art/ui/icons)]
 const BUTTONS := [["Character", "open_sheet", "sheet", "character"], ["Inventory", "open_inventory", "inventory", "inventory"],
 	["Journal", "open_journal", "journal", "journal"], ["Party", "open_party", "party", "party"], ["Map", "open_map", "map", "map"],
@@ -235,6 +240,8 @@ func build(state: StoryState) -> void:
 	var lines: Array[String] = CONTROLS.duplicate()
 	if CameraRig.tilt_limits() != Vector2.ZERO:
 		lines.append(TILT_CONTROL)
+	if CameraRig.free_moves():
+		lines.append(FREE_CONTROL)
 	for line: String in lines:
 		var l := _label(line, 15, "vellum")
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -288,7 +295,10 @@ func build(state: StoryState) -> void:
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bar.add_theme_constant_override("separation", 6)
 	plate.add_child(bar)
-	for b: Array in BUTTONS:
+	var rows: Array = BUTTONS.duplicate()
+	if CameraRig.free_moves():
+		rows.insert(rows.size() - 1, FREE_BUTTON)
+	for b: Array in rows:
 		var cmd := str(b[2])
 		var btn := UiKit.button("", func() -> void:
 			pad_bar(false)   # a button pressed from the bar on a pad hands the pad back to the world
@@ -813,6 +823,14 @@ func _show_keys(on: Dictionary = {}) -> void:
 		b.tooltip_text = ("%s (%s)" % [row[0], shown] if shown != "" else str(row[0])) + (" · on" if bool(on.get(cmd, false)) else "")
 	for l in _control_lines:
 		l.text = PadGlyphs.names(InputActions.fill(str(l.get_meta(&"template"))))
+
+
+## The bar's free camera button reads as on while the free camera is (CameraRig.free_changed).
+func show_free_camera(on: bool) -> void:
+	var b := _bar_buttons.get("camera", null) as Button
+	if b != null:
+		b.modulate = Color(1.25, 1.12, 0.8) if on else Color.WHITE
+		_show_keys({"camera": on})
 
 
 func controls_showing() -> bool:

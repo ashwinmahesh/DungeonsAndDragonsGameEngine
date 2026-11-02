@@ -21,6 +21,8 @@ const BINDINGS := {
 	&"camera_tilt_up": [KEY_COMMA, KEY_PAGEUP],
 	&"camera_tilt_down": [KEY_PERIOD, KEY_PAGEDOWN],
 	&"camera_reset": [KEY_BACKSLASH, KEY_HOME],
+	# The free camera, in a game that has it (CameraRig.free_moves): no key unless the game gives it one ("keys").
+	&"camera_free": [],
 	&"cycle_leader": [KEY_TAB],
 	&"select_member_1": [KEY_1],
 	&"select_member_2": [KEY_2],
@@ -83,6 +85,7 @@ const COMMANDS := [
 	[&"camera_tilt_up", "Tilt the camera up (flatter)", "both"],
 	[&"camera_tilt_down", "Tilt the camera down (steeper)", "both"],
 	[&"camera_reset", "Put the camera back (angle and heading)", "both"],
+	[&"camera_free", "Free camera on and off (the walking keys move it)", "both"],
 	[&"cycle_leader", "Next party member", "both"],
 	[&"select_member_1", "Lead: first", "explore"],
 	[&"select_member_2", "Lead: second", "explore"],
@@ -209,6 +212,30 @@ const KEY_NAMES := {KEY_BRACKETLEFT: "[", KEY_BRACKETRIGHT: "]", KEY_ESCAPE: "Es
 	KEY_CTRL: "Ctrl", KEY_META: "Cmd", KEY_CAPSLOCK: "Caps Lock", KEY_BACKSPACE: "Backspace"}
 
 static var _keys_set := false
+## A game's own default keys (data/campaign.json "keys": {action: ["W", "Page Up"]}, key names as Godot reads them):
+## they replace BINDINGS' for those actions, as the defaults the Keys page resets to. The player's own keys still go
+## over them. Read once per config (Campaign.use_config swaps it in tests).
+static var _game_defaults: Dictionary = {}
+static var _game_defaults_of: Dictionary = {}
+
+
+## `action`'s default keys: the game's (campaign "keys") or the engine's (BINDINGS).
+static func _defaults_src(action: StringName) -> Array:
+	var cfg := Campaign.config()
+	if not is_same(cfg, _game_defaults_of):
+		_game_defaults_of = cfg
+		_game_defaults = {}
+		var given: Variant = cfg.get("keys", {})
+		if given is Dictionary:
+			for a: Variant in given:
+				var out: Array = []
+				for k: Variant in (given[a] as Array if given[a] is Array else []):
+					var code := OS.find_keycode_from_string(str(k))
+					if code == KEY_NONE:
+						push_warning("campaign keys: '%s' for %s is no key" % [k, a])
+					out.append(code)
+				_game_defaults[StringName(str(a))] = out
+	return (_game_defaults[action] if _game_defaults.has(action) else BINDINGS.get(action, [])) as Array
 
 
 static func ensure() -> void:
@@ -268,7 +295,7 @@ static func apply() -> void:
 ## An action's keys now: [key, alternate], KEY_NONE where there's none.
 static func keys(action: StringName) -> Array[int]:
 	var saved := GameSettings.value("keys", {}) as Dictionary
-	var src := (saved[str(action)] if saved.has(str(action)) else BINDINGS.get(action, [])) as Array
+	var src := (saved[str(action)] if saved.has(str(action)) else _defaults_src(action)) as Array
 	var out: Array[int] = [KEY_NONE, KEY_NONE]
 	for i in mini(src.size(), 2):
 		out[i] = int(src[i])
@@ -367,7 +394,7 @@ static func _store(action: StringName, k: Array[int]) -> void:
 
 
 static func keys_default(action: StringName) -> Array[int]:
-	var src := BINDINGS.get(action, []) as Array
+	var src := _defaults_src(action)
 	var out: Array[int] = [KEY_NONE, KEY_NONE]
 	for i in mini(src.size(), 2):
 		out[i] = int(src[i])
@@ -399,7 +426,9 @@ static func fill(text: String) -> String:
 		keys_now.append(key_text(a))
 		alts.append(key_text(a, 1))
 	var walk := " ".join(keys_now)
-	if alts == PackedStringArray(["Up", "Left", "Down", "Right"]):
+	if keys_now == PackedStringArray(["Up", "Left", "Down", "Right"]) and alts == PackedStringArray(["", "", "", ""]):
+		walk = "the arrows"   # (a game that gives WASD to the camera)
+	elif alts == PackedStringArray(["Up", "Left", "Down", "Right"]):
 		walk += " or the arrows"
 	elif not alts.has(""):
 		walk += " or " + " ".join(alts)

@@ -127,6 +127,8 @@ func begin(encounter: Encounter, board_: ArenaBoard, rig_: CameraRig, tokens_: D
 	e = encounter
 	board = board_
 	rig = rig_
+	rig.tilt_floor = CameraRig.fight_floor()
+	rig.toggle_free(false)   # the fight moves the camera itself (the walking keys pan it)   # a game that tilts low keeps the fight's view steep enough to read the grid
 	tokens = tokens_
 	for id: Variant in tokens:
 		var own := tokens[id] as CombatToken
@@ -439,6 +441,8 @@ func _think(c: Combatant) -> Dictionary:
 
 func _exit_tree() -> void:
 	_closed = true
+	if is_instance_valid(rig):
+		rig.tilt_floor = 0.0   # exploring tilts as low as the game allows again
 	if _thinker != null:
 		_thinker.wait_to_finish()   # a plan still being made as the view goes (a load from the menu)
 		_thinker = null

@@ -186,6 +186,9 @@ func _ready() -> void:
 	rig.zoom_max = 30.0
 	rig.distance = 13.0
 	rig.rotate_step(-1)
+	rig.bounds = Rect2(0.0, 0.0, float(grid.width), float(grid.depth))   # the free camera keeps over the place
+	if not bool((loc["map"] as Dictionary).get("outdoors", false)):
+		rig.place_floor = CameraRig.indoor_floor()   # indoors the camera stays above the walls (a game that tilts low)
 	rig.camera.current = true
 	post = Look.make_post_process()
 	rig.camera.add_child(post)
