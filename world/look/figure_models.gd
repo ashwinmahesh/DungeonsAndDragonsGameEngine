@@ -13,6 +13,7 @@ extends RefCounted
 ## (picked in turn for variety), or {"clip", "from", "to", "hit", "speed", "loop"}: a part of a long clip, from and to
 ## in seconds, the moment the blow lands (`hit`, seconds into the clip) and how fast it plays. A manifest's "defaults"
 ## entry is under every figure's (its `clips` merged role by role): models made one way share their preset clips.
+## `tint` (a palette name or "#rrggbb") multiplies the figure's surfaces by that colour (FigureModels.tint_of).
 ## Other keys are the game's own (its import tool's `source`), never read here.
 ##
 ## Layers (docs/reference/art/figures.md, "Layers"): a figure can wear parts on its own skeleton. The manifest's "parts"
@@ -143,6 +144,17 @@ static func albedo_of(art_id: String) -> Texture2D:
 	if rel == "" or not ArtPaths.exists(rel):
 		return null
 	return load(ArtPaths.of(rel)) as Texture2D
+
+
+## The colour an entry multiplies its surfaces by (`tint`: a palette name or a "#rrggbb"), white (no change) without one. With `base`
+## it dresses a shared body in a colour of its own, and with `albedo` it tints that picture.
+static func tint_of(art_id: String) -> Color:
+	var spec := str(info(art_id).get("tint", ""))
+	if spec == "":
+		return Color.WHITE
+	if spec.begins_with("#"):
+		return Color(spec)
+	return Look.color(spec)
 
 
 ## The model's scene (a `base` entry's is its base's), or null.

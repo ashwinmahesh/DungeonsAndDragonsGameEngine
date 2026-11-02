@@ -91,6 +91,8 @@ var _lie := 0.0
 var _lie_to := 0.0
 var _fell_by_clip := false
 var _shown_modulate := Color(-1, -1, -1, -1)
+## The entry's own `tint` (FigureModels.tint_of), multiplied into the modulate: white, no change, unless the manifest asks.
+var _base_tint := Color.WHITE
 var _walk_at := -1.0
 var _tilt := 0.0
 var _tilt_v := 0.0
@@ -181,6 +183,8 @@ static func rest_box(root: Node3D) -> AABB:
 ## Materials are shared by every copy of a model; what's a figure's own (its fade, flash, glow) is per instance.
 func _dress() -> void:
 	var paint := FigureModels.albedo_of(art_id)
+	_base_tint = FigureModels.tint_of(art_id)
+	_shown_modulate = Color(-1, -1, -1, -1)   # (so the tint goes on at the next frame whatever the modulate)
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		if mi.mesh == null:
@@ -1029,7 +1033,7 @@ func _show_modulate() -> void:
 	if modulate == _shown_modulate:
 		return
 	_shown_modulate = modulate
-	_each_mesh("tint", Vector4(modulate.r, modulate.g, modulate.b, modulate.a))
+	_each_mesh("tint", Vector4(modulate.r * _base_tint.r, modulate.g * _base_tint.g, modulate.b * _base_tint.b, modulate.a))
 
 
 ## Turns toward `facing`, the short way round; the first time at once.
