@@ -20,6 +20,8 @@ func test_defaults_change_nothing() -> void:
 	for k: String in ["knockback", "breath", "spell_light", "spell_reach"]:
 		assert_eq(GameFeel.num(k), 1.0, "%s as it was" % k)
 	assert_false(FxShapes.on(), "no shapes")
+	assert_true(GameFeel.flag("kill_splash"), "a kill keeps its splash wherever shapes are on")
+	assert_false(GameFeel.flag("strike_on_hit_frame"), "a melee blow lands after the step in and back, as before")
 
 
 func test_unknown_keys_are_ignored() -> void:
@@ -169,3 +171,11 @@ func test_spells_and_falls_mark_the_ground_through_ground_marks() -> void:
 		var last := parent.get_child(parent.get_child_count() - 1) as Decal
 		assert_true(last.modulate.is_equal_approx(Look.color("bog")), "the undead leave ichor")
 	parent.free()
+
+
+func test_melee_kinds_and_the_campaign_hook() -> void:
+	assert_eq(SpellFx.melee_kind(null, "weapon:unarmed_strike"), "unarmed", "an Unarmed Strike")
+	assert_eq(SpellFx.melee_kind(null, "weapon:mace"), "blunt", "a mace")
+	assert_eq(SpellFx.melee_kind(null, "weapon:rapier"), "point", "a rapier")
+	assert_eq(SpellFx.melee_kind(null, "weapon:longsword"), "blade", "a longsword")
+	assert_false(CampaignLook.new().melee_hit(null, {}, null, null, false, "blade"), "the base look keeps the engine's slash")

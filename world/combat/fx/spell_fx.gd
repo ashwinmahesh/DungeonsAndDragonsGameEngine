@@ -429,13 +429,22 @@ func smite(spell_id: String, caster: CombatToken, target: CombatToken) -> void:
 	await wait(0.18)
 
 
-## A blow from `attacker` lands on `target` (a slash or touch cue from `attack_cue`).
-func on_hit(cue: Dictionary, attacker: CombatToken, target: CombatToken, critical: bool) -> void:
+## A blow from `attacker` lands on `target` (a slash or touch cue from `attack_cue`; `action` is the attack event's).
+## A campaign may draw a melee blow its own way (CampaignLook.melee_hit).
+func on_hit(cue: Dictionary, attacker: CombatToken, target: CombatToken, critical: bool, action: String = "") -> void:
 	if str(cue["family"]) == "slash":
-		FxBodies.slash(self, cue, attacker, target, critical)
+		if not CampaignLook.current().melee_hit(self, cue, attacker, target, critical, melee_kind(attacker, action)):
+			FxBodies.slash(self, cue, attacker, target, critical)
 	else:
 		FxMissiles.impact(self, cue, SpellFx.chest(target), 0.7)
 	SpellMarks.spot(self, cue, target.global_position, 0.8)
+
+
+## What kind of melee blow `action` is, for its look: CombatSfx.hit_kind's ("blade", "point", "blunt"), or "unarmed".
+static func melee_kind(attacker: CombatToken, action: String) -> String:
+	if action.get_slice(":", 1).get_slice("@", 0) == "unarmed_strike":
+		return "unarmed"
+	return CombatSfx.hit_kind(attacker.combatant if attacker != null else null, action)
 
 
 ## A creature appeared (summoned, conjured, called): a circle opens under it in the last cast's colours.

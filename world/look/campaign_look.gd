@@ -88,3 +88,12 @@ func dress_place(_view: LocationView) -> void:
 ## The place's lights and glows, every quarter second and whenever someone starts or stops speaking.
 func refresh(_view: LocationView) -> void:
 	pass
+
+
+# --- Combat ---------------------------------------------------------------------------------------------------------
+
+## A melee blow landing on `target` (SpellFx.on_hit, a "slash" cue: a blade, a point, a club or a fist). `kind` is
+## CombatSfx.hit_kind's ("blade", "point", "blunt") or "unarmed" for an Unarmed Strike. True when the campaign drew the
+## blow its own way, so the engine's slash is left out; false (this base) keeps the engine's.
+func melee_hit(_fx: SpellFx, _cue: Dictionary, _attacker: CombatToken, _target: CombatToken, _critical: bool, _kind: String) -> bool:
+	return false

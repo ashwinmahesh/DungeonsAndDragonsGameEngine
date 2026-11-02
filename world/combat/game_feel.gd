@@ -18,12 +18,16 @@ extends RefCounted
 ##   shapes: drawn shapes (slash crescents, burst stars, ink splashes, speed lines) over blows and impacts, animated
 ##     on twos (shape_fps a second). The art comes from art/vfx/shapes/<kind>.png (the game's, else the engine's
 ##     procedural fallback); shape_size is times their size.
+##   kill_splash: with shapes on, an ink splash over a creature felled by a blow (false for none).
+##   strike_on_hit_frame: a melee blow's effect and its impact moment (hit-stop, camera kick) land on the swing's hit
+##     frame, not after the attacker's step in and back (false: after, as the engine always did).
 const DEFAULTS := {
 	"hit_stop": {}, "kick": 0.0, "flash": 0.0, "flash_seconds": 0.12, "knockback": 1.0,
 	"dip": {}, "impact_frame": 0, "impact_ink": "void", "impact_paper": "parchment",
 	"breath": 1.0, "sway": 0.0,
 	"spell_light": 1.0, "spell_reach": 1.0, "spell_shadows": false,
-	"shapes": false, "shape_fps": 12.0, "shape_size": 1.0,
+	"shapes": false, "shape_fps": 12.0, "shape_size": 1.0, "kill_splash": true,
+	"strike_on_hit_frame": false,
 }
 ## The share of a target's Hit Points a blow takes from which it is medium and heavy (under medium it is light).
 const MEDIUM_SHARE := 0.12

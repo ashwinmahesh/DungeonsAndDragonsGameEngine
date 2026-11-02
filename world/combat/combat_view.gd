@@ -2247,6 +2247,10 @@ func _play_events() -> void:
 					var shoots := not acue.is_empty() and str(acue["family"]) in SpellFx.MISSILES and str(acue["family"]) != "touch"
 					# The drawn attack winds up, then the token steps in on the blow; without one, just the step.
 					var drawn := not flew and str(ev["attacker"]) != cast_by and a.start_attack(Vector2(dir.x, dir.z))
+					# A game may land a melee blow on the swing's hit frame (GameFeel strike_on_hit_frame): its effect and
+					# impact moment play there, not after the step in and back.
+					var on_frame := not flew and not shoots and GameFeel.flag("strike_on_hit_frame")
+					var landed := false
 					if drawn:
 						await a.wait_for_strike()
 						if _cap_tool != null and not _cap_swing_done:
@@ -2260,11 +2264,17 @@ func _play_events() -> void:
 					elif not flew:
 						var tw2 := create_tween()
 						tw2.tween_property(a, "position", home + dir.normalized() * (0.15 if drawn else 0.3), 0.1)
+						if on_frame:
+							if not drawn:
+								await tw2.finished   # no drawn swing: the blow lands at the end of the lunge
+								tw2 = create_tween()
+							landed = true
+							final_played = _melee_lands(acue, a, d, ev, events, ev_at, final_fall) or final_played
 						tw2.tween_property(a, "position", home, 0.12)
 						await tw2.finished
-						if not acue.is_empty() and bool(ev["hit"]):
-							fx.on_hit(acue, a, d, bool(ev.get("critical", false)))
-					if bool(ev["hit"]):
+						if not landed and not acue.is_empty() and bool(ev["hit"]):
+							fx.on_hit(acue, a, d, bool(ev.get("critical", false)), str(ev.get("action", "")))
+					if bool(ev["hit"]) and not landed:
 						var struck: Array[CombatToken] = [d]
 						final_played = _impact_on(struck, events, ev_at, final_fall, bool(ev.get("critical", false)), a.global_position) or final_played
 					# A blow sounds by what struck and how hard it landed, or by its own "hit" sounds (CombatSfx.blow); a
@@ -2766,6 +2776,18 @@ func _spell_spot(ev: Dictionary, caster: CombatToken) -> Vector3:
 ## victims are whoever its damage that follows hits). CombatImpact gives the moment its weight: the last foe's fall
 ## in slow motion, else the hardest-hit creature's (a kill first, then the most damage) push-in or freeze. A kill
 ## pushes in only on a single victim. True if it played the last foe's fall. `from`: where the blow came from.
+## A melee blow from `a` lands on `d` on its hit frame (GameFeel strike_on_hit_frame): its effect, then its impact
+## moment. Returns whether the fight's last fall played.
+func _melee_lands(acue: Dictionary, a: CombatToken, d: CombatToken, ev: Dictionary, events: Array, ev_at: int, final_fall: int) -> bool:
+	if not bool(ev["hit"]):
+		return false
+	var critical := bool(ev.get("critical", false))
+	if not acue.is_empty():
+		fx.on_hit(acue, a, d, critical, str(ev.get("action", "")))
+	var struck: Array[CombatToken] = [d]
+	return _impact_on(struck, events, ev_at, final_fall, critical, a.global_position)
+
+
 func _impact_on(struck: Array[CombatToken], events: Array, at: int, final_fall: int, critical: bool, from: Vector3 = Vector3.INF) -> bool:
 	if not CombatImpact.on():
 		return false

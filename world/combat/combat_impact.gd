@@ -203,7 +203,7 @@ func _feel(target: Node3D, from: Vector3, w: String) -> void:
 		if dir == Vector2.ZERO:
 			dir = Vector2(0.0, -1.0)   # no way to tell: a jolt down, as a weight landing
 		rig.impulse(dir, kick * GameFeel.strength(w))
-	if w == "kill" and target.get_parent() is Node3D:
+	if w == "kill" and GameFeel.flag("kill_splash") and target.get_parent() is Node3D:
 		# A game's drawn ink splash over the fallen (FxShapes).
 		FxShapes.play(target.get_parent() as Node3D, "splash", target.global_position + Vector3(0, 0.8, 0),
 			{"core": Look.color("vampire_red"), "glow": Look.color("blood")}, 1.6, 0.0, GameSettings.combat_pace())
