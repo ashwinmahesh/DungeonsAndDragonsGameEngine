@@ -241,3 +241,20 @@ func test_a_story_boon_raises_a_score_to_the_campaigns_limit() -> void:
 	for i in 6:
 		StoryBoons.raise_ability(other, "int", 2, "A gift")
 	assert_eq(other.ability_score(&"int"), 20, "the engine's limit without the setting")
+
+
+func test_the_moons_size_follows_the_story() -> void:
+	var cfg := (Campaign.config() as Dictionary).duplicate(true)
+	var cal := (cfg.get("calendar", {}) as Dictionary).duplicate(true)
+	cal["moon"] = {"size": 1.0, "brightness": 1.0, "nights": [{"size": 1.1}],
+		"stages": [{"when": "flag.test_moon_falls >= 2", "size": 3.0, "brightness": 1.5}, {"when": "flag.test_moon_falls >= 1", "size": 2.0}]}
+	cfg["calendar"] = cal
+	Campaign.use_config(cfg)
+	var st := StoryState.new()
+	assert_eq(Calendar.moon(1, st)["size"], 1.1, "the nights' cycle while no stage holds")
+	st.set_flag("test_moon_falls", 1)
+	assert_eq(Calendar.moon(1, st)["size"], 2.0)
+	st.set_flag("test_moon_falls", 2)
+	assert_eq([Calendar.moon(1, st)["size"], Calendar.moon(1, st)["brightness"]], [3.0, 1.5], "the first stage that holds")
+	assert_eq(Calendar.moon(1)["size"], 1.1, "without the story, as before")
+	Campaign.use_config(null)

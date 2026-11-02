@@ -36,7 +36,7 @@ engine's default, which is how the first game (Curse of Strahd) played.
 | `weather` | the first game's | The climates file (story/weather.gd) |
 | `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
 | `reading` | the first game's deck | See "The reading" below (`ReadingDeck`) |
-| `calendar` | the engine's day | Night 19:00-06:00, dusk 18:00, dawn 06:00, a 18:00 start, no hour names, one moon. Under `eternal_night` it is always night (no sun); named hours show in every clock ("22:15 · the Witching Hour"), may set their own look (`phase`: day, dusk, night, dawn) and may be used in an NPC's `hours`; `dawn` and `dusk` are when items' charges come back, `words` what the screens call them; the moon's `nights` cycle one a day and size its disc and brighten its key light outdoors (`Calendar`) |
+| `calendar` | the engine's day | Night 19:00-06:00, dusk 18:00, dawn 06:00, a 18:00 start, no hour names, one moon. Under `eternal_night` it is always night (no sun); named hours show in every clock ("22:15 · the Witching Hour"), may set their own look (`phase`: day, dusk, night, dawn) and may be used in an NPC's `hours`; `dawn` and `dusk` are when items' charges come back, `words` what the screens call them; the moon's `nights` cycle one a day and size its disc and brighten its key light outdoors (`Calendar`), and its `stages` ([{when, size, brightness}], the first whose condition holds) set them from the story over the cycle (a moon that swells as it falls); its face is the painted look's `moon_face` |
 
 Paths the first game used are its defaults (`Campaign.LEGACY`); a new game names its own.
 

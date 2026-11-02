@@ -757,7 +757,7 @@ static func _footprint_textures() -> Array[Texture2D]:
 const MOON_SHOWS := {"night": 1.0, "dusk": 0.45, "dawn": 0.45, "day": 0.12}
 ## The campaign's moon tonight (Calendar.moon: its disc's size and brightness by the night), {} for the plain moon.
 func _moon_tonight() -> Dictionary:
-	return Calendar.moon(GameState.story.day) if GameState.story != null else {}
+	return Calendar.moon(GameState.story.day, GameState.story) if GameState.story != null else {}
 
 
 ## How bright the moon's key light and disc are at phase `p`: the night's moon outdoors at night, else 1.

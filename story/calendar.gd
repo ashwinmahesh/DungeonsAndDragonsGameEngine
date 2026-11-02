@@ -116,8 +116,10 @@ static func start_minute() -> int:
 	return _at("start")
 
 
-## The moon on `day`: {size, brightness} (each 1.0 for the engine's moon).
-static func moon(day: int) -> Dictionary:
+## The moon on `day`: {size, brightness} (each 1.0 for the engine's moon). With `st`, the calendar moon's `stages`
+## ([{when, size, brightness}], the first whose condition holds) set it from the story over the nights' cycle: a moon
+## that swells as it falls toward the world.
+static func moon(day: int, st: StoryState = null) -> Dictionary:
 	var m := spec().get("moon", {}) as Dictionary
 	var out := {"size": float(m.get("size", 1.0)), "brightness": float(m.get("brightness", 1.0))}
 	var nights := m.get("nights", []) as Array
@@ -125,6 +127,13 @@ static func moon(day: int) -> Dictionary:
 		var n := nights[posmod(day - 1, nights.size())] as Dictionary
 		out["size"] = float(n.get("size", out["size"]))
 		out["brightness"] = float(n.get("brightness", out["brightness"]))
+	if st != null:
+		for sv: Variant in m.get("stages", []):
+			var stage := sv as Dictionary
+			if StoryConditions.check(str(stage.get("when", "")), st):
+				out["size"] = float(stage.get("size", out["size"]))
+				out["brightness"] = float(stage.get("brightness", out["brightness"]))
+				break
 	return out
 
 
