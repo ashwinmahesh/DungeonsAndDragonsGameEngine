@@ -9,8 +9,12 @@ var scales: Dictionary = {}
 
 
 ## The skeleton's bone called `bone`, ignoring case and a library or armature prefix (mixamorig:Head, which Godot's
-## import makes mixamorig_Head; Armature|Head), or -1.
-static func bone_named(skel: Skeleton3D, bone: String) -> int:
+## import makes mixamorig_Head; Armature|Head), or -1; `rig_bones`, a figure's rig's names (FigureModels.rig_bones), first.
+static func bone_named(skel: Skeleton3D, bone: String, rig_bones: Dictionary = {}) -> int:
+	if not rig_bones.is_empty():   # what the figure's rig calls it (FigureModels.rig_bones), when it says
+		var mapped := FigureModels.bone(skel, bone, rig_bones)
+		if mapped >= 0:
+			return mapped
 	var want := bone.to_lower()
 	for i in skel.get_bone_count():
 		var n := skel.get_bone_name(i).to_lower()
