@@ -1250,7 +1250,8 @@
                     "summon",
                     "take",
                     "text",
-                    "effect"
+                    "effect",
+                    "strike"
                   ]
                 },
                 "affects": {
@@ -1306,7 +1307,6 @@
                 "damage": {
                   "type": "object",
                   "required": [
-                    "dice",
                     "type"
                   ],
                   "properties": {
