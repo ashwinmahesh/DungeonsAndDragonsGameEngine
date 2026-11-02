@@ -8,6 +8,7 @@ const ID := "test_figure"
 
 
 func after_each() -> void:
+	WalkPace.speed_override = -1.0
 	FigureModels.unregister(ID)
 	FigureModels.unregister(ID + "_still")
 	FigureModels.unregister(ID + "_dressed")
@@ -185,6 +186,18 @@ func test_the_attack_lands_its_blow_and_finishes() -> void:
 	still.free()
 
 
+func test_the_animation_speed_quickens_its_clips_but_not_its_talk() -> void:
+	WalkPace.speed_override = 1.5
+	var fig := _figure(1.0, {"clips": {"attack": {"clip": "slash", "speed": 2.0}, "talk": "slash"}})
+	assert_true(fig.attack())
+	assert_between(fig._player.speed_scale, 2.99, 3.01, "its own speed times the animation speed")
+	fig._end_clip()
+	assert_true(fig.gesture("talk"))
+	assert_between(fig._player.speed_scale, 0.99, 1.01, "a talk keeps time with the voice")
+	WalkPace.speed_override = -1.0
+	fig.free()
+
+
 func test_it_falls_and_lies_on_its_back_then_gets_up() -> void:
 	var fig := _figure(1.2)
 	assert_true(fig.die(), "it falls")
@@ -347,7 +360,8 @@ func test_a_creature_with_only_a_walk_that_idles_from_it_stirs_on_it_when_standi
 	await get_tree().process_frame
 	assert_true(fig.has_role("idle"), "the walk stands in for the idle")
 	assert_eq(str(fig._player.current_animation), "walk.001", "so it isn't left in its bind pose")
-	assert_between(fig._player.speed_scale, 0.29, 0.31, "slowed to a stir (ModelFigure.IDLE_STIR)")
+	var stir := ModelFigure.IDLE_STIR * WalkPace.anim()   # the campaign's animation speed on top
+	assert_between(fig._player.speed_scale, stir - 0.01, stir + 0.01, "slowed to a stir (ModelFigure.IDLE_STIR)")
 	fig.set_step_time(1.0 / 0.6)   # half a unit tall: its 1.2-unit stride is 0.6 at this size
 	fig.moving = true
 	await get_tree().process_frame

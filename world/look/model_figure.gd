@@ -150,7 +150,7 @@ func _build() -> void:
 	_read_clips()
 	if not ghostly.is_empty():
 		set_ghost_look(ghostly)
-	_play_loop("idle", 1.0)
+	_play_loop("idle", WalkPace.anim())
 	if _player != null and _player.current_animation != "":
 		# A crowd doesn't breathe in step: each figure starts its idle somewhere of its own.
 		_player.seek(DirectionalSprite._rng.randf() * _player.current_animation_length, true)
@@ -830,7 +830,7 @@ func _play_loop(role: String, rate: float) -> void:
 	var spec := _spec(role) if role != _loop else (_roles.get(role, [{}]) as Array)[0] as Dictionary
 	if spec.is_empty():
 		if role != "idle":
-			_play_loop("idle", 1.0)
+			_play_loop("idle", WalkPace.anim())
 		elif _loop != "idle":
 			# No idle clip (a walk-only rig): stand in the rest pose, breathing (_breath), rather than walking on the spot.
 			_player.stop()
@@ -869,7 +869,7 @@ func _play_role(role: String, lands: bool) -> bool:
 	_rise_to = -1.0   # a clip cuts a getting-up short
 	_player.play(name, BLEND)
 	_player.seek(from, true)
-	_player.speed_scale = float(spec.get("speed", 1.0))
+	_player.speed_scale = float(spec.get("speed", 1.0)) * (1.0 if role == "talk" else WalkPace.anim())
 	return true
 
 
@@ -885,7 +885,7 @@ func _end_clip() -> void:
 		attack_finished.emit()
 	if role == "die" and pose == "down":
 		return   # it lies where the clip left it
-	_play_loop("idle", 1.0)
+	_play_loop("idle", WalkPace.anim())
 
 
 # --- What a DirectionalSprite does ------------------------------------------------------------------------------------
@@ -1017,7 +1017,7 @@ func _process(delta: float) -> void:
 	var role := str(get_meta("walk_role", "walk")) if moving else "idle"
 	if not has_role(role):
 		role = "walk" if moving else "idle"
-	var rate := walk_speed if moving else 1.0
+	var rate := walk_speed if moving else WalkPace.anim()
 	if role != _loop or not is_equal_approx(rate, _rate):
 		_play_loop(role, rate)
 	if moving:
@@ -1064,7 +1064,7 @@ func _pose_step(dt: float) -> void:
 			_get_up_by_clip()
 	if _lie != _lie_to:
 		var falling := _lie_to > _lie
-		_lie = move_toward(_lie, _lie_to, dt / (FALL_SECONDS if falling else RISE_SECONDS))
+		_lie = move_toward(_lie, _lie_to, dt * WalkPace.anim() / (FALL_SECONDS if falling else RISE_SECONDS))
 		if falling and _lie >= 1.0:
 			if _one_shot == "die":
 				_one_shot = ""
@@ -1097,7 +1097,7 @@ func _breath() -> Basis:
 func _get_up_by_clip() -> void:
 	var specs := _roles.get("die", []) as Array
 	if specs.is_empty() or _player == null:
-		_play_loop("idle", 1.0)
+		_play_loop("idle", WalkPace.anim())
 		return
 	var spec := specs[0] as Dictionary
 	var name := str(spec["name"])
@@ -1106,7 +1106,7 @@ func _get_up_by_clip() -> void:
 	var to := clampf(float(spec.get("to", length)), from, length)
 	_player.play(name, 0.0, -(to - from) / RISE_CLIP_SECONDS, true)
 	_player.seek(to, true)
-	_player.speed_scale = 1.0
+	_player.speed_scale = WalkPace.anim()
 	_rise_to = from
 	_one_shot = "rise"
 	_loop = ""

@@ -355,7 +355,7 @@ func _play_once(base: String, lands_a_blow: bool) -> bool:
 	_hit_frame = int((sprite_frames.get_meta("hit_frames", {}) as Dictionary).get(base,
 		sprite_frames.get_meta("hit_frame", 2) if base == "attack" else 1))
 	moving = false
-	speed_scale = 1.0
+	speed_scale = WalkPace.anim()
 	var shown := anim_for(sprite_frames, base, dir)
 	flip_h = bool(shown[1])
 	play(shown[0] as StringName)
@@ -417,7 +417,7 @@ func _process(delta: float) -> void:
 		return
 	finish_stride = false
 	_stride_t = 0.0
-	speed_scale = walk_speed if base in ["walk", "sneak_walk"] else 1.0
+	speed_scale = walk_speed if base in ["walk", "sneak_walk"] else WalkPace.anim()
 	var shown := anim_for(sprite_frames, base, direction_for(facing, cam.global_basis))
 	var anim := shown[0] as StringName
 	flip_h = bool(shown[1])

@@ -97,7 +97,7 @@ static func tick(view: LocationView, delta: float) -> void:
 	var next: Vector2i = view._queue.pop_front()
 	# A diagonal step is longer, so it takes longer: the party keeps one steady pace.
 	var diagonal := absi(next.x - view.leader().cell.x) + absi(next.y - view.leader().cell.y) == 2
-	view._step_t = (LocationView.SNEAK_STEP_TIME if view.sneaking else LocationView.STEP_TIME) * (sqrt(2.0) if diagonal else 1.0)
+	view._step_t = (LocationView.SNEAK_STEP_TIME if view.sneaking else LocationView.STEP_TIME) / WalkPace.anim() * (sqrt(2.0) if diagonal else 1.0)
 	if view.grid.has_flag(next, CombatGrid.WALL) and not _exit_at(view, next):
 		var door := LocationLocks._openable_doors(view).get(next, {}) as Dictionary
 		if not door.is_empty():
@@ -175,7 +175,7 @@ static func _glide(view: LocationView, id: String, to: Vector3, place: int) -> v
 		g.wait = PartyGlide.FOLLOW_DELAY * place
 		g.catch_up = 1.0 if place == 0 else 1.4
 		view._glides[id] = g
-	g.step_time = LocationView.SNEAK_STEP_TIME if view.sneaking else LocationView.STEP_TIME
+	g.step_time = (LocationView.SNEAK_STEP_TIME if view.sneaking else LocationView.STEP_TIME) / WalkPace.anim()
 	g.points.append(to)
 
 

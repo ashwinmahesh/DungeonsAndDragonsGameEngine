@@ -106,8 +106,8 @@ func step(delta: float, direction: Vector3 = Vector3.ZERO) -> void:
 			dir = to.normalized() * clampf(to.length() / 0.4, 0.35, 1.0)
 	elif dir != Vector3.ZERO:
 		has_target = false
-	velocity.x = dir.x * SPEED
-	velocity.z = dir.z * SPEED
+	velocity.x = dir.x * SPEED * WalkPace.anim()
+	velocity.z = dir.z * SPEED * WalkPace.anim()
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 20.0 * delta
 	move_and_slide()
 	var flat := Vector3(velocity.x, 0, velocity.z)

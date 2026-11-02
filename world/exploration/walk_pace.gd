@@ -14,10 +14,21 @@ const FASTER := 1.25
 const HEROES := 0.75
 ## An enemy's walk in a fight (owner 2026-10-30: 15% faster).
 const FOES := 1.15
+## How fast every figure animates, on top of the paces above: a campaign's `anim_speed` (data/campaign.json), 1 by
+## default. Clips (idle, attack, cast, hurt, die, greet; not talk, which keeps time with the voice) play this much faster,
+## and walking covers ground this much faster, so the walk cycle (paced to the ground it covers) keeps its feet planted.
+## The Speed stat, cutscenes and voice lines are untouched. `speed_override` above 0 wins (a tool's live slider).
+static var speed_override := -1.0
 
 
 ## How fast `c` walks in a fight against the base pace: heroes (the party and its guests) slow, enemies quick, anyone else
 ## (a neutral) as it was. A square takes CombatView.STEP_TIME divided by this.
+static func anim() -> float:
+	if speed_override > 0.0:
+		return speed_override
+	return maxf(float(Campaign.setting("anim_speed", 1.0)), 0.05)
+
+
 static func combat_scale(c: Combatant) -> float:
 	if c == null:
 		return 1.0

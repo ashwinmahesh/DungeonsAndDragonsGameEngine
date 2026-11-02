@@ -207,7 +207,7 @@ func _drop_figure() -> void:
 func _figure_mode() -> void:
 	_fig.moving = mode in ["walk", "run"]
 	if _fig.moving:
-		_fig.set_step_time(1.0 / (RUN_PACE if mode == "run" else WALK_PACE))
+		_fig.set_step_time(1.0 / ((RUN_PACE if mode == "run" else WALK_PACE) * WalkPace.anim()))
 	match mode:
 		"attack":
 			if not _fig.attack():

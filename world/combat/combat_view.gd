@@ -2169,7 +2169,7 @@ func _settle_shared() -> void:
 		var to := _token_spot(tok.combatant, tok.combatant.cell)
 		var off := Vector2(to.x - tok.position.x, to.z - tok.position.z).length()
 		if off > 0.02 and off < 0.75 and absf(to.y - tok.position.y) < 0.05:
-			create_tween().tween_property(tok, "position", to, STEP_TIME * GameSettings.combat_pace())
+			create_tween().tween_property(tok, "position", to, STEP_TIME * GameSettings.combat_pace() / WalkPace.anim())
 
 
 func _play_events() -> void:
@@ -2207,7 +2207,7 @@ func _play_events() -> void:
 					continue
 				var from: Vector2i = ev["from"]
 				var to: Vector2i = ev["to"]
-				var step := STEP_TIME * GameSettings.combat_pace()   # the fast combat speed (Settings)
+				var step := STEP_TIME * GameSettings.combat_pace() / WalkPace.anim()   # the fast combat speed (Settings)
 				# A move taken back (undo) glides home like a rewind: no walking, no turning round.
 				var back := bool(ev.get("undo", false))
 				# An ordinary walk goes at its side's pace (heroes slower, enemies quicker); a push, a pull, a drag or a glide home doesn't.
@@ -2509,7 +2509,7 @@ func _play_events() -> void:
 					var spot := _token_spot(at.combatant, at.combatant.cell)
 					spot.y += (int(ev["to"]) - at.combatant.altitude) / float(CombatGrid.FEET)
 					var up := create_tween()
-					up.tween_property(at, "position", spot, STEP_TIME * GameSettings.combat_pace())
+					up.tween_property(at, "position", spot, STEP_TIME * GameSettings.combat_pace() / WalkPace.anim())
 					await up.finished
 				_show_heights()
 			"resize":

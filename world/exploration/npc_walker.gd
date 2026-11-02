@@ -15,7 +15,7 @@ static func create(frames: SpriteFrames, route: Array[Vector3]) -> NpcWalker:
 	n.name = "Villager"
 	n.waypoints = route
 	n.sprite = DirectionalSprite.create(frames, 1.55)
-	n.sprite.set_step_time(1.0 / SPEED)
+	n.sprite.set_step_time(1.0 / (SPEED * WalkPace.anim()))
 	# The generated art is dark; lift it a little so it reads against the night floor.
 	n.sprite.modulate = Color(1.3, 1.3, 1.3)
 	n.add_child(n.sprite)
@@ -33,7 +33,7 @@ func _physics_process(delta: float) -> void:
 	if to.length() < 0.05:
 		_next = (_next + 1) % waypoints.size()
 		return
-	var step := minf(SPEED * delta, to.length())
+	var step := minf(SPEED * WalkPace.anim() * delta, to.length())
 	global_position += to.normalized() * step
 	sprite.facing = to.normalized()
 	sprite.moving = true

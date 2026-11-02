@@ -153,8 +153,8 @@ func _walk(shown: Dictionary, delta: float) -> void:
 	shown["at"] = (at + 1) % route.size()
 	shown["face"] = str((route[at] as Dictionary).get("face", ""))
 	shown["work"] = str((route[at] as Dictionary).get("work", ""))
-	shown["work_t"] = STEP_TIME + 0.4
-	shown["wait"] = STEP_TIME * (sqrt(2.0) if absi(next.x - here.x) + absi(next.y - here.y) == 2 else 1.0) + float((route[at] as Dictionary)["pause"])
+	shown["work_t"] = STEP_TIME / WalkPace.anim() + 0.4
+	shown["wait"] = STEP_TIME / WalkPace.anim() * (sqrt(2.0) if absi(next.x - here.x) + absi(next.y - here.y) == 2 else 1.0) + float((route[at] as Dictionary)["pause"])
 	if view.planning:
 		shown["round_left"] = int(shown.get("round_left", 0)) - 1
 	LocationNpcs._check_approach(view)   # walking up to the party counts as coming near
@@ -215,5 +215,5 @@ func _step(shown: Dictionary, next: Vector2i) -> void:
 	if g == null:
 		g = PartyGlide.new(tok)
 		_glides[tok] = g
-	g.step_time = STEP_TIME
+	g.step_time = STEP_TIME / WalkPace.anim()
 	g.points.append(view.board.cell_center(next))

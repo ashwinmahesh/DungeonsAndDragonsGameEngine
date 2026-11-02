@@ -195,7 +195,7 @@ static func advance_patrols(view: LocationView, delta: float) -> bool:
 			w["wait"] = float(w["wait"]) - delta
 			continue
 		w["clock"] = float(w["clock"]) + delta
-		if float(w["clock"]) < NpcRoutes.STEP_TIME:
+		if float(w["clock"]) < NpcRoutes.STEP_TIME / WalkPace.anim():
 			continue
 		w["clock"] = 0.0
 		var step := route[int(w["at"])] as Dictionary

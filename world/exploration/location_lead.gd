@@ -216,9 +216,9 @@ func _step_npc() -> void:
 		_shown["cell"] = next
 	if _glide == null:
 		_glide = PartyGlide.new(_tok)
-	_glide.step_time = NPC_STEP
+	_glide.step_time = NPC_STEP / WalkPace.anim()
 	_glide.points.append(view.board.cell_center(next))
-	_npc_wait = NPC_STEP * (sqrt(2.0) if absi(next.x - from.x) + absi(next.y - from.y) == 2 else 1.0)
+	_npc_wait = NPC_STEP / WalkPace.anim() * (sqrt(2.0) if absi(next.x - from.x) + absi(next.y - from.y) == 2 else 1.0)
 	_trail.append(next)
 
 
@@ -226,7 +226,7 @@ func _step_leader() -> void:
 	var next: Vector2i = _trail.pop_front()
 	_open_door(next)
 	var here := view.leader().cell
-	_leader_wait = LocationView.STEP_TIME * (sqrt(2.0) if absi(next.x - here.x) + absi(next.y - here.y) == 2 else 1.0)
+	_leader_wait = LocationView.STEP_TIME / WalkPace.anim() * (sqrt(2.0) if absi(next.x - here.x) + absi(next.y - here.y) == 2 else 1.0)
 	LocationWalk._advance_party(view, next)
 
 
