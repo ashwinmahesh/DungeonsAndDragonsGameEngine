@@ -31,10 +31,12 @@ on:
 permissions:
   contents: read
 
-# A newer run for the same branch or pull request cancels the one it supersedes.
+# A newer push to a pull request cancels the run it supersedes. On main a run in progress always finishes (one waits
+# behind it, the newest), since the first one imports for hours and only a finished run saves the import cache: main's
+# frequent pushes cancelled each one part-way, so main never got a cache.
 concurrency:
   group: downstream-check-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   # The game checked by default (owner, 2026-10-31); the DOWNSTREAM_GAME_REPO variable checks another instead.
