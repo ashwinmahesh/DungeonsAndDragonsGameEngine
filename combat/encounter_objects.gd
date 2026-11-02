@@ -131,6 +131,8 @@ static func set_piece_rules(o: BattleObject, entry: Dictionary) -> void:
 		o.hazard = (entry["hazard"] as Array).duplicate(true)
 	if entry.has("study"):
 		o.study = (entry["study"] as Dictionary).duplicate(true)
+	if entry.has("last_act"):
+		o.last_act = (entry["last_act"] as Dictionary).duplicate(true)
 
 
 ## `o`'s grid flag on its squares (a door standing open has none).

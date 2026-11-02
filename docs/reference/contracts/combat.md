@@ -328,6 +328,12 @@ and a waiting foe waits again on its square as its entry says (asleep with `surp
 Encounter holds what the fight reads (`Encounter.ends_when`: `exits` as squares, `trigger_hero_down`); a fight picked
 up from a round's save reads it from the entry again.
 
+A set piece's `last_act` ({label, target: [names or stat blocks], effect: {name, modifiers, no_legendary_resistance},
+flag, say}; LastAct: R26's lava and the Brimstone Behemoth) is a hero's willing death: an action within 5 ft, asked once
+more first (a prompt of kind `last_act`). The hero dies for good, their soul gone (the build's `soul_gone`: no revival by
+spell, item or temple), each creature named in `target` takes `effect` for the rest of the fight (Disadvantage, half
+Speed, Vulnerability to Radiant; no Legendary Resistance left), and `flag` is set for the story.
+
 Set pieces: an encounter's `objects` entry can carry `threshold` (Damage Threshold: damage less than it from one source
 does nothing), `undo` (`{skill, dc, label}`: the Utilize action within 5 ft and that check take it away without force,
 "<label> <the object>" on the Common tab) and `flag` (set in the fight's `story_flags` when it is gone, broken or

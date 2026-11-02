@@ -405,6 +405,9 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	for h in HeldObjects.entries(e, c):
 		out.append(_entry(str(h["id"]), COMMON, str(h["label"]), str(h["sub"]), "attack" if c.attacks_left > 0 else "action",
 			str(h["why"]) if str(h["why"]) != "" else _attack_why(c), "none", str(h["help"])))
+	# A willing death beside a set piece (LastAct: the lava that cripples the Behemoth).
+	for la in LastAct.entries(e, c):
+		out.append(_entry(str(la["id"]), COMMON, str(la["label"]), str(la["sub"]), "action", str(la["why"]), "none", str(la["help"])))
 	# A loose creature the heroes can catch and carry out of the fight (EncounterGrapples.catch_creature).
 	if c.side in [&"party", &"guest"]:
 		for t in e.grappling.catchable(c):
@@ -1455,6 +1458,8 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
 		"catch":
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
+		"lastact":
+			return LastAct.take(e, c, id.substr(8))
 		"hold_breath":
 			return HoldBreath.toggle(e, c)
 		"heldhit":

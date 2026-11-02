@@ -95,6 +95,8 @@ var hazard_hit: Dictionary = {}
 var ward: Dictionary = {}
 ## The Study that tells what it is: {skills, dc, say, flag}; {} for none.
 var study: Dictionary = {}
+## A hero's willing death beside it (LastAct): {label, target, effect, flag, say}.
+var last_act: Dictionary = {}
 var studied: bool = false
 
 
@@ -189,7 +191,8 @@ func to_dict() -> Dictionary:
 		"threshold": threshold, "undo": undo.duplicate(true), "flag": flag,
 		"carry": carry.duplicate(true), "carried_by": carried_by, "takes": takes.duplicate(true), "cleansed": cleansed,
 		"hazard": hazard.duplicate(true), "hazard_hit": hazard_hit.duplicate(), "ward": ward.duplicate(true),
-		"study": study.duplicate(true), "studied": studied, "held_target": held_target, "held": held.duplicate(true)}
+		"study": study.duplicate(true), "studied": studied, "held_target": held_target, "held": held.duplicate(true),
+		"last_act": last_act.duplicate(true)}
 
 
 static func from_dict(d: Dictionary) -> BattleObject:
@@ -241,6 +244,7 @@ static func from_dict(d: Dictionary) -> BattleObject:
 	o.hazard_hit = (d.get("hazard_hit", {}) as Dictionary).duplicate()
 	o.ward = (d.get("ward", {}) as Dictionary).duplicate(true)
 	o.study = (d.get("study", {}) as Dictionary).duplicate(true)
+	o.last_act = (d.get("last_act", {}) as Dictionary).duplicate(true)
 	o.studied = bool(d.get("studied", false))
 	for c2: Variant in d.get("wreck", []):
 		o.wreck.append(Vector2i(int((c2 as Array)[0]), int((c2 as Array)[1])))

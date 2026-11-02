@@ -166,6 +166,9 @@ static func revival_options(st: StoryState, caster: Character) -> Array[Dictiona
 static func revive_why(st: StoryState, spell_id: String, ch: Character) -> String:
 	if not ch.dead:
 		return "%s isn't dead" % ch.name.get_slice(" ", 0)
+	# Given for good (LastAct's `soul_gone`): no revival by any means.
+	if str(ch.build.get("soul_gone", "")) != "":
+		return "%s's soul is gone" % ch.name.get_slice(" ", 0)
 	var within := int((REVIVAL.get(spell_id, {}) as Dictionary).get("within", -1))
 	if within >= 0 and Services.dead_for(st, ch) > within:
 		return "%s has been dead too long for %s" % [ch.name.get_slice(" ", 0), Compendium.shared().display_name("spells", spell_id)]

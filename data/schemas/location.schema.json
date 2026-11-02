@@ -1223,7 +1223,8 @@
                 "carry": {"$ref": "#/$defs/set_piece_carry"},
                 "takes": {"$ref": "#/$defs/set_piece_takes"},
                 "hazard": {"$ref": "#/$defs/set_piece_hazard"},
-                "study": {"$ref": "#/$defs/set_piece_study"}
+                "study": {"$ref": "#/$defs/set_piece_study"},
+                "last_act": {"type": "object", "description": "A hero's willing death beside it (LastAct): {label, target: [names or stat blocks], effect: {name, modifiers, no_legendary_resistance}, flag, say}."}
               }
             }
           },
@@ -1750,7 +1751,8 @@
                 "prop": {"type": "string", "description": "The prop's id."},
                 "takes": {"$ref": "#/$defs/set_piece_takes"},
                 "hazard": {"$ref": "#/$defs/set_piece_hazard"},
-                "study": {"$ref": "#/$defs/set_piece_study"}
+                "study": {"$ref": "#/$defs/set_piece_study"},
+                "last_act": {"type": "object", "description": "A hero's willing death beside it (LastAct): {label, target: [names or stat blocks], effect: {name, modifiers, no_legendary_resistance}, flag, say}."}
               }
             }
           },

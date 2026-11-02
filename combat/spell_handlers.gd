@@ -285,6 +285,8 @@ func free_on_teleport(c: Combatant) -> void:
 ## creature (a hero of an Undead or Construct species is a soul in a made body, and comes back).
 ## The spell's targeting asks before anything is spent (SpellTargeting).
 static func revivify_why(e: Encounter, t: Combatant) -> String:
+	if t.creature is Character and str((t.creature as Character).build.get("soul_gone", "")) != "":
+		return "%s's soul is gone" % t.name()
 	var died := int(t.get_meta("died_round", e.round_no)) if t.has_meta("died_round") else e.round_no
 	if e.round_no - died > 10:
 		return "%s has been dead too long for Revivify" % t.name()

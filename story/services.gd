@@ -95,6 +95,8 @@ static func why_not(st: StoryState, line: Dictionary, ch: Character) -> String:
 		"dead":
 			if not ch.dead:
 				return "%s is alive" % who
+			if str(ch.build.get("soul_gone", "")) != "":
+				return "%s's soul is gone" % who
 			if dead_for(st, ch) > RAISE_LIMIT:
 				return "%s has been dead more than 10 days" % who
 		"party":
