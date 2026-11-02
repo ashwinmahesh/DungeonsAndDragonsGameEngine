@@ -95,6 +95,10 @@
         "swim": {
           "type": "boolean",
           "description": "Its deep water (w) can be swum in fights: double cost without a Swim Speed; water-only creatures stay in it (docs/reference/contracts/locations.md)."
+        },
+        "underwater": {
+          "type": "boolean",
+          "description": "Its fights are under water (Underwater, 2024 PHB): Disadvantage on most weapons, ranged attacks only to normal range, Resistance to Fire for all."
         }
       }
     },

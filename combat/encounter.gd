@@ -111,6 +111,8 @@ var _savage_turn: Dictionary = {}
 ## The place's own rules for fights there (a location's `fight_rules`: {name, modifiers}): an effect on every creature
 ## in the fight, those that join later too, gone with the fight (EncounterSetup.clear_fight_effects).
 var place_rules: Dictionary = {}
+## The fight is under water (a map's `underwater`, Underwater): the 2024 rules for weapons and fire there.
+var underwater: bool = false
 const PLACE_RULES := "place_rules"
 ## The map's light: bright, dim or dark (lanterns, moonlight, a lightless cellar); sunlit maps are in sunlight.
 ## d20s the party brought to this fight (a boon): any hero may spend one in place of a visible creature's next d20
@@ -239,6 +241,7 @@ func add(creature: Creature, side: StringName, cell: Vector2i) -> Combatant:
 	creature.condition_blocked = _condition_blocked
 	combatants.append(c)
 	apply_place_rules(c)
+	Underwater.apply(self, c)   # fire is muffled under water
 	HeldObjects.ensure(self, c)   # a horn or lantern it holds that the heroes can strike
 	# A foe that joins mid-fight (Children of the Night) comes at the difficulty's Hit Points and +2s too.
 	if state == State.ACTIVE and side == &"enemy" and creature is Monster:

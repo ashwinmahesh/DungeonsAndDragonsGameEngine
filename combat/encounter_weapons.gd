@@ -222,6 +222,9 @@ func attack_legal(c: Combatant, target: Combatant, option: Dictionary) -> String
 		var long := p.long_range if p.long_range > 0 else p.normal_range
 		if long > 0 and dist > long:
 			return "Out of range (%d ft, range %d/%d)" % [dist, p.normal_range, long]
+		# Under water a ranged weapon attack beyond its normal range misses (2024 PHB): it isn't worth making.
+		if e.underwater and p.normal_range > 0 and dist > p.normal_range:
+			return "Under water, nothing reaches past %d ft" % p.normal_range
 	if int(e.cover(c, target)["cover"]) == CombatGrid.Cover.TOTAL:
 		return "No clear line: Total Cover"
 	if target.creature.has_flag("ethereal"):

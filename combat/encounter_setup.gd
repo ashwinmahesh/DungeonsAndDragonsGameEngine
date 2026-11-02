@@ -128,7 +128,8 @@ static func clear_fight_effects(cr: Creature) -> void:
 	for fx: Effect in cr.effects.duplicate():
 		var holds := &"restrained" in fx.conditions or &"grappled" in fx.conditions
 		if fx.ends in [Effect.Ends.ROUNDS, Effect.Ends.START_OF_TURN, Effect.Ends.END_OF_TURN] or holds \
-				or not fx.escape.is_empty() or fx.stack_key.begins_with("zone:") or fx.stack_key == Encounter.PLACE_RULES:
+				or not fx.escape.is_empty() or fx.stack_key.begins_with("zone:") or fx.stack_key == Encounter.PLACE_RULES \
+				or fx.stack_key == Underwater.STACK:
 			cr.remove_effect(fx)
 	cr.remove_condition(&"grappled")
 	cr.remove_condition(&"restrained")

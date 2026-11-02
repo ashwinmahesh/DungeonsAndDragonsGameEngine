@@ -146,6 +146,7 @@ static func start_encounter(view: LocationView, encounter_id: String, chosen: Di
 		grid.make_swimmable()   # deep water to swim in, not a void (docs: Swimming in fights)
 	var e := Encounter.new(grid, view.dice)
 	e.place_rules = (view.loc.get("fight_rules", {}) as Dictionary).duplicate(true)   # the place's own (a jinxed riverboat)
+	e.underwater = bool((view.loc.get("map", {}) as Dictionary).get("underwater", false))   # Underwater
 	e.title = str(spec.get("text", ""))
 	# Bosses (ADR 0014): the place (a Misty Escape's resting place), the lair's actions, a foe that withdraws.
 	e.location_id = view.loc_id
@@ -710,6 +711,7 @@ static func resume_encounter(view: LocationView, snapshot: Dictionary) -> bool:
 		e.grid.make_swimmable()
 	keep_back(view, e.grid, _squares_in(view, e), e)
 	e.place_rules = (view.loc.get("fight_rules", {}) as Dictionary).duplicate(true)
+	e.underwater = bool((view.loc.get("map", {}) as Dictionary).get("underwater", false))   # Underwater
 	e.ends_when = ends_when_for(view, spec)
 	e.meters.setup(FightMeters.for_story(spec.get("meters", []) as Array, view.st))   # a guide's loyalty, a rite's pips (a saved round keeps their values)
 	e.zones.from_location(view.loc)

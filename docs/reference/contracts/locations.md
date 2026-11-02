@@ -128,6 +128,11 @@ geometry: a fight starts where the party stands, on the same squares. `world/exp
   (the place's state, `rearm`), and after n minutes of the clock it isn't done any more: entering the place, or the
   clock running on while the party is there, brings it back to wait and trigger as at first (LocationFights.rearm; a
   beaten mob that gathers again in four hours).
+- **Under water (`map.underwater: true`, Underwater; 2024 PHB):** a melee weapon attack has Disadvantage unless the
+  attacker has a Swim Speed or the weapon is a dagger, javelin, shortsword, spear or trident (natural weapons and
+  unarmed strikes too); a ranged weapon attack can't reach past its normal range and has Disadvantage within it unless
+  it's a crossbow, a net, a javelin, spear, trident or dart; everything in the fight has Resistance to Fire damage (an
+  effect that goes with the fight). Holding breath in a fight is HoldBreath; drowning is the story's.
 - **Rest:** `safe`, `risky` (a Long Rest is interrupted on a 1 in 6, and makes camp on the map: docs/story/camp.md)
   or `no` (no Long Rest: its card says `rest_text`); default risky. A Short Rest is taken in any of them, `no`
   included, unless a fight on the map was begun and not won or foes are in plain view of the party

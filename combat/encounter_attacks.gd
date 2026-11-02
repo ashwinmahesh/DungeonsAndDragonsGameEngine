@@ -323,6 +323,11 @@ func attack_situation(c: Combatant, target: Combatant, option: Dictionary) -> Di
 			if h.can_act() and e.distance(c, h) <= 5 and e.can_see(h, c):
 				dis.append("ranged attack with %s within 5 ft" % h.name())
 				break
+	# Under water (2024 PHB): a melee weapon has Disadvantage unless it's a stabbing one or the attacker swims; a ranged
+	# one unless it's a crossbow, a net or a thrown spear-like weapon.
+	var under := Underwater.attack_disadvantage(e, c, p, melee, str(option.get("kind", "")))
+	if under != "":
+		dis.append(under)
 	if "heavy" in p.properties:
 		var need := &"str" if melee else &"dex"
 		if c.creature.ability_score(need) < 13:
