@@ -236,6 +236,7 @@ func add(creature: Creature, side: StringName, cell: Vector2i) -> Combatant:
 	creature.condition_blocked = _condition_blocked
 	combatants.append(c)
 	apply_place_rules(c)
+	HeldObjects.ensure(self, c)   # a horn or lantern it holds that the heroes can strike
 	# A foe that joins mid-fight (Children of the Night) comes at the difficulty's Hit Points and +2s too.
 	if state == State.ACTIVE and side == &"enemy" and creature is Monster:
 		difficulty.toughen(c, false)

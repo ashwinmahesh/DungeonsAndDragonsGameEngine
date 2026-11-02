@@ -395,6 +395,10 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 	var stab := _entry("stabilize", COMMON, "Stabilize", "DC 10 Medicine", "action", why, "dying", "Help a dying creature within 5 ft: a DC 10 Wisdom (Medicine) check makes it Stable (or brings round one that was knocked out).")
 	stab["range"] = 5
 	out.append(stab)
+	# What a monster holds that the heroes can strike (HeldObjects: a rotweaver's horn).
+	for h in HeldObjects.entries(e, c):
+		out.append(_entry(str(h["id"]), COMMON, str(h["label"]), str(h["sub"]), "attack" if c.attacks_left > 0 else "action",
+			str(h["why"]) if str(h["why"]) != "" else _attack_why(c), "none", str(h["help"])))
 	# A loose creature the heroes can catch and carry out of the fight (EncounterGrapples.catch_creature).
 	if c.side in [&"party", &"guest"]:
 		for t in e.grappling.catchable(c):
@@ -1445,6 +1449,9 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.release_grapple(c, e.get_c(id.get_slice(":", 1)))
 		"catch":
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
+		"heldhit":
+			var rest := id.substr(8)
+			return e.objects.attack(c, rest.get_slice("|", 0), rest.get_slice("|", 1))
 		"offer":
 			return e.trait_offers.take(c, e.get_c(id.get_slice(":", 1)), id.get_slice(":", 2))
 		"meter":

@@ -178,6 +178,17 @@ func _begin_turn() -> CombatResult:
 ## The last of a turn's start: Dazed, a dropped weapon picked up, a turn without an action, an AI creature's Death
 ## Saving Throw.
 func _turn_start_flags(c: Combatant) -> void:
+	# Iron on its body (a rotweaver's Iron Binding: the flag `one_of_move_action_bonus`): only one of moving, its action
+	# or its Bonus Action this turn. A foe within reach keeps its action; else it moves.
+	if c.creature.has_flag("one_of_move_action_bonus"):
+		var e0 := enc()
+		var near := e0.hostiles_of(c).any(func(h: Combatant) -> bool: return not h.is_down() and e0.distance(c, h) <= 5)
+		c.bonus_available = false
+		if near:
+			c.movement_left = 0
+		else:
+			c.action_available = false
+		e0.log.add("info", "%s is bound by iron: %s only" % [c.name(), "its action" if near else "a move"], c.id)
 	var e := enc()
 	if not c.is_alive() or e.current() != c:
 		return

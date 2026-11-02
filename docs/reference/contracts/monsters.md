@@ -32,6 +32,14 @@ held creature's next turn), `pull` / `push` (`feet`), `drain_max_hp` and `heal_s
 levels of an affliction, docs/contracts/afflictions.md; an aura's `riders` take it, each with its own `save`: spores that
 burn and then rot).
 
+A trait's `held_object` ({name, ac, hp, needs: [action ids], owner_share, owner_type}; HeldObjects): something it
+holds that the heroes can strike (a rotweaver's horn, a kackle's lantern). It goes into the fight held by the creature,
+on its square, with its own Armor Class and Hit Points; heroes strike it from the Common tab with a weapon in reach.
+Broken, the holder's actions in `needs` can't be used (Call the Rot); with `owner_share` (0.5) the holder takes that
+share of the damage it takes, as `owner_type` (Force). The flag `one_of_move_action_bonus` (Iron Binding: iron on its
+body, given by a trait offer's rider) limits the creature to one of moving, its action or its Bonus Action each turn:
+its action when a foe is within 5 ft as the turn starts, else a move.
+
 ## Traits read by code
 
 `aura` (`radius`, `trigger: start_turn`, `save`, `condition`, `until`, `immune_on_success`, `affects`): Stench,

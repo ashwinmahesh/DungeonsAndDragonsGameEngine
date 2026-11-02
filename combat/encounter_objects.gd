@@ -299,6 +299,7 @@ func damage(o: BattleObject, parts: Array, by: Combatant, label: String, details
 	o.hp = maxi(0, o.hp - total)
 	e.log.add("hit", "%s takes %d damage (%s): %d/%d left" % [o.title(), total, label, o.hp, o.hp_max], by.id if by != null else "", notes)
 	e.events.append({"type": "object_damage", "id": o.id, "amount": total})
+	HeldObjects.hurt_owner(e, o, total, by)   # a kackle's lantern: half as Force to it
 	if o.hp <= 0:
 		_break(o)
 		e.game.object_broken(o, by)
@@ -381,7 +382,9 @@ func _fall(o: BattleObject) -> void:
 ## "" if `c` could attack `o` with `option` from where it stands (not counting what's left of its turn).
 func attack_why(c: Combatant, o: BattleObject, option: Dictionary) -> String:
 	var e := enc()
-	if o == null or o.destroyed or o.carried_by != "":
+	if o != null and o.held_target and not o.destroyed:
+		HeldObjects.follow(e, o)   # on its holder's squares
+	if o == null or o.destroyed or (o.carried_by != "" and not o.held_target):
 		return "Nothing to attack there"
 	if not o.carry.is_empty():
 		return "%s can't be attacked" % o.title()

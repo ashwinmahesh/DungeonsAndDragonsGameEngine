@@ -47,6 +47,10 @@ func why_not(c: Combatant, act: Dictionary) -> String:
 	var gone := enc().ground.weapon_gone(c, act)
 	if gone != "":
 		return gone
+	# The horn its Call the Rot needs, broken (HeldObjects).
+	var broken := HeldObjects.broken_for(enc(), c, act)
+	if broken != "":
+		return broken
 	# A vine blight can't lash out again while its vine holds someone.
 	if bool(act.get("not_while_grappling", false)) and enc().grapples.values().has(c.id):
 		return "Its vine is holding someone"
