@@ -134,6 +134,9 @@ func _begin_turn() -> CombatResult:
 	for o in e.combatants:
 		o.cast_slot_spell_this_turn = false
 		o.creature.on_turn_start(c.id)
+		# Reactive (the flag `reactive`: the Wicker Man): its Reaction comes back on every creature's turn.
+		if o.creature.has_flag("reactive"):
+			o.reaction_available = true
 	e._expire_marks(c.id, "start")
 	e.movement.settle_all()   # a flyer whose flight ended comes down (F4)
 	if c.readied.has("spell"):

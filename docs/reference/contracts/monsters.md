@@ -45,6 +45,9 @@ share of the damage it takes, as `owner_type` (Force). The flag `one_of_move_act
 body, given by a trait offer's rider) limits the creature to one of moving, its action or its Bonus Action each turn:
 its action when a foe is within 5 ft as the turn starts, else a move.
 
+The flag `reactive` (a trait's `{"stat": "flag", "value": "reactive"}`: the Wicker Man's Reactive) gives the creature its
+Reaction back at the start of every creature's turn, not only its own.
+
 ## Traits read by code
 
 `aura` (`radius`, `trigger: start_turn`, `save`, `condition`, `until`, `immune_on_success`, `affects`): Stench,
