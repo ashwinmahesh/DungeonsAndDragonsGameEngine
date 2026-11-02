@@ -55,6 +55,9 @@ var _meshes: Array[GeometryInstance3D] = []
 ## The model's own meshes (a layer can hide them), and its height at rest in the model's units.
 var _own_meshes: Array[MeshInstance3D] = []
 var _rest_height := 1.0
+## What the figure's rig (FigureModels.rig) calls the bones the engine looks for: Neck, HeadTop_End, a hand. {} on the
+## engine's own rigs.
+var _rig_bones: Dictionary = {}
 ## Part id -> what it put on the figure: {"nodes": [the attachment or the bound meshes], "meshes": [...], "hides": [...]}.
 var _layers: Dictionary = {}
 ## The parts `wear` asked for (the entry's own `layers` are always on).
@@ -115,6 +118,7 @@ static func create_for(frames: SpriteFrames, height_units: float) -> ModelFigure
 
 func _build() -> void:
 	_info = FigureModels.info(art_id)
+	_rig_bones = FigureModels.rig_bones(art_id)
 	_turn = Node3D.new()
 	_turn.name = "Turn"
 	add_child(_turn)
@@ -437,7 +441,7 @@ func _put_on(id: String) -> void:
 	var nodes: Array[Node3D] = []
 	var bone_name := str(entry.get("bone", ""))
 	if bone_name != "":
-		var b := FigureModels.bone(_skeleton, bone_name)
+		var b := FigureModels.bone(_skeleton, bone_name, _rig_bones)
 		if b < 0:
 			piece.free()
 			return
@@ -555,16 +559,24 @@ func _hold_at(piece: Node3D, entry: Dictionary, bone_name: String, turns_with_bo
 ## piece when none is given) on the Neck joint, standing the way the model stands at rest. So one head fits any body
 ## with those joints, sized by the body itself. IDENTITY when the skeleton lacks a joint.
 func _head_fit(piece: Node3D, box: AABB, entry: Dictionary, bone_name: String, h: float) -> Transform3D:
-	var head := FigureModels.bone(_skeleton, bone_name)
-	var neck := FigureModels.bone(_skeleton, "Neck")
-	var top := FigureModels.bone(_skeleton, "HeadTop_End")
-	if head < 0 or neck < 0 or top < 0 or box.size.y < 0.0001:
+	var head := FigureModels.bone(_skeleton, bone_name, _rig_bones)
+	var neck := FigureModels.bone(_skeleton, "Neck", _rig_bones)
+	var top := FigureModels.bone(_skeleton, "HeadTop_End", _rig_bones)
+	if head < 0 or neck < 0 or box.size.y < 0.0001:
 		return Transform3D.IDENTITY
 	var rest := _skeleton.get_bone_global_rest(head)
+	var top_at := Vector3.ZERO
+	if top >= 0:
+		top_at = _skeleton.get_bone_global_rest(top).origin
+	elif FigureModels.rig(art_id).get("head_top") is Array:
+		# A rig with no head-top bone says where the top of the head is: an offset in figure heights from the Head bone.
+		top_at = rest.origin + _vec(FigureModels.rig(art_id)["head_top"]) * h
+	else:
+		return Transform3D.IDENTITY
 	rest.basis = rest.basis.orthonormalized()
 	var to_head := rest.affine_inverse()
 	var neck_at := _skeleton.get_bone_global_rest(neck).origin
-	var length := _skeleton.get_bone_global_rest(top).origin.distance_to(neck_at)
+	var length := top_at.distance_to(neck_at)
 	var size := float(entry.get("size", 0.0))
 	var hs := length * (size if size > 0.0 else 1.0) / box.size.y
 	var basis := to_head.basis * _euler(entry.get("turn")) * Basis.from_scale(Vector3.ONE * hs)
@@ -645,7 +657,7 @@ func _bones() -> void:
 	var fb := FigureBones.new()
 	fb.name = "FigureBones"
 	for bone: String in want:
-		var i := FigureBones.bone_named(_skeleton, bone)
+		var i := FigureBones.bone_named(_skeleton, bone, _rig_bones)
 		if i < 0:
 			push_warning("figure %s: no bone %s to scale" % [art_id, bone])
 			continue

@@ -140,6 +140,33 @@ the off hand is mirrored (`FigureModels.mirrored`, the id with `@off`). A figure
 shows none, since its model has its things drawn on. `CombatToken` dresses a character's figure when it is made and
 again whenever what they have on changes, whatever changed it.
 
+## Rigs: bodies that name their bones another way
+
+The engine looks bones up by the names Mixamo and Tripo use (`Neck`, `HeadTop_End`, `RightHand`, `Head`), ignoring case
+and an exporter's prefix. A body made on another skeleton (Quaternius's 65-joint one calls them `neck_01`, `hand_r`, and
+has no head-top bone) names its rig in its entry and the manifest says what that rig's bones are:
+
+```json
+{
+  "rigs": {
+    "quaternius": {
+      "bones": {"Neck": "neck_01", "RightHand": "hand_r", "LeftHand": "hand_l", "Hips": "pelvis", "HeadTop_End": ""},
+      "head_top": [0, 0.12, 0],
+      "clips": {"idle": "Idle_Loop", "walk": "Walk_Loop", "attack": "Sword_Attack"}
+    }
+  },
+  "figures": {"villager_m": {"file": "art/figures/pack_male.glb", "rig": "quaternius", "layers": ["pack_head"]}}
+}
+```
+
+`bones` maps the engine's name to the rig's (an empty name: the rig has no such bone, `HeadTop_End` here). It is used
+wherever the engine finds a bone for a figure: a part's `bone`, the head fit (`fit: "head"`, which needs `Neck` and a
+head top), and the entry's `bones` scales. `head_top` says where the top of the head is when there is no bone for it: an
+offset in figure heights from the `Head` bone, up being +y. `clips` gives every figure on the rig its clip names by
+role (CLIPS); under the entry's own `clips` and over the manifest's `defaults`. A figure with no `rig` is looked up by the
+engine's own names exactly as before (a game on Mixamo or Tripo bodies, like Curse of Strahd, changes nothing).
+`FigureModels.rig(art_id)` and `rig_bones(art_id)` read it; `register_rig` adds one in code (tests).
+
 ## Bodies: made heroes as figures
 
 A game whose heroes are 3D names the body a made hero wears under the manifest's `bodies`: species id (`"*"` for any)
