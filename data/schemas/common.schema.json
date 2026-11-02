@@ -182,6 +182,7 @@
             "proficiency",
             "expertise",
             "auto_fail",
+            "auto_succeed",
             "d20",
             "advantage",
             "disadvantage",

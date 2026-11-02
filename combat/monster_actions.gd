@@ -628,7 +628,7 @@ func _save_one(c: Combatant, act: Dictionary, t: Combatant, r: CombatResult, rol
 	if t.has_meta(immune_key):
 		e.log.add("info", "%s is unmoved by %s" % [t.name(), act.get("name", "")], t.id)
 		return r
-	var keys: Array[String] = []
+	var keys: Array[String] = ["save_vs:" + str(act.get("id", ""))]   # a ward against this one power (`auto_succeed`)
 	if bool(act.get("magical", false)):
 		keys.append("save_vs:magic")
 	var roll := func() -> D20Test:

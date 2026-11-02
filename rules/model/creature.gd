@@ -544,6 +544,12 @@ func roll_d20(dice: DiceRoller, kind: D20Test.Kind, bonus: Breakdown, target: in
 			var failed := D20Test.automatic_failure(kind, target, label, m.source_name)
 			failed.breakdown = bonus
 			return failed
+	# A held ward against one power (`auto_succeed` on its key: `save_vs:<action id>`): passed without a roll.
+	for m in modifiers_for(&"auto_succeed"):
+		if m.matches_any(keys):
+			var passed := D20Test.automatic_success(kind, target, label, m.source_name)
+			passed.breakdown = bonus
+			return passed
 	if kind == D20Test.Kind.SAVING_THROW and "save:con" in keys and "concentration" in keys and concentration != null:
 		var school := str(compendium.spell_data(concentration.source_id).get("school", ""))
 		for m in modifiers_for(&"concentration_save_bonus"):
