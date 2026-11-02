@@ -148,6 +148,7 @@ func _begin_turn() -> CombatResult:
 	e.legendary.turn_start(c)
 	if not c.is_alive():
 		return CombatResult.new()
+	e.meters.repair(c)   # a boss spending its count to mend (`meter_repair`)
 	var none := CombatResult.new()
 	var steps: Array = [
 		func() -> CombatResult: return e.spells.turn_start(c),

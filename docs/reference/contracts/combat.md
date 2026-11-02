@@ -457,7 +457,12 @@ meter's `store` sets a story flag to its value as the fight ends, however it end
 foes hunt: enemies count it as a foe (Combatant.hostile_to), it fights nobody, and the party counts it a friend. A meter
 action's `rescue: true` frees, on a success, the creature named in its `near` nearest the hero within its `range` (left:
 `rescued`); with the meter's `on: defeat` for those named creatures and `store_add`, the saved and the slain become
-tallies the story adds up across fights (`{"add": n}` handed back, a boss's resource later). A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
+tallies the story adds up across fights (`{"add": n}` handed back, a boss's resource later). A boss's count (the Wicker Man's Soul Motes): a meter's `start_from` ({flag, table: [[at least, add]...]}) adds to its
+`start` from a story flag as the fight starts (the innocents lost); an `on` rule's `near` (a name or stat block) with
+`within` (30 ft) counts only deaths that close to it, and `not_types` (construct, undead) leaves those out. A trait's
+`meter_crit` ({meter, cost, name}) turns the creature's hit into a Critical Hit with its Reaction and that much of the
+count (Crushing Blow); `meter_repair` ({meter, cost, heal, name}) regains `heal` Hit Points as its turn starts, hurt by
+at least that much, the same way (Repair). A meter's `menu` folds its actions under one hotbar entry of that name (a rite's Honour the Fallen: each theme a choice in it).
 
 ### Round events (combat/round_events.gd)
 

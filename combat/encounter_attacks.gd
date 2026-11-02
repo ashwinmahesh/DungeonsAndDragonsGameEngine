@@ -620,6 +620,9 @@ func _attack_outcome(st: Dictionary) -> CombatResult:
 		details.append("Automatic Critical Hit: the target can't defend itself within 5 ft")
 	if t.success and not critical and e.items.makes_crit(c, target, option, details):
 		critical = true
+	# A boss spending its count on it (a trait's `meter_crit`: the Wicker Man's Crushing Blow, a Soul Mote and its Reaction).
+	if t.success and not critical and e.meters.crit_for(c, details):
+		critical = true
 	critical = e.items.crit_allowed(c, target, critical, details)
 	var success := t.success
 	if success and mirror_image_takes(target, c, t.total):

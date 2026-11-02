@@ -63,6 +63,16 @@ static func for_story(list: Array, st: StoryState) -> Array:
 	var out: Array = []
 	for raw: Variant in list:
 		var d := (raw as Dictionary).duplicate(true)
+		# A count seeded from the story (`start_from`: {flag, table: [[at least, add]...]}): the Wicker Man's Soul Motes
+		# from the innocents lost on the vigil.
+		var sf := d.get("start_from", {}) as Dictionary
+		if not sf.is_empty() and st != null:
+			var n := int(st.get_flag(str(sf.get("flag", "")), 0))
+			var add := 0
+			for row: Variant in sf.get("table", []):
+				if n >= int((row as Array)[0]):
+					add = int((row as Array)[1])
+			d["start"] = int(d.get("start", 0)) + add
 		d["actions"] = (d.get("actions", []) as Array).filter(func(a: Variant) -> bool:
 			return st == null or StoryConditions.check(str((a as Dictionary).get("when", "")), st))
 		for a: Variant in d["actions"]:
@@ -389,12 +399,68 @@ func _moved_by(kind: String, who: Combatant) -> void:
 				continue
 			if rule.has("side") and _side(who) != str(rule["side"]):
 				continue
+			# Only near a named creature (`near`, `within` ft: deaths within 30 ft of the Wicker Man), and not of
+			# `not_types` (constructs, undead).
+			if rule.has("near") and not _near_named(who, str(rule["near"]), int(rule.get("within", 30))):
+				continue
+			if (rule.get("not_types", []) as Array).has(str(who.creature.creature_type)):
+				continue
 			change(id, int(rule.get("delta", 1)))
 
 
 ## The view has taken the events: the next scan starts from the top.
 func drained() -> void:
 	_scanned = 0
+
+
+func _near_named(who: Combatant, name: String, ft: int) -> bool:
+	var e := enc()
+	for o in e.combatants:
+		if o != who and o.is_alive() and (o.name() == name or (o.creature is Monster and str((o.creature as Monster).data.get("id", "")) == name)) \
+				and e.distance(o, who) <= ft:
+			return true
+	return false
+
+
+# --- A boss spending its count ---------------------------------------------------------------------------------
+
+## A trait's {meter, cost} on `c`, if it has that trait (`key`: meter_crit, meter_repair) and the count to pay, else {}.
+func _spend_rule(c: Combatant, key: String) -> Dictionary:
+	var e := enc()
+	for tv: Variant in e.monster_actions.traits(c):
+		var rule := (tv as Dictionary).get(key, {}) as Dictionary
+		if not rule.is_empty() and value(str(rule.get("meter", ""))) >= int(rule.get("cost", 1)):
+			return rule
+	return {}
+
+
+## `c`'s hit turned into a Critical Hit with its Reaction and `cost` of a meter (`meter_crit`: Crushing Blow).
+func crit_for(c: Combatant, details: Array) -> bool:
+	if not c.reaction_available:
+		return false
+	var rule := _spend_rule(c, "meter_crit")
+	if rule.is_empty():
+		return false
+	c.reaction_available = false
+	change(str(rule["meter"]), -int(rule.get("cost", 1)))
+	details.append("%s: a Critical Hit (%d spent)" % [str(rule.get("name", "Crushing Blow")), int(rule.get("cost", 1))])
+	return true
+
+
+## As `c`'s turn starts, hurt by at least `heal`: its Reaction and `cost` of a meter regain `heal` Hit Points
+## (`meter_repair`: the Wicker Man's Repair).
+func repair(c: Combatant) -> void:
+	var e := enc()
+	if not c.reaction_available or not c.is_alive():
+		return
+	var rule := _spend_rule(c, "meter_repair")
+	if rule.is_empty() or c.creature.max_hp() - c.creature.hp < int(rule.get("heal", 20)):
+		return
+	c.reaction_available = false
+	change(str(rule["meter"]), -int(rule.get("cost", 1)))
+	var healed := c.creature.heal(int(rule.get("heal", 20)), str(rule.get("name", "Repair")))
+	e.log.add("info", "%s: %s regains %d Hit Points" % [str(rule.get("name", "Repair")), c.name(), healed], c.id)
+	e.events.append({"type": "heal", "id": c.id, "amount": healed})
 
 
 static func _named(c: Combatant, names: Array) -> bool:
