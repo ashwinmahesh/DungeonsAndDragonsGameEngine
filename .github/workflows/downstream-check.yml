@@ -48,6 +48,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    permissions:
+      contents: read
+      actions: write   # to drop the caches this run's own replace
     steps:
       - name: Is a game set up?
         id: setup
@@ -188,6 +191,34 @@ jobs:
         with:
           path: game/.godot
           key: downstream-import-${{ env.GODOT_VERSION }}-${{ steps.lfs.outputs.game_sha }}-${{ steps.lfs.outputs.engine_sha }}
+
+      # A saved cache leaves the ones it replaces behind until GitHub's cache budget (about 10 GB a repo) evicts the least
+      # recently used, which can be the import cache this run just saved. So the older import and LFS caches of this
+      # branch or pull request go now, once this run's own are there. A pull request from a fork can't delete: no harm.
+      - name: Drop the caches this run replaced
+        if: always() && steps.setup.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMPORT_KEY: downstream-import-${{ env.GODOT_VERSION }}-${{ steps.lfs.outputs.game_sha }}-${{ steps.lfs.outputs.engine_sha }}
+          LFS_KEY: downstream-lfs-${{ steps.lfs.outputs.game }}-${{ steps.lfs.outputs.engine }}
+        run: |
+          # drop <prefix> <key to keep>: the caches of this ref whose key starts with prefix, but only if `keep` is there.
+          drop() {
+            ids="$(gh cache list -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "$1" --limit 100 --json id,key \
+              --jq ".[] | \"\(.id) \(.key)\"")"
+            if ! printf '%s\n' "$ids" | awk '{print $2}' | grep -qxF "$2"; then
+              echo "No $2 on $GITHUB_REF yet: keeping the older ones"
+              return
+            fi
+            printf '%s\n' "$ids" | while read -r id key; do
+              if [ -n "$id" ] && [ "$key" != "$2" ]; then
+                gh cache delete "$id" -R "$GITHUB_REPOSITORY" && echo "Dropped $key"
+              fi
+            done
+          }
+          drop "downstream-import-${GODOT_VERSION}-" "$IMPORT_KEY"
+          drop "downstream-lfs-" "$LFS_KEY"
 
       - name: Summary
         if: always() && steps.setup.outputs.run == 'true'
