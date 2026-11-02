@@ -182,6 +182,30 @@ static func bring_back(st: StoryState, ch: Character, full_hp: bool, ordeal: boo
 	st.flags.erase(_repose_key(ch))
 
 
+## 2024: a creature at 0 Hit Points that is Stable regains 1 Hit Point after 1d4 hours. Out of a fight a hero at 0 who isn't
+## dead is Stable (no more Death Saving Throws come), so once the clock passes the hours rolled for them they come round. Only
+## under the campaign's `stable_wakes` setting: the first game leaves them at 0 until someone heals them. The 1d4 is seeded
+## from the playthrough and the hour the hero was first seen there, so a reload rolls the same.
+static func wake_the_stable(st: StoryState, start: int, minutes: int) -> void:
+	if not bool(Campaign.setting("stable_wakes", false)):
+		return
+	var now := start + maxi(0, minutes)
+	for ch in st.party:
+		var key := "_stable_wake:%s" % (ch.id if ch.id != "" else ch.name)
+		if ch.dead or ch.hp > 0:
+			st.flags.erase(key)
+			continue
+		if not st.flags.has(key):
+			var dice := DiceRoller.new(hash("%d:%d:%s:stable" % [st.playthrough_seed, start, key]))
+			st.flags[key] = start + dice.roll_one(4, "%s comes round" % ch.name) * 60
+		if now >= int(st.flags[key]):
+			st.flags.erase(key)
+			ch.stable = true
+			ch.death_successes = 0
+			ch.death_failures = 0
+			ch.heal(1, "coming round")
+
+
 ## Ends a condition however it was given: as a plain condition or by an effect (as Lesser Restoration does in a fight).
 static func cure(cr: Creature, cond: StringName) -> void:
 	cr.end_condition(cond)

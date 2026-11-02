@@ -37,6 +37,7 @@ engine's default, which is how the first game (Curse of Strahd) played.
 | `texts` | the first game's words | Lines the engine shows that name the first game's world, by key: `respec_option` and `respec_tip` (the pause menu's respec switch), `skirmish_search_foes`, `skirmish_search_maps`, `skirmish_search_brushes` (the skirmish search boxes' hints), `reading_ally_stays` (a guest the reading named won't leave: `%s` is their name), `planes_closed` (a plane-shifting amulet's failure). `Campaign.text(key, first_games)` |
 | `quest_regions` | the first game's | `{order, names}`: the journal's region headings and their order; a campaign that gives them never falls back to the first game's (QuestRegions) |
 | `weather` | the first game's | The climates file (story/weather.gd) |
+| `stable_wakes` | false | A hero at 0 Hit Points who isn't dead comes round with 1 Hit Point after 1d4 hours (the 2024 rule for a Stable creature, `Services.wake_the_stable`); by default they stay at 0 until healed |
 | `search_again_after_rest` | false | A hero who missed a hidden find may search for it again after the party's next Short or Long Rest (`RestRules.forget_missed_finds`); by default a miss is for good |
 | `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
 | `skirmish_pregens` | `"all"` | Which pregens Skirmish's Add page offers: `"all"`, or `"roster"` for only those with `roster: true` (`SkirmishScreen.offered_pregens()`) |
