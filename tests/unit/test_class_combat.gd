@@ -76,6 +76,51 @@ func test_flurry_of_blows_spends_focus_for_two_strikes() -> void:
 	assert_false(m.bonus_available)
 
 
+func test_the_attack_action_offers_a_monks_unarmed_strike() -> void:
+	var e := TestCombat.open_field(3)
+	var m := _add(e, TestChars.custom("monk", "human", 5), Vector2i(2, 3))
+	var t := TestCombat.punching_bag(e, Vector2i(3, 3), 300)
+	var f := _add(e, TestChars.custom("fighter", "human", 1), Vector2i(2, 5))
+	TestCombat.start_with(e, m)
+	var cat := ActionCatalog.new(e)
+	var slot := cat.find(m, "attack:weapon:unarmed_strike")
+	assert_false(slot.is_empty(), "an Unarmed Strike slot on the monk's hotbar")
+	assert_true(str(slot["sub"]).contains("1d8"), "with the Martial Arts die: %s" % slot["sub"])
+	assert_true(cat.perform(m, slot, [t]).ok)
+	assert_eq(m.attacks_left, 1, "one of Extra Attack's two strikes used")
+	assert_true(cat.perform(m, cat.find(m, "attack:weapon:unarmed_strike"), [t]).ok, "the second strike")
+	assert_true(bool(cat.find(m, "feat:cf:martial_arts_strike")["legal"]), "the Bonus Action strike still free")
+	assert_true(cat.find(f, "attack:weapon:unarmed_strike").is_empty(), "a plain punch stays off an armed fighter's hotbar")
+
+
+func test_martial_arts_uses_dexterity_for_strikes_and_grapples() -> void:
+	var e := TestCombat.open_field(3)
+	var ch := TestChars.custom("monk", "human", 1)
+	ch.build["base_scores"] = {"str": 8, "dex": 16, "con": 12, "int": 10, "wis": 14, "cha": 10}
+	ch.refresh()
+	var m := _add(e, ch, Vector2i(2, 3))
+	TestCombat.start_with(e, m)
+	var p := e.option_by_id(m, "weapon:unarmed_strike")["profile"] as WeaponProfile
+	assert_eq(p.ability, &"dex")
+	assert_eq(p.damage_dice, "1d6")
+	assert_eq(EncounterGrapples.unarmed_dc(m), 8 + ch.ability_mod(&"dex") + ch.proficiency_bonus(), "Grapple and Shove DC from Dexterity")
+	assert_eq(str(ActionCatalog.new(e).find(m, "grapple")["sub"]), "DC %d" % EncounterGrapples.unarmed_dc(m))
+
+
+func test_martial_arts_bare_handed_leaves_a_monk_unarmed() -> void:
+	Campaign.use_config({})
+	var armed := TestChars.custom("monk", "human", 1)
+	Campaign.use_config({"martial_arts_bare_handed": true})
+	var bare := TestChars.custom("monk", "human", 1)
+	var fighter := TestChars.custom("fighter", "human", 1)
+	Campaign.use_config(null)
+	Campaign.config()   # back to the game's own setting
+	assert_false(armed.equipped("main_hand").is_empty(), "by default a monk takes up a weapon")
+	assert_true(bare.equipped("main_hand").is_empty() and bare.equipped("off_hand").is_empty(), "no weapon in hand")
+	assert_true(bare.inventory.any(func(x: Dictionary) -> bool: return str(x["id"]) == "spear"), "the spear stays in the pack")
+	assert_false(fighter.equipped("main_hand").is_empty(), "everyone else still arms")
+
+
 func test_stunning_strike_stuns_on_a_failed_save() -> void:
 	var e := TestCombat.open_field(3)
 	var m := _add(e, TestChars.custom("monk", "human", 5), Vector2i(2, 3))

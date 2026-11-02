@@ -18,6 +18,9 @@ const STANDARD_LANGUAGES: Array[String] = ["common_sign_language", "draconic", "
 const RARE_LANGUAGES: Array[String] = ["abyssal", "celestial", "deep_speech", "druidic", "infernal", "primordial",
 	"sylvan", "thieves_cant", "undercommon"]
 const EQUIP_SLOTS: Array[String] = ["armor", "main_hand", "off_hand"]
+## The campaign's `martial_arts_bare_handed` setting (Campaign tells the rules library): auto_equip leaves a character
+## with Martial Arts (a Monk) bare-handed, its weapons in the pack, so it fights with Unarmed Strikes. Off by default.
+static var martial_arts_bare_handed := false
 ## A character's id is its name in snake_case (id_for_name), except a prebuilt hero whose shown name was respelled
 ## after saves, flags, art and voice were keyed by the old one: the id stays what the old name made it (owner,
 ## 2026-10-12: the Wizard is "Ratatouille", and his id is still ratatoille).
@@ -2333,7 +2336,8 @@ func unequip_item(item_id: String) -> void:
 
 
 ## Picks armor the character is trained in (best AC), a Shield if trained and one-handed fighting suits, the best
-## melee weapon, and the weapon sets around it (seed_weapon_sets). The player can change all of it; this just gives a
+## melee weapon, and the weapon sets around it (seed_weapon_sets); no weapon or Shield for a martial artist under
+## martial_arts_bare_handed. The player can change all of it; this just gives a
 ## sensible start.
 func auto_equip() -> void:
 	for slot in EQUIP_SLOTS:
@@ -2360,6 +2364,9 @@ func auto_equip() -> void:
 			shield_id = str(item["id"])
 	if best_armor != "" and best_ac > 10 + dex:
 		equip(best_armor, "armor")
+	if martial_arts_bare_handed and has_flag("martial_arts"):
+		seed_doll()
+		return
 	var best_weapon := ""
 	var best_avg := -1.0
 	for entry in inventory:

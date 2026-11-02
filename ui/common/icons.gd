@@ -75,6 +75,8 @@ static func for_action(action: Dictionary) -> Texture2D:
 			return item(id.get_slice(":", 1))
 		"attack", "offhand":
 			var option := id.substr(id.find(":") + 1)
+			if option == "weapon:unarmed_strike":
+				return feature("martial_arts")   # no item: the fist of the Martial Arts tile
 			if option.begins_with("weapon:") or option.begins_with("thrown:"):
 				return item(option.get_slice(":", 1).get_slice("@", 0))
 		"healers_kit":

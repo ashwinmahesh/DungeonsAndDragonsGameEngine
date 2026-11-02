@@ -42,6 +42,7 @@ static func config() -> Dictionary:
 		if FileAccess.file_exists(CONFIG):
 			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG))
 			_config = parsed as Dictionary if parsed is Dictionary else {}
+		_tell_rules()
 	return _config
 
 
@@ -49,6 +50,13 @@ static func config() -> Dictionary:
 static func use_config(cfg: Variant) -> void:
 	_config = cfg as Dictionary if cfg is Dictionary else {}
 	_config_read = cfg is Dictionary
+	if _config_read:
+		_tell_rules()
+
+
+## The settings the rules library follows (it never reads the campaign itself): martial_arts_bare_handed.
+static func _tell_rules() -> void:
+	Character.martial_arts_bare_handed = bool(_config.get("martial_arts_bare_handed", false))
 
 
 static func _load() -> CampaignModule:

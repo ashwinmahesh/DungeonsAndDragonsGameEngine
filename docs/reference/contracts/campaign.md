@@ -38,6 +38,7 @@ engine's default, which is how the first game (Curse of Strahd) played.
 | `quest_regions` | the first game's | `{order, names}`: the journal's region headings and their order; a campaign that gives them never falls back to the first game's (QuestRegions) |
 | `weather` | the first game's | The climates file (story/weather.gd) |
 | `stable_wakes` | false | A hero at 0 Hit Points who isn't dead comes round with 1 Hit Point after 1d4 hours (the 2024 rule for a Stable creature, `Services.wake_the_stable`); by default they stay at 0 until healed |
+| `martial_arts_bare_handed` | false | A character with Martial Arts (a Monk) starts bare-handed: `Character.auto_equip` leaves its weapons in the pack, so it fights with Unarmed Strikes; by default it takes up its best melee weapon like anyone |
 | `search_again_after_rest` | false | A hero who missed a hidden find may search for it again after the party's next Short or Long Rest (`RestRules.forget_missed_finds`); by default a miss is for good |
 | `arena_encounter` | the first game's | The arena scene's fight (`CombatArena.encounter_id()`) |
 | `skirmish_pregens` | `"all"` | Which pregens Skirmish's Add page offers: `"all"`, or `"roster"` for only those with `roster: true` (`SkirmishScreen.offered_pregens()`) |

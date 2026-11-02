@@ -14,8 +14,17 @@ func enc() -> Encounter:
 	return _enc.get_ref() as Encounter
 
 
+## The save DC of `c`'s Grapple or Shove (and so a grapple's escape DC): 8 + Strength modifier + Proficiency Bonus,
+## or Dexterity instead with a Monk's Martial Arts while it applies (2024 PHB, Dexterous Attacks).
+static func unarmed_dc(c: Combatant) -> int:
+	var ab := &"str"
+	if c.creature is Character and (c.creature as Character).martial_arts_die() != "" and c.creature.ability_mod(&"dex") > c.creature.ability_mod(&"str"):
+		ab = &"dex"
+	return 8 + c.creature.ability_mod(ab) + c.creature.proficiency_bonus()
+
+
 ## Grapple or Shove with an Unarmed Strike as one attack of the Attack action (2024): the target makes a Strength
-## or Dexterity save (its choice: the better one) against 8 + Str modifier + PB; it can be at most one size larger.
+## or Dexterity save (its choice: the better one) against unarmed_dc; it can be at most one size larger.
 func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatResult:
 	var e := enc()
 	var why := e._turn_check(c)
@@ -33,7 +42,7 @@ func unarmed_special(c: Combatant, target: Combatant, mode: String) -> CombatRes
 	if DecoyImages.is_image(target):
 		e.images.struck(c, target, "%s's %s" % [c.name(), "grab" if mode == "grapple" else "shove"], "attack")
 		return CombatResult.new()
-	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
+	var dc := unarmed_dc(c)
 	var ab := &"str" if target.creature.save_bonus(&"str").total() >= target.creature.save_bonus(&"dex").total() else &"dex"
 	var against: Array[String] = []
 	if mode == "grapple":
@@ -142,7 +151,7 @@ func escape_grapple(c: Combatant) -> CombatResult:
 		return CombatResult.fail("Not grappled")
 	e.spend_action(c)
 	var grappler := e.get_c(str(e.grapples[c.id]))
-	var dc := 8 + grappler.creature.ability_mod(&"str") + grappler.creature.proficiency_bonus() if grappler != null else 10
+	var dc := unarmed_dc(grappler) if grappler != null else 10
 	if c.has_meta("escape_dc"):
 		dc = int(c.get_meta("escape_dc"))
 	var skill := &"athletics" if c.creature.skill_bonus(&"athletics").total() >= c.creature.skill_bonus(&"acrobatics").total() else &"acrobatics"

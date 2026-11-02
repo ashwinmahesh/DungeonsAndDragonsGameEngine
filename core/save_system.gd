@@ -44,6 +44,7 @@ var _recap_due := false
 
 
 func _ready() -> void:
+	Campaign.config()   # the campaign's settings reach the rules library before any hero is built (Campaign._tell_rules)
 	get_tree().scene_changed.connect(func() -> void:
 		var scene := get_tree().current_scene
 		if _recap_due and scene != null:

@@ -298,6 +298,15 @@ func _attack_why(c: Combatant) -> String:
 	return ""
 
 
+## Whether the Attack action shows an Unarmed Strike slot (anyone may make one, 2024 PHB): when it rolls a die (a
+## Monk's Martial Arts, Unarmed Fighting, Tavern Brawler, a spell or trait that reshapes it), or when there's no weapon
+## to attack with. A plain 1 + Strength punch beside a weapon stays off the hotbar.
+static func _unarmed_slot(options: Array[Dictionary], p: WeaponProfile) -> bool:
+	if p.damage_dice.contains("d"):
+		return true
+	return not options.any(func(o: Dictionary) -> bool: return str(o["kind"]) in ["weapon", "thrown", "blade", "monster"] and not o.has("improvised"))
+
+
 func _attacks(c: Combatant, out: Array[Dictionary]) -> void:
 	var why := _attack_why(c)
 	var cost := "attack" if c.attacks_left > 0 else "action"
@@ -307,9 +316,10 @@ func _attacks(c: Combatant, out: Array[Dictionary]) -> void:
 	var haste := why == "Action already used" and c.haste_attack_ready()
 	var weapon_why := "" if haste else why
 	var weapon_cost := "free" if haste else cost
-	for o in e.attack_options(c):
+	var options := e.attack_options(c)
+	for o in options:
 		var p := o["profile"] as WeaponProfile
-		if str(o["kind"]) == "unarmed":
+		if str(o["kind"]) == "unarmed" and not _unarmed_slot(options, p):
 			continue
 		var w := weapon_why
 		if w == "" and not e.has_ammo_for(c, o):
@@ -353,7 +363,7 @@ func _attacks(c: Combatant, out: Array[Dictionary]) -> void:
 				names.append(str(Compendium.shared().item_data(str(id)).get("name", id)))
 		out.append(_entry("swap_weapons", COMMON, "Swap weapons", "to " + " and ".join(names), "free", e._turn_check(c), "none",
 			"Take your other weapon set in hand (free, as often as you like; attacking with a weapon of that set swaps too). Set both in the inventory."))
-	var dc := 8 + c.creature.ability_mod(&"str") + c.creature.proficiency_bonus()
+	var dc := EncounterGrapples.unarmed_dc(c)
 	var g := _entry("grapple", COMMON, "Grapple", "DC %d" % dc, cost, why, "enemy", "Unarmed Strike: the target makes a Str or Dex save or is Grappled.")
 	g["range"] = 5
 	out.append(g)
@@ -616,8 +626,9 @@ func _effect_actions(c: Combatant, out: Array[Dictionary], tab: String) -> void:
 		out.append(_entry("haste:disengage", tab, "Haste: Disengage", "extra action", "free", hw, "none", "Haste's extra action: Disengage."))
 		out.append(_entry("haste:hide", tab, "Haste: Hide", "extra action", "free", hw if hw != "" else e.hide_blocker(c), "none", "Haste's extra action: Hide."))
 		var best := e.best_melee_option(c, null)
-		for o in e.attack_options(c):
-			if str(o["kind"]) == "unarmed":
+		var hoptions := e.attack_options(c)
+		for o in hoptions:
+			if str(o["kind"]) == "unarmed" and not _unarmed_slot(hoptions, o["profile"] as WeaponProfile):
 				continue
 			var ha := _entry("haste:attack:" + str(o["id"]), tab, "Haste: %s" % (o["profile"] as WeaponProfile).name, "one attack", "free", hw, "enemy",
 				"Haste's extra action: one weapon attack.")
