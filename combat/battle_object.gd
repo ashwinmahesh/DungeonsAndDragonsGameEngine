@@ -80,6 +80,9 @@ var flag: String = ""
 var carry: Dictionary = {}
 ## The creature carrying it ("" when it lies on the floor).
 var carried_by: String = ""
+## A thing a monster holds that heroes can strike (HeldObjects): its trait's `held_object` data.
+var held_target: bool = false
+var held: Dictionary = {}
 ## What it takes in (ObjectCarry.put): {tag, label, flag, say, damage, light}; {} for nothing.
 var takes: Dictionary = {}
 ## Done with: something was put in it, and its hazard is over.
@@ -186,7 +189,7 @@ func to_dict() -> Dictionary:
 		"threshold": threshold, "undo": undo.duplicate(true), "flag": flag,
 		"carry": carry.duplicate(true), "carried_by": carried_by, "takes": takes.duplicate(true), "cleansed": cleansed,
 		"hazard": hazard.duplicate(true), "hazard_hit": hazard_hit.duplicate(), "ward": ward.duplicate(true),
-		"study": study.duplicate(true), "studied": studied}
+		"study": study.duplicate(true), "studied": studied, "held_target": held_target, "held": held.duplicate(true)}
 
 
 static func from_dict(d: Dictionary) -> BattleObject:
@@ -230,6 +233,8 @@ static func from_dict(d: Dictionary) -> BattleObject:
 	o.flag = str(d.get("flag", ""))
 	o.carry = (d.get("carry", {}) as Dictionary).duplicate(true)
 	o.carried_by = str(d.get("carried_by", ""))
+	o.held_target = bool(d.get("held_target", false))
+	o.held = (d.get("held", {}) as Dictionary).duplicate(true)
 	o.takes = (d.get("takes", {}) as Dictionary).duplicate(true)
 	o.cleansed = bool(d.get("cleansed", false))
 	o.hazard = (d.get("hazard", []) as Array).duplicate(true)

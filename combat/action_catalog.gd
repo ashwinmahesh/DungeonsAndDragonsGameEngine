@@ -401,6 +401,10 @@ func _standard(c: Combatant, out: Array[Dictionary]) -> void:
 		out.append(_entry("hold_breath", COMMON, "Breathe again" if held else "Hold Breath", "free", "free",
 			"" if c.creature.hp > 0 else "Unconscious", "none",
 			"While you hold it, creatures that find the living by their breath can't see you. Damage may break it (Con save)."))
+	# What a monster holds that the heroes can strike (HeldObjects: a rotweaver's horn).
+	for h in HeldObjects.entries(e, c):
+		out.append(_entry(str(h["id"]), COMMON, str(h["label"]), str(h["sub"]), "attack" if c.attacks_left > 0 else "action",
+			str(h["why"]) if str(h["why"]) != "" else _attack_why(c), "none", str(h["help"])))
 	# A loose creature the heroes can catch and carry out of the fight (EncounterGrapples.catch_creature).
 	if c.side in [&"party", &"guest"]:
 		for t in e.grappling.catchable(c):
@@ -1453,6 +1457,9 @@ func _perform(c: Combatant, action: Dictionary, targets: Array, point: Vector2, 
 			return e.grappling.catch_creature(c, e.get_c(id.get_slice(":", 1)))
 		"hold_breath":
 			return HoldBreath.toggle(e, c)
+		"heldhit":
+			var rest := id.substr(8)
+			return e.objects.attack(c, rest.get_slice("|", 0), rest.get_slice("|", 1))
 		"offer":
 			return e.trait_offers.take(c, e.get_c(id.get_slice(":", 1)), id.get_slice(":", 2))
 		"meter":
